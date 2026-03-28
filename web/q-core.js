@@ -1,6 +1,6 @@
 // THE QUADRATURE: MASTER CORE LOGIC (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase II Active. Sovereign Identity Hooked. Mobile Bridge Engaged with Graceful Web Fallback.
+// STATUS: Phase II Active. Supabase Cloud Bridge & Magic Link Auth Engaged.
 
 window.MS_DAY = 86400000;
 
@@ -48,9 +48,66 @@ window.Q_LEXICON = {
     INTERFACE: "The Quad"
 };
 
+// --- SUPABASE CLOUD BRIDGE ---
+window.Q_SUPABASE_URL = 'https://wnfpxozpeucrwqmrqpzv.supabase.co';
+window.Q_SUPABASE_KEY = 'sb_publishable_g6JfCH6FefIwEmXztgkdTw_Md1z4se5';
+window.supabaseClient = null;
+
+window.initCloudBridge = async function() {
+    return new Promise((resolve) => {
+        if (window.supabase) {
+            window.supabaseClient = window.supabase.createClient(window.Q_SUPABASE_URL, window.Q_SUPABASE_KEY);
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.onload = () => {
+            window.supabaseClient = window.supabase.createClient(window.Q_SUPABASE_URL, window.Q_SUPABASE_KEY);
+            window.Q_LOG('INFO', 'CORE', 'SUPABASE_CLIENT_INITIALIZED');
+            resolve();
+        };
+        document.head.appendChild(script);
+    });
+};
+
+window.fetchCloudState = async function() {
+    if (!window.supabaseClient) return;
+    
+    const { data: session } = await window.supabaseClient.auth.getSession();
+    if (!session?.session?.user) {
+        window.Q_LOG('WARN', 'CORE', 'CLOUD_SYNC_ABORTED: No Active Supabase Auth Session.');
+        return; 
+    }
+
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('system_state')
+            .select('*')
+            .eq('user_id', session.session.user.id)
+            .single();
+
+        if (error) throw error;
+        
+        if (data) {
+            if (data.q_time_fmt) {
+                window.Q_STATE.system_state.q_time_fmt = data.q_time_fmt;
+                localStorage.setItem('Q_TIME_FMT', data.q_time_fmt);
+                
+                document.querySelectorAll('.fmt-toggle').forEach(btn => {
+                    btn.innerText = data.q_time_fmt.replace('_', ' ');
+                });
+            }
+            window.Q_LOG('STATE', 'CORE', 'CLOUD_STATE_SYNCED_TO_LOCAL');
+        }
+    } catch (err) {
+        window.Q_LOG('ERROR', 'CORE', 'CLOUD_STATE_FETCH_FAILED', { error: err.message });
+    }
+};
+
 // CENTRALIZED STATE MANAGEMENT
 window.Q_STATE = {
-    persistence: { db_migration: 'ACTIVE', auth_status: 'SOVEREIGN', sync_active: false },
+    persistence: { db_migration: 'ACTIVE', auth_status: 'STANDBY', sync_active: false },
     logic_layer: { predictive_friction: true, civil_exporter: 'ACTIVE' },
     hardware_hooks: { biometric_api: 'ACTIVE', iot_webhooks: 'ACTIVE' },
     capital_ledger: { fiat_api: 'STANDBY', resonance_tracker: 'ACTIVE' },
@@ -66,21 +123,47 @@ window.Q_STATE = {
         lon: parseFloat(localStorage.getItem('q_current_lon')) || 0, 
         name: localStorage.getItem('q_current_loc_name') || 'UNKNOWN', 
         synced: false 
+    },
+    system_state: {
+        q_time_fmt: localStorage.getItem('Q_TIME_FMT') || 'UTC_24'
     }
 };
 
-window.Q_UpdateState = function(category, key, value) {
+window.Q_UpdateState = async function(category, key, value) {
     if(window.Q_STATE[category]) {
         window.Q_STATE[category][key] = value;
-        if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_STORE_SET', key: `q_${key}`, value: value }));
+    }
+
+    if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_STORE_SET', key: `q_${key}`, value: value }));
+    }
+    
+    if(key === 'lat') localStorage.setItem('q_current_lat', value);
+    if(key === 'lon') localStorage.setItem('q_current_lon', value);
+    if(key === 'name') localStorage.setItem('q_current_loc_name', value);
+    if(key === 'natal_anchor') localStorage.setItem('q_natal_anchor', value);
+    if(key === 'dob') localStorage.setItem('q_dob', value);
+    if(key === 'q_time_fmt') localStorage.setItem('Q_TIME_FMT', value);
+
+    if (window.supabaseClient) {
+        const { data: session } = await window.supabaseClient.auth.getSession();
+        if (session?.session?.user) {
+            try {
+                let payload = { user_id: session.session.user.id };
+                if (key === 'q_time_fmt') payload.q_time_fmt = value;
+                
+                const { error } = await window.supabaseClient
+                    .from('system_state')
+                    .upsert(payload, { onConflict: 'user_id' });
+
+                if (error) throw error;
+                window.Q_LOG('INFO', 'CORE', 'STATE_SYNCED_TO_CLOUD', { key, value });
+            } catch (err) {
+                window.Q_LOG('ERROR', 'CORE', 'CLOUD_SYNC_FAILED', { error: err.message });
+            }
+        } else {
+             window.Q_LOG('WARN', 'CORE', 'CLOUD_WRITE_ABORTED: Authentication Required.');
         }
-        
-        if(key === 'lat') localStorage.setItem('q_current_lat', value);
-        if(key === 'lon') localStorage.setItem('q_current_lon', value);
-        if(key === 'name') localStorage.setItem('q_current_loc_name', value);
-        if(key === 'natal_anchor') localStorage.setItem('q_natal_anchor', value);
-        if(key === 'dob') localStorage.setItem('q_dob', value);
     }
 };
 
@@ -234,6 +317,9 @@ window.Q_KairosVoice = {
         } catch(e) {
             window.Q_LOG('ERROR', 'INTERFACE', 'MIC_START_FAILED', { error: e.message });
             this.showErrorToast(`START FAILED: ${e.message}`);
+            this.isListening = false;
+            const fab = document.getElementById('q-mic-fab') || document.getElementById('q-mic-fab-desktop');
+            if(fab) fab.classList.remove('listening');
         }
     },
     disengage: function() {
@@ -252,53 +338,79 @@ window.Q_KairosVoice = {
     processCommand: function(cmd) {
         const normalized = cmd.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
 
-        if (normalized.includes("over")) {
-            window.Q_LOG('STATE', 'INTERFACE', 'COMMAND_ACKNOWLEDGED');
-        }
-        if (normalized.includes("flush") || normalized.includes("clean")) {
-            window.Q_LOG('STATE', 'INTERFACE', 'FLUSH_COMMAND_LOGGED');
-        }
-
-        if (normalized.includes("telemetry") || normalized.includes("data") || normalized.includes("hud") || normalized.includes("open panel") || normalized.includes("show me")) {
-            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_TELEMETRY');
-            if (typeof window.toggleTelemetry === 'function') window.toggleTelemetry();
-            window.Q_MobileBridge.pulse('MEDIUM');
-        } 
-        else if (normalized.includes("close") || normalized.includes("dismiss") || normalized.includes("back") || normalized.includes("hide")) {
+        if (normalized.includes("close") || normalized.includes("dismiss") || normalized.includes("hide")) {
             window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_CLOSE');
             if (window.Q_ModalEngine) window.Q_ModalEngine.close();
             if (window.Q_IntegrationHub) window.Q_IntegrationHub.closeHub();
             if (window.Q_OmniPlanner) window.Q_OmniPlanner.closePlanner();
             if (document.body.classList.contains('telemetry-open') && typeof window.toggleTelemetry === 'function') window.toggleTelemetry();
             window.Q_MobileBridge.pulse('LIGHT');
+            return;
         }
-        else if (normalized.includes("elasticity") || normalized.includes("biometrics") || normalized.includes("heart rate")) {
-            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_ELASTICITY');
-            if (window.Q_PHASE_III && window.Q_PHASE_III.syncBiometrics) {
-                window.Q_PHASE_III.syncBiometrics().catch(e => console.error(e));
-                window.Q_MobileBridge.pulse('HEAVY');
-            }
-        } 
-        else if (normalized.includes("export") || normalized.includes("ledger")) {
-            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_EXPORT');
-            if (window.Q_OmniPlanner && window.Q_OmniPlanner.triggerExport) {
-                window.Q_OmniPlanner.triggerExport();
-                window.Q_MobileBridge.pulse('MEDIUM');
-            }
-        } 
-        else if (normalized.includes("delta") || normalized.includes("variance") || normalized.includes("equation of time")) {
-            const delta = window.Q_DELTA !== undefined ? window.Q_DELTA.toFixed(4) : "UNKNOWN";
-            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_QDELTA', { delta: delta });
-            alert(`CURRENT Q-DELTA VARIANCE: ${delta}°`);
-            window.Q_MobileBridge.pulse('MEDIUM');
-        } 
-        else if (normalized.includes("record") || normalized.includes("intent") || normalized.includes("planner") || normalized.includes("journal")) {
-            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_RECORD');
+
+        if (normalized.includes("biological") || normalized.includes("bio vector")) {
+            window.location.href = "BIOVECHUD.html";
+            return;
+        }
+        if (normalized.includes("communal") || normalized.includes("com vector")) {
+            window.location.href = "COMVECHUD.html";
+            return;
+        }
+        if (normalized.includes("environmental") || normalized.includes("env vector")) {
+            window.location.href = "ENVVECHUD.html";
+            return;
+        }
+        if (normalized.includes("mechanical") || normalized.includes("mech vector")) {
+            window.location.href = "MECVECHUD.html";
+            return;
+        }
+        if (normalized.includes("chrono") || normalized.includes("main face") || normalized.includes("home")) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        if (normalized.includes("open planner") || normalized.includes("launch planner") || normalized.includes("omni planner")) {
+            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_PLANNER_OPEN');
             if (window.Q_OmniPlanner && window.Q_OmniPlanner.openPlanner) {
                 window.Q_OmniPlanner.openPlanner();
                 window.Q_MobileBridge.pulse('MEDIUM');
             }
+            return;
         }
+        
+        if (sessionStorage.getItem('Q_PLANNER_ACTIVE') === 'true') {
+            if (normalized.includes("view cycle") || normalized.includes("annual view")) {
+                window.Q_OmniPlanner.setViewMode('cycle');
+            }
+            else if (normalized.includes("view quad") || normalized.includes("quadrant view")) {
+                window.Q_OmniPlanner.setViewMode('quad');
+            }
+            else if (normalized.includes("view sect") || normalized.includes("sector view") || normalized.includes("month view")) {
+                window.Q_OmniPlanner.setViewMode('sect');
+            }
+            else if (normalized.includes("view day") || normalized.includes("daily view")) {
+                window.Q_OmniPlanner.setViewMode('day');
+            }
+            else if (normalized.includes("next day") || normalized.includes("step forward")) {
+                window.Q_OmniPlanner.stepDay(1);
+            }
+            else if (normalized.includes("previous day") || normalized.includes("step back")) {
+                window.Q_OmniPlanner.stepDay(-1);
+            }
+            else if (normalized.includes("next sector") || normalized.includes("next month")) {
+                window.Q_OmniPlanner.stepSector(1);
+            }
+            else if (normalized.includes("previous sector") || normalized.includes("previous month")) {
+                window.Q_OmniPlanner.stepSector(-1);
+            }
+            else if (normalized.includes("toggle format") || normalized.includes("switch format")) {
+                window.Q_OmniPlanner.toggleFormat();
+            }
+            window.Q_MobileBridge.pulse('LIGHT');
+            return;
+        }
+
+        window.Q_LOG('WARN', 'INTERFACE', 'UNRECOGNIZED_VOICE_COMMAND', { cmd: normalized });
     }
 };
 
@@ -379,16 +491,96 @@ window.Q_Onboarding = {
     }
 };
 
-// --- SOVEREIGN AUTHENTICATION ---
+// --- SOVEREIGN AUTHENTICATION (MAGIC LINK) ---
 window.Q_Auth = {
     triggerOAuth: function() {
         window.Q_LOG('INFO', 'CORE', 'SOVEREIGN_IDENTITY_AUTH_TRIGGERED');
         if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'OAUTH_LOGIN' }));
         } else {
-            window.Q_LOG('INFO', 'CORE', 'MOCK_BROWSER_AUTH_SUCCESS');
-            alert("[ WEB VIEW MODE ]\nSovereign Identity OAuth triggered. Assuming successful login for testing environment.");
-            window.Q_STATE.persistence.auth_status = 'SOVEREIGN_WEB_MOCK';
+            this.renderLoginModal();
+        }
+    },
+    renderLoginModal: function() {
+        if (document.getElementById('q-auth-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'q-auth-overlay';
+        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:999999; display:flex; justify-content:center; align-items:center; flex-direction:column; color:#00f0ff; font-family:"Orbitron"; backdrop-filter:blur(15px);';
+        
+        overlay.innerHTML = `
+            <div style="width: 90%; max-width: 400px; border: 1px solid #00f0ff; padding: 25px; background: rgba(0, 240, 255, 0.05); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); border-radius: 8px; position:relative;">
+                <button onclick="document.getElementById('q-auth-overlay').remove()" style="position:absolute; top:10px; right:10px; background:transparent; border:none; color:#ff003c; font-size:1.2rem; cursor:pointer;">✖</button>
+                <h3 style="text-align:center; letter-spacing:3px; text-shadow:0 0 10px #00f0ff; margin-top:0;">SOVEREIGN LOGIN</h3>
+                <div style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#aaa; margin-bottom: 25px; text-align:center; line-height: 1.5;">Authenticate via Magic Link to sync your temporal state across the Quadrature Matrix.</div>
+                
+                <label style="font-size:0.65rem; color:#fff; font-weight:bold;">EMAIL ADDRESS</label>
+                <input type="email" id="auth-email" placeholder="architect@thequadrature.com" style="width:100%; background:rgba(0,0,0,0.8); border:1px solid #00f0ff; color:#00f0ff; padding:10px; margin-top:4px; margin-bottom:25px; font-family:'JetBrains Mono'; box-sizing:border-box; outline:none;">
+                
+                <button onclick="window.Q_Auth.sendMagicLink()" id="auth-submit-btn" style="width:100%; background:#00f0ff; color:#000; border:none; padding:12px; font-family:'Orbitron'; font-weight:900; cursor:pointer; letter-spacing:3px; box-shadow:0 0 20px #00f0ff; transition: 0.3s;">SEND MAGIC LINK</button>
+                <div id="auth-status" style="margin-top:15px; font-family:'JetBrains Mono'; font-size:0.65rem; color:#39ff14; text-align:center; display:none;"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    },
+    sendMagicLink: async function() {
+        const email = document.getElementById('auth-email').value;
+        const statusEl = document.getElementById('auth-status');
+        const btn = document.getElementById('auth-submit-btn');
+        
+        if (!email || !email.includes('@')) {
+            alert("INVALID EMAIL PROTOCOL.");
+            return;
+        }
+
+        if (!window.supabaseClient) {
+            alert("CLOUD BRIDGE DISCONNECTED. AWAITING SUPABASE INIT.");
+            return;
+        }
+
+        btn.innerText = "TRANSMITTING...";
+        btn.style.opacity = "0.5";
+        btn.style.pointerEvents = "none";
+
+        try {
+            const { error } = await window.supabaseClient.auth.signInWithOtp({
+                email: email,
+                options: {
+                    emailRedirectTo: window.location.origin
+                }
+            });
+
+            if (error) throw error;
+
+            statusEl.innerText = "[ LINK TRANSMITTED. CHECK SECURE COMMS. ]";
+            statusEl.style.color = "#39ff14";
+            statusEl.style.display = "block";
+            btn.innerText = "LINK SENT";
+            window.Q_LOG('STATE', 'CORE', 'MAGIC_LINK_DISPATCHED', { email });
+
+        } catch (err) {
+            statusEl.innerText = `[ FAULT: ${err.message} ]`;
+            statusEl.style.color = "#ff003c";
+            statusEl.style.display = "block";
+            btn.innerText = "SEND MAGIC LINK";
+            btn.style.opacity = "1";
+            btn.style.pointerEvents = "auto";
+            window.Q_LOG('ERROR', 'CORE', 'MAGIC_LINK_FAILED', { error: err.message });
+        }
+    },
+    handleAuthRedirect: async function() {
+        if (!window.supabaseClient) return;
+        
+        const { data: session } = await window.supabaseClient.auth.getSession();
+        if (session?.session?.user) {
+            window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
+            window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
+            
+            const badge = document.getElementById('q-global-sim-badge');
+            if (badge) {
+                badge.style.border = "1px solid #39ff14";
+                badge.style.boxShadow = "0 0 10px rgba(57, 255, 20, 0.4)";
+            }
         }
     }
 };
@@ -412,7 +604,8 @@ window.toggleTimeFmt = function(btnId) {
     let fmt = localStorage.getItem('Q_TIME_FMT') || 'UTC_24';
     const cycle = { 'UTC_24': 'LOCAL_24', 'LOCAL_24': 'UTC_12', 'UTC_12': 'LOCAL_12', 'LOCAL_12': 'UTC_24' };
     let newFmt = cycle[fmt] || 'UTC_24';
-    localStorage.setItem('Q_TIME_FMT', newFmt);
+    
+    window.Q_UpdateState('system_state', 'q_time_fmt', newFmt);
     
     document.querySelectorAll('.fmt-toggle').forEach(btn => {
         btn.innerText = newFmt.replace('_', ' ');
@@ -872,6 +1065,7 @@ window.injectUniversalUI = function() {
             if (!e.detail.isLive) {
                 badge.style.background = "#ff003c";
                 badge.style.color = "#fff";
+                badge.style.border = "none";
             } else {
                 badge.style.background = "var(--theme-main, #00f0ff)";
                 badge.style.color = "#000";
@@ -883,11 +1077,9 @@ window.injectUniversalUI = function() {
         const ribbonFmt = document.getElementById('ribbon-fmt');
         
         if (ribbonLeg && ribbonLegDate) {
-            // Restore persistent legacy time and format toggle
             ribbonLeg.innerText = e.detail.legacyTimeStr;
             if (ribbonFmt) ribbonFmt.innerText = localStorage.getItem('Q_TIME_FMT') || 'UTC_24';
 
-            // Shift ONLY the Date/Coordinate based on Planner state
             if (document.body.classList.contains('planner-quad-active')) {
                 const qData = e.detail.qData;
                 const t = e.detail.t;
@@ -1097,7 +1289,6 @@ window.getOrbitalData = function(daysElapsed) {
     let sect = Math.floor((meanArc % 90) / 30) + 1; if(sect > 3) sect = 3;
     let day = Math.floor(cycleDays % 30) + 1; 
 
-    // -- DUAL-STATE ENGINE: Q-DELTA BURN-DOWN & COORDINATE SYNC --
     const absoluteTime = window.PYLON_ALPHA_DYNAMIC ? window.PYLON_ALPHA_DYNAMIC + (daysElapsed * window.MS_DAY) : Date.now();
     if (window.getQBlockByTime) {
         let activeBlock = window.getQBlockByTime(absoluteTime);
@@ -1136,6 +1327,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (window.Q_Onboarding) window.Q_Onboarding.check(); 
     window.loadPlannerData(); 
     
+    await window.initCloudBridge();
+    
+    // Check if returning from a Magic Link redirect
+    if (window.Q_Auth && window.Q_Auth.handleAuthRedirect) {
+        await window.Q_Auth.handleAuthRedirect();
+    }
+    
+    await window.fetchCloudState();
     await window.calculatePylonAlpha();
 
     if (window.Q_KairosVoice) window.Q_KairosVoice.init(); 

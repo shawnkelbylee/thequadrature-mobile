@@ -42,6 +42,8 @@
             --bio-green: #39ff14;
             --mech-red: #ff003c;
             --env-green: #a7ff83;
+            --starlight: rgba(255, 255, 255, 0.6);
+            --platinum: #E5E4E2;
         }
 
         body.mode-legacy {
@@ -130,7 +132,7 @@
         .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.85rem; color: var(--platinum); font-family: 'JetBrains Mono'; margin-bottom: 8px; font-weight: 700; }
 
         .val-gold { color: var(--gold); text-shadow: 0 0 15px var(--gold-dim); z-index: 20;}
-        .val-sm { font-family: 'Orbitron'; font-size: 1.1rem; font-weight: 700; color: var(--sys-cyan); text-shadow: 0 0 10px rgba(0, 240, 255, 0.3); z-index: 20;}
+        .val-sm { font-family: 'Orbitron'; font-size: 1.1rem; font-weight: 700; z-index: 20;}
 
         .gear-container {
             position: absolute; width: var(--dial-size); height: var(--dial-size); border-radius: 50%; 
@@ -217,31 +219,31 @@
     <div class="star-container" id="star-layer"></div>
 
     <div class="vector-anchor telemetry-node tl">
-        <div class="v-head holo-text" style="color:var(--bio-green); text-shadow:0 0 10px var(--bio-green);">BIOLOGICAL</div>
-        <div class="t-row"><span>HRV / ELASTICITY:</span> <span id="face-bio-state" style="color:var(--bio-green);">SYNCING..</span></div>
-        <div class="t-row"><span>NATAL ANCHOR:</span> <span id="face-bio-natal">--</span></div>
-        <div class="t-row"><span>ULTRADIAN PHASE:</span> <span id="face-bio-phase" style="color:var(--platinum);">ACTIVE</span></div>
+        <div class="v-head holo-text" style="color:var(--sys-cyan); text-shadow:0 0 10px var(--sys-cyan);">BIOLOGICAL</div>
+        <div class="t-row"><span>HRV / ELASTICITY:</span> <span id="face-bio-state" style="color:var(--sys-cyan);">SYNCING..</span></div>
+        <div class="t-row"><span>NATAL ANCHOR:</span> <span id="face-bio-natal" style="color:var(--sys-cyan);">--</span></div>
+        <div class="t-row"><span>ULTRADIAN PHASE:</span> <span id="face-bio-phase" style="color:var(--sys-cyan);">ACTIVE</span></div>
     </div>
     
     <div class="vector-anchor telemetry-node tr">
         <div class="v-head holo-text" style="color:var(--gold); text-shadow:0 0 10px var(--gold);">COMMUNAL</div>
         <div class="t-row"><span>Q-COORDINATE:</span> <span id="face-com-node" style="color:var(--gold);">SEARCHING..</span></div>
-        <div class="t-row"><span>ZODIACAL EVENT:</span> <span id="face-com-zod">--</span></div>
+        <div class="t-row"><span>ZODIACAL EVENT:</span> <span id="face-com-zod" style="color:var(--gold);">--</span></div>
         <div class="t-row"><span>SOVEREIGN STATUS:</span> <span id="face-com-postulate" style="color:var(--gold);">QUADRATURE</span></div>
     </div>
     
     <div class="vector-anchor telemetry-node bl">
         <div class="v-head holo-text" style="color:var(--env-green); text-shadow:0 0 10px var(--env-green);">ENVIRONMENTAL</div>
         <div class="t-row"><span>RISK INDEX:</span> <span id="face-env-risk" style="color:var(--env-green);">CALCULATING..</span></div>
-        <div class="t-row"><span>CLIMATIC BASELOAD:</span> <span id="face-env-tension">--</span></div>
-        <div class="t-row"><span>GEOLOCATION:</span> <span id="face-env-geo" style="color:var(--platinum);">SYNCING..</span></div>
+        <div class="t-row"><span>CLIMATIC BASELOAD:</span> <span id="face-env-tension" style="color:var(--env-green);">--</span></div>
+        <div class="t-row"><span>GEOLOCATION:</span> <span id="face-env-geo" style="color:var(--env-green);">SYNCING..</span></div>
     </div>
     
     <div class="vector-anchor telemetry-node br">
         <div class="v-head holo-text" style="color:var(--mech-red); text-shadow:0 0 10px var(--mech-red);">MECHANICAL</div>
         <div class="t-row"><span>EQUATION OF TIME:</span> <span id="face-mech-delta" style="color:var(--mech-red);">--</span></div>
-        <div class="t-row"><span>ENTROPIC SMEAR:</span> <span id="face-mech-smear">--</span></div>
-        <div class="t-row"><span>KEPLERIAN VELOCITY:</span> <span id="face-mech-vel" style="color:var(--platinum);">NOMINAL</span></div>
+        <div class="t-row"><span>ENTROPIC SMEAR:</span> <span id="face-mech-smear" style="color:var(--mech-red);">--</span></div>
+        <div class="t-row"><span>KEPLERIAN VELOCITY:</span> <span id="face-mech-vel" style="color:var(--mech-red);">NOMINAL</span></div>
     </div>
 
     <div class="wing wing-left telemetry-node">
@@ -249,15 +251,15 @@
             <div style="display:flex; flex-direction:column; align-items:center;">
                 <span class="w-head">LEGACY OS</span>
                 <div class="w-lbl">DATE</div>
-                <div class="val-lg val-gold" id="leg-date">--</div>
+                <div class="val-lg" id="leg-date">--</div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:center; margin-top: 10px;">
                 <div style="display:flex; align-items:center; justify-content:center; gap: 5px;">
                     <div class="w-lbl" style="margin:0;">TIME</div><div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')" ontouchstart="window.toggleTimeFmt('fmt-btn')" id="fmt-btn">UTC</div>
                 </div>
-                <div class="val-lg val-gold" id="leg-time">--</div>
+                <div class="val-lg" id="leg-time">--</div>
             </div>
-            <div style="font-size:0.5rem; color:var(--platinum); margin-top:12px; border-top: 1px dashed rgba(255,215,0,0.3); padding-top: 8px; width: 85%;">STATUS: CONTINUITY ACTIVE</div>
+            <div style="font-size:0.5rem; color:var(--starlight); margin-top:12px; border-top: 1px dashed rgba(255,215,0,0.3); padding-top: 8px; width: 85%;">STATUS: CONTINUITY ACTIVE</div>
         </div>
     </div>
 
@@ -271,14 +273,14 @@
             <div style="display:flex; width: 100%; justify-content: space-around; margin-top: 10px;">
                 <div style="display:flex; flex-direction:column; align-items:center;">
                     <div class="w-lbl">MEAN CIRCLE (CIVIL)</div>
-                    <div class="val-sm" id="mean-deg" style="color:var(--white) !important; text-shadow:0 0 10px rgba(255,255,255,0.5); margin-top: 4px;">--</div>
+                    <div class="val-sm" id="mean-deg" style="color:var(--gold) !important; text-shadow:0 0 10px var(--gold-dim); margin-top: 4px;">--</div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center;">
                     <div class="w-lbl">TRUE ELLIPSE (PHYSICS)</div>
-                    <div class="val-sm" id="true-deg" style="color:var(--white) !important; text-shadow:0 0 10px rgba(255,255,255,0.5); margin-top: 4px;">--</div>
+                    <div class="val-sm" id="true-deg" style="color:var(--gold) !important; text-shadow:0 0 10px var(--gold-dim); margin-top: 4px;">--</div>
                 </div>
             </div>
-            <div style="font-size:0.5rem; color:var(--platinum); margin-top:12px; border-top: 1px dashed rgba(255,215,0,0.3); padding-top: 8px; width: 85%;">DUAL-STATE ENGINE</div>
+            <div style="font-size:0.5rem; color:var(--starlight); margin-top:12px; border-top: 1px dashed rgba(255,215,0,0.3); padding-top: 8px; width: 85%;">DUAL-STATE ENGINE</div>
         </div>
     </div>
 
@@ -346,8 +348,26 @@
         window.addEventListener('q-tick', (e) => {
             const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
 
-            document.getElementById('leg-date').innerText = legacyDateStr.toUpperCase();
-            document.getElementById('leg-time').innerText = legacyTimeStr;
+            // Utility function to format legacy strings (grey letters/symbols, gold numbers)
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--gold); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(t => {
+                        if (/[0-9]/.test(t)) {
+                            out += `<span style="${numStyle}">${t}</span>`;
+                        } else {
+                            out += `<span style="${letterStyle}">${t}</span>`;
+                        }
+                    });
+                }
+                return out;
+            }
+
+            document.getElementById('leg-date').innerHTML = formatDualColor(legacyDateStr.toUpperCase());
+            document.getElementById('leg-time').innerHTML = formatDualColor(legacyTimeStr);
 
             const continuousMeanDeg = daysElapsed * (360 / 365.24219);
             const continuousTrueDeg = continuousMeanDeg + qData.delta;
@@ -367,14 +387,18 @@
             
             let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
             const qCoordWing = document.getElementById('q-coord-wing');
+            
+            let letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+            let numStyle = "color:var(--gold); font-size:1.1rem; font-weight:bold;";
+            
             if (activeBlock && activeBlock.type === 'PYLON') {
                 qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--gold); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--gold-dim);">${activeBlock.name}</span>`;
             } else {
                 let cCycle = activeBlock ? activeBlock.cycle : 0;
-                qCoordWing.innerHTML = `<span style="color:var(--gold); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;">QC</span><span style="color:#fff; font-size:1.1rem;">${cCycle}</span> ` +
-                                       `<span style="color:var(--gold); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px; margin-right:2px;">Q</span><span style="color:#fff; font-size:1.1rem;">${qData.quad}</span> ` +
-                                       `<span style="color:var(--gold); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px; margin-right:2px;">S</span><span style="color:#fff; font-size:1.1rem;">${qData.sect}</span> ` +
-                                       `<span style="color:var(--gold); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px; margin-right:4px;">DAY</span><span style="color:#fff; font-size:1.1rem;">${qData.day}</span>`;
+                qCoordWing.innerHTML = `<span style="${letterStyle}">QC</span><span style="${numStyle}">${cCycle}</span> ` +
+                                       `<span style="${letterStyle} margin-left:6px;">Q</span><span style="${numStyle}">${qData.quad}</span> ` +
+                                       `<span style="${letterStyle} margin-left:6px;">S</span><span style="${numStyle}">${qData.sect}</span> ` +
+                                       `<span style="${letterStyle} margin-left:6px;">DAY</span><span style="${numStyle}">${qData.day}</span>`;
             }
 
             // --- MASTER TELEMETRY ROLLUPS POPULATION ---
@@ -384,7 +408,9 @@
             document.getElementById('face-bio-natal').innerText = window.Q_STATE.metaphysical_layer.natal_anchor;
             
             // COMMUNAL (Purged 'QC' cycle count, strictly aligned day count. Appending Sovereign Postulate)
-            document.getElementById('face-com-node').innerText = (activeBlock && activeBlock.type === 'PYLON') ? activeBlock.name : `Q${qData.quad} S${qData.sect} DAY ${qData.day}`;
+            let smLetterStyle = "color:var(--starlight);";
+            let smNumStyle = "color:var(--gold);";
+            document.getElementById('face-com-node').innerHTML = (activeBlock && activeBlock.type === 'PYLON') ? `<span style="${smNumStyle}">${activeBlock.name}</span>` : `<span style="${smLetterStyle}">Q</span><span style="${smNumStyle}">${qData.quad}</span> <span style="${smLetterStyle}">S</span><span style="${smNumStyle}">${qData.sect}</span> <span style="${smLetterStyle}">DAY</span> <span style="${smNumStyle}">${qData.day}</span>`;
             
             const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
             document.getElementById('face-com-zod').innerText = zodiacNames[Math.floor(qData.meanArc / 30)];
