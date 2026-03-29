@@ -95,7 +95,9 @@ window.injectUniversalUI = function() {
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } 50% { transform: scale(1.1); box-shadow: 0 0 25px ${micColor}; } 100% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } }
 
         .q-control-strip { display: none; }
-        .star-container { position: absolute; top: 0; left: 0; width: 100vw; height: var(--app-height, 100vh); z-index: 1; pointer-events: none; overflow: hidden; transform: translateZ(0); backface-visibility: hidden; }
+        
+        /* 3D KINETIC STARFIELD CONTAINER */
+        .star-container { position: fixed; top: 0; left: 0; width: 100vw; height: var(--app-height, 100vh); z-index: 1; pointer-events: none; overflow: hidden; transform-style: preserve-3d; perspective: 1500px; }
         
         .wing { position: absolute; top: 50%; height: 220px; width: var(--wing-w); min-width: 240px; z-index: 50; display: flex; flex-direction: column; justify-content: center; transform: translateY(-50%); pointer-events: none; }
         .wing-left { right: calc(50% + var(--wing-offset)); left: auto; perspective: 1000px; }
@@ -505,24 +507,31 @@ window.generateStars = function(containerId) {
         style.id = 'q-star-style';
         style.innerHTML = `
             .star-kinetic {
-                position: absolute; top: 50%; left: 50%; width: 2px; height: 2px;
-                background: var(--warp-color, #fff); border-radius: 50%;
-                transform-origin: 0 0;
-                transform: rotate(var(--angle)) translateX(var(--radius)) scaleX(calc(1 + var(--warp-factor, 0) * 20));
-                opacity: var(--opacity);
-                transition: transform 0.1s linear, background 0.3s ease;
+                position: absolute; top: 50%; left: 50%; width: 2px;
+                height: calc(2px + (60px * var(--warp-factor, 0)));
+                background: linear-gradient(to bottom, #fff, var(--warp-color, #fff));
+                border-radius: 2px;
+                animation: warp-travel linear infinite;
+            }
+            @keyframes warp-travel {
+                0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--radius)) translateZ(-500px); opacity: 0; }
+                20% { opacity: var(--opacity); }
+                80% { opacity: var(--opacity); }
+                100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--radius)) translateZ(500px); opacity: 0; }
             }
         `;
         document.head.appendChild(style);
     }
     
     container.innerHTML = '';
-    for(let i=0; i<150; i++) {
-        let star = document.createElement('div'); 
+    for(let i=0; i<300; i++) {
+        let star = document.createElement('div');
         star.className = 'star-kinetic';
-        star.style.setProperty('--angle', Math.random() * 360 + 'deg'); 
-        star.style.setProperty('--radius', (Math.random() * 600 + 50) + 'px');
-        star.style.setProperty('--opacity', Math.random() * 0.8 + 0.2); 
+        star.style.setProperty('--angle', Math.random() * 360 + 'deg');
+        star.style.setProperty('--radius', (Math.random() * 800 + 50) + 'px');
+        star.style.setProperty('--opacity', Math.random() * 0.8 + 0.2);
+        star.style.animationDuration = (Math.random() * 5 + 5) + 's';
+        star.style.animationDelay = -(Math.random() * 10) + 's';
         container.appendChild(star);
     }
 };
@@ -538,19 +547,19 @@ window.generateStars = function(containerId) {
         if (lastDays !== null && !e.detail.isLive) {
             const delta = Math.abs(currentDays - lastDays);
             if (delta > 0) {
-                targetWarp = Math.min(1.0, targetWarp + (delta * 0.5)); 
+                targetWarp = Math.min(1.0, targetWarp + (delta * 0.4)); 
             }
         }
         lastDays = currentDays;
     });
 
     const tick = () => {
-        targetWarp *= 0.90; 
-        warpFactor += (targetWarp - warpFactor) * 0.2; 
+        targetWarp *= 0.85; 
+        warpFactor += (targetWarp - warpFactor) * 0.15; 
         
         if (document.documentElement) {
             document.documentElement.style.setProperty('--warp-factor', Math.max(0, warpFactor).toFixed(3));
-            document.documentElement.style.setProperty('--warp-color', warpFactor > 0.05 ? 'var(--sys-cyan, #00f0ff)' : '#fff');
+            document.documentElement.style.setProperty('--warp-color', warpFactor > 0.1 ? 'var(--theme-main)' : '#fff');
         }
         requestAnimationFrame(tick);
     };
