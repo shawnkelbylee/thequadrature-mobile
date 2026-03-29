@@ -19,21 +19,22 @@ window.Q_IntegrationHub = {
         style.innerHTML = `
             .q-hub-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10010; display: none; justify-content: center; align-items: center; pointer-events: auto; }
             .q-hub-overlay.active { display: flex; }
-            .q-hub-box { width: 90vw; max-width: 500px; max-height: 85vh; overflow-y: auto; background: rgba(5, 8, 15, 0.95); border: 1px solid var(--theme-main, #00f0ff) !important; border-radius: 8px; padding: 25px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 15px; color: #fff; font-family: 'JetBrains Mono', monospace; pointer-events: auto; }
+            .q-hub-box { width: 90vw; max-width: 500px; max-height: 85vh; overflow-y: auto; background: rgba(5, 8, 15, 0.95); border: 1px solid var(--theme-main) !important; border-radius: 8px; padding: 25px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 15px; color: #fff; font-family: 'JetBrains Mono', monospace; pointer-events: auto; }
             
             /* Scrollbar styling for the hub box */
             .q-hub-box::-webkit-scrollbar { width: 6px; }
             .q-hub-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-            .q-hub-box::-webkit-scrollbar-thumb { background: var(--theme-main, #00f0ff) !important; border-radius: 3px; }
+            .q-hub-box::-webkit-scrollbar-thumb { background: var(--theme-main) !important; border-radius: 3px; }
 
             .q-global-controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; min-width: 480px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
-            .q-ctrl-btn { background: transparent; border: 1px solid var(--theme-main, #00f0ff) !important; color: var(--theme-main, #00f0ff) !important; padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; white-space: nowrap; pointer-events: auto; }
+            .q-ctrl-btn { background: transparent; border: 1px solid var(--theme-main) !important; color: var(--theme-main) !important; padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; white-space: nowrap; pointer-events: auto; }
             .q-ctrl-btn:hover { background: rgba(255,255,255,0.1) !important; color: #fff !important; }
-            .q-ctrl-btn.active { background: var(--theme-main, #00f0ff) !important; color: #000 !important; }
-            .q-scrubber { flex-grow: 1; accent-color: var(--theme-main, #00f0ff) !important; cursor: pointer; height: 4px; -webkit-appearance: none; margin: 0 10px; border-radius: 2px; background: rgba(255,255,255,0.1); pointer-events: auto; }
-            .q-scrubber::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; background: var(--theme-main, #00f0ff) !important; clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); cursor: grab; pointer-events: auto; }
+            .q-ctrl-btn.active { background: var(--theme-main) !important; color: #000 !important; }
+            .q-scrubber { flex-grow: 1; accent-color: var(--theme-main) !important; cursor: pointer; height: 4px; -webkit-appearance: none; margin: 0 10px; border-radius: 2px; background: rgba(255,255,255,0.1); pointer-events: auto; }
+            .q-scrubber::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; background: var(--theme-main) !important; clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); cursor: grab; pointer-events: auto; }
+            .q-scrubber::-webkit-slider-thumb:active { cursor: grabbing; }
             .hub-tier-row { background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; transition: 0.3s; pointer-events: auto; }
-            .hub-tier-row:hover { border-color: var(--theme-main, #00f0ff) !important; box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1); }
+            .hub-tier-row:hover { border-color: var(--theme-main) !important; box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1); }
             
             .support-links { border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; font-size: 0.6rem; font-family: 'Orbitron'; font-weight: 700; pointer-events: auto; }
             .support-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; letter-spacing: 1px; pointer-events: auto; }
@@ -89,7 +90,7 @@ window.Q_IntegrationHub = {
 
         dom.innerHTML = `
             <div class="q-hub-box" onclick="event.stopPropagation()">
-                <div style="font-family:'Orbitron'; text-align:center; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:10px; font-size: 1.1rem; color: var(--theme-main, #00f0ff); font-weight: 900; letter-spacing: 2px;">DASHBOARD // SOVEREIGN MATRIX</div>
+                <div style="font-family:'Orbitron'; text-align:center; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:10px; font-size: 1.1rem; color: var(--theme-main); font-weight: 900; letter-spacing: 2px;">DASHBOARD // SOVEREIGN MATRIX</div>
                 <div style="font-size:0.65rem; color:#aaa; margin:5px 0 10px 0; text-align:center; line-height: 1.5;">Manage Sovereign Identity API hooks and Tiered Access Bridges.</div>
                 
                 <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 5px;">
@@ -142,7 +143,7 @@ window.Q_IntegrationHub = {
                     <a href="#" class="highlight">[ POD / DIGITAL PRINT ]</a>
                 </div>
 
-                <button class="q-ctrl-btn" style="width:100%; border-color: var(--theme-main, #00f0ff); color: var(--theme-main, #00f0ff); pointer-events:auto;" onclick="window.Q_IntegrationHub.closeHub()">ACKNOWLEDGE</button>
+                <button class="q-ctrl-btn" style="width:100%; border-color: var(--theme-main); color: var(--theme-main); pointer-events:auto;" onclick="window.Q_IntegrationHub.closeHub()">ACKNOWLEDGE</button>
             </div>
         `;
         document.body.appendChild(dom);
