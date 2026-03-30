@@ -41,11 +41,7 @@
             touch-action: manipulation;
         }
 
-        /* --- HAPTIC & MODAL Z-INDEX OVERRIDES --- */
         #q-universal-modal { z-index: 999999 !important; }
-        .corner-panel { pointer-events: auto !important; z-index: 60 !important; }
-        .btn, .fmt-toggle { pointer-events: auto !important; z-index: 100 !important; position: relative; }
-
         .corner-panel { 
             position: absolute; display: flex; flex-direction: column; gap: 0.5vh; z-index: 60; 
             background: linear-gradient(135deg, rgba(5, 8, 15, 0.8) 0%, rgba(15, 10, 30, 0.95) 100%); 
@@ -62,11 +58,8 @@
         .sim-tag { background: var(--theme-main); color: #000; font-size: 0.45rem; padding: 2px 4px; border-radius: 2px; display: block; font-weight: 900; letter-spacing: 1px; }
         
         .m-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.65rem; margin-top: 8px; }
-        
-        /* STANDARDIZED TELEMETRY AESTHETICS */
         .m-row span:first-child { color: var(--starlight); font-family: 'JetBrains Mono'; font-weight: 700; }
         .m-row span:last-child { color: var(--theme-main); font-weight: 700; text-shadow: 0 0 8px var(--theme-dim); }
-        .m-row span.val-alert { color: var(--friction-red) !important; text-shadow: 0 0 8px rgba(255, 51, 51, 0.4) !important; }
 
         .sync-matrix { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.6rem; color: var(--starlight); display: flex; flex-direction: column; gap: 6px; font-weight: 700; }
         .matrix-row { display: flex; justify-content: space-between; align-items: center; }
@@ -75,9 +68,7 @@
         .alert-flow { color: var(--theme-main); text-shadow: 0 0 5px var(--theme-dim); }
 
         .btn { background: transparent; border: 1px solid var(--theme-main); color: var(--theme-main); padding: 8px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 2px; border-radius: 4px; transition: 0.3s; width: 100%; margin-top: 6px; z-index: 50; position: relative; font-weight: 700;}
-        .btn:hover { background: var(--theme-dim); color: #fff; }
 
-        /* LUNISOLAR ASTROLABE */
         .astrolabe-root { position: absolute; width: var(--dial-size); height: var(--dial-size); max-width: 550px; max-height: 550px; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; }
         .ls-ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
         .ls-outer { width: 100%; height: 100%; border: 1px dashed var(--bio-cobalt-dim); }
@@ -85,12 +76,10 @@
         
         .ls-center-hud { position: absolute; width: 35%; height: 35%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
         
-        /* DARK EARTH CORE GEOMETRY - MIXED HALO */
         .bio-earth-core { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background-color: #020204; overflow: hidden; box-shadow: 0 0 20px var(--bio-cobalt-dim), 0 0 40px var(--bio-purple-dim), inset -10px -10px 20px rgba(0,0,0,0.9); pointer-events: none; }
         .bio-earth-surface { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 200% 100%; filter: grayscale(80%) sepia(50%) hue-rotate(240deg) saturate(200%) brightness(0.65) contrast(1.2); opacity: 0.8; }
         .night-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 2; background: radial-gradient(circle at 70% 30%, rgba(0, 85, 255, 0.25) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.8) 100%); pointer-events: none; box-shadow: inset 0 0 30px rgba(0,0,0,0.7); }
 
-        /* GRADIENT AURA MIX (COBALT -> PURPLE) */
         .aura-glow { position: absolute; width: 100%; height: 100%; border-radius: 50%; transition: all 1s ease; opacity: 0.4; z-index: -1; }
         .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); }
         .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse 3s infinite; }
@@ -103,7 +92,6 @@
         
         #lunar-nodes-container { position: absolute; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
         .lunar-phase-icon { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease; }
-        .lunar-phase-icon:hover { transform: scale(2.0) !important; filter: drop-shadow(0 0 10px var(--bio-cobalt)) drop-shadow(0 0 20px var(--bio-purple)) brightness(1.5) !important; z-index: 100 !important; }
     </style>
 </head>
 <body class="mode-q">
@@ -111,36 +99,36 @@
     <div class="star-container" id="stars" style="z-index: 1;"></div>
 
     <div class="corner-panel mod-tl telemetry-node">
-        <div class="m-head">PHOTIC ALIGNMENT <span id="sync-badge-tl" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-head">SUNLIGHT EXPOSURE <span id="sync-badge-tl" class="sim-tag">SOVEREIGN</span></div>
         <div class="m-row"><span>SOLAR LUX TARGET:</span> <span id="lux-avail">--</span></div>
         <div class="m-row"><span>UV INDEX EXPOSURE:</span> <span id="uv-index">--</span></div>
         <div class="m-row" style="margin-top: 12px;"><span>SOLAR NOON (ZENITH):</span> <span id="solar-noon">--</span></div>
     </div>
     
     <div class="corner-panel mod-tr telemetry-node">
-        <div class="m-head">NODAL & SAROS CYCLE <span id="sync-badge-tr" class="sim-tag">SOVEREIGN</span></div>
-        <div class="m-row"><span>SAROS SERIES:</span> <span id="saros-series">--</span></div>
-        <div class="m-row"><span>DRACONIC PRESCESSION:</span> <span id="draconic-phase">--</span></div>
-        <div class="m-row" style="margin-top: 12px;"><span>ECLIPSE PROXIMITY:</span> <span id="eclipse-prox">--</span></div>
+        <div class="m-head">LUNAR & TIDE IMPACT <span id="sync-badge-tr" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-row"><span>LUNAR ILLUMINATION:</span> <span id="lunar-illum">--</span></div>
+        <div class="m-row"><span>TIDAL GRAVITY:</span> <span id="tidal-impact">NOMINAL</span></div>
+        <div class="m-row" style="margin-top: 12px;"><span>LUNAR PHASE:</span> <span id="lunar-phase-name">--</span></div>
     </div>
 
     <div class="corner-panel mod-bl telemetry-node">
-        <div class="m-head">CIRCADIAN ANCHOR <span id="sync-badge-bl" class="sim-tag">SOVEREIGN</span></div>
-        <div class="m-row"><span>MELATONIN ONSET:</span> <span id="melatonin-onset">--</span></div>
+        <div class="m-head">INTERNAL BODY CLOCK <span id="sync-badge-bl" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-row"><span>RESTING HR (RHR):</span> <span id="bio-rhr">-- BPM</span></div>
+        <div class="m-row"><span>HRV ELASTICITY:</span> <span id="bio-hrv">-- MS</span></div>
         <div class="sync-matrix" id="sync-matrix-block">
-            <div class="matrix-row"><span>ULTRADIAN OUTPUT:</span> <span id="mat-ultra">--</span></div>
+            <div class="matrix-row"><span>SLEEP STAGE:</span> <span id="mat-sleep">DEEP</span></div>
             <div class="matrix-row"><span>BIOLOGICAL SYNC:</span> <span id="bio-sync-pct">--%</span></div>
             <div class="matrix-alert" id="mat-alert">--</div>
         </div>
     </div>
 
     <div class="corner-panel mod-br telemetry-node">
-        <div class="m-head">ULTRADIAN RHYTHM <span id="sync-badge-br" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-head">90-MINUTE FOCUS CYCLE <span id="sync-badge-br" class="sim-tag">SOVEREIGN</span></div>
         <div class="m-row"><span>STATE:</span> <span id="bio-state" style="display:inline-block;">--</span></div>
         <div class="m-row"><span>ELAPSED:</span> <span id="bio-timer">-- / 90 MIN</span></div>
         <div class="bar-bg"><div class="bar-fill" id="bio-bar"></div></div>
         <button class="btn" style="margin-top:16px;" onclick="openCalibration()" ontouchstart="event.stopPropagation(); openCalibration(); event.preventDefault();">CALIBRATE RHYTHM</button>
-        
     </div>
 
     <div class="astrolabe-root q-center-dial">
@@ -159,34 +147,6 @@
         </div>
     </div>
 
-    <div class="vector-anchor telemetry-node tl" style="display:none; visibility:hidden;">
-        <div class="v-head holo-text" style="color:var(--bio-purple); text-shadow:0 0 10px var(--bio-purple-dim);">BIOLOGICAL</div>
-        <div class="t-row"><span>HRV / ELASTICITY:</span> <span id="face-bio-state" style="color:var(--bio-purple);">SYNCING..</span></div>
-        <div class="t-row"><span>NATAL ANCHOR:</span> <span id="face-bio-natal" style="color:var(--bio-purple);">--</span></div>
-        <div class="t-row"><span>ULTRADIAN PHASE:</span> <span id="face-bio-phase" style="color:var(--bio-purple);">ACTIVE</span></div>
-    </div>
-    
-    <div class="vector-anchor telemetry-node tr" style="display:none; visibility:hidden;">
-        <div class="v-head holo-text" style="color:var(--gold); text-shadow:0 0 10px var(--gold-dim);">COMMUNAL</div>
-        <div class="t-row"><span>Q-COORDINATE:</span> <span id="face-com-node" style="color:var(--gold);">SEARCHING..</span></div>
-        <div class="t-row"><span>ZODIACAL EVENT:</span> <span id="face-com-zod" style="color:var(--gold);">--</span></div>
-        <div class="t-row"><span>SOVEREIGN STATUS:</span> <span id="face-com-postulate" style="color:var(--gold);">QUADRATURE</span></div>
-    </div>
-    
-    <div class="vector-anchor telemetry-node bl" style="display:none; visibility:hidden;">
-        <div class="v-head holo-text" style="color:var(--env-green); text-shadow:0 0 10px var(--env-green-dim);">ENVIRONMENTAL</div>
-        <div class="t-row"><span>RISK INDEX:</span> <span id="face-env-risk" style="color:var(--env-green);">CALCULATING..</span></div>
-        <div class="t-row"><span>CLIMATIC BASELOAD:</span> <span id="face-env-tension" style="color:var(--env-green);">--</span></div>
-        <div class="t-row"><span>GEOLOCATION:</span> <span id="face-env-geo" style="color:var(--env-green);">SYNCING..</span></div>
-    </div>
-    
-    <div class="vector-anchor telemetry-node br" style="display:none; visibility:hidden;">
-        <div class="v-head holo-text" style="color:var(--sys-cyan); text-shadow:0 0 10px var(--sys-cyan-dim);">MECHANICAL</div>
-        <div class="t-row"><span>EQUATION OF TIME:</span> <span id="face-mech-delta" style="color:var(--sys-cyan);">--</span></div>
-        <div class="t-row"><span>ENTROPIC SMEAR:</span> <span id="face-mech-smear" style="color:var(--sys-cyan);">--</span></div>
-        <div class="t-row"><span>KEPLERIAN VELOCITY:</span> <span id="face-mech-vel" style="color:var(--sys-cyan);">NOMINAL</span></div>
-    </div>
-
     <script>
         let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
         let savedAnchor = localStorage.getItem('q_bio_anchor');
@@ -198,19 +158,15 @@
         async function engageBiometricVector() {
             if (window.Q_PHASE_III && window.Q_PHASE_III.syncBiometrics) {
                 document.getElementById('mat-alert').innerText = "SYNCING NATIVE HRV...";
-                document.getElementById('mat-alert').style.color = "var(--warn-orange)";
                 try {
                     const dynamicDuration = await window.Q_PHASE_III.syncBiometrics();
-                    if (!localStorage.getItem('q_bio_duration')) {
-                        cycleDuration = dynamicDuration;
-                    }
+                    if (!localStorage.getItem('q_bio_duration')) cycleDuration = dynamicDuration;
                     document.getElementById('bio-sync-pct').innerText = "100%";
                     document.getElementById('mat-alert').innerText = "HRV LINK ESTABLISHED";
                     document.getElementById('mat-alert').className = "matrix-alert alert-flow";
                 } catch(e) {
                     document.getElementById('bio-sync-pct').innerText = "FAIL";
                     document.getElementById('mat-alert').innerText = "HRV SYNC FAILED";
-                    document.getElementById('mat-alert').style.color = "var(--friction-red)";
                 }
             }
         }
@@ -229,32 +185,15 @@
         }
 
         function getDynamicMoonSVG(phaseFloat, isApex, isPrimary) {
-            // Mix: Cobalt blue shadows blending with purple borders
             let shadowColor = isApex ? 'rgba(0, 85, 255, 1)' : `rgba(0, 85, 255, ${(phaseFloat > 0.4 && phaseFloat < 0.6) ? 0.8 : 0.2})`;
             let shadowSize = isApex ? '15px' : (isPrimary ? '8px' : '3px');
             let html = `<svg viewBox="0 0 32 32" width="100%" height="100%" style="border-radius:50%; box-shadow: 0 0 ${shadowSize} ${shadowColor};">`;
-            
             html += `<circle cx="16" cy="16" r="15" fill="#05080f" stroke="rgba(184,41,255,0.4)" stroke-width="1"/>`;
-            
             let rx = Math.max(0.01, Math.abs(15 * Math.cos(phaseFloat * 2 * Math.PI))); 
-            let sweep;
-            let path = "";
-            
-            if (phaseFloat < 0.5) {
-                sweep = phaseFloat <= 0.25 ? 0 : 1;
-                path = `M 16 1 A 15 15 0 0 1 16 31 A ${rx} 15 0 0 ${sweep} 16 1`;
-            } else {
-                sweep = phaseFloat <= 0.75 ? 0 : 1;
-                path = `M 16 1 A 15 15 0 0 0 16 31 A ${rx} 15 0 0 ${sweep} 16 1`;
-            }
-            
-            if (phaseFloat === 0 || phaseFloat === 1) {
-            } else if (phaseFloat === 0.5) {
-                html += `<circle cx="16" cy="16" r="15" fill="#E5E4E2"/>`;
-            } else {
-                html += `<path d="${path}" fill="#E5E4E2"/>`;
-            }
-            
+            let sweep = phaseFloat < 0.5 ? (phaseFloat <= 0.25 ? 0 : 1) : (phaseFloat <= 0.75 ? 0 : 1);
+            let path = phaseFloat < 0.5 ? `M 16 1 A 15 15 0 0 1 16 31 A ${rx} 15 0 0 ${sweep} 16 1` : `M 16 1 A 15 15 0 0 0 16 31 A ${rx} 15 0 0 ${sweep} 16 1`;
+            if (phaseFloat === 0.5) html += `<circle cx="16" cy="16" r="15" fill="#E5E4E2"/>`;
+            else if (phaseFloat !== 0 && phaseFloat !== 1) html += `<path d="${path}" fill="#E5E4E2"/>`;
             html += `</svg>`;
             return html;
         }
@@ -262,19 +201,17 @@
         function renderDynamicMoons(daysElapsed) {
             const container = document.getElementById('lunar-nodes-container');
             container.innerHTML = '';
-            
             const synodicMonth = 29.530588;
             const C = Math.floor((daysElapsed + 1.555) / synodicMonth);
             const windowDays = 100;
-            const phaseDensity = 16; 
-
+            
             let closestNode = null;
             let minDelta = Infinity;
             let allNodes = [];
 
             for (let c = C - 4; c <= C + 4; c++) {
-                for (let p = 0; p < phaseDensity; p++) {
-                    let phaseFloat = p / phaseDensity;
+                for (let p = 0; p < 16; p++) {
+                    let phaseFloat = p / 16;
                     let absoluteDays = c * synodicMonth + (phaseFloat * synodicMonth) - 1.555;
                     let deltaDays = absoluteDays - daysElapsed;
                     allNodes.push({ absoluteDays, deltaDays, c, p, phaseFloat });
@@ -288,41 +225,23 @@
 
             allNodes.forEach(n => {
                 if (Math.abs(n.deltaDays) <= windowDays) {
-                    let opacity = 1 - (Math.abs(n.deltaDays) / windowDays);
-                    opacity = Math.pow(opacity, 1.5); 
-                    
+                    let opacity = Math.pow(1 - (Math.abs(n.deltaDays) / windowDays), 1.5); 
                     let meanArc = (n.absoluteDays * (360 / 365.24219)) % 360;
                     if (meanArc < 0) meanArc += 360;
-                    
                     let rad = (meanArc - 90) * (Math.PI / 180);
                     
-                    let isPrimary = (n.p % (phaseDensity / 4) === 0);
+                    let isPrimary = (n.p % 4 === 0);
                     let rMap = 46 - 8 * Math.cos(n.phaseFloat * 2 * Math.PI);
                     let x = 50 + rMap * Math.cos(rad);
                     let y = 50 + rMap * Math.sin(rad);
                     
                     let isApex = (n.c === closestNode.c && n.p === closestNode.p);
-                    
-                    let size;
-                    if (isApex) size = 28;
-                    else if (isPrimary) size = (n.p === 0 || n.p === phaseDensity/2) ? 20 : 16;
-                    else size = 10; 
-                    
+                    let size = isApex ? 28 : (isPrimary ? 18 : 10);
                     let zIndex = isApex ? 50 : (isPrimary ? 20 : 10);
                     
                     let node = document.createElement('div');
                     node.className = 'lunar-phase-icon';
-                    node.style.position = 'absolute';
-                    node.style.width = size + 'px';
-                    node.style.height = size + 'px';
-                    node.style.marginLeft = -(size/2) + 'px';
-                    node.style.marginTop = -(size/2) + 'px';
-                    node.style.left = x + '%';
-                    node.style.top = y + '%';
-                    node.style.opacity = isApex ? 1.0 : opacity;
-                    node.style.zIndex = zIndex;
-                    node.style.cursor = 'help';
-                    node.style.pointerEvents = 'auto';
+                    node.style.cssText = `position:absolute; width:${size}px; height:${size}px; margin-left:${-(size/2)}px; margin-top:${-(size/2)}px; left:${x}%; top:${y}%; opacity:${isApex ? 1.0 : opacity}; z-index:${zIndex}; cursor:help; pointer-events:auto;`;
                     
                     if (isApex) {
                         node.style.filter = 'drop-shadow(0 0 10px var(--bio-cobalt)) drop-shadow(0 0 20px var(--bio-purple)) brightness(1.2)';
@@ -349,7 +268,7 @@
         }
 
         function calculateSolarMetrics(daysElapsed) {
-            const lat = window.Q_STATE.location.lat;
+            const lat = window.Q_STATE?.location?.lat || 0;
             const declination = 23.45 * Math.sin((360 / 365.24219) * (daysElapsed - 81) * Math.PI / 180);
             return {
                 lux: (declination > 0 && lat > 0) || (declination < 0 && lat < 0) ? "HIGH (>10,000)" : "LOW (<2,500)",
@@ -359,58 +278,31 @@
         }
 
         function openCalibration() { 
-            const hStr = Math.floor(anchorMins / 60).toString().padStart(2, '0');
-            const mStr = (anchorMins % 60).toString().padStart(2, '0');
-            const savedDob = window.Q_STATE.metaphysical_layer.dob || "";
-            const savedLoc = window.Q_STATE.location.name || "";
-
             const html = `
-                <div style="display: flex; flex-direction: column;">
-                    <label style="font-size: 0.65rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron';">SESSION ANCHOR (WAKE TIME UTC)</label>
-                    <input type="time" id="cal-anchor" value="${hStr}:${mStr}" class="modal-input">
-                </div>
-                <div style="display: flex; flex-direction: column; margin-top: 10px;">
-                    <label style="font-size: 0.65rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron';">CYCLE DURATION (MIN)</label>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <label style="font-size:0.6rem; color:rgba(255,255,255,0.6); font-family:'Orbitron';">WAKE ANCHOR (UTC)</label>
+                    <input type="time" id="cal-anchor" value="${Math.floor(anchorMins/60).toString().padStart(2,'0')}:${(anchorMins%60).toString().padStart(2,'0')}" class="modal-input">
+                    <label style="font-size:0.6rem; color:rgba(255,255,255,0.6); font-family:'Orbitron';">CYCLE DURATION (MIN)</label>
                     <input type="number" id="cal-duration" value="${cycleDuration}" min="45" max="144" class="modal-input">
-                </div>
-                <div style="display: flex; flex-direction: column; margin-top: 10px;">
-                    <label style="font-size: 0.65rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron';">GEOLOCATION (LOCAL SYNC)</label>
-                    <input type="text" id="cal-location" value="${savedLoc}" class="modal-input" placeholder="e.g. CLEARWATER, FL">
-                </div>
-                <div style="display: flex; flex-direction: column; margin-top: 10px;">
-                    <label style="font-size: 0.65rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron';">DATE OF BIRTH (NATAL METROLOGY)</label>
-                    <input type="date" id="cal-dob" value="${savedDob}" class="modal-input">
-                </div>
-            `;
+                </div>`;
             window.Q_ModalEngine.render('BIOLOGICAL CALIBRATION', html, 'LOCK PARAMETERS', () => {
                 cycleDuration = Math.floor(document.getElementById('cal-duration').value);
                 localStorage.setItem('q_bio_duration', cycleDuration);
-                
                 const parts = document.getElementById('cal-anchor').value.split(':');
                 anchorMins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
                 localStorage.setItem('q_bio_anchor', anchorMins);
-                isAutoAnchor = false; 
-                
-                const newLoc = document.getElementById('cal-location').value;
-                if(newLoc) window.Q_UpdateState('location', 'name', newLoc.toUpperCase());
-
-                const newDob = document.getElementById('cal-dob').value;
-                window.Q_UpdateState('metaphysical_layer', 'dob', newDob);
-
-                window.Q_ModalEngine.close();
+                isAutoAnchor = false; window.Q_ModalEngine.close();
             }); 
         }
 
         window.addEventListener('q-tick', (e) => {
-            const { t, isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
+            const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr } = e.detail;
 
-            // 1. Dynamic Moons
             if (lastRenderedScrub === null || Math.abs(daysElapsed - lastRenderedScrub) > 0.05) {
                 renderDynamicMoons(daysElapsed);
                 lastRenderedScrub = daysElapsed;
             }
 
-            // 2. Wing Telemetry (Restored & Colored)
             function formatDualColor(str) {
                 const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
                 const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
@@ -418,57 +310,36 @@
                 let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
                 if (tokens) {
                     tokens.forEach(token => {
-                        if (/[0-9]/.test(token)) {
-                            out += `<span style="${numStyle}">${token}</span>`;
-                        } else {
-                            out += `<span style="${letterStyle}">${token}</span>`;
-                        }
+                        if (/[0-9]/.test(token)) out += `<span style="${numStyle}">${token}</span>`;
+                        else out += `<span style="${letterStyle}">${token}</span>`;
                     });
                 }
                 return out;
             }
 
             const legDateEl = document.getElementById('leg-date');
-            if (legDateEl) {
-                legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
-            }
-
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold;">${legacyDateStr.toUpperCase()}</span>`;
             const legTimeEl = document.getElementById('leg-time');
-            if (legTimeEl) {
-                legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-            }
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
 
-            const fmtBtn = document.getElementById('fmt-btn');
-            if (fmtBtn) { 
-                fmtBtn.style.color = "var(--theme-main)"; 
-                fmtBtn.style.borderColor = "var(--theme-main)"; 
-            }
-
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
             const qCoordWing = document.getElementById('q-coord-wing');
-            
-            let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-            let smNumStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-            
             if (qCoordWing) {
+                let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
                 if (activeBlock && activeBlock.type === 'PYLON') {
                     qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
                 } else {
                     let cCycle = activeBlock ? activeBlock.cycle : 0;
-                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
+                    qCoordWing.innerHTML = `<span style="color:var(--starlight);">QC</span><span style="color:var(--theme-main); font-weight:bold;">${cCycle}</span> <span style="color:var(--starlight);">Q</span><span style="color:var(--theme-main); font-weight:bold;">${qData.quad}</span> <span style="color:var(--starlight);">S</span><span style="color:var(--theme-main); font-weight:bold;">${qData.sect}</span> <span style="color:var(--starlight);">DAY</span><span style="color:var(--theme-main); font-weight:bold;">${qData.day}</span>`;
                 }
             }
 
+            // RESTORED DEGREES FOR QUAD OS WING
             const meanDegEl = document.getElementById('mean-deg');
             if (meanDegEl) { 
                 meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
                 meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
                 meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
             }
-            
             const trueDegEl = document.getElementById('true-deg');
             if (trueDegEl) { 
                 trueDegEl.innerText = qData.trueArc.toFixed(2) + "°";
@@ -476,76 +347,36 @@
                 trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
             }
 
-            // 3. Local BIO Vector Logic
-            const solarMetrics = calculateSolarMetrics(daysElapsed);
-            document.getElementById('lux-avail').innerText = solarMetrics.lux;
-            document.getElementById('uv-index').innerText = solarMetrics.uv;
-
-            const noonOffset = (window.Q_STATE.location.lon / 15);
-            let noonHour = 12 - noonOffset;
-            let noonDate = new Date(activeTime.getTime());
-            noonDate.setUTCHours(Math.floor(noonHour), Math.floor((noonHour % 1) * 60), 0, 0);
-            document.getElementById('solar-noon').innerText = window.formatLegacyDate(noonDate.getTime()).timeStr;
-
-            let melDate = new Date(activeTime.getTime());
-            melDate.setUTCHours(Math.floor(noonHour) + 8 + solarMetrics.sunsetOffset, 0, 0, 0);
-            document.getElementById('melatonin-onset').innerText = window.formatLegacyDate(melDate.getTime()).timeStr;
-
-            if (isAutoAnchor) {
-                let wakeDate = new Date(melDate.getTime() + (8 * 3600000));
-                anchorMins = wakeDate.getUTCHours() * 60 + wakeDate.getUTCMinutes();
+            // --- THE NADIR CORRECTION: 180-DEGREE FLIP ---
+            const earthSurface = document.querySelector('.bio-earth-surface');
+            if (earthSurface) {
+                const lon = window.Q_STATE?.location?.lon || 0;
+                const siderealDayMs = 86164090;
+                const utcFraction = (t % siderealDayMs) / siderealDayMs;
+                const lonFraction = lon / 360;
+                const bgPosition = 200 - (utcFraction * 200) - (lonFraction * 200) + 100; 
+                earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
             }
 
-            let sarosSeries = 136 + Math.floor(daysElapsed / 6585.32);
-            let draconicPhase = ((daysElapsed + 0.5) % 27.21222) / 27.21222;
-            let eclipseProx = Math.abs(0.5 - draconicPhase) * 100;
-            
-            document.getElementById('saros-series').innerText = 'SERIES ' + sarosSeries;
-            document.getElementById('draconic-phase').innerText = (draconicPhase * 100).toFixed(1) + '%';
-            document.getElementById('eclipse-prox').innerText = eclipseProx < 5 ? 'IMMINENT' : 'NOMINAL';
-            if (eclipseProx < 5) document.getElementById('eclipse-prox').classList.add('val-alert');
-            else document.getElementById('eclipse-prox').classList.remove('val-alert');
-
-            // --- HIGH-PRECISION ULTRADIAN FRACTIONAL TIMER ---
-            let anchorMs = anchorMins * 60000;
-            let msSinceMidnight = (t % 86400000); 
-            let activeMs = msSinceMidnight - anchorMs;
-            if (activeMs < 0) activeMs += 86400000;
-            
+            let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
             let cycleDurMs = cycleDuration * 60000;
-            let cyclePosMs = activeMs % cycleDurMs;
-            let cyclePosFloat = cyclePosMs / cycleDurMs;
-            let cyclePosMins = Math.floor(cyclePosMs / 60000);
-
-            const aura = document.getElementById('bio-aura');
-            const bioStateEl = document.getElementById('bio-state');
-            
+            let cyclePosFloat = (activeMs % cycleDurMs) / cycleDurMs;
             let currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
             
             if (currentBioState !== lastBioState) {
-                bioStateEl.innerText = currentBioState;
-                aura.className = currentBioState === "DEEP FLOW" ? "aura-glow flow-aura" : "aura-glow vent-aura";
-                
-                if (lastBioState !== "") {
-                    bioStateEl.style.animation = "none";
-                    void bioStateEl.offsetWidth; // Trigger DOM reflow to restart animation
-                    bioStateEl.style.animation = "flash-text 0.5s ease-out";
-                    if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('MEDIUM');
-                }
+                document.getElementById('bio-state').innerText = currentBioState;
+                document.getElementById('bio-aura').className = currentBioState === "DEEP FLOW" ? "aura-glow flow-aura" : "aura-glow vent-aura";
                 lastBioState = currentBioState;
             }
-            
-            document.getElementById('bio-timer').innerText = `${cyclePosMins} / ${cycleDuration} MIN`;
+            document.getElementById('bio-timer').innerText = `${Math.floor((activeMs % cycleDurMs) / 60000)} / ${cycleDuration} MIN`;
             document.getElementById('bio-bar').style.width = (cyclePosFloat * 100) + "%";
-            document.getElementById('mat-ultra').innerText = currentBioState;
+            document.getElementById('mat-sleep').innerText = currentBioState === "VENT/RECOVERY" ? "LIGHT/REM" : "DEEP";
 
-            const earthSurface = document.querySelector('.bio-earth-surface');
-            if (earthSurface) {
-                const siderealDayMs = 86164090;
-                const dayProgress = ((t % siderealDayMs) / siderealDayMs + 0.5) % 1;
-                const bgPosition = 200 - (dayProgress * 200);
-                earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
-            }
+            const sm = calculateSolarMetrics(daysElapsed);
+            document.getElementById('lux-avail').innerText = sm.lux;
+            document.getElementById('uv-index').innerText = sm.uv;
+            document.getElementById('lunar-illum').innerText = (qData.lunarPhase > 0.5 ? (1 - qData.lunarPhase) * 200 : qData.lunarPhase * 200).toFixed(1) + '%';
+            document.getElementById('lunar-phase-name').innerText = getPhaseName(qData.lunarPhase);
         });
 
         if (window.generateStars) window.generateStars('stars');
