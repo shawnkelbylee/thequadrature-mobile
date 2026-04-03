@@ -373,15 +373,15 @@
 
             // COM DATA
             if(getEl('face-COM-NODE')) getEl('face-COM-NODE').innerText = (activeBlock && activeBlock.type === 'PYLON') ? activeBlock.name : `Q${qData.quad} S${qData.sect} D${qData.day}`;
-            if(getEl('face-COM-ZOD')) {
+            if(getEl('face-COM-ZODIAC')) {
                 const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
                 const sNatal = window.Q_STATE?.metaphysical_layer?.natal_anchor || 'NONE';
                 if (sNatal !== 'NONE') {
                     let diff = Math.abs(Math.floor(qData.trueArc / 30) - zodiacNames.indexOf(sNatal));
                     if (diff > 6) diff = 12 - diff; 
-                    getEl('face-COM-ZOD').innerText = diff === 0 ? "CONJUNCTION (0°)" : diff === 1 ? "SEMI-SEXTILE (30°)" : diff === 2 ? "SEXTILE (60°)" : diff === 3 ? "SQUARE (90°)" : diff === 4 ? "TRINE (120°)" : diff === 5 ? "QUINCUNX (150°)" : "OPPOSITION (180°)";
+                    getEl('face-COM-ZODIAC').innerText = diff === 0 ? "CONJUNCTION (0°)" : diff === 1 ? "SEMI-SEXTILE (30°)" : diff === 2 ? "SEXTILE (60°)" : diff === 3 ? "SQUARE (90°)" : diff === 4 ? "TRINE (120°)" : diff === 5 ? "QUINCUNX (150°)" : "OPPOSITION (180°)";
                 } else {
-                    getEl('face-COM-ZOD').innerText = zodiacNames[Math.floor(qData.meanArc / 30)];
+                    getEl('face-COM-ZODIAC').innerText = zodiacNames[Math.floor(qData.meanArc / 30)];
                 }
             }
             if(getEl('face-COM-LEDGER')) getEl('face-COM-LEDGER').innerText = `Q${Math.floor(qData.trueArc / 90) + 1} CHECKPOINT`;

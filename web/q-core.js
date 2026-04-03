@@ -1,6 +1,6 @@
 // THE QUADRATURE: MASTER CORE LOGIC (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase II Active. UI Decoupled. Supabase OAuth Engaged. Automated Spatial Lock Active.
+// STATUS: Active. Ephemeris Bridge & Multi-Day Observance Logic Integrated.
 
 window.MS_DAY = 86400000;
 
@@ -13,20 +13,41 @@ window.Q_GEAR_CONSTANTS = {
     EPSILON: 89662680   // 24.9063h
 };
 
-// --- GLOBAL UNIVERSAL EVENT REGISTRY ---
+// --- GLOBAL UNIVERSAL EVENT REGISTRY (EXACT 2026 METROLOGY) ---
 window.Q_REGISTRY = {
     REL_DB: {
-        jud: [ { name: "Purim", coord: 74.5, type: 'node-jud', glyph: '✡' }, { name: "Passover (Pesach)", coord: 110.0, type: 'node-jud', glyph: '✡' }, { name: "Shavuot", coord: 165.2, type: 'node-jud', glyph: '✡' }, { name: "Rosh Hashanah", coord: 275.5, type: 'node-jud', glyph: '✡' }, { name: "Yom Kippur", coord: 285.0, type: 'node-jud', glyph: '✡' }, { name: "Hanukkah", coord: 350.5, type: 'node-jud', glyph: '✡' } ],
-        chr: [ { name: "Ash Wednesday", coord: 65.0, type: 'node-chr', glyph: '✝' }, { name: "Easter", coord: 105.0, type: 'node-chr', glyph: '✝' }, { name: "Pentecost", coord: 154.0, type: 'node-chr', glyph: '✝' }, { name: "Christmas", coord: 3.9, type: 'node-chr', glyph: '✝' } ],
-        hin: [ { name: "Holi", coord: 75.0, type: 'node-hin', glyph: 'ॐ' }, { name: "Diwali", coord: 230.0, type: 'node-hin', glyph: 'ॐ' } ],
-        bud: [ { name: "Vesak", coord: 135.0, type: 'node-bud', glyph: '☸' }, { name: "Bodhi Day", coord: 260.0, type: 'node-bud', glyph: '☸' } ],
-        tao: [ { name: "Qingming", coord: 105.0, type: 'node-tao', glyph: '☯' }, { name: "Ghost Festival", coord: 225.0, type: 'node-tao', glyph: '☯' } ]
+        jud: [ 
+            { name: "Purim", coord: 70.9, type: 'node-jud', glyph: '✡', durationDays: 1 }, 
+            { name: "Passover (Pesach)", coord: 98.44, type: 'node-jud', glyph: '✡', durationDays: 8 }, 
+            { name: "Shavuot", coord: 161.8, type: 'node-jud', glyph: '✡', durationDays: 2 }, 
+            { name: "Rosh Hashanah", coord: 259.10, type: 'node-jud', glyph: '✡', durationDays: 2 }, 
+            { name: "Yom Kippur", coord: 270.0, type: 'node-jud', glyph: '✡', durationDays: 1 }, 
+            { name: "Hanukkah", coord: 344.0, type: 'node-jud', glyph: '✡', durationDays: 8 } 
+        ],
+        chr: [ 
+            { name: "Ash Wednesday", coord: 58.1, type: 'node-chr', glyph: '✝', durationDays: 1 }, 
+            { name: "Easter", coord: 102.38, type: 'node-chr', glyph: '✝', durationDays: 1 }, 
+            { name: "Pentecost", coord: 153.8, type: 'node-chr', glyph: '✝', durationDays: 1 }, 
+            { name: "Christmas", coord: 3.9, type: 'node-chr', glyph: '✝', durationDays: 1 } 
+        ],
+        hin: [ 
+            { name: "Holi", coord: 70.9, type: 'node-hin', glyph: 'ॐ', durationDays: 1 }, 
+            { name: "Diwali", coord: 317.3, type: 'node-hin', glyph: 'ॐ', durationDays: 5 } 
+        ],
+        bud: [ 
+            { name: "Vesak", coord: 129.1, type: 'node-bud', glyph: '☸', durationDays: 1 }, 
+            { name: "Bodhi Day", coord: 346.9, type: 'node-bud', glyph: '☸', durationDays: 1 } 
+        ],
+        tao: [ 
+            { name: "Qingming", coord: 103.5, type: 'node-tao', glyph: '☯', durationDays: 1 }, 
+            { name: "Ghost Festival", coord: 245.4, type: 'node-tao', glyph: '☯', durationDays: 1 } 
+        ]
     },
     SOLAR_TERMS: [
         { name: "Winter Solstice", start: 0, theme: "Rest and deepest reflection." }, { name: "Minor Cold", start: 15, theme: "Preparation for harsh conditions." }, { name: "Major Cold", start: 30, theme: "Endurance and inner warmth." }, 
         { name: "Spring Begins", start: 45, theme: "First stirring of new intent." }, { name: "Rain Water", start: 60, theme: "Nourishing early concepts." }, { name: "Insects Awaken", start: 75, theme: "Sudden activity and emergence." },
         { name: "Vernal Equinox", start: 90, theme: "Perfect balance. The Initiator." }, { name: "Clear & Bright", start: 105, theme: "Clarity of vision and purification." }, { name: "Grain Rain", start: 120, theme: "Rapid growth requiring sustenance." }, 
-        { name: "Summer Begins", start: 135, theme: "Commitment to outward expansion." }, { name: "Grain Buds", start: 150, theme: "Early signs of maturation." }, { name: "Grain in Ear", start: 165, theme: "Intense labor before the peak." },
+        { name: "Summer Begins", start: 135, theme: "Commitment to outward expansion." }, { name: "Grain Buds", start: 150, theme: "Early signs of maturation." }, { name: "Grain in Ear", start: 165, theme: "Intense labor labor the peak." },
         { name: "Summer Solstice", start: 180, theme: "The Apex. Maximum illumination." }, { name: "Minor Heat", start: 195, theme: "Sustaining momentum under pressure." }, { name: "Major Heat", start: 210, theme: "The crucible of final development." }, 
         { name: "Autumn Begins", start: 225, theme: "Shifting focus to harvest." }, { name: "End of Heat", start: 240, theme: "Cooling down, solidifying gains." }, { name: "White Dew", start: 255, theme: "Gathering resources, transition." },
         { name: "Autumnal Equinox", start: 270, theme: "Balance before the descent." }, { name: "Cold Dew", start: 285, theme: "Letting go of the non-essential." }, { name: "Frost Descends", start: 300, theme: "Finalizing storage and protection." }, 
@@ -38,7 +59,80 @@ window.Q_REGISTRY = {
         { name: "Gamma Pylon", coord: 180, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.GAMMA, event: 'SUMMER SOLSTICE (APEX)', desc: "PRINCIPLE: Quadrature Apex. Maximum orbital variance. Initiates Q3 decline.", renderUI: true },
         { name: "Delta Pylon", coord: 270, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.DELTA, event: 'AUTUMNAL EQUINOX', desc: "PRINCIPLE: Final Quadrant Anchor. Entropy return threshold. Initiates Q4 system transit.", renderUI: true },
         { name: "Epsilon Pylon", coord: 360, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.EPSILON, event: 'TERMINAL RESOLUTION', desc: "PRINCIPLE: Terminal Oddity integration. Resolution of the Keplerian Smear. Closes the Mean Circle.", renderUI: false }
+    ],
+    CIV_LEDGER: [
+        { name: "New Year", month: 0, day: 1, type: 'node-civ', glyph: '🏛', durationDays: 1 },
+        { name: "Valentine's Day", month: 1, day: 14, type: 'node-hol', glyph: '💝', durationDays: 1 },
+        { name: "St. Patrick's Day", month: 2, day: 17, type: 'node-hol', glyph: '☘', durationDays: 1 },
+        { name: "Earth Day", month: 3, day: 22, type: 'node-hol', glyph: '🌍', durationDays: 1 },
+        { name: "Cinco de Mayo", month: 4, day: 5, type: 'node-hol', glyph: '🌮', durationDays: 1 },
+        { name: "Independence Day", month: 6, day: 4, type: 'node-civ', glyph: '✦', durationDays: 1 },
+        { name: "Halloween", month: 9, day: 31, type: 'node-hol', glyph: '🎃', durationDays: 1 },
+        { name: "Veterans Day", month: 10, day: 11, type: 'node-civ', glyph: '⚒', durationDays: 1 }
     ]
+};
+
+// --- EPHEMERIS BRIDGE ---
+window.Q_ACTIVE_EPHEMERIS = null;
+window.Q_EphemerisBridge = {
+    offlineMode: localStorage.getItem('Q_EPHEMERIS_OFFLINE') === 'true',
+    
+    syncYear: async function(year) {
+        if (window.Q_ACTIVE_EPHEMERIS && window.Q_ACTIVE_EPHEMERIS.year === year) return;
+
+        if (this.offlineMode) {
+            window.Q_LOG('INFO', 'PHYSICS', 'SOVEREIGN_EPHEMERIS_ACTIVE', { year, status: 'INDEXED_DB_HOOK_PENDING' });
+            return;
+        }
+
+        if (!window.supabaseClient) return;
+
+        try {
+            const { data, error } = await window.supabaseClient.functions.invoke('q-ephemeris', {
+                body: { year: year }
+            });
+            
+            if (error) throw error;
+            if (data && data.holidays) {
+                window.Q_ACTIVE_EPHEMERIS = { year: year, data: data.holidays };
+                window.Q_LOG('STATE', 'PHYSICS', 'CLOUD_EPHEMERIS_SYNCED', { year });
+                window.dispatchEvent(new CustomEvent('q-ephemeris-updated', { detail: { year } }));
+            }
+        } catch (err) {
+            window.Q_LOG('WARN', 'PHYSICS', 'EPHEMERIS_SYNC_FAILED', { error: err.message, fallback: 'STATIC_REGISTRY' });
+        }
+    },
+    
+    toggleOfflineMode: function(enabled) {
+        this.offlineMode = enabled;
+        localStorage.setItem('Q_EPHEMERIS_OFFLINE', enabled ? 'true' : 'false');
+        window.Q_LOG('STATE', 'PHYSICS', enabled ? 'SOVEREIGN_EPHEMERIS_ENGAGED' : 'CLOUD_EPHEMERIS_ENGAGED');
+    }
+};
+
+// GLOBAL HOLIDAY COORDINATE RESOLVER
+window.getGlobalHolidays = function(year) {
+    if (!window.PYLON_ALPHA_DYNAMIC) return [];
+    let list = [];
+    
+    window.Q_REGISTRY.CIV_LEDGER.forEach(ev => {
+        let ts = Date.UTC(year, ev.month, ev.day, 12, 0, 0);
+        let days = (ts - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+        list.push({ ...ev, coord: window.getOrbitalData(days).meanArc, durationDays: ev.durationDays || 1 });
+    });
+    
+    if (window.Q_ACTIVE_EPHEMERIS && window.Q_ACTIVE_EPHEMERIS.year === year) {
+        list = list.concat(window.Q_ACTIVE_EPHEMERIS.data);
+    } else {
+        Object.keys(window.Q_REGISTRY.REL_DB).forEach(k => {
+            window.Q_REGISTRY.REL_DB[k].forEach(ev => {
+                list.push({ ...ev, durationDays: ev.durationDays || 1 });
+            });
+        });
+    }
+    
+    window.Q_REGISTRY.PYLONS.forEach(ev => list.push({ ...ev, durationDays: 1 }));
+    return list;
 };
 
 // --- GLOBAL LEXICON ---
@@ -113,7 +207,7 @@ window.Q_STATE = {
     hardware_hooks: { biometric_api: 'ACTIVE', iot_webhooks: 'ACTIVE' },
     capital_ledger: { fiat_api: 'STANDBY', resonance_tracker: 'ACTIVE' },
     metaphysical_layer: { 
-        swiss_ephemeris: 'STANDBY', 
+        swiss_ephemeris: 'ACTIVE', 
         patreon_gating: 'STANDBY', 
         access_tier: 0,
         natal_anchor: localStorage.getItem('q_natal_anchor') || 'NONE',
@@ -337,19 +431,10 @@ window.Q_KairosVoice = {
         }
     },
     processCommand: function(cmd) {
-        const normalized = cmd.toLowerCase().trim();
+        const normalized = cmd.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
 
-        // OPTIMIZED REGEX INTENT PARSER
-        const rxFlush = /\b(flush|close|dismiss|hide|clear|reset)\b/i;
-        const rxTelemetry = /\b(telemetry|data|scan|environmental)\b/i;
-        const rxElasticity = /\b(elasticity|bio|biological|heart rate|hrv)\b/i;
-        const rxPlanner = /\b(open planner|launch planner|omni planner|plan)\b/i;
-        const rxCommunal = /\b(communal|com vector|society|metaphysical)\b/i;
-        const rxMechanical = /\b(mechanical|mech vector|physics|core)\b/i;
-        const rxChrono = /\b(chrono|main face|home|index)\b/i;
-
-        if (rxFlush.test(normalized)) {
-            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_FLUSH');
+        if (normalized.includes("close") || normalized.includes("dismiss") || normalized.includes("hide")) {
+            window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_CLOSE');
             if (window.Q_ModalEngine) window.Q_ModalEngine.close();
             if (window.Q_IntegrationHub) window.Q_IntegrationHub.closeHub();
             if (window.Q_OmniPlanner) window.Q_OmniPlanner.closePlanner();
@@ -358,13 +443,28 @@ window.Q_KairosVoice = {
             return;
         }
 
-        if (rxElasticity.test(normalized)) { window.location.href = "BIOVECHUD.html"; return; }
-        if (rxTelemetry.test(normalized)) { window.location.href = "ENVVECHUD.html"; return; }
-        if (rxCommunal.test(normalized)) { window.location.href = "COMVECHUD.html"; return; }
-        if (rxMechanical.test(normalized)) { window.location.href = "MECVECHUD.html"; return; }
-        if (rxChrono.test(normalized)) { window.location.href = "index.html"; return; }
+        if (normalized.includes("biological") || normalized.includes("bio vector")) {
+            window.location.href = "BIOVECHUD.html";
+            return;
+        }
+        if (normalized.includes("communal") || normalized.includes("com vector")) {
+            window.location.href = "COMVECHUD.html";
+            return;
+        }
+        if (normalized.includes("environmental") || normalized.includes("env vector")) {
+            window.location.href = "ENVVECHUD.html";
+            return;
+        }
+        if (normalized.includes("mechanical") || normalized.includes("mech vector")) {
+            window.location.href = "MECVECHUD.html";
+            return;
+        }
+        if (normalized.includes("chrono") || normalized.includes("main face") || normalized.includes("home")) {
+            window.location.href = "index.html";
+            return;
+        }
 
-        if (rxPlanner.test(normalized)) {
+        if (normalized.includes("open planner") || normalized.includes("launch planner") || normalized.includes("omni planner")) {
             window.Q_LOG('INFO', 'INTERFACE', 'VOICE_INTENT_PLANNER_OPEN');
             if (window.Q_OmniPlanner && window.Q_OmniPlanner.openPlanner) {
                 window.Q_OmniPlanner.openPlanner();
@@ -373,18 +473,34 @@ window.Q_KairosVoice = {
             return;
         }
         
-        // PLANNER-SPECIFIC STATE MODIFICATIONS
         if (sessionStorage.getItem('Q_PLANNER_ACTIVE') === 'true') {
-            if (/\b(view cycle|annual view)\b/i.test(normalized)) window.Q_OmniPlanner.setViewMode('cycle');
-            else if (/\b(view quad|quadrant view)\b/i.test(normalized)) window.Q_OmniPlanner.setViewMode('quad');
-            else if (/\b(view sect|sector view|month view)\b/i.test(normalized)) window.Q_OmniPlanner.setViewMode('sect');
-            else if (/\b(view day|daily view)\b/i.test(normalized)) window.Q_OmniPlanner.setViewMode('day');
-            else if (/\b(next day|step forward)\b/i.test(normalized)) window.Q_OmniPlanner.stepDay(1);
-            else if (/\b(previous day|step back)\b/i.test(normalized)) window.Q_OmniPlanner.stepDay(-1);
-            else if (/\b(next sector|next month)\b/i.test(normalized)) window.Q_OmniPlanner.stepSector(1);
-            else if (/\b(previous sector|previous month)\b/i.test(normalized)) window.Q_OmniPlanner.stepSector(-1);
-            else if (/\b(toggle format|switch format)\b/i.test(normalized)) window.Q_OmniPlanner.toggleFormat();
-            
+            if (normalized.includes("view cycle") || normalized.includes("annual view")) {
+                window.Q_OmniPlanner.setViewMode('cycle');
+            }
+            else if (normalized.includes("view quad") || normalized.includes("quadrant view")) {
+                window.Q_OmniPlanner.setViewMode('quad');
+            }
+            else if (normalized.includes("view sect") || normalized.includes("sector view") || normalized.includes("month view")) {
+                window.Q_OmniPlanner.setViewMode('sect');
+            }
+            else if (normalized.includes("view day") || normalized.includes("daily view")) {
+                window.Q_OmniPlanner.setViewMode('day');
+            }
+            else if (normalized.includes("next day") || normalized.includes("step forward")) {
+                window.Q_OmniPlanner.stepDay(1);
+            }
+            else if (normalized.includes("previous day") || normalized.includes("step back")) {
+                window.Q_OmniPlanner.stepDay(-1);
+            }
+            else if (normalized.includes("next sector") || normalized.includes("next month")) {
+                window.Q_OmniPlanner.stepSector(1);
+            }
+            else if (normalized.includes("previous sector") || normalized.includes("previous month")) {
+                window.Q_OmniPlanner.stepSector(-1);
+            }
+            else if (normalized.includes("toggle format") || normalized.includes("switch format")) {
+                window.Q_OmniPlanner.toggleFormat();
+            }
             window.Q_MobileBridge.pulse('LIGHT');
             return;
         }
@@ -734,7 +850,6 @@ window.Q_PHASE_III = {
 window.Q_EVENT_BUFFER = [];
 window.PYLON_ALPHA_DYNAMIC = null;
 window.EPHEMERIS_LIVE = false;
-window.EPHEMERIS_DATA = null;
 
 window.syncGeoLocation = async function() {
     if (window.Q_STATE.location.synced) return;
@@ -761,7 +876,6 @@ window.syncGeoLocation = async function() {
     } catch (e) {
         window.Q_LOG('WARN', 'CORE', 'GLOBAL_GEO_FAILED', { using_fallback: true, error: e.message });
         
-        // Regional Baseline Fallback Logic
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
@@ -865,30 +979,13 @@ window.fetchJPLTelemetry = async function() {
         const startStr = fmt(tDate);
         const stopStr = fmt(eDate);
 
-        // API HOOK: JPL Horizons directly pulling Live X, Y, Z vector telemetry mapped to the Solar System Barycenter
-        const response = await fetch(`https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND='399'&OBJ_DATA='YES'&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'&CENTER='@0'&START_TIME='${startStr}'&STOP_TIME='${stopStr}'&STEP_SIZE='1 d'&OUT_UNITS='AU-D'`);
-        
+        const response = await fetch(`https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27399%27&OBJ_DATA=%27YES%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27500@10%27&START_TIME=%27${startStr}%27&STOP_TIME=%27${stopStr}%27&STEP_SIZE=%271%20d%27&QUANTITIES=%2718%27`);
         if (!response.ok) throw new Error('Telemetry endpoint unreachable or rate-limited.');
         const data = await response.json();
         
         if (data && data.result) {
             window.EPHEMERIS_LIVE = true;
-            
-            const lines = data.result.split('\n');
-            let x=0, y=0, z=0;
-            for(let i=0; i<lines.length; i++) {
-                if(lines[i].includes('X =')) {
-                    let matchX = lines[i].match(/X =\s*([-\d.E+]+)/);
-                    let matchY = lines[i].match(/Y =\s*([-\d.E+]+)/);
-                    let matchZ = lines[i].match(/Z =\s*([-\d.E+]+)/);
-                    if(matchX) x = parseFloat(matchX[1]);
-                    if(matchY) y = parseFloat(matchY[1]);
-                    if(matchZ) z = parseFloat(matchZ[1]);
-                    break;
-                }
-            }
-            window.EPHEMERIS_DATA = { x, y, z };
-            window.Q_LOG('INFO', 'CORE', 'JPL_BARYCENTRIC_TELEMETRY_SYNCED', { x, y, z, source: 'NASA JPL HORIZONS' });
+            window.Q_LOG('INFO', 'CORE', 'JPL_TELEMETRY_SYNCED', { source: 'NASA JPL HORIZONS', window: `${startStr} to ${stopStr}` });
         } else {
             throw new Error("Invalid telemetry payload.");
         }
@@ -903,21 +1000,11 @@ window.getOrbitalData = function(daysElapsed) {
     let meanArc = (daysElapsed * meanVelocity) % 360;
     if (meanArc < 0) meanArc += 360;
 
-    let trueArc;
-    
-    // PRIMARY OBSERVATION ENGINE: Live Barycentric Data overrides historical simulation variables
-    if (window.EPHEMERIS_LIVE && window.EPHEMERIS_DATA && daysElapsed >= 0 && daysElapsed < 1) {
-         let rad = Math.atan2(window.EPHEMERIS_DATA.y, window.EPHEMERIS_DATA.x);
-         let deg = rad * (180 / Math.PI);
-         trueArc = (deg + 360) % 360;
-    } else {
-        // SECONDARY FAILOVER: Baseline Keplerian Simulation
-        const meanAnomaly = (daysElapsed / 365.24219) * Math.PI * 2;
-        const e = 0.0167; 
-        const trueAnomaly = meanAnomaly + (2 * e * Math.sin(meanAnomaly)) + (1.25 * e * e * Math.sin(2 * meanAnomaly));
-        trueArc = (trueAnomaly * (180 / Math.PI)) % 360;
-        if (trueArc < 0) trueArc += 360;
-    }
+    const meanAnomaly = (daysElapsed / 365.24219) * Math.PI * 2;
+    const e = 0.0167; 
+    const trueAnomaly = meanAnomaly + (2 * e * Math.sin(meanAnomaly)) + (1.25 * e * e * Math.sin(2 * meanAnomaly));
+    let trueArc = (trueAnomaly * (180 / Math.PI)) % 360;
+    if (trueArc < 0) trueArc += 360;
 
     let delta = trueArc - meanArc;
     if (delta > 180) delta -= 360;
@@ -971,7 +1058,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     if (window.Q_Auth && window.Q_Auth.handleAuthRedirect) {
         await window.Q_Auth.handleAuthRedirect();
-        
         if (window.Q_STATE.persistence.auth_status === 'SOVEREIGN_AUTHENTICATED') {
             await window.syncGeoLocation();
         }
@@ -979,6 +1065,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     await window.fetchCloudState();
     await window.calculatePylonAlpha();
+
+    // Trigger Initial Ephemeris Bridge Sync
+    const initYear = new Date(window.PYLON_ALPHA_DYNAMIC || Date.now()).getUTCFullYear();
+    if (window.Q_EphemerisBridge) window.Q_EphemerisBridge.syncYear(initYear);
 
     if (window.Q_KairosVoice) window.Q_KairosVoice.init(); 
     if (window.Q_MasterLoop) window.Q_MasterLoop.start(); 

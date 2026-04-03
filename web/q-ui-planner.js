@@ -1,13 +1,12 @@
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
-// PROTOCOL: Pragmatic Interoperability, Predictive Phase Bordering, & Civil Tension Scoring
+// PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
 
 // --- DUAL-STATE ASYMMETRICAL GEAR ENGINE ---
 
 // Initialize Absolute Block Array (365 Total Blocks per Cycle)
 (function initQBlocks() {
     window.Q_BLOCK_DEFS = [];
-    // Alpha is pure ignition
     window.Q_BLOCK_DEFS.push({ type: 'PYLON', name: 'ALPHA PYLON', dur: window.Q_GEAR_CONSTANTS.ALPHA, quad: 1, sect: 1 });
     
     function buildDays(q, s) {
@@ -24,7 +23,6 @@
     window.Q_BLOCK_DEFS.push({ type: 'PYLON', name: 'DELTA PYLON', dur: window.Q_GEAR_CONSTANTS.DELTA, quad: 3, sect: 3 });
     
     buildDays(4, 1); buildDays(4, 2); buildDays(4, 3);
-    // Epsilon integrates the final Terminal Oddity buffer
     window.Q_BLOCK_DEFS.push({ type: 'PYLON', name: 'EPSILON PYLON', dur: window.Q_GEAR_CONSTANTS.EPSILON, quad: 4, sect: 3 });
     
     window.Q_BLOCKS = [];
@@ -34,7 +32,6 @@
         acc += b.dur;
     });
 
-    // Terminal Resolution: Bridge Quadrant 4 (Epsilon) back to Alpha ignition without a lost fraction
     window.Q_YEAR_MS = acc;
 })();
 
@@ -144,7 +141,7 @@ window.Q_ModalEngine = {
 // --- OMNI-PLANNER MODULE ---
 window.Q_OmniPlanner = {
     viewState: 'closed',
-    plannerMacroMode: 'sect', // 'sect', 'quad', 'cycle'
+    plannerMacroMode: 'sect',
     plannerBase: Date.now(),
     selectedDate: null,
     selectedPylon: null,
@@ -338,9 +335,6 @@ window.Q_OmniPlanner = {
 
             .planner-context { background: rgba(0,0,0,0.5); border: 1px solid var(--theme-dim); padding: 15px; margin: 15px 20px 10px 20px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; }
             
-            .open-ledger-btn { background: var(--theme-main, #ff003c); color: #000; font-family: 'Orbitron'; font-weight: 900; padding: 6px 12px; font-size: 0.7rem; white-space: nowrap; border: none; border-radius: 4px; cursor: pointer; letter-spacing: 1px; box-shadow: 0 0 10px var(--theme-dim); transition: 0.3s; }
-            .open-ledger-btn:hover { transform: scale(1.03); }
-
             .back-btn, .close-planner-btn { background: transparent; border: 1px solid #fff; color: #fff; padding: 6px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; border-radius: 4px; transition: 0.3s; font-weight: bold; letter-spacing: 1px; }
             .back-btn:hover, .close-planner-btn:hover { background: rgba(255,255,255,0.1); }
             .close-planner-btn { border-color: #ff3333; color: #ff3333; }
@@ -393,7 +387,7 @@ window.Q_OmniPlanner = {
             .header-controls-row { display: contents; } 
             #action-btn-container { order: 4; display: grid !important; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 6px; width: 100%; margin: 0; }
             
-            .back-btn, .open-ledger-btn, .close-planner-btn { padding: 12px 0; font-size: 0.6rem; margin: 0; text-align: center; display: flex; justify-content: center; align-items: center; border-radius: 4px; }
+            .back-btn, .close-planner-btn { padding: 12px 0; font-size: 0.6rem; margin: 0; text-align: center; display: flex; justify-content: center; align-items: center; border-radius: 4px; }
 
             .q-cal-jump { display: none !important; } 
             .vector-context-mobile-hide { display: none !important; }
@@ -464,7 +458,7 @@ window.Q_OmniPlanner = {
     closePlanner: function() { 
         this.viewState = 'closed';
         sessionStorage.setItem('Q_PLANNER_ACTIVE', 'false');
-        document.body.classList.remove('planner-quad-active'); // Revert ribbon
+        document.body.classList.remove('planner-quad-active'); 
         document.getElementById('unified-omni-planner').classList.remove('active'); 
     },
 
@@ -493,25 +487,6 @@ window.Q_OmniPlanner = {
         this.refreshView(); 
     },
 
-    goBack: function() {
-        if(this.viewState === 'hour' || this.viewState === 'pylon-hour') { this.viewState = this.viewState === 'hour' ? 'day' : 'pylon'; }
-        else if(this.viewState === 'day' || this.viewState === 'pylon') { this.viewState = 'planner'; }
-        sessionStorage.setItem('Q_PLANNER_STATE', this.viewState);
-        this.refreshView();
-    },
-    
-    openLedger: function() {
-        let activeBlock = window.getQBlockByTime(this.selectedDate);
-        if (!this.isLegacy && activeBlock && activeBlock.type === 'PYLON') {
-            this.selectedPylon = { name: activeBlock.name, startMs: this.selectedDate, dur: activeBlock.dur };
-            this.viewState = 'pylon';
-        } else {
-            this.viewState = 'day';
-        }
-        sessionStorage.setItem('Q_PLANNER_STATE', this.viewState);
-        this.refreshView();
-    },
-
     renderContextBanner: function() {
         const wrapper = document.getElementById('planner-context-wrapper');
         if (this.viewState !== 'planner' || !this.selectedDate) {
@@ -525,8 +500,7 @@ window.Q_OmniPlanner = {
         let cTitle = ""; let cDesc = "";
         
         if (this.isLegacy) {
-            cTitle = "";
-            cDesc = "";
+            cTitle = ""; cDesc = "";
         } else {
             let activeBlock = window.getQBlockByTime(this.selectedDate);
             if(activeBlock.type === 'PYLON') {
@@ -534,16 +508,12 @@ window.Q_OmniPlanner = {
                 cDesc = `SETTLEMENT NODE: "CELESTIAL DAY". Actively resolving accumulated physical drift. Q-Delta interpolating to 0.0000° across ${(activeBlock.dur / 3600000).toFixed(4)} hours.`;
                 contextDiv.style.borderColor = 'var(--gold)';
             } else {
-                cTitle = "";
                 let daysElapsed = (this.selectedDate - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
                 let oData = window.getOrbitalData(daysElapsed);
                 let driftDeg = oData.trueArc - oData.meanArc;
-                
                 let driftColor = driftDeg > 0 ? '#ff003c' : '#00f0ff';
                 let driftState = driftDeg > 0 ? "AHEAD" : "BEHIND";
-                let driftStr = driftDeg > 0 ? `+${driftDeg.toFixed(4)}` : driftDeg.toFixed(4);
-                
-                cDesc = `<span style="color:var(--gold);">DRIFT:</span> TRUE ELLIPSE ${driftState} <span style="color:${driftColor};">| ${driftStr}°</span>`;
+                cDesc = `<span style="color:var(--gold);">DRIFT:</span> TRUE ELLIPSE ${driftState} <span style="color:${driftColor};">| ${(driftDeg>0?'+':'')}${driftDeg.toFixed(4)}°</span>`;
             }
         }
         
@@ -558,9 +528,7 @@ window.Q_OmniPlanner = {
         
         contextDiv.innerHTML = htmlStr;
         wrapper.innerHTML = '';
-        if (cTitle || cDesc) {
-            wrapper.appendChild(contextDiv);
-        }
+        if (cTitle || cDesc) wrapper.appendChild(contextDiv);
     },
 
     refreshView: function() {
@@ -577,7 +545,6 @@ window.Q_OmniPlanner = {
             btnFwd.innerHTML = this.isLegacy ? "MONTH &#187;" : "SECT &#187;";
         }
 
-        // Broadcast state to body for ribbon interception
         if (!this.isLegacy && this.viewState !== 'closed') {
             document.body.classList.add('planner-quad-active');
         } else {
@@ -606,21 +573,20 @@ window.Q_OmniPlanner = {
         fmtBtn.className = 'back-btn'; 
         fmtBtn.innerText = this.isLegacy ? "QUAD" : "LEGACY";
         fmtBtn.onclick = () => this.toggleFormat(); 
-        
-        const schedBtn = document.createElement('button');
-        schedBtn.className = 'open-ledger-btn';
-        schedBtn.innerText = 'LEDGER';
-        schedBtn.onclick = () => this.openLedger();
 
         if (actionContainer) {
             actionContainer.appendChild(fmtBtn);
-            actionContainer.appendChild(schedBtn);
             
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
                 hardBackBtn.className = 'back-btn';
                 hardBackBtn.innerText = 'BACK';
-                hardBackBtn.onclick = () => this.goBack();
+                hardBackBtn.onclick = () => {
+                    if(this.viewState === 'hour' || this.viewState === 'pylon-hour') { this.viewState = this.viewState === 'hour' ? 'day' : 'pylon'; }
+                    else if(this.viewState === 'day' || this.viewState === 'pylon') { this.viewState = 'planner'; }
+                    sessionStorage.setItem('Q_PLANNER_STATE', this.viewState);
+                    this.refreshView();
+                };
                 actionContainer.appendChild(hardBackBtn);
             }
             
@@ -634,23 +600,42 @@ window.Q_OmniPlanner = {
         this.renderContextBanner();
 
         if(this.viewState === 'planner') { 
-            if (this.plannerMacroMode === 'sect') {
-                this.renderSector(body, title); 
-            } else if (this.plannerMacroMode === 'quad') {
-                this.renderQuad(body, title);
-            } else {
-                this.renderCycle(body, title);
-            }
+            if (this.plannerMacroMode === 'sect') this.renderSector(body, title); 
+            else if (this.plannerMacroMode === 'quad') this.renderQuad(body, title);
+            else this.renderCycle(body, title);
         } 
-        else if(this.viewState === 'day') { 
-            this.renderDay(body, title); 
-        }
-        else if (this.viewState === 'pylon') {
-            this.renderPylon(body, title); 
-        }
-        else { 
-            this.renderHour(body, title); 
-        }
+        else if(this.viewState === 'day') this.renderDay(body, title); 
+        else if (this.viewState === 'pylon') this.renderPylon(body, title); 
+        else this.renderHour(body, title); 
+    },
+
+    injectHolidays: function(element, date) {
+        if (!window.PYLON_ALPHA_DYNAMIC || !window.getGlobalHolidays) return;
+        const year = date.getUTCFullYear();
+        const daysElapsed = (date.getTime() - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+        const o = window.getOrbitalData(daysElapsed);
+        const dayArc = o.meanArc;
+        
+        const allEvents = window.getGlobalHolidays(year);
+        const degreesPerDay = 360 / 365.24219;
+        
+        // STRICT PHASE BORDERING: Exact Multi-Day Span Injection
+        const matches = allEvents.filter(e => {
+            let diff = dayArc - e.coord; 
+            if (diff < -180) diff += 360;
+            if (diff > 180) diff -= 360;
+            
+            let durationDeg = (e.durationDays || 1) * degreesPerDay;
+            return (diff >= 0 && diff < durationDeg); 
+        });
+
+        matches.forEach(match => {
+            const tag = document.createElement('div');
+            tag.className = 's-tag';
+            tag.style.cssText = 'font-size:0.55rem; color:#F4D068; margin-top:6px; font-family:"JetBrains Mono"; font-weight:bold; text-shadow:0 0 5px rgba(0,0,0,0.8);';
+            tag.innerText = `${match.glyph || ''} ${match.name.toUpperCase()}`;
+            element.appendChild(tag);
+        });
     },
 
     renderSector: function(container, title) {
@@ -664,7 +649,7 @@ window.Q_OmniPlanner = {
 
         if (this.isLegacy) {
             const baseDate = new Date(this.plannerBase);
-            const year = baseDate.getFullYear(); const month = baseDate.getMonth(); const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+            const year = baseDate.getFullYear(); const month = baseDate.getMonth();
             matrix.style.gridTemplateColumns = 'repeat(7, 1fr)';
             const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
             days.forEach(d => { const h = document.createElement('div'); h.style.textAlign = 'center'; h.style.fontSize = '0.65rem'; h.style.color = '#aaa'; h.style.fontFamily = 'JetBrains Mono'; h.innerText = window.innerWidth <= 768 ? d[0] : d; matrix.appendChild(h); });
@@ -681,22 +666,16 @@ window.Q_OmniPlanner = {
                 d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:#fff; font-size: 1rem;">${i}</div>`;
                 this.injectHolidays(d, new Date(localTs));
 
-                d.onclick = () => { 
-                    this.selectedDate = localTs; 
-                    this.refreshView(); 
-                };
+                d.onclick = () => { this.selectedDate = localTs; this.setViewMode('day'); };
                 matrix.appendChild(d);
             }
         } else {
-            // STRICTLY 6 COLUMNS TO PREVENT HORIZONTAL SCROLL BLEED
             matrix.style.gridTemplateColumns = 'repeat(6, 1fr)'; 
-            
             let activeBlock = window.getQBlockByTime(this.plannerBase);
             if(!activeBlock) return;
             
             let aQuad = activeBlock.quad || 1;
             let aSect = activeBlock.sect || 1;
-            
             let cCycle = activeBlock.cycle;
             let d1Index = window.Q_BLOCKS.findIndex(b => b.type === 'DAY' && b.quad === aQuad && b.sect === aSect && b.day === 1);
             
@@ -704,7 +683,6 @@ window.Q_OmniPlanner = {
             if (aQuad === 1 && aSect === 1 && d1Index > 0 && window.Q_BLOCKS[d1Index - 1].type === 'PYLON') {
                 gridItems.push(window.Q_BLOCKS[d1Index - 1]);
             }
-            
             for(let i=0; i<30; i++) gridItems.push(window.Q_BLOCKS[d1Index + i]);
             
             let lastDayIdx = d1Index + 29;
@@ -721,22 +699,17 @@ window.Q_OmniPlanner = {
                     d.className = 'p-day pylon-block';
                     if (isToday) d.classList.add('status-today');
                     if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    
                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--gold, #F4D068); font-size:0.75rem;">${item.name}</div><div style="font-size:0.5rem; color:#aaa; margin-top:4px;">CELESTIAL DAY</div>`;
                 } else {
                     d.className = 'p-day';
                     if (isToday) d.classList.add('status-today');
                     if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
                     if (window.hasDataInDay(new Date(absStart))) d.classList.add('status-red');
-                    
                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--theme-main, #ff003c);">DAY ${item.day}</div>`;
                     this.injectHolidays(d, new Date(absStart));
                 }
                 
-                d.onclick = () => { 
-                    this.selectedDate = absStart; 
-                    this.refreshView(); 
-                };
+                d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                 matrix.appendChild(d);
             });
         }
@@ -748,8 +721,9 @@ window.Q_OmniPlanner = {
         const todayDateNum = new Date(nowMs).setHours(0,0,0,0);
         const selectedDateNum = new Date(this.selectedDate).setHours(0,0,0,0);
 
+        title.innerHTML = `<div class="cal-title-wrapper ${this.isLegacy ? 'show-legacy' : 'show-quad'}"><div class="title-leg">LEGACY OS: QUARTER VIEW</div><div class="title-divider">|</div><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">QUADRANT VIEW</span></div></div>`;
+        
         if (this.isLegacy) {
-            title.innerHTML = `<div class="cal-title-wrapper ${this.isLegacy ? 'show-legacy' : 'show-quad'}"><div class="title-leg">LEGACY OS: QUARTER VIEW</div><div class="title-divider">|</div><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">QUADRANT VIEW</span></div></div>`;
             const baseDate = new Date(this.plannerBase);
             const year = baseDate.getFullYear();
             const currentMonth = baseDate.getMonth();
@@ -769,7 +743,6 @@ window.Q_OmniPlanner = {
                 
                 const grid = document.createElement('div');
                 grid.className = 'mini-cal-grid';
-                
                 daysOfWeek.forEach(dayName => {
                     const header = document.createElement('div');
                     header.className = 'mini-day';
@@ -791,11 +764,9 @@ window.Q_OmniPlanner = {
                     d.className = 'mini-day'; 
                     d.innerText = i;
                     const localTs = new Date(year, m, i).getTime();
-                    
                     if(new Date(localTs).setHours(0,0,0,0) === todayDateNum) d.classList.add('status-today');
                     if(new Date(localTs).setHours(0,0,0,0) === selectedDateNum) d.classList.add('selected');
-                    
-                    d.onclick = () => { this.selectedDate = localTs; this.setViewMode('sect'); };
+                    d.onclick = () => { this.selectedDate = localTs; this.setViewMode('day'); };
                     grid.appendChild(d);
                 }
                 monthBox.appendChild(grid);
@@ -803,10 +774,8 @@ window.Q_OmniPlanner = {
             }
             container.appendChild(matrix);
         } else {
-            title.innerHTML = `<div class="cal-title-wrapper ${this.isLegacy ? 'show-legacy' : 'show-quad'}"><div class="title-leg">LEGACY OS: QUARTER VIEW</div><div class="title-divider">|</div><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">QUADRANT VIEW</span></div></div>`;
             let activeBlock = window.getQBlockByTime(this.plannerBase);
             if(!activeBlock) return;
-            
             let aQuad = activeBlock.quad || 1;
             let cCycle = activeBlock.cycle;
             const qColors = ['', '#00f0ff', '#a7ff83', '#F4D068', '#ff003c'];
@@ -828,30 +797,21 @@ window.Q_OmniPlanner = {
                 pb.className = 'macro-pylon-bar';
                 if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
                 pb.innerText = `${item.name} // CELESTIAL DAY // Q-DELTA RESET`;
-                pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('sect'); };
+                pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                 quadBox.appendChild(pb);
             }
             
             const sectorsWrapper = document.createElement('div');
-            sectorsWrapper.style.display = 'flex';
-            sectorsWrapper.style.flexWrap = 'wrap';
-            sectorsWrapper.style.gap = '15px';
-            sectorsWrapper.style.justifyContent = 'center';
+            sectorsWrapper.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center;';
             
             for(let s = 1; s <= 3; s++) {
                 const sectorBox = document.createElement('div');
                 sectorBox.className = 'macro-month-box';
                 sectorBox.style.borderColor = qColors[aQuad];
-                
-                const sectorTitle = document.createElement('div');
-                sectorTitle.className = 'macro-month-title';
-                sectorTitle.style.color = qColors[aQuad];
-                sectorTitle.innerText = `SECTOR ${s}`;
-                sectorBox.appendChild(sectorTitle);
+                sectorBox.innerHTML = `<div class="macro-month-title" style="color:${qColors[aQuad]}">SECTOR ${s}</div>`;
                 
                 const qGrid = document.createElement('div');
                 qGrid.className = 'q-sector-grid';
-                
                 for(let d=1; d<=6; d++) {
                     const header = document.createElement('div');
                     header.className = 'mini-day';
@@ -870,10 +830,9 @@ window.Q_OmniPlanner = {
                     const d = document.createElement('div'); 
                     d.className = 'mini-day'; 
                     d.innerText = item.day;
-                    
                     if(isToday) d.classList.add('status-today');
                     if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    d.onclick = () => { this.selectedDate = absStart; this.setViewMode('sect'); };
+                    d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                     qGrid.appendChild(d);
                 });
                 sectorBox.appendChild(qGrid);
@@ -889,7 +848,7 @@ window.Q_OmniPlanner = {
                 pb.className = 'macro-pylon-bar';
                 if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
                 pb.innerText = `${item.name} // CELESTIAL DAY // Q-DELTA RESET`;
-                pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('sect'); };
+                pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                 quadBox.appendChild(pb);
             }
             
@@ -922,7 +881,6 @@ window.Q_OmniPlanner = {
                 
                 const grid = document.createElement('div');
                 grid.className = 'mini-cal-grid';
-                
                 daysOfWeek.forEach(dayName => {
                     const header = document.createElement('div');
                     header.className = 'mini-day';
@@ -944,11 +902,9 @@ window.Q_OmniPlanner = {
                     d.className = 'mini-day'; 
                     d.innerText = i;
                     const localTs = new Date(year, m, i).getTime();
-                    
                     if(new Date(localTs).setHours(0,0,0,0) === todayDateNum) d.classList.add('status-today');
                     if(new Date(localTs).setHours(0,0,0,0) === selectedDateNum) d.classList.add('selected');
-                    
-                    d.onclick = () => { this.selectedDate = localTs; this.setViewMode('sect'); };
+                    d.onclick = () => { this.selectedDate = localTs; this.setViewMode('day'); };
                     grid.appendChild(d);
                 }
                 monthBox.appendChild(grid);
@@ -980,30 +936,21 @@ window.Q_OmniPlanner = {
                     pb.className = 'macro-pylon-bar';
                     if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
                     pb.innerText = `${item.name} // CELESTIAL DAY // Q-DELTA RESET`;
-                    pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('sect'); };
+                    pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                     quadBox.appendChild(pb);
                 }
                 
                 const sectorsWrapper = document.createElement('div');
-                sectorsWrapper.style.display = 'flex';
-                sectorsWrapper.style.flexWrap = 'wrap';
-                sectorsWrapper.style.gap = '15px';
-                sectorsWrapper.style.justifyContent = 'center';
+                sectorsWrapper.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center;';
                 
                 for(let s = 1; s <= 3; s++) {
                     const sectorBox = document.createElement('div');
                     sectorBox.className = 'macro-month-box';
                     sectorBox.style.borderColor = qColors[q];
-                    
-                    const sectorTitle = document.createElement('div');
-                    sectorTitle.className = 'macro-month-title';
-                    sectorTitle.style.color = qColors[q];
-                    sectorTitle.innerText = `SECTOR ${s}`;
-                    sectorBox.appendChild(sectorTitle);
+                    sectorBox.innerHTML = `<div class="macro-month-title" style="color:${qColors[q]}">SECTOR ${s}</div>`;
                     
                     const qGrid = document.createElement('div');
                     qGrid.className = 'q-sector-grid';
-                    
                     for(let d=1; d<=6; d++) {
                         const header = document.createElement('div');
                         header.className = 'mini-day';
@@ -1022,10 +969,9 @@ window.Q_OmniPlanner = {
                         const d = document.createElement('div'); 
                         d.className = 'mini-day'; 
                         d.innerText = item.day;
-                        
                         if(isToday) d.classList.add('status-today');
                         if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                        d.onclick = () => { this.selectedDate = absStart; this.setViewMode('sect'); };
+                        d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                         qGrid.appendChild(d);
                     });
                     sectorBox.appendChild(qGrid);
@@ -1041,31 +987,12 @@ window.Q_OmniPlanner = {
                     pb.className = 'macro-pylon-bar';
                     if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
                     pb.innerText = `${item.name} // CELESTIAL DAY // Q-DELTA RESET`;
-                    pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('sect'); };
+                    pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                     quadBox.appendChild(pb);
                 }
-                
                 matrix.appendChild(quadBox);
             }
             container.appendChild(matrix);
-        }
-    },
-
-    injectHolidays: function(element, date) {
-        if (!window.Q_REGISTRY) return;
-        const daysElapsed = (date.getTime() - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
-        const o = window.getOrbitalData(daysElapsed);
-        const arc = o.meanArc;
-        let allEvents = [...window.Q_REGISTRY.PYLONS];
-        Object.keys(window.Q_REGISTRY.REL_DB).forEach(k => { allEvents = allEvents.concat(window.Q_REGISTRY.REL_DB[k]); });
-        
-        const match = allEvents.find(e => Math.abs(e.coord - arc) < 0.8);
-        if (match) {
-            const tag = document.createElement('div');
-            tag.className = 's-tag';
-            tag.style.fontSize = '0.55rem'; tag.style.color = '#c5b358'; tag.style.marginTop = '6px'; tag.style.fontFamily = 'JetBrains Mono';
-            tag.innerText = match.glyph + " " + match.name.toUpperCase();
-            element.appendChild(tag);
         }
     },
 
@@ -1087,8 +1014,7 @@ window.Q_OmniPlanner = {
             const data = window.qData[key] || { text: "" };
             
             let activeMs = ((blockMs % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
-            let cycleDurMs = cycleDuration * 60000;
-            let cyclePosFloat = (activeMs % cycleDurMs) / cycleDurMs;
+            let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
             let currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
             
             dailyBlocksData.push({ hour: h, text: data.text, bioState: currentBioState, key: key, ms: blockMs });
@@ -1213,10 +1139,8 @@ window.Q_OmniPlanner = {
             const diff = (targetMs - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY; 
             const orbital = window.getOrbitalData(diff);
             
-            // Precise Bio-State tinting for the exact minute block
             let activeMs = ((targetMs % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
-            let cycleDurMs = cycleDuration * 60000;
-            let cyclePosFloat = (activeMs % cycleDurMs) / cycleDurMs;
+            let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
             let currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
             
             const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');

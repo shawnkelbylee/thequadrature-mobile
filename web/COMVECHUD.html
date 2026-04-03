@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // COMMUNAL VECTOR</title>
-    <script src="q-ui-global.js?v=16.4"></script>
-    <script src="q-core.js?v=16.4"></script>
-    <script src="q-ui-planner.js?v=16.4"></script>
-    <script src="q-hub.js?v=16.4"></script>
+    <script src="q-ui-global.js?v=16.2"></script>
+    <script src="q-core.js?v=16.2"></script>
+    <script src="q-ui-planner.js?v=16.2"></script>
+    <script src="q-hub.js?v=16.2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
@@ -99,8 +99,9 @@
         .node-bud { color: #f4c430; border-color: rgba(244,196,48,0.3); box-shadow: inset 0 0 10px rgba(244,196,48,0.2); }
         .node-tao { color: #ffffff; border-color: rgba(255,255,255,0.3); box-shadow: inset 0 0 10px rgba(255,255,255,0.2); }
         .node-hol { color: #ff66b2; border-color: rgba(255,102,178,0.3); box-shadow: inset 0 0 10px rgba(255,102,178,0.2); }
+        .node-sys { color: #00f0ff; border-color: rgba(0,240,255,0.3); box-shadow: inset 0 0 10px rgba(0,240,255,0.2); }
+        .node-cluster { color: #000; background: var(--gold-bright); border-color: var(--gold-bright); box-shadow: 0 0 15px var(--gold-bright); font-weight: 900; font-family:'JetBrains Mono'; }
         .node-pyl { color: var(--gold-bright); border-color: var(--gold-bright); box-shadow: inset 0 0 10px var(--gold-dim); font-size: 1rem; z-index: 32; }
-        .node-sys { color: #00f0ff; border-color: rgba(0,240,255,0.3); box-shadow: inset 0 0 10px rgba(0,240,255,0.2); font-weight: bold; }
 
         .event-label { position: absolute; font-family: 'JetBrains Mono'; font-size: 0.6rem; width: auto; white-space: nowrap; text-align: center; margin-top: 25px; transition: 0.3s; opacity: 0; font-weight: 700; color: var(--platinum); text-shadow: 0 0 8px #000, 0 0 15px var(--brass); background: rgba(0,0,0,0.8); border: 1px solid rgba(255,215,0,0.3); padding: 4px 8px; border-radius: 4px; pointer-events: none; z-index: 50; }
         .event-node:hover { transform: scale(1.6); border-color: #fff; box-shadow: 0 0 25px #fff; z-index: 60; }
@@ -125,34 +126,34 @@
     <div class="star-container" id="stars"></div>
 
     <div class="scroll-block tl telemetry-node" id="btn-rel" onclick="setMode('rel')" ontouchstart="setMode('rel')">
-        <div class="s-head">GLOBAL OBSERVANCES</div>
+        <div class="s-head">RELIGIOUS OVERLAY</div>
         <div class="s-data" id="data-rel">
             <div style="display:flex; justify-content:space-between;"><span>SUB-SET:</span> <span class="s-highlight" id="rel-active">MULTI-FAITH</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>NEXT (TRUE ARC):</span> <span id="rel-next">--</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>NEXT:</span> <span id="rel-next">--</span></div>
         </div>
         <div class="opt-btn" onclick="openOptions(event, 'rel')" ontouchstart="event.stopPropagation(); openOptions(event, 'rel')">[OPT]</div>
     </div>
 
     <div class="scroll-block tr mode-active telemetry-node" id="btn-zod" onclick="setMode('zod')" ontouchstart="setMode('zod')">
-        <div class="s-head">ASTROPHYSICAL ALIGNMENT</div>
+        <div class="s-head">ZODIACAL TRANSIT</div>
         <div class="s-data" id="data-zod">
-            <div style="display:flex; justify-content:space-between;"><span>NATAL ANCHOR:</span> <span class="s-highlight" id="zod-house">--</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>TRUE ASPECT:</span> <span id="zod-phase">--</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>HOUSE:</span> <span class="s-highlight" id="zod-house">--</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>PHASE:</span> <span id="zod-phase">--</span></div>
         </div>
         <div class="opt-btn" onclick="openOptions(event, 'zod')" ontouchstart="event.stopPropagation(); openOptions(event, 'zod')">[OPT]</div>
     </div>
 
     <div class="scroll-block bl telemetry-node" id="btn-civ" onclick="setMode('civ')" ontouchstart="setMode('civ')">
-        <div class="s-head">SOVEREIGN MICRO-LEDGER</div>
+        <div class="s-head">CIVIL ANCHOR</div>
         <div class="s-data" id="data-civ">
-            <div style="display:flex; justify-content:space-between;"><span>CHECKPOINT:</span> <span class="s-highlight" id="civ-active">90° FISCAL</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>NEXT EVENT:</span> <span id="civ-next">--</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>LOCALE:</span> <span class="s-highlight" id="civ-active">US (STATIC)</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>NEXT:</span> <span id="civ-next">--</span></div>
         </div>
         <div class="opt-btn" onclick="openOptions(event, 'civ')" ontouchstart="event.stopPropagation(); openOptions(event, 'civ')">[OPT]</div>
     </div>
 
-    <div class="scroll-block br telemetry-node" id="btn-int" onclick="openSovereignDiary(event)" ontouchstart="openSovereignDiary(event)">
-        <div class="s-head">SOLAR SEASONS (JIÉQÌ)</div>
+    <div class="scroll-block br telemetry-node" id="btn-int" onclick="setMode('int')" ontouchstart="setMode('int')">
+        <div class="s-head">INTROSPECTION</div>
         <div class="s-data" id="data-int">
             <div style="display:flex; justify-content:space-between;"><span>JIÉQÌ:</span> <span class="s-highlight" id="int-term">--</span></div>
             <div style="display:flex; justify-content:space-between;"><span>GROWTH ARC:</span> <span id="int-pct">--%</span></div>
@@ -191,16 +192,8 @@
         let activePylons = true;
         let activeSys = true;
         
-        let CIV_DB = [];
-        let HOL_DB = [];
         let ISL_DB = [];
-        let SYS_DB = [ 
-            { name: "Q1 Fiscal Ledger (90°)", coord: 90.0, type: 'node-sys', glyph: '$' },
-            { name: "Q2 Fiscal Ledger (180°)", coord: 180.0, type: 'node-sys', glyph: '$' },
-            { name: "Q3 Fiscal Ledger (270°)", coord: 270.0, type: 'node-sys', glyph: '$' },
-            { name: "Q4 Fiscal Ledger (360°)", coord: 360.0, type: 'node-sys', glyph: '$' },
-            { name: "Tax Proximity (US)", coord: 113.4, type: 'node-sys', glyph: '¢' } 
-        ];
+        let SYS_DB = [ { name: "Tax Day (US)", coord: 113.4, type: 'node-sys', glyph: '$' } ];
         
         function setMode(mode) {
             currentMode = mode;
@@ -213,22 +206,6 @@
             if(type === 'pyl') { activePylons = !activePylons; btn.classList.toggle('active', activePylons); }
             if(type === 'sys') { activeSys = !activeSys; btn.classList.toggle('active', activeSys); }
             renderDynamicRing();
-        }
-        
-        function getNthDay(year, month, dayOfWeek, n) {
-            let d = new Date(Date.UTC(year, month, 1, 12, 0, 0));
-            let day = d.getUTCDay();
-            let diff = (dayOfWeek - day + 7) % 7;
-            d.setUTCDate(1 + diff + (n - 1) * 7);
-            return d.getTime();
-        }
-        
-        function getLastDay(year, month, dayOfWeek) {
-            let d = new Date(Date.UTC(year, month + 1, 0, 12, 0, 0));
-            let day = d.getUTCDay();
-            let diff = (day - dayOfWeek + 7) % 7;
-            d.setUTCDate(d.getUTCDate() - diff);
-            return d.getTime();
         }
 
         function recalculateDynamicHolidays(year) {
@@ -245,80 +222,97 @@
                 { name: "Eid al-Fitr", time: fitrTime, type: 'node-isl', glyph: '☪' },
                 { name: "Eid al-Adha", time: adhaTime, type: 'node-isl', glyph: '☪' }
             ];
-            
-            CIV_DB = [
-                { name: "New Year", time: Date.UTC(year, 0, 1, 12, 0, 0), type: 'node-civ', glyph: '🏛' },
-                { name: "Memorial Day", time: getLastDay(year, 4, 1), type: 'node-civ', glyph: '⚑' },
-                { name: "Independence Day", time: Date.UTC(year, 6, 4, 12, 0, 0), type: 'node-civ', glyph: '✦' },
-                { name: "Labor Day", time: getNthDay(year, 8, 1, 1), type: 'node-civ', glyph: '⚒' },
-                { name: "Thanksgiving", time: getNthDay(year, 10, 4, 4), type: 'node-civ', glyph: '❖' }
-            ];
-            
-            HOL_DB = [
-                { name: "Valentine's Day", time: Date.UTC(year, 1, 14, 12, 0, 0), type: 'node-hol', glyph: '💝' },
-                { name: "St. Patrick's Day", time: Date.UTC(year, 2, 17, 12, 0, 0), type: 'node-hol', glyph: '☘' },
-                { name: "April Fools", time: Date.UTC(year, 3, 1, 12, 0, 0), type: 'node-hol', glyph: '🃏' },
-                { name: "Earth Day", time: Date.UTC(year, 3, 22, 12, 0, 0), type: 'node-hol', glyph: '🌍' },
-                { name: "Cinco de Mayo", time: Date.UTC(year, 4, 5, 12, 0, 0), type: 'node-hol', glyph: '🌮' },
-                { name: "Halloween", time: Date.UTC(year, 9, 31, 12, 0, 0), type: 'node-hol', glyph: '🎃' }
-            ];
 
-            [CIV_DB, HOL_DB, ISL_DB].forEach(db => {
-                db.forEach(ev => {
-                    let diff = ev.time - window.PYLON_ALPHA_DYNAMIC;
-                    let days = diff / window.MS_DAY;
-                    let qData = window.getOrbitalData(days);
-                    ev.coord = qData.trueArc; // Purged Mean Circle, now accurately reflecting True Ellipse
-                });
+            ISL_DB.forEach(ev => {
+                let diff = ev.time - window.PYLON_ALPHA_DYNAMIC;
+                let days = diff / window.MS_DAY;
+                ev.coord = window.getOrbitalData(days).meanArc;
             });
         }
 
-        function applyFanning(nodes, minGap = 3.5) {
+        function applyFanning(nodes) {
+            let isMobile = window.innerWidth <= 768;
+            let windowSize = isMobile ? 5.0 : 3.5; 
             let list = nodes.map(n => ({...n, renderCoord: n.coord}));
             list.sort((a,b) => a.coord - b.coord);
+            
             let clusters = []; let currentCluster = [];
-
             for(let i=0; i<list.length; i++) {
-                if(currentCluster.length === 0) { currentCluster.push(list[i]); } 
+                if(currentCluster.length === 0) currentCluster.push(list[i]);
                 else {
-                    let prev = currentCluster[currentCluster.length-1];
-                    let diff = list[i].coord - prev.coord;
-                    if(diff < minGap) { currentCluster.push(list[i]); } 
+                    let diff = list[i].coord - currentCluster[currentCluster.length-1].coord;
+                    if(diff < windowSize) currentCluster.push(list[i]);
                     else { clusters.push(currentCluster); currentCluster = [list[i]]; }
                 }
             }
             if(currentCluster.length > 0) clusters.push(currentCluster);
 
-            if (clusters.length > 1) {
-                let first = clusters[0]; let last = clusters[clusters.length-1];
-                let diff = (first[0].coord + 360) - last[last.length-1].coord;
-                if (diff < minGap) { clusters[0] = last.concat(first); clusters.pop(); }
-            }
-
-            clusters.forEach(cluster => {
-                if(cluster.length > 1) {
+            let result = [];
+            clusters.forEach(c => {
+                if(c.length > 1 && isMobile) {
+                    result.push({
+                        isCluster: true,
+                        coord: c[0].coord,
+                        renderCoord: c[0].coord,
+                        events: c,
+                        type: 'node-cluster',
+                        glyph: c.length,
+                        name: 'CONCURRENT EVENTS'
+                    });
+                } else if (c.length > 1) {
                     let sines = 0, cosines = 0;
-                    cluster.forEach(n => { sines += Math.sin(n.coord * Math.PI / 180); cosines += Math.cos(n.coord * Math.PI / 180); });
-                    let avgRad = Math.atan2(sines / cluster.length, cosines / cluster.length);
+                    c.forEach(n => { sines += Math.sin(n.coord * Math.PI / 180); cosines += Math.cos(n.coord * Math.PI / 180); });
+                    let avgRad = Math.atan2(sines / c.length, cosines / c.length);
                     let avgDeg = (avgRad * 180 / Math.PI + 360) % 360;
-                    let startAngle = avgDeg - ((cluster.length - 1) * minGap / 2);
-                    cluster.forEach((n, idx) => { n.renderCoord = (startAngle + (idx * minGap) + 360) % 360; });
+                    
+                    let startAngle = avgDeg - ((c.length - 1) * windowSize / 2);
+                    c.forEach((n, idx) => { 
+                        n.renderCoord = (startAngle + (idx * windowSize) + 360) % 360; 
+                        result.push(n);
+                    });
+                } else {
+                    let n = c[0];
+                    n.renderCoord = n.coord;
+                    result.push(n);
                 }
             });
-            return list;
+            return result;
+        }
+
+        window.TEMP_CLUSTER_EVENTS = [];
+        function openClusterModal(clusterEvent) {
+            window.TEMP_CLUSTER_EVENTS = clusterEvent.events;
+            let html = `<div style="font-size:0.65rem; color:var(--platinum); margin-bottom:15px; text-align:center; line-height: 1.4;">Multiple observances detected within a tightly bound orbital arc. Select a specific node to view telemetry.</div>`;
+            html += `<div style="display:flex; flex-direction:column; gap:8px; max-height: 50vh; overflow-y: auto;">`;
+            
+            clusterEvent.events.forEach((ev, i) => {
+                let colorStr = ev.type.includes('jud') ? 'var(--gold-bright)' : ev.type.includes('chr') ? 'var(--copper)' : ev.type.includes('isl') ? 'var(--platinum)' : ev.type.includes('sys') ? '#00f0ff' : '#fff';
+                html += `<button style="background:rgba(0,0,0,0.6); border:1px solid ${colorStr}; color:${colorStr}; font-family:'Orbitron'; font-size:0.7rem; padding:12px; border-radius:4px; display:flex; justify-content:space-between; cursor:pointer;" onclick="window.Q_ModalEngine.close(); setTimeout(() => openNodeModal(window.TEMP_CLUSTER_EVENTS[${i}]), 300)">
+                    <span>${ev.glyph || ''} ${ev.name.toUpperCase()}</span>
+                    <span style="font-family:'JetBrains Mono'; opacity:0.8;">${ev.coord.toFixed(1)}°</span>
+                </button>`;
+            });
+            
+            html += `</div>`;
+            window.Q_ModalEngine.render(`CONCURRENT OBSERVANCES`, html, 'CLOSE');
         }
 
         function renderNodes(renderedList, parentLayer, radius) {
             renderedList.forEach((event) => {
                 let node = document.createElement('div');
-                node.className = `event-node ${event.type}`; node.dataset.coord = event.coord; 
-                if(event.glyph) node.innerHTML = event.glyph;
+                node.className = `event-node ${event.type}`; 
+                node.dataset.coord = event.coord; 
+                if(event.glyph) node.innerHTML = event.isCluster ? `<span style="font-size:0.65rem; color:#000; font-family:'JetBrains Mono';">+${event.glyph}</span>` : event.glyph;
                 
                 let angle = (event.renderCoord - 90) * (Math.PI / 180); 
                 let x = 50 + radius * Math.cos(angle); let y = 50 + radius * Math.sin(angle);
                 node.style.left = `${x}%`; node.style.top = `${y}%`;
                 
-                node.onclick = (e) => { e.stopPropagation(); openNodeModal(event); };
+                if (event.isCluster) {
+                    node.onclick = (e) => { e.stopPropagation(); openClusterModal(event); };
+                } else {
+                    node.onclick = (e) => { e.stopPropagation(); openNodeModal(event); };
+                }
                 
                 let label = document.createElement('div'); label.className = 'event-label'; label.innerText = event.name.toUpperCase();
                 let lx = 50 + (radius + 8) * Math.cos(angle); let ly = 50 + (radius + 8) * Math.sin(angle);
@@ -375,18 +369,24 @@
                 if (f === 'isl') outerDb = outerDb.concat(ISL_DB);
                 else if(window.Q_REGISTRY.REL_DB[f]) outerDb = outerDb.concat(window.Q_REGISTRY.REL_DB[f]); 
             });
-            if (activeCivil) outerDb = outerDb.concat(CIV_DB);
-            if (activeHolidays) outerDb = outerDb.concat(HOL_DB);
+            
+            if (activeCivil || activeHolidays) {
+                const globalHols = window.getGlobalHolidays(currentRenderedYear);
+                globalHols.forEach(h => {
+                    if (activeCivil && h.type === 'node-civ') outerDb.push(h);
+                    if (activeHolidays && h.type === 'node-hol') outerDb.push(h);
+                });
+            }
             if (activeSys) outerDb = outerDb.concat(SYS_DB);
             
             if (outerDb.length > 0) {
-                let fannedOuter = applyFanning(outerDb, 3.5);
+                let fannedOuter = applyFanning(outerDb);
                 renderNodes(fannedOuter, nodeLayer, 42.5);
             }
             
             if (activePylons) {
                 let visiblePylons = window.Q_REGISTRY.PYLONS.filter(p => p.renderUI !== false);
-                let fannedPylons = applyFanning(visiblePylons, 3.5);
+                let fannedPylons = applyFanning(visiblePylons);
                 renderNodes(fannedPylons, nodeLayer, 35);
             }
 
@@ -414,7 +414,7 @@
             let title = ""; let html = "";
             
             if(target === 'rel') {
-                title = "GLOBAL OBSERVANCES MULTI-SELECT";
+                title = "RELIGIOUS OVERLAY MULTI-SELECT";
                 html = `
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         <label class="chk-row" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum);"><input type="checkbox" value="jud" id="chk-jud" ${activeFaiths.includes('jud')?'checked':''} style="accent-color:var(--gold-bright);"> HEBREW (JUD) - ✡</label>
@@ -425,13 +425,13 @@
                         <label class="chk-row" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum);"><input type="checkbox" value="tao" id="chk-tao" ${activeFaiths.includes('tao')?'checked':''} style="accent-color:var(--gold-bright);"> TAOISM/ZEN - ☯</label>
                     </div>`;
             } else if(target === 'zod') {
-                title = "ASTROPHYSICAL CONFIGURATION";
+                title = "ZODIACAL CONFIGURATION";
                 const savedAnchor = window.Q_STATE.metaphysical_layer.natal_anchor;
                 let ephStatus = (window.Q_STATE && window.Q_STATE.metaphysical_layer) ? window.Q_STATE.metaphysical_layer.swiss_ephemeris : 'STANDBY';
                 html = `
                     <label class="chk-row" style="margin-bottom:10px; border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:10px; font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum);"><input type="checkbox" id="chk-show-zod" ${activeZodiac ? 'checked' : ''} style="accent-color:var(--gold-bright);"> DISPLAY ZODIACAL RING</label>
                     <label style="font-size:0.6rem; color:rgba(255,255,255,0.6); font-family:'Orbitron';">CALCULATION BASE:</label>
-                    <select class="modal-input"><option>SWISS EPHEMERIS (TRUE ARC)</option><option>SIDEREAL (ASTRONOMICAL)</option></select>
+                    <select class="modal-input"><option>TROPICAL (SEASONAL)</option><option>SIDEREAL (ASTRONOMICAL)</option></select>
                     <label style="font-size:0.6rem; color:rgba(255,255,255,0.6); margin-top:5px; font-family:'Orbitron';">NATAL ANCHOR (BIRTH SIGN):</label>
                     <select id="natal-select" class="modal-input">
                         <option value="NONE" ${savedAnchor==='NONE'?'selected':''}>-- SELECT --</option>
@@ -441,9 +441,9 @@
                         <option value="CAPRICORN" ${savedAnchor==='CAPRICORN'?'selected':''}>CAPRICORN</option><option value="AQUARIUS" ${savedAnchor==='AQUARIUS'?'selected':''}>AQUARIUS</option><option value="PISCES" ${savedAnchor==='PISCES'?'selected':''}>PISCES</option>
                     </select>
                     <div style="font-size:0.5rem; color:var(--platinum); margin-top:5px; text-align:center;">UPDATE VIA BIOLOGICAL VECTOR CALIBRATION FOR FULL SYNC</div>
-                    <div style="font-size:0.5rem; color:var(--gold-bright); margin-top:10px; text-align:center; padding-top:5px; border-top:1px dashed var(--gold-dim);" id="eph-api-status">EPHEMERIS API: ${ephStatus}</div>`;
+                    <div style="font-size:0.5rem; color:var(--gold-bright); margin-top:10px; text-align:center; padding-top:5px; border-top:1px dashed var(--gold-dim);" id="eph-api-status">EPHEMERIS API: ${ephStatus} (PHASE V)</div>`;
             } else if(target === 'civ') {
-                title = "SOVEREIGN MICRO-LEDGER"; 
+                title = "CIVIL ANCHOR LOCALE"; 
                 html = `<label style="font-size:0.6rem; color:rgba(255,255,255,0.6); font-family:'Orbitron';">ORIGIN MATRIX:</label>
                 <select class="modal-input"><option>US (STATIC)</option><option>GLOBAL (UN)</option><option>GEOLOCATION (AUTO)</option></select>
                 <div style="margin-top:15px; border-top:1px dashed var(--copper); padding-top:10px;">
@@ -451,7 +451,7 @@
                     <div style="display:flex; justify-content:space-around;">
                         <button class="opt-btn ${activeHolidays ? 'active' : ''}" onclick="toggleVisibility('hol', this)" id="btn-hol">HOLIDAYS</button>
                         <button class="opt-btn ${activePylons ? 'active' : ''}" onclick="toggleVisibility('pyl', this)" id="btn-pyl">PYLONS</button>
-                        <button class="opt-btn ${activeSys ? 'active' : ''}" onclick="toggleVisibility('sys', this)" id="btn-sys">LEDGER MARKS</button>
+                        <button class="opt-btn ${activeSys ? 'active' : ''}" onclick="toggleVisibility('sys', this)" id="btn-sys">SYS MARKS</button>
                     </div>
                 </div>`;
             } else if(target === 'int') {
@@ -464,12 +464,6 @@
                 <div style="font-size:0.5rem; color:var(--platinum); margin-top:5px; text-align:center;">ENTRIES SYNC TO OMNI-PLANNER AS [DIARY]</div>`;
             }
             window.Q_ModalEngine.render(title, html, 'SAVE & CLOSE', saveOptions);
-        }
-
-        function openSovereignDiary(e) {
-            if(e) e.stopPropagation();
-            setMode('int');
-            openOptions(e, 'int');
         }
 
         function openNodeModal(eventObj) {
@@ -495,7 +489,7 @@
             if(eventObj.type.includes('hin') || eventObj.type.includes('bud') || eventObj.type.includes('tao')) descType = "Eastern Traditional alignment node.";
             if(eventObj.type.includes('hol')) descType = "Societal Holiday resonance marker.";
             if(eventObj.type.includes('pyl')) descType = "Quadrature Physics cardinal anchor.";
-            if(eventObj.type.includes('sys')) descType = "Systematic Sovereign Micro-Ledger checkpoint.";
+            if(eventObj.type.includes('sys')) descType = "Systematic Civil/Financial checkpoint.";
 
             const savedNote = localStorage.getItem('q_note_' + eventObj.name) || "";
 
@@ -509,7 +503,7 @@
                         <span style="color: var(--gold-bright); font-size: 0.85rem; font-weight: bold; text-shadow: 0 0 8px var(--gold-dim);">Q${nData.quad} S${nData.sect} DAY ${nData.day}</span>
                     </div>
                     <div style="display: flex; flex-direction: column;">
-                        <span style="font-size: 0.5rem; color: rgba(255,255,255,0.5); font-family: 'Orbitron'; letter-spacing: 1px;">TRUE ELLIPSE</span>
+                        <span style="font-size: 0.5rem; color: rgba(255,255,255,0.5); font-family: 'Orbitron'; letter-spacing: 1px;">MEAN CIRCLE</span>
                         <span style="color: var(--gold-bright); font-size: 0.85rem; font-weight: bold; text-shadow: 0 0 8px var(--gold-dim);">${eventObj.coord.toFixed(3)}°</span>
                     </div>
                     <div style="display: flex; flex-direction: column;">
@@ -545,7 +539,7 @@
                 
                 relationshipHtml = `
                     <div style="font-size:0.6rem; color:var(--platinum); margin-top:5px;">NATAL ANCHOR: <span style="color:var(--gold-bright);">${savedAnchor}</span></div>
-                    <div style="font-size:0.6rem; color:var(--platinum); margin-top:5px;">TRUE ELLIPSE ASPECT: <span style="color:var(--gold-bright); text-shadow: 0 0 10px var(--gold-dim);">${aspect}</span></div>
+                    <div style="font-size:0.6rem; color:var(--platinum); margin-top:5px;">GEOMETRIC ASPECT: <span style="color:var(--gold-bright); text-shadow: 0 0 10px var(--gold-dim);">${aspect}</span></div>
                     <div style="font-size:0.7rem; color:var(--starlight); margin-top:15px; line-height:1.5; border-top:1px dashed rgba(255,215,0,0.3); padding-top:15px; text-align:center;">
                         ${aspectDesc}
                     </div>
@@ -556,7 +550,7 @@
             
             const html = `
                 <div style="font-size:0.65rem; color:var(--platinum); border-bottom:1px solid rgba(255,215,0,0.3); padding-bottom:10px; margin-bottom:10px; text-align:center;">
-                    Astrophysical Alignment Node
+                    Astrological Transit Node
                 </div>
                 ${relationshipHtml}
             `;
@@ -611,7 +605,8 @@
                 localStorage.setItem('q_note_' + currentNodeFocus, nText);
                 let combinedDb = [];
                 ['jud','chr','hin','bud','tao'].forEach(f => { if(window.Q_REGISTRY.REL_DB[f]) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB[f]); });
-                combinedDb = combinedDb.concat(ISL_DB, CIV_DB, HOL_DB, window.Q_REGISTRY.PYLONS, SYS_DB);
+                const globalHols = window.getGlobalHolidays(currentRenderedYear);
+                combinedDb = combinedDb.concat(ISL_DB, globalHols, SYS_DB);
                 const ev = combinedDb.find(e => e.name === currentNodeFocus);
                 if(ev) {
                     let absoluteTimeMs = ev.time;
@@ -636,53 +631,8 @@
                 renderDynamicRing();
             }
             
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:var(--gold-bright); font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(token => {
-                        if (/[0-9]/.test(token)) {
-                            out += `<span style="${numStyle}">${token}</span>`;
-                        } else {
-                            out += `<span style="${letterStyle}">${token}</span>`;
-                        }
-                    });
-                }
-                return out;
-            }
-
-            const legDateEl = document.getElementById('leg-date');
-            if (legDateEl) legDateEl.innerText = legacyDateStr.toUpperCase();
-            
-            const legTimeEl = document.getElementById('leg-time');
-            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-            
             const trueArc = qData.trueArc;
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('q-coord-wing');
-            
-            if (qCoordWing) {
-                let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                let smNumStyle = "color:var(--gold-bright); font-size:1.1rem; font-weight:bold;";
-                
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--gold-bright); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--gold-dim);">${activeBlock.name}</span>`;
-                } else {
-                    let cCycle = activeBlock ? activeBlock.cycle : 0;
-                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
-                }
-            }
-
-            const meanDegEl = document.getElementById('mean-deg');
-            if (meanDegEl) meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
-            
-            const trueDegEl = document.getElementById('true-deg');
-            if (trueDegEl) trueDegEl.innerText = trueArc.toFixed(2) + "°";
+            const meanArc = qData.meanArc;
             
             const continuousMeanDeg = daysElapsed * (360 / 365.24219);
             document.getElementById('transit-arm').style.transform = `rotate(${continuousMeanDeg + qData.delta}deg)`;
@@ -725,7 +675,8 @@
                 document.getElementById('zod-phase').innerText = "PENDING CALIBRATION";
             }
 
-            let nextCiv = getNextEvent(trueArc, CIV_DB.concat(SYS_DB));
+            let globalCiv = window.getGlobalHolidays(currentRenderedYear).filter(e => e.type === 'node-civ');
+            let nextCiv = getNextEvent(trueArc, globalCiv.concat(SYS_DB));
             document.getElementById('civ-next').innerText = nextCiv ? `${nextCiv.name.substring(0,10).toUpperCase()}.. (${nextCiv.coord.toFixed(1)}°)` : "--";
 
             const termIndex = Math.floor(trueArc / 15); const activeTerm = window.Q_REGISTRY.SOLAR_TERMS[termIndex]; activeTermName = activeTerm.name; const termProgress = ((trueArc - activeTerm.start) / 15) * 100;
