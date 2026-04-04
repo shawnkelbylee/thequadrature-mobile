@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Quadrature - Aperture</title>
+    <style>
+        /* INVARIANT CSS VARIABLES: APERTURE BLUEPRINT SKIN */
+        :root {
+            --bg-color: #000000;
+            --stroke-color: #ffffff;
+            --text-color: #ffffff;
+            --font-main: 'Courier New', Courier, monospace;
+            --grid-opacity: 0.15;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* BLUEPRINT GRID BACKGROUND */
+        .blueprint-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, var(--grid-opacity)) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, var(--grid-opacity)) 1px, transparent 1px);
+            background-size: 2vw 2vw;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* STRUCTURAL INVARIANT: HUD CONTAINER */
+        .q-hud-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 20% 60% 20%;
+            grid-template-rows: 20% 60% 20%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* 4 CORNER PANELS */
+        .corner-panel {
+            border: 1px solid var(--stroke-color);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            pointer-events: auto;
+            background-color: rgba(0, 0, 0, 0.8); /* Slight occlusion for readability */
+        }
+        .top-left { grid-column: 1; grid-row: 1; border-top: none; border-left: none; }
+        .top-right { grid-column: 3; grid-row: 1; border-top: none; border-right: none; text-align: right; }
+        .bottom-left { grid-column: 1; grid-row: 3; border-bottom: none; border-left: none; justify-content: flex-end; }
+        .bottom-right { grid-column: 3; grid-row: 3; border-bottom: none; border-right: none; justify-content: flex-end; text-align: right; }
+
+        /* 2 WING OS */
+        .wing-os {
+            border: 1px solid var(--stroke-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .wing-left { grid-column: 1; grid-row: 2; border-left: none; }
+        .wing-right { grid-column: 3; grid-row: 2; border-right: none; }
+
+        /* CENTER DIAL ZONE */
+        .center-zone {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* CENTER DIAL GEOMETRY */
+        .center-dial {
+            width: 55vmin;
+            height: 55vmin;
+            border: 2px solid var(--stroke-color);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .dial-inner {
+            width: 45vmin;
+            height: 45vmin;
+            border: 1px dashed var(--stroke-color);
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .dial-crosshair {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background-color: var(--stroke-color);
+            opacity: 0.5;
+        }
+        .dial-crosshair.vertical {
+            width: 1px;
+            height: 100%;
+        }
+
+        /* DATA TYPOGRAPHY */
+        .data-label { opacity: 0.6; margin-bottom: 4px; font-size: 0.7rem; }
+        .data-value { font-weight: bold; letter-spacing: 2px; }
+
+    </style>
+</head>
+<body>
+    <div class="blueprint-grid"></div>
+
+    <div class="q-hud-container">
+        
+        <div class="corner-panel top-left">
+            <div class="data-label">SYS_STATE</div>
+            <div class="data-value">APERTURE</div>
+        </div>
+        
+        <div class="corner-panel top-right">
+            <div class="data-label">TELEMETRY</div>
+            <div class="data-value">LOCKED</div>
+        </div>
+
+        <div class="wing-os wing-left">
+            <div class="data-label">W_OS_L</div>
+        </div>
+
+        <div class="center-zone">
+            <div class="center-dial">
+                <div class="dial-crosshair"></div>
+                <div class="dial-crosshair vertical"></div>
+                <div class="dial-inner"></div>
+            </div>
+        </div>
+
+        <div class="wing-os wing-right">
+            <div class="data-label">W_OS_R</div>
+        </div>
+
+        <div class="corner-panel bottom-left">
+            <div class="data-label">LATENCY</div>
+            <div class="data-value">-- ms</div>
+        </div>
+
+        <div class="corner-panel bottom-right">
+            <div class="data-label">BIFURCATION</div>
+            <div class="data-value">ACTIVE</div>
+        </div>
+
+    </div>
+
+    <script>
+        console.log("[APERTURE] Init: Structural Invariant Deployed.");
+        console.log("[APERTURE] UI Mode: Pure Blueprint. Nav/Scrubber Offline.");
+        // q-core.js and Native Bridge hookups will be routed here.
+    </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Quadrature - Commercial</title>
+    <style>
+        /* INVARIANT CSS VARIABLES: COMMERCIAL DASHBOARD SKIN */
+        :root {
+            --bg-color: #f4f5f7;
+            --stroke-color: #0f172a;
+            --text-color: #0f172a;
+            --alert-color: #dc2626; /* Functional color for state-changes/alerts */
+            --panel-bg: #ffffff;
+            --font-main: 'Courier New', Courier, monospace;
+            --grid-opacity: 0.05;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* ENTERPRISE GRID BACKGROUND */
+        .commercial-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(15, 23, 42, var(--grid-opacity)) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, var(--grid-opacity)) 1px, transparent 1px);
+            background-size: 2vw 2vw;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* RESTORED: TOP NAVIGATION BAR */
+        .top-nav {
+            width: 100%;
+            height: 60px;
+            border-bottom: 2px solid var(--stroke-color);
+            background-color: var(--panel-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 20;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .nav-brand { font-size: 1.2rem; letter-spacing: 2px; }
+        .nav-status { color: var(--alert-color); animation: pulse 2s infinite; }
+
+        /* RESTORED: BOTTOM SCRUBBER PANEL */
+        .bottom-scrubber {
+            width: 100%;
+            height: 60px;
+            border-top: 2px solid var(--stroke-color);
+            background-color: var(--panel-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 20;
+            position: absolute;
+            bottom: 0;
+        }
+        
+        .scrubber-track {
+            flex-grow: 1;
+            height: 4px;
+            background-color: var(--stroke-color);
+            margin: 0 20px;
+            position: relative;
+            opacity: 0.3;
+        }
+        .scrubber-node {
+            position: absolute;
+            top: -6px;
+            left: 25%;
+            width: 16px;
+            height: 16px;
+            background-color: var(--stroke-color);
+            border-radius: 50%;
+        }
+
+        /* STRUCTURAL INVARIANT: HUD CONTAINER */
+        .q-hud-container {
+            flex-grow: 1;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 20% 60% 20%;
+            grid-template-rows: 20% 60% 20%;
+            z-index: 10;
+            pointer-events: none;
+            margin-bottom: 60px; /* Offset to clear the scrubber */
+        }
+
+        /* 4 CORNER PANELS */
+        .corner-panel {
+            border: 2px solid var(--stroke-color);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            pointer-events: auto;
+            background-color: var(--panel-bg);
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.05); /* Slight depth for legibility */
+        }
+        .top-left { grid-column: 1; grid-row: 1; border-top: none; border-left: none; }
+        .top-right { grid-column: 3; grid-row: 1; border-top: none; border-right: none; text-align: right; }
+        .bottom-left { grid-column: 1; grid-row: 3; border-bottom: none; border-left: none; justify-content: flex-end; }
+        .bottom-right { grid-column: 3; grid-row: 3; border-bottom: none; border-right: none; justify-content: flex-end; text-align: right; }
+
+        /* 2 WING OS */
+        .wing-os {
+            border: 2px solid var(--stroke-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            background-color: var(--panel-bg);
+        }
+        .wing-left { grid-column: 1; grid-row: 2; border-left: none; }
+        .wing-right { grid-column: 3; grid-row: 2; border-right: none; }
+
+        /* CENTER DIAL ZONE */
+        .center-zone {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* CENTER DIAL GEOMETRY (TMR) */
+        .center-dial {
+            width: 55vmin;
+            height: 55vmin;
+            border: 3px solid var(--stroke-color);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .dial-inner {
+            width: 45vmin;
+            height: 45vmin;
+            border: 2px dashed var(--stroke-color);
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .dial-crosshair {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: var(--stroke-color);
+            opacity: 0.8;
+        }
+        .dial-crosshair.vertical {
+            width: 2px;
+            height: 100%;
+        }
+
+        /* DATA TYPOGRAPHY */
+        .data-label { opacity: 0.7; margin-bottom: 4px; font-size: 0.75rem; font-weight: bold; }
+        .data-value { font-weight: 900; letter-spacing: 1px; font-size: 1.1rem; }
+        .alert-text { color: var(--alert-color); }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <div class="nav-brand">THE QUADRATURE // COMMERCIAL</div>
+        <div class="nav-status">NETWORK SYNC: ACTIVE</div>
+    </div>
+
+    <div class="commercial-grid"></div>
+
+    <div class="q-hud-container">
+        
+        <div class="corner-panel top-left">
+            <div class="data-label">MARKET_ARC</div>
+            <div class="data-value">NOMINAL</div>
+        </div>
+        
+        <div class="corner-panel top-right">
+            <div class="data-label">B2B_TELEMETRY</div>
+            <div class="data-value alert-text">AWAITING HANDSHAKE</div>
+        </div>
+
+        <div class="wing-os wing-left">
+            <div class="data-label">LOGISTICS</div>
+        </div>
+
+        <div class="center-zone">
+            <div class="center-dial">
+                <div class="dial-crosshair"></div>
+                <div class="dial-crosshair vertical"></div>
+                <div class="dial-inner"></div>
+            </div>
+        </div>
+
+        <div class="wing-os wing-right">
+            <div class="data-label">METRICS</div>
+        </div>
+
+        <div class="corner-panel bottom-left">
+            <div class="data-label">LATENCY</div>
+            <div class="data-value">-- ms</div>
+        </div>
+
+        <div class="corner-panel bottom-right">
+            <div class="data-label">BIFURCATION</div>
+            <div class="data-value">COMM_ACTIVE</div>
+        </div>
+
+    </div>
+
+    <div class="bottom-scrubber">
+        <div class="data-label">T-MINUS</div>
+        <div class="scrubber-track">
+            <div class="scrubber-node"></div>
+        </div>
+        <div class="data-label">T-PLUS</div>
+    </div>
+
+    <script>
+        console.log("[COMMERCIAL] Init: Structural Invariant Deployed.");
+        console.log("[COMMERCIAL] UI Mode: High-Contrast Dashboard.");
+        // q-core.js and Native Bridge hookups will be routed here.
+    </script>
+</body>
+</html>
