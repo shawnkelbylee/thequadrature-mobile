@@ -24,274 +24,179 @@
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&family=Playfair+Display:wght@700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
 
-        /* ========================================================================= */
-        /* --- APERTURE GATEWAY OVERRIDES: FROSTED ASYMMETRIC METALLIC ---           */
-        /* ========================================================================= */
-
-        /* 1. HIDE ALL NAVIGATION AND SCRUBBER PANELS */
-        .q-nav-bar, .q-global-controls, #mobile-telemetry-ribbon, .q-control-strip, #q-mic-fab, #q-mic-fab-desktop {
-            display: none !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
+        :root {
+            --chrome-grad: linear-gradient(135deg, #ffffff 0%, #777777 25%, #222222 50%, #999999 75%, #ffffff 100%);
+            --frost-base: rgba(25, 30, 40, 0.45);
         }
 
-        /* 2. VOID BACKGROUND (Grid Removed) */
         body {
-            background-color: #030508 !important;
+            background-color: #020406 !important;
             background-image: none !important;
             margin: 0; height: 100dvh; width: 100vw; overflow: hidden;
             display: flex; justify-content: center; align-items: center;
-        }
-
-        /* METALLIC CHROME GRADIENT DEFINITION */
-        :root {
-            --chrome-grad: linear-gradient(135deg, #ffffff 0%, #777777 25%, #222222 50%, #999999 75%, #ffffff 100%);
-            --frost-bg: rgba(20, 25, 35, 0.4);
-        }
-
-        /* COSMIC CLOUD BACKGROUND LAYER */
-        .cosmic-cloud-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-        .nebula-cloud {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(50, 70, 100, 0.2) 0%, transparent 60%);
-            filter: blur(60px);
-            animation: cloud-drift linear infinite alternate;
-        }
-        @keyframes cloud-drift {
-            0% { transform: translate(0, 0) scale(1); opacity: 0.4; }
-            100% { transform: translate(10vw, -10vh) scale(1.2); opacity: 0.8; }
-        }
-
-        /* 3. WING OVERRIDES (Clean Frosted Glass & Asymmetric Metallic Borders) */
-        .wing-content {
-            background-color: var(--frost-bg) !important;
-            background-image: linear-gradient(var(--frost-bg), var(--frost-bg)), var(--chrome-grad) !important;
-            background-origin: padding-box, border-box !important;
-            background-clip: padding-box, border-box !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border-style: solid !important;
-            border-color: transparent !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
-            border-radius: 0 !important;
-        }
-        /* Asymmetric borders for the wings */
-        .wing-left .wing-content { border-width: 1px 1px 1px 4px !important; }
-        .wing-right .wing-content { border-width: 1px 4px 1px 1px !important; }
-        
-        .w-head, .v-head { border-bottom: 1px solid #555555 !important; color: #ffffff !important; text-shadow: none !important; }
-        .val-lg, .q-val, .fmt-toggle, .val-sm, .t-row span, .w-lbl { color: #ffffff !important; text-shadow: none !important; }
-        .fmt-toggle { border: 1px solid #ffffff !important; background: #000000 !important; }
-
-        /* 4. THE 4 GATEWAY CORNERS (Clean Frosted Glass & Asymmetric Metallic Borders) */
-        .vector-anchor {
-            position: absolute; 
-            width: calc(320px + 50px); 
-            height: 100px;
-            z-index: 100; cursor: pointer; pointer-events: auto; 
-            display: flex; justify-content: center; align-items: center; text-align: center;
-            box-sizing: border-box; transition: all 0.3s ease; 
-            background-color: var(--frost-bg) !important;
-            background-image: linear-gradient(var(--frost-bg), var(--frost-bg)), var(--chrome-grad) !important;
-            background-origin: padding-box, border-box !important;
-            background-clip: padding-box, border-box !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border-style: solid !important;
-            border-color: transparent !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
-            border-radius: 0 !important;
-            backface-visibility: hidden;
-        }
-        .vector-anchor:hover {
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.3) !important;
-        }
-        
-        /* Asymmetric border weights for corners */
-        .tl { top: 7vh; left: 2vw; border-width: 3px 1px 1px 4px !important; border-radius: 6px 0 0 0 !important; }
-        .tr { top: 7vh; right: 2vw; border-width: 3px 4px 1px 1px !important; border-radius: 0 6px 0 0 !important; }
-        .bl { bottom: 8vh; left: 2vw; border-width: 1px 1px 3px 4px !important; border-radius: 0 0 0 6px !important; }
-        .br { bottom: 8vh; right: 2vw; border-width: 1px 4px 3px 1px !important; border-radius: 0 0 6px 0 !important; }
-
-        .gateway-title {
             font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 1.1rem;
-            letter-spacing: 4px;
-            color: #ffffff;
         }
 
-        /* 5. CENTER DIAL (Metallic Borders & Confined Starfield) */
-        .aperture-dial {
-            position: absolute; 
-            width: 60vh; 
-            height: 60vh; 
-            border-radius: 50%; 
-            display: flex; justify-content: center; align-items: center; 
-            z-index: 30; 
-            background-color: #000000;
-            background-image: linear-gradient(#000, #000), var(--chrome-grad);
-            background-origin: padding-box, border-box;
-            background-clip: padding-box, border-box;
-            border: 5px solid transparent; 
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
-            overflow: hidden; 
-        }
-
-        #dense-star-layer {
+        /* 1. CLEAN FROSTED PANELS WITH ASYMMETRIC METALLIC BORDERS */
+        .vector-anchor, .wing-content {
+            background: var(--frost-base) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            z-index: 1;
-            pointer-events: none;
-            perspective: 1000px;
-            transform-style: preserve-3d;
+            display: flex; justify-content: center; align-items: center;
+            box-sizing: border-box;
+            border: none !important; /* Remove old border logic */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
         }
 
-        /* 6. ENGRAVED, ROTATING CLASSIC "Q" */
-        .mercury-q {
-            font-family: 'Playfair Display', serif; /* Tighter, classic Roman Serif */
-            font-size: 32vh; 
-            font-weight: 900; 
+        /* Asymmetric Border Logic using pseudo-elements to prevent streaks */
+        .vector-anchor::before, .wing-content::before {
+            content: ''; position: absolute; inset: 0;
+            padding: 1px; /* Default thin */
             background: var(--chrome-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.5); /* Inner engraved line */
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
-            animation: rotate-mercury 10s linear infinite;
-            z-index: 10;
-            line-height: 1;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            pointer-events: none;
         }
 
-        @keyframes rotate-mercury {
+        /* Specific Asymmetric Weights */
+        .tl::before { padding: 4px 1px 1px 4px; }
+        .tr::before { padding: 4px 4px 1px 1px; }
+        .bl::before { padding: 1px 1px 4px 4px; }
+        .br::before { padding: 1px 4px 4px 1px; }
+        .wing-left .wing-content::before { padding: 1px 1px 1px 5px; }
+        .wing-right .wing-content::before { padding: 1px 5px 1px 1px; }
+
+        .vector-anchor { width: 360px; height: 100px; z-index: 100; cursor: pointer; }
+        .tl { top: 7vh; left: 2vw; border-radius: 8px 0 0 0; }
+        .tr { top: 7vh; right: 2vw; border-radius: 0 8px 0 0; }
+        .bl { bottom: 8vh; left: 2vw; border-radius: 0 0 0 8px; }
+        .br { bottom: 8vh; right: 2vw; border-radius: 0 0 8px 0; }
+
+        .gateway-title { font-weight: 900; font-size: 1.1rem; letter-spacing: 4px; color: #ffffff; text-align: center; }
+
+        /* 2. DYNAMIC NEBULA BACKGROUND */
+        .nebula-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .cloud { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(40, 60, 90, 0.25) 0%, transparent 70%); filter: blur(80px); animation: drift 40s infinite alternate; }
+
+        @keyframes drift { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(5vw, 5vh) scale(1.3); } }
+
+        /* 3. CENTER DIAL & STARFIELD */
+        .aperture-dial {
+            position: relative; width: 60vh; height: 60vh; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            background: #000; overflow: hidden; z-index: 30;
+        }
+        .aperture-dial::after {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            padding: 5px; background: var(--chrome-grad);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+        }
+
+        #dense-stars { position: absolute; inset: 0; border-radius: 50%; z-index: 1; transform-style: preserve-3d; }
+        .star-kinetic { position: absolute; top: 50%; left: 50%; width: 1.5px; height: 1.5px; background: #fff; border-radius: 50%; animation: warp-travel linear infinite; }
+
+        /* 4. THE ENGRAVED SVG "Q" */
+        .q-container { width: 35vh; height: 35vh; z-index: 10; animation: rotate-q 12s linear infinite; perspective: 1000px; }
+        
+        @keyframes rotate-q {
             0% { transform: rotateY(0deg); }
             100% { transform: rotateY(360deg); }
         }
 
-        /* Kinetic Star CSS */
-        .star-kinetic {
-            position: absolute; top: 50%; left: 50%; width: 1.5px;
-            height: calc(1.5px + (40px * var(--warp-factor, 0.5)));
-            background: #ffffff;
-            border-radius: 1px;
-            animation: warp-travel linear infinite;
-        }
+        .chrome-q { width: 100%; height: 100%; fill: url(#chrome-fill); filter: drop-shadow(0 0 20px rgba(255,255,255,0.25)); }
+
         @keyframes warp-travel {
-            0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--radius)) translateZ(-300px); opacity: 0; }
+            0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--radius)) translateZ(-400px); opacity: 0; }
             20% { opacity: var(--opacity); }
             80% { opacity: var(--opacity); }
-            100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--radius)) translateZ(300px); opacity: 0; }
+            100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--radius)) translateZ(400px); opacity: 0; }
         }
 
+        /* WING TELEMETRY STYLING */
+        .w-head { border-bottom: 1px solid #555 !important; color: #fff !important; margin-bottom: 8px; }
+        .val-lg, .q-val, .val-sm, .w-lbl { color: #fff !important; }
+        .fmt-toggle { border: 1px solid #fff !important; background: transparent !important; }
+        
+        .q-nav-bar, .q-global-controls, #mobile-telemetry-ribbon, .q-control-strip, #q-mic-fab { display: none !important; }
     </style>
 </head>
 <body class="mode-q boot-active">
 
-    <div class="cosmic-cloud-layer" id="cosmic-clouds"></div>
+    <div class="nebula-layer" id="nebula"></div>
 
-    <div class="vector-anchor tl" onclick="window.location.href='../personal/index.html'">
-        <div class="gateway-title">PERSONAL QUAD</div>
-    </div>
-    
-    <div class="vector-anchor tr" onclick="window.location.href='../commercial/index.html'">
-        <div class="gateway-title">COMMERCIAL QUAD</div>
-    </div>
-
-    <div class="vector-anchor bl" onclick="window.location.href='../physical/index.html'">
-        <div class="gateway-title">PHYSICAL ASSETS</div>
-    </div>
-
-    <div class="vector-anchor br" onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()">
-        <div class="gateway-title">DASHBOARD</div>
-    </div>
+    <div class="vector-anchor tl" onclick="window.location.href='../personal/index.html'"><div class="gateway-title">PERSONAL QUAD</div></div>
+    <div class="vector-anchor tr" onclick="window.location.href='../commercial/index.html'"><div class="gateway-title">COMMERCIAL QUAD</div></div>
+    <div class="vector-anchor bl" onclick="window.location.href='../physical/index.html'"><div class="gateway-title">PHYSICAL ASSETS</div></div>
+    <div class="vector-anchor br" onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()"><div class="gateway-title">DASHBOARD</div></div>
 
     <div class="aperture-dial">
-        <div id="dense-star-layer"></div>
-        <div class="mercury-q">Q</div>
+        <div id="dense-stars"></div>
+        <div class="q-container">
+            <svg class="chrome-q" viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="chrome-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ffffff" />
+                        <stop offset="25%" style="stop-color:#777777" />
+                        <stop offset="50%" style="stop-color:#222222" />
+                        <stop offset="75%" style="stop-color:#999999" />
+                        <stop offset="100%" style="stop-color:#ffffff" />
+                    </linearGradient>
+                </defs>
+                <path d="M50,15 C32,15 18,29 18,46 C18,63 32,77 50,77 C56,77 62,75 67,71 L75,85 L82,80 L74,68 C79,62 82,54 82,46 C82,29 68,15 50,15 Z M50,22 C63,22 74,33 74,46 C74,53 71,60 66,65 L64,62 C70,58 73,52 73,46 C73,34 63,24 50,24 C37,24 27,34 27,46 C27,58 37,68 50,68 C55,68 60,66 64,62 L66,65 C61,70 56,72 50,72 C35,72 23,60 23,46 C23,32 35,20 50,20 Z" />
+            </svg>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Generate Cosmic Clouds (Background)
-            const cloudLayer = document.getElementById('cosmic-clouds');
-            if(cloudLayer) {
-                for(let i=0; i<6; i++) { // Fewer, larger elements
-                    let cloud = document.createElement('div');
-                    cloud.className = 'nebula-cloud';
-                    cloud.style.width = (Math.random() * 40 + 40) + 'vw';
-                    cloud.style.height = cloud.style.width;
-                    cloud.style.left = (Math.random() * 100 - 20) + 'vw';
-                    cloud.style.top = (Math.random() * 100 - 20) + 'vh';
-                    cloud.style.animationDuration = (Math.random() * 30 + 40) + 's';
-                    cloud.style.animationDelay = -(Math.random() * 40) + 's';
-                    cloudLayer.appendChild(cloud);
-                }
+            // Nebula Clouds
+            const neb = document.getElementById('nebula');
+            for(let i=0; i<8; i++) {
+                let c = document.createElement('div');
+                c.className = 'cloud';
+                c.style.width = (Math.random() * 40 + 30) + 'vw';
+                c.style.height = c.style.width;
+                c.style.left = (Math.random() * 100 - 20) + 'vw';
+                c.style.top = (Math.random() * 100 - 20) + 'vh';
+                c.style.animationDelay = -(Math.random() * 40) + 's';
+                neb.appendChild(c);
             }
 
-            // 2. Generate Confined Starfield (Inside Dial)
-            const starContainer = document.getElementById('dense-star-layer');
-            if(starContainer) {
-                for(let i=0; i<900; i++) {
-                    let star = document.createElement('div');
-                    star.className = 'star-kinetic';
-                    star.style.setProperty('--angle', Math.random() * 360 + 'deg');
-                    star.style.setProperty('--radius', (Math.random() * 350) + 'px');
-                    star.style.setProperty('--opacity', Math.random() * 0.9 + 0.1);
-                    star.style.animationDuration = (Math.random() * 4 + 3) + 's';
-                    star.style.animationDelay = -(Math.random() * 10) + 's';
-                    starContainer.appendChild(star);
-                }
+            // Dense Stars
+            const stars = document.getElementById('dense-stars');
+            for(let i=0; i<1000; i++) {
+                let s = document.createElement('div');
+                s.className = 'star-kinetic';
+                s.style.setProperty('--angle', Math.random() * 360 + 'deg');
+                s.style.setProperty('--radius', (Math.random() * 300) + 'px');
+                s.style.setProperty('--opacity', Math.random());
+                s.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                s.style.animationDelay = -(Math.random() * 10) + 's';
+                stars.appendChild(s);
             }
         });
 
-        // 3. Restored Telemetry Listener for the Dynamic OS Wings
+        // WING UPDATER
         window.addEventListener('q-tick', (e) => {
             const { t, qData, legacyDateStr, legacyTimeStr } = e.detail;
-
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:#ffffff; font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
-                }
-                return out;
-            }
-
-            const legDateEl = document.getElementById('leg-date');
-            if (legDateEl) legDateEl.innerHTML = `<span style="color:#ffffff; font-weight:bold; text-shadow:0 0 10px rgba(255,255,255,0.3);">${legacyDateStr.toUpperCase()}</span>`;
-
-            const legTimeEl = document.getElementById('leg-time');
-            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-
-            const meanDegEl = document.getElementById('mean-deg');
-            if (meanDegEl) { meanDegEl.innerText = qData.meanArc.toFixed(2) + "°"; meanDegEl.style.setProperty('color', '#ffffff', 'important'); }
+            document.getElementById('leg-date').innerText = legacyDateStr.toUpperCase();
+            document.getElementById('leg-time').innerText = legacyTimeStr;
+            document.getElementById('mean-deg').innerText = qData.meanArc.toFixed(2) + "°";
+            document.getElementById('true-deg').innerText = qData.trueArc.toFixed(2) + "°";
             
-            const trueDegEl = document.getElementById('true-deg');
-            if (trueDegEl) { trueDegEl.innerText = qData.trueArc.toFixed(2) + "°"; trueDegEl.style.setProperty('color', '#ffffff', 'important'); }
-
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('q-coord-wing');
-            
-            if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:#ffffff; font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
+            let block = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+            const wing = document.getElementById('q-coord-wing');
+            if (wing) {
+                if (block && block.type === 'PYLON') {
+                    wing.innerHTML = block.name;
                 } else {
-                    qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:#ffffff; font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
-                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">Q</span><span style="color:#ffffff; font-size:1.1rem; font-weight:bold;">${qData.quad}</span> ` +
-                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">S</span><span style="color:#ffffff; font-size:1.1rem; font-weight:bold;">${qData.sect}</span> ` +
-                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">DAY</span><span style="color:#ffffff; font-size:1.1rem; font-weight:bold;">${qData.day}</span>`;
+                    wing.innerHTML = `QC${block ? block.cycle : 0} Q${qData.quad} S${qData.sect} D${qData.day}`;
                 }
             }
         });
