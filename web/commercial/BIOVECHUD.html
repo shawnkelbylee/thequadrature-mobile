@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>THE QUADRATURE // BIOLOGICAL VECTOR</title>
+    <script src="q-ui-global.js?v=16.4"></script>
+    <script src="q-core.js?v=16.4"></script>
+    <script src="q-ui-planner.js?v=16.4"></script>
+    <script src="q-hub.js?v=16.4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
+
+        :root {
+            --void: #05080f; 
+            --bio-purple: #b829ff; 
+            --bio-purple-dim: rgba(184, 41, 255, 0.2);
+            --bio-cobalt: #0055ff;
+            --bio-cobalt-dim: rgba(0, 85, 255, 0.3);
+            --sys-cyan: #00f0ff;
+            --env-green: #a7ff83;
+            --warn-orange: #ffaa00; 
+            --friction-red: #ff3333;
+            --theme-main: var(--bio-purple); 
+            --theme-dim: var(--bio-purple-dim);
+            --gold: #F4D068;
+            --platinum: #E5E4E2;
+            --starlight: rgba(255, 255, 255, 0.6);
+        }
+
+        body { 
+            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; 
+            background-color: var(--void); 
+            background: radial-gradient(circle at center, #0f0a1c 0%, var(--void) 90%); 
+            color: #fff; font-family: 'JetBrains Mono', monospace; display: flex; 
+            justify-content: center; align-items: center; user-select: none; 
+            color-scheme: dark; perspective: 1500px; transform-style: preserve-3d; 
+            touch-action: manipulation;
+        }
+
+        #q-universal-modal { z-index: 999999 !important; }
+        .corner-panel { 
+            position: absolute; display: flex; flex-direction: column; gap: 0.5vh; z-index: 60; 
+            background: linear-gradient(135deg, rgba(5, 8, 15, 0.8) 0%, rgba(15, 10, 30, 0.95) 100%); 
+            border: 1px solid var(--bio-cobalt-dim); border-top: 1px solid var(--bio-cobalt); 
+            border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,85,255,0.15); 
+            box-sizing: border-box; pointer-events: auto; padding: 1vw; min-width: 250px;
+        }
+        .mod-tl { top: 13vh; left: 2vw; } 
+        .mod-tr { top: 13vh; right: 2vw; } 
+        .mod-bl { bottom: 8vh; left: 2vw; } 
+        .mod-br { bottom: 8vh; right: 2vw; } 
+
+        .m-head { font-family: 'Orbitron'; font-size: 0.75rem; color: #fff; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px dashed var(--bio-cobalt-dim); padding-bottom: 6px; margin-top: 2px; font-weight: 800; text-shadow: 0 0 8px var(--theme-dim); display: flex; justify-content: space-between; align-items: center;}
+        .sim-tag { background: var(--theme-main); color: #000; font-size: 0.45rem; padding: 2px 4px; border-radius: 2px; display: block; font-weight: 900; letter-spacing: 1px; }
+        
+        .m-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.65rem; margin-top: 8px; }
+        .m-row span:first-child { color: var(--starlight); font-family: 'JetBrains Mono'; font-weight: 700; }
+        .m-row span:last-child { color: var(--theme-main); font-weight: 700; text-shadow: 0 0 8px var(--theme-dim); }
+
+        .sync-matrix { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.6rem; color: var(--starlight); display: flex; flex-direction: column; gap: 6px; font-weight: 700; }
+        .matrix-row { display: flex; justify-content: space-between; align-items: center; }
+        .matrix-row span:last-child { color: var(--theme-main); }
+        .matrix-alert { font-family: 'Orbitron'; font-weight: 700; margin-top: 6px; text-align: center; letter-spacing: 1px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .alert-flow { color: var(--theme-main); text-shadow: 0 0 5px var(--theme-dim); }
+
+        .btn { background: transparent; border: 1px solid var(--theme-main); color: var(--theme-main); padding: 8px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 2px; border-radius: 4px; transition: 0.3s; width: 100%; margin-top: 6px; z-index: 50; position: relative; font-weight: 700;}
+        .btn:hover { background: var(--theme-main); color: #000; box-shadow: 0 0 15px var(--theme-main); }
+
+        .astrolabe-root { position: absolute; width: var(--dial-size); height: var(--dial-size); max-width: 550px; max-height: 550px; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; }
+        .ls-ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .ls-outer { width: 100%; height: 100%; border: 1px dashed var(--bio-cobalt-dim); }
+        .ls-inner { width: 50%; height: 50%; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 30px rgba(0,0,0,0.8); }
+        
+        .ls-center-hud { position: absolute; width: 35%; height: 35%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+        
+        .bio-earth-core { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background-color: #020204; overflow: hidden; box-shadow: 0 0 20px var(--bio-cobalt-dim), 0 0 40px var(--bio-purple-dim), inset -10px -10px 20px rgba(0,0,0,0.9); pointer-events: none; }
+        .bio-earth-surface { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 200% 100%; filter: grayscale(80%) sepia(50%) hue-rotate(240deg) saturate(200%) brightness(0.65) contrast(1.2); opacity: 0.8; }
+        .night-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 2; background: radial-gradient(circle at 70% 30%, rgba(0, 85, 255, 0.25) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.8) 100%); pointer-events: none; box-shadow: inset 0 0 30px rgba(0,0,0,0.7); }
+
+        .aura-glow { position: absolute; width: 100%; height: 100%; border-radius: 50%; transition: all 1s ease; opacity: 0.4; z-index: -1; }
+        .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); }
+        .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse 3s infinite; }
+        @keyframes aura-pulse { 0%, 100% { transform: scale(1); opacity: 0.25; } 50% { transform: scale(1.15); opacity: 0.45; } }
+        
+        @keyframes flash-text { 0% { color: #fff; text-shadow: 0 0 20px #fff, 0 0 40px #fff; transform: scale(1.1); } 100% { color: var(--theme-main); text-shadow: 0 0 8px var(--theme-dim); transform: scale(1); } }
+
+        .bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+        .bar-fill { height: 100%; background: var(--theme-main); width: 0%; box-shadow: 0 0 10px var(--theme-main); transition: width 0.1s linear; }
+        
+        #lunar-nodes-container { position: absolute; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
+        .lunar-phase-icon { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease; }
+    </style>
+</head>
+<body class="mode-q">
+
+    <div class="star-container" id="stars" style="z-index: 1;"></div>
+
+    <div class="corner-panel mod-tl telemetry-node">
+        <div class="m-head">SUNLIGHT EXPOSURE <span id="sync-badge-tl" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-row"><span>SOLAR LUX TARGET:</span> <span id="lux-avail">--</span></div>
+        <div class="m-row"><span>UV INDEX EXPOSURE:</span> <span id="uv-index">--</span></div>
+        <div class="m-row" style="margin-top: 12px;"><span>SOLAR NOON (ZENITH):</span> <span id="solar-noon">--</span></div>
+    </div>
+    
+    <div class="corner-panel mod-tr telemetry-node">
+        <div class="m-head">LUNAR & TIDE IMPACT <span id="sync-badge-tr" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-row"><span>LUNAR ILLUMINATION:</span> <span id="lunar-illum">--</span></div>
+        <div class="m-row"><span>TIDAL GRAV (SLEEP):</span> <span id="tidal-impact">NOMINAL</span></div>
+        <div class="m-row" style="margin-top: 12px;"><span>LUNAR PHASE:</span> <span id="lunar-phase-name">--</span></div>
+    </div>
+
+    <div class="corner-panel mod-bl telemetry-node">
+        <div class="m-head">INTERNAL BODY CLOCK <span id="sync-badge-bl" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-row"><span>RESTING HR (RHR):</span> <span id="bio-rhr">-- BPM</span></div>
+        <div class="m-row"><span>HRV ELASTICITY:</span> <span id="bio-hrv">-- MS</span></div>
+        <div class="sync-matrix" id="sync-matrix-block">
+            <div class="matrix-row"><span>SLEEP STAGE:</span> <span id="mat-sleep">DEEP</span></div>
+            <div class="matrix-row"><span>BIOLOGICAL SYNC:</span> <span id="bio-sync-pct">--%</span></div>
+            <div class="matrix-alert" id="mat-alert">--</div>
+        </div>
+    </div>
+
+    <div class="corner-panel mod-br telemetry-node">
+        <div class="m-head">90-MINUTE FOCUS CYCLE <span id="sync-badge-br" class="sim-tag">SOVEREIGN</span></div>
+        <div class="m-row"><span>STATE:</span> <span id="bio-state" style="display:inline-block;">--</span></div>
+        <div class="m-row"><span>ELAPSED:</span> <span id="bio-timer">-- / 90 MIN</span></div>
+        <div class="m-row" style="margin-top: 6px;"><span>PHASE COMPLETION:</span> <span id="phase-completion-q" style="color:var(--theme-main); cursor:pointer; border-bottom:1px dashed var(--theme-dim); transition:0.3s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='var(--theme-main)';">--</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="bio-bar"></div></div>
+        <button class="btn" onclick="openCalibration()" ontouchstart="event.stopPropagation(); openCalibration(); event.preventDefault();">CALIBRATE RHYTHM</button>
+    </div>
+
+    <div class="astrolabe-root q-center-dial">
+        <div class="ls-ring ls-outer"></div>
+        <div class="ls-ring ls-inner"></div>
+        
+        <div id="lunar-nodes-container"></div>
+        
+        <div class="ls-center-hud">
+            <div id="bio-aura" class="aura-glow"></div>
+            
+            <div class="bio-earth-core">
+                <div class="bio-earth-surface"></div>
+                <div class="night-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
+        let savedAnchor = localStorage.getItem('q_bio_anchor');
+        let isAutoAnchor = (savedAnchor === null || savedAnchor === "");
+        let anchorMins = isAutoAnchor ? 0 : parseInt(savedAnchor); 
+        let lastRenderedScrub = null;
+        let lastBioState = "";
+
+        async function engageBiometricVector() {
+            if (window.Q_PHASE_III && window.Q_PHASE_III.syncBiometrics) {
+                document.getElementById('mat-alert').innerText = "SYNCING NATIVE HRV...";
+                try {
+                    const dynamicDuration = await window.Q_PHASE_III.syncBiometrics();
+                    if (!localStorage.getItem('q_bio_duration')) cycleDuration = dynamicDuration;
+                    document.getElementById('bio-sync-pct').innerText = "100%";
+                    document.getElementById('mat-alert').innerText = "HRV LINK ESTABLISHED";
+                    document.getElementById('mat-alert').className = "matrix-alert alert-flow";
+                } catch(e) {
+                    document.getElementById('bio-sync-pct').innerText = "FAIL";
+                    document.getElementById('mat-alert').innerText = "HRV SYNC FAILED";
+                }
+            }
+        }
+        
+        engageBiometricVector();
+
+        function getPhaseName(f) {
+            if (f === 0 || f === 1) return "NEW MOON";
+            if (f < 0.25) return "WAXING CRESCENT";
+            if (f === 0.25) return "FIRST QUARTER";
+            if (f < 0.5) return "WAXING GIBBOUS";
+            if (f === 0.5) return "FULL MOON";
+            if (f < 0.75) return "WANING GIBBOUS";
+            if (f === 0.75) return "THIRD QUARTER";
+            return "WANING CRESCENT";
+        }
+
+        function getDynamicMoonSVG(phaseFloat, isApex, isPrimary) {
+            let shadowColor = isApex ? 'rgba(0, 85, 255, 1)' : `rgba(0, 85, 255, ${(phaseFloat > 0.4 && phaseFloat < 0.6) ? 0.8 : 0.2})`;
+            let shadowSize = isApex ? '15px' : (isPrimary ? '8px' : '3px');
+            let html = `<svg viewBox="0 0 32 32" width="100%" height="100%" style="border-radius:50%; box-shadow: 0 0 ${shadowSize} ${shadowColor};">`;
+            html += `<circle cx="16" cy="16" r="15" fill="#05080f" stroke="rgba(184,41,255,0.4)" stroke-width="1"/>`;
+            let rx = Math.max(0.01, Math.abs(15 * Math.cos(phaseFloat * 2 * Math.PI))); 
+            let sweep = phaseFloat < 0.5 ? (phaseFloat <= 0.25 ? 0 : 1) : (phaseFloat <= 0.75 ? 0 : 1);
+            let path = phaseFloat < 0.5 ? `M 16 1 A 15 15 0 0 1 16 31 A ${rx} 15 0 0 ${sweep} 16 1` : `M 16 1 A 15 15 0 0 0 16 31 A ${rx} 15 0 0 ${sweep} 16 1`;
+            if (phaseFloat === 0.5) html += `<circle cx="16" cy="16" r="15" fill="#E5E4E2"/>`;
+            else if (phaseFloat !== 0 && phaseFloat !== 1) html += `<path d="${path}" fill="#E5E4E2"/>`;
+            html += `</svg>`;
+            return html;
+        }
+
+        function renderDynamicMoons(daysElapsed) {
+            const container = document.getElementById('lunar-nodes-container');
+            container.innerHTML = '';
+            const synodicMonth = 29.530588;
+            const C = Math.floor((daysElapsed + 1.555) / synodicMonth);
+            const windowDays = 100;
+            
+            let closestNode = null;
+            let minDelta = Infinity;
+            let allNodes = [];
+
+            for (let c = C - 4; c <= C + 4; c++) {
+                for (let p = 0; p < 16; p++) {
+                    let phaseFloat = p / 16;
+                    let absoluteDays = c * synodicMonth + (phaseFloat * synodicMonth) - 1.555;
+                    let deltaDays = absoluteDays - daysElapsed;
+                    allNodes.push({ absoluteDays, deltaDays, c, p, phaseFloat });
+                    
+                    if (Math.abs(deltaDays) < minDelta) {
+                        minDelta = Math.abs(deltaDays);
+                        closestNode = { c, p };
+                    }
+                }
+            }
+
+            allNodes.forEach(n => {
+                if (Math.abs(n.deltaDays) <= windowDays) {
+                    let opacity = Math.pow(1 - (Math.abs(n.deltaDays) / windowDays), 1.5); 
+                    let meanArc = (n.absoluteDays * (360 / 365.24219)) % 360;
+                    if (meanArc < 0) meanArc += 360;
+                    let rad = (meanArc - 90) * (Math.PI / 180);
+                    
+                    let isPrimary = (n.p % 4 === 0);
+                    let rMap = 46 - 8 * Math.cos(n.phaseFloat * 2 * Math.PI);
+                    let x = 50 + rMap * Math.cos(rad);
+                    let y = 50 + rMap * Math.sin(rad);
+                    
+                    let isApex = (n.c === closestNode.c && n.p === closestNode.p);
+                    let size = isApex ? 28 : (isPrimary ? 18 : 10);
+                    let zIndex = isApex ? 50 : (isPrimary ? 20 : 10);
+                    
+                    let node = document.createElement('div');
+                    node.className = 'lunar-phase-icon';
+                    node.style.cssText = `position:absolute; width:${size}px; height:${size}px; margin-left:${-(size/2)}px; margin-top:${-(size/2)}px; left:${x}%; top:${y}%; opacity:${isApex ? 1.0 : opacity}; z-index:${zIndex}; cursor:help; pointer-events:auto;`;
+                    
+                    if (isApex) {
+                        node.style.filter = 'drop-shadow(0 0 10px var(--bio-cobalt)) drop-shadow(0 0 20px var(--bio-purple)) brightness(1.2)';
+                    }
+                    
+                    node.innerHTML = getDynamicMoonSVG(n.phaseFloat, isApex, isPrimary);
+                    
+                    node.onclick = () => {
+                        const targetMs = window.PYLON_ALPHA_DYNAMIC + (n.absoluteDays * window.MS_DAY);
+                        const fd = window.formatLegacyDate(targetMs);
+                        const phaseName = getPhaseName(n.phaseFloat);
+                        window.Q_ModalEngine.render(`LUNAR PHASE: ${phaseName}`, `
+                            <div style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum); text-align:center; line-height: 1.6;">
+                                <span style="color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; font-size:0.85rem;">${fd.dateStr}</span><br>
+                                ILLUMINATION: ${(n.phaseFloat > 0.5 ? (1 - n.phaseFloat) * 200 : n.phaseFloat * 200).toFixed(1)}%<br>
+                                ORBITAL ARC: ${meanArc.toFixed(2)}°
+                            </div>
+                        `);
+                    };
+                    
+                    container.appendChild(node);
+                }
+            });
+        }
+
+        function calculateSolarMetrics(daysElapsed) {
+            const lat = window.Q_STATE?.location?.lat || 0;
+            const declination = 23.45 * Math.sin((360 / 365.24219) * (daysElapsed - 81) * Math.PI / 180);
+            return {
+                lux: (declination > 0 && lat > 0) || (declination < 0 && lat < 0) ? "HIGH (>10,000)" : "LOW (<2,500)",
+                uv: (declination > 0 && lat > 0) || (declination < 0 && lat < 0) ? "MODERATE-HIGH" : "LOW-MINIMAL",
+                sunsetOffset: (declination > 0 && lat > 0) || (declination < 0 && lat < 0) ? 1 : -1
+            };
+        }
+
+        function openCalibration() { 
+            const html = `
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <label style="font-size:0.6rem; color:rgba(255,255,255,0.6); font-family:'Orbitron';">WAKE ANCHOR (UTC)</label>
+                    <input type="time" id="cal-anchor" value="${Math.floor(anchorMins/60).toString().padStart(2,'0')}:${(anchorMins%60).toString().padStart(2,'0')}" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--theme-main); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none;">
+                    <label style="font-size:0.6rem; color:rgba(255,255,255,0.6); font-family:'Orbitron';">CYCLE DURATION (MIN)</label>
+                    <input type="number" id="cal-duration" value="${cycleDuration}" min="45" max="144" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--theme-main); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none;">
+                </div>`;
+            window.Q_ModalEngine.render('BIOLOGICAL CALIBRATION', html, 'LOCK PARAMETERS', () => {
+                cycleDuration = Math.floor(document.getElementById('cal-duration').value);
+                localStorage.setItem('q_bio_duration', cycleDuration);
+                const parts = document.getElementById('cal-anchor').value.split(':');
+                anchorMins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
+                localStorage.setItem('q_bio_anchor', anchorMins);
+                isAutoAnchor = false; window.Q_ModalEngine.close();
+            }); 
+        }
+
+        window.addEventListener('q-tick', (e) => {
+            const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr } = e.detail;
+
+            if (lastRenderedScrub === null || Math.abs(daysElapsed - lastRenderedScrub) > 0.05) {
+                renderDynamicMoons(daysElapsed);
+                lastRenderedScrub = daysElapsed;
+            }
+
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(token => {
+                        if (/[0-9]/.test(token)) out += `<span style="${numStyle}">${token}</span>`;
+                        else out += `<span style="${letterStyle}">${token}</span>`;
+                    });
+                }
+                return out;
+            }
+
+            const legDateEl = document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold;">${legacyDateStr.toUpperCase()}</span>`;
+            const legTimeEl = document.getElementById('leg-time');
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
+
+            const qCoordWing = document.getElementById('q-coord-wing');
+            if (qCoordWing) {
+                let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
+                } else {
+                    let cCycle = activeBlock ? activeBlock.cycle : 0;
+                    qCoordWing.innerHTML = `<span style="color:var(--starlight);">QC</span><span style="color:var(--theme-main); font-weight:bold;">${cCycle}</span> <span style="color:var(--starlight);">Q</span><span style="color:var(--theme-main); font-weight:bold;">${qData.quad}</span> <span style="color:var(--starlight);">S</span><span style="color:var(--theme-main); font-weight:bold;">${qData.sect}</span> <span style="color:var(--starlight);">DAY</span><span style="color:var(--theme-main); font-weight:bold;">${qData.day}</span>`;
+                }
+            }
+
+            const meanDegEl = document.getElementById('mean-deg');
+            if (meanDegEl) { 
+                meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
+                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            const trueDegEl = document.getElementById('true-deg');
+            if (trueDegEl) { 
+                trueDegEl.innerText = qData.trueArc.toFixed(2) + "°";
+                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+
+            const earthSurface = document.querySelector('.bio-earth-surface');
+            if (earthSurface) {
+                const lon = window.Q_STATE?.location?.lon || 0;
+                const siderealDayMs = 86164090;
+                const utcFraction = (t % siderealDayMs) / siderealDayMs;
+                const lonFraction = lon / 360;
+                const bgPosition = 200 - (utcFraction * 200) - (lonFraction * 200) + 100; 
+                earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
+            }
+
+            // BIOMETRIC DATA SIMULATION HOOKS
+            let baseRHR = 55 + Math.sin(t / 10000) * 5;
+            let baseHRV = 65 + Math.cos(t / 15000) * 10;
+            document.getElementById('bio-rhr').innerText = baseRHR.toFixed(1) + " BPM";
+            document.getElementById('bio-hrv').innerText = baseHRV.toFixed(1) + " MS";
+
+            // TIDAL GRAVITY IMPACT
+            let tideStr = "NOMINAL (NEAP TIDE)";
+            let tideColor = "var(--theme-main)";
+            if (qData.lunarPhase < 0.05 || qData.lunarPhase > 0.95 || (qData.lunarPhase > 0.45 && qData.lunarPhase < 0.55)) {
+                tideStr = "HIGH IMPACT (SPRING TIDE)";
+                tideColor = "var(--friction-red)";
+            }
+            const tidalEl = document.getElementById('tidal-impact');
+            tidalEl.innerText = tideStr;
+            tidalEl.style.color = tideColor;
+            tidalEl.style.textShadow = tideColor === "var(--friction-red)" ? "0 0 10px rgba(255,51,51,0.4)" : "";
+
+            let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
+            let cycleDurMs = cycleDuration * 60000;
+            let cyclePosFloat = (activeMs % cycleDurMs) / cycleDurMs;
+            let currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            
+            if (currentBioState !== lastBioState) {
+                document.getElementById('bio-state').innerText = currentBioState;
+                document.getElementById('bio-aura').className = currentBioState === "DEEP FLOW" ? "aura-glow flow-aura" : "aura-glow vent-aura";
+                lastBioState = currentBioState;
+            }
+            document.getElementById('bio-timer').innerText = `${Math.floor((activeMs % cycleDurMs) / 60000)} / ${cycleDuration} MIN`;
+            document.getElementById('bio-bar').style.width = (cyclePosFloat * 100) + "%";
+            document.getElementById('mat-sleep').innerText = currentBioState === "VENT/RECOVERY" ? "LIGHT/REM" : "DEEP";
+
+            // PHASE COMPLETION HOOK
+            let remainingMs = cycleDurMs - (activeMs % cycleDurMs);
+            let completionAbsoluteMs = t + remainingMs;
+            let completionDays = (completionAbsoluteMs - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+            let compData = window.getOrbitalData(completionDays);
+            
+            let compCoordStr = `Q${compData.quad} S${compData.sect} D${compData.day}`;
+            let completionEl = document.getElementById('phase-completion-q');
+            completionEl.innerText = compCoordStr;
+            
+            completionEl.onclick = (ev) => {
+                ev.stopPropagation();
+                if(window.Q_OmniPlanner && window.Q_OmniPlanner.openPlanner) {
+                    const d = new Date(completionAbsoluteMs);
+                    window.Q_OmniPlanner.jumpToDate(`${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`);
+                    window.Q_OmniPlanner.openPlanner(true);
+                    window.Q_MobileBridge.pulse('MEDIUM');
+                }
+            };
+
+            const sm = calculateSolarMetrics(daysElapsed);
+            document.getElementById('lux-avail').innerText = sm.lux;
+            document.getElementById('uv-index').innerText = sm.uv;
+            document.getElementById('lunar-illum').innerText = (qData.lunarPhase > 0.5 ? (1 - qData.lunarPhase) * 200 : qData.lunarPhase * 200).toFixed(1) + '%';
+            document.getElementById('lunar-phase-name').innerText = getPhaseName(qData.lunarPhase);
+        });
+
+        if (window.generateStars) window.generateStars('stars');
+    </script>
+</body>
+</html>

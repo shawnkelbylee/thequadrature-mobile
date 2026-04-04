@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>THE QUADRATURE // ENVIRONMENTAL VECTOR</title>
+    <script src="q-ui-global.js?v=16.4"></script>
+    <script src="q-core.js?v=16.4"></script>
+    <script src="q-ui-planner.js?v=16.4"></script>
+    <script src="q-hub.js?v=16.4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
+
+        :root {
+            --void: #020617; 
+            --atmos-blue: #0ea5e9; 
+            --atmos-dim: rgba(14, 165, 233, 0.15);
+            --squall-amber: #f59e0b; 
+            --alert-red: #ef4444; 
+            --perihelion-mag: #c026d3;
+            --env-green: #a7ff83; 
+            --env-green-dim: rgba(167, 255, 131, 0.2); 
+            --env-green-glow: rgba(167, 255, 131, 0.4);
+            --theme-main: var(--env-green); 
+            --theme-dim: var(--env-green-dim); 
+            --gold: #F4D068;
+            --platinum: #E5E4E2;
+            --white-pure: #ffffff;
+            --starlight: rgba(255, 255, 255, 0.6);
+        }
+
+        body { 
+            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; 
+            background-color: var(--void); 
+            background: radial-gradient(circle at center, #0a1122 0%, var(--void) 100%); 
+            color: var(--env-green); font-family: 'JetBrains Mono', monospace; 
+            display: flex; justify-content: center; align-items: center; 
+            user-select: none; perspective: 1500px; transform-style: preserve-3d; color-scheme: dark; 
+            touch-action: manipulation;
+        }
+
+        /* --- HAPTIC & MODAL Z-INDEX OVERRIDES --- */
+        #q-universal-modal { z-index: 999999 !important; }
+        .wind-panel { pointer-events: auto !important; z-index: 60 !important; }
+        .sys-badge.opt-badge, .val-highlight, .val-alert, .val-warn, .fmt-toggle { pointer-events: auto !important; position: relative; z-index: 100 !important; }
+
+        .wind-panel { 
+            position: absolute; width: var(--mod-w); padding: 12px 15px; box-sizing: border-box; 
+            backdrop-filter: var(--blur-med); -webkit-backdrop-filter: var(--blur-med); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.4); 
+            display: flex; flex-direction: column; justify-content: center; gap: 4px; 
+            border-radius: 12px; border: 1px solid var(--env-green-dim); 
+            transition: all 0.3s ease; 
+        }
+        
+        .wind-tl { top: 7vh; left: 2vw; background: radial-gradient(circle at top left, var(--env-green-dim) 0%, var(--glass-med) 70%); } 
+        .wind-tr { top: 7vh; right: 2vw; background: radial-gradient(circle at top right, var(--env-green-dim) 0%, var(--glass-med) 70%); cursor: pointer; } 
+        .wind-bl { bottom: 8vh; left: 2vw; background: radial-gradient(circle at bottom left, var(--env-green-dim) 0%, var(--glass-med) 70%); } 
+        .wind-br { bottom: 8vh; right: 2vw; background: radial-gradient(circle at bottom right, var(--env-green-dim) 0%, var(--glass-med) 70%); } 
+        .wind-tr:hover { border-color: var(--env-green); box-shadow: 0 0 20px var(--env-green-dim); }
+
+        .h-label { 
+            font-family: 'Orbitron'; font-size: 0.55rem; color: rgba(255,255,255,0.5); 
+            letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px dashed var(--env-green-dim); 
+            padding-bottom: 3px; margin-top: 4px; display: flex; justify-content: space-between;
+        }
+        .h-label:first-child { margin-top: 0; }
+        
+        /* STANDARDIZED TELEMETRY AESTHETICS */
+        .h-val { font-size: 0.65rem; margin-top: 8px; display: flex; justify-content: space-between; align-items: baseline; }
+        .h-val span:first-child { color: var(--starlight); font-family: 'JetBrains Mono'; font-weight: 700; }
+        .h-val span:last-child { color: var(--env-green); font-weight: 700; text-shadow: 0 0 8px var(--env-green-dim); transition: 0.3s; }
+        
+        .h-val span.val-highlight { cursor: pointer; border-bottom: 1px dotted var(--env-green); }
+        .h-val span.val-highlight:hover { color: #fff; text-shadow: 0 0 15px var(--env-green); }
+        .h-val span.val-alert { color: var(--alert-red) !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5) !important; cursor: pointer; border-bottom: 1px dotted var(--alert-red); }
+        .h-val span.val-alert:hover { color: #fff !important; text-shadow: 0 0 15px var(--alert-red) !important; }
+        .h-val span.val-warn { color: var(--squall-amber) !important; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4) !important; cursor: pointer; border-bottom: 1px dotted var(--squall-amber); }
+        .h-val span.val-warn:hover { color: #fff !important; text-shadow: 0 0 15px var(--squall-amber) !important; }
+
+        .sparkline-container { width: 100%; height: 16px; display: flex; align-items: flex-end; gap: 2px; margin-top: 4px; }
+        .spark-bar { flex-grow: 1; background: var(--env-green); border-radius: 1px 1px 0 0; transition: height 0.5s ease, background 0.5s ease; opacity: 0.8; box-shadow: 0 0 5px var(--env-green-glow);}
+        
+        .sys-badge { font-size: 0.45rem; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--env-green-dim); color: var(--env-green); }
+        .opt-badge:hover { background: var(--platinum); color: var(--void) !important; cursor: pointer; }
+
+        .master-wheel-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); display: flex; justify-content: center; align-items: center; z-index: 5; }
+        .wheel-glass { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, rgba(167, 255, 131, 0.02) 0%, rgba(14, 165, 233, 0.05) 60%, rgba(2, 6, 23, 0.6) 100%); backdrop-filter: blur(8px); border: 1px solid var(--env-green-dim); box-shadow: 0 0 60px var(--env-green-dim), inset 0 0 40px rgba(0,0,0,0.8); pointer-events: none; }
+        .equator-hub { position: absolute; width: 95%; height: 95%; top: 2.5%; left: 2.5%; pointer-events: none; z-index: 10; }
+
+        #axis-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(2, 6, 15, 0.9); border: 1px solid var(--env-green); padding: 8px 16px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; color: var(--env-green); border-radius: 4px; box-shadow: 0 0 15px var(--env-green-dim); z-index: 100; opacity: 0; transition: opacity 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 2px; }
+
+        .ecliptic-axis, .axial-tilt, .celestial-equator, .apsides-line { pointer-events: auto; cursor: crosshair; }
+        .ecliptic-axis::after, .celestial-equator::after, .apsides-line::after { content: ''; position: absolute; top: -10px; left: 0; width: 100%; height: 20px; }
+        .axial-tilt::after { content: ''; position: absolute; top: 0; left: -10px; width: 20px; height: 100%; }
+
+        .ecliptic-axis { position: absolute; width: 100%; height: 2px; top: 50%; left: 0; background: linear-gradient(90deg, rgba(167,255,131,0) 0%, var(--env-green) 10%, var(--env-green) 90%, rgba(167,255,131,0) 100%); transform: translateY(-50%); z-index: 11; box-shadow: 0 0 10px var(--env-green-dim); }
+        .axial-tilt { position: absolute; width: 2px; height: 100%; top: 0; left: 50%; background: linear-gradient(180deg, transparent 10%, var(--white-pure) 40%, var(--white-pure) 60%, transparent 90%); transform: translateX(-50%) rotate(23.5deg); z-index: 11; box-shadow: 0 0 10px rgba(255, 255, 255, 0.4); }
+        .celestial-equator { position: absolute; width: 100%; height: 2px; top: 50%; left: 0; background: linear-gradient(90deg, transparent 10%, var(--white-pure) 40%, var(--white-pure) 60%, transparent 90%); transform: translateY(-50%) rotate(23.5deg); z-index: 11; box-shadow: 0 0 10px rgba(255, 255, 255, 0.4); }
+        .apsides-line { position: absolute; width: 84.21%; height: 2px; top: 50%; left: 50%; background: linear-gradient(90deg, var(--atmos-blue) 0%, transparent 50%, var(--perihelion-mag) 100%); box-shadow: 0 0 10px var(--atmos-dim); transform: translate(-50%, -50%) rotate(-76deg); z-index: 11; }
+
+        @keyframes solar-pulse-low { 0%, 100% { box-shadow: 0 0 20px var(--squall-amber), 0 0 40px rgba(245, 158, 11, 0.5), inset 0 0 5px #fff; opacity: 1; } 50% { box-shadow: 0 0 10px var(--squall-amber), 0 0 20px rgba(245, 158, 11, 0.3), inset 0 0 2px #fff; opacity: 0.85; } }
+        .sun-fulcrum { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: var(--squall-amber); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: solar-pulse-low 3s ease-in-out infinite; z-index: 12; }
+
+        .wheel-ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s linear, box-shadow 0.3s ease; }
+        .r-outer { width: 95%; height: 95%; border: 2px solid var(--env-green); opacity: 0.7; box-shadow: 0 0 15px var(--env-green-glow), inset 0 0 20px rgba(0,0,0,0.5); }
+        .r-mid { width: 78%; height: 78%; background: conic-gradient(from 0deg, var(--void) 0deg, var(--env-green) 45deg, var(--void) 90deg, var(--env-green) 135deg, var(--void) 180deg, var(--env-green) 225deg, var(--void) 270deg, var(--env-green) 315deg, var(--void) 360deg); -webkit-mask: radial-gradient(transparent 65%, black 66%); opacity: 0.8; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .r-inner { width: 55%; height: 55%; border: 2px solid var(--env-green-dim); box-shadow: 0 0 0 1px var(--env-green), inset 0 0 30px var(--env-green-dim); background: rgba(0,0,0,0.4); }
+
+        .horizon-cone { position: absolute; top: -10px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 30px solid var(--env-green); filter: drop-shadow(0 -5px 15px var(--env-green)); pointer-events: none; }
+        .seasonal-marker { position: absolute; font-family: 'Segoe UI Emoji', Arial, sans-serif; font-size: 1.4rem; color: var(--env-green); filter: drop-shadow(0 0 8px var(--env-green-glow)); display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; margin-left: -20px; margin-top: -20px; z-index: 50; pointer-events: none; background: rgba(2, 6, 23, 0.85); border: 1px solid var(--env-green-dim); border-radius: 50%; box-shadow: 0 0 15px rgba(0,0,0,0.9); }
+
+        .astro-tooltip { position: absolute; background: rgba(2, 6, 15, 0.95); backdrop-filter: blur(10px); border: 1px solid; padding: 12px; border-radius: 6px; width: 220px; font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--starlight); z-index: 100; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,0.9); text-shadow: none; }
+        .astro-tt-head { font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed; padding-bottom: 4px; }
+        
+        .perihelion-marker { position: absolute; width: 14px; height: 14px; background: var(--perihelion-mag); border-radius: 50%; box-shadow: 0 0 25px var(--perihelion-mag), 0 0 10px #fff; z-index: 35; margin-left: -7px; margin-top: -7px; cursor: help; pointer-events: auto; }
+        .aphelion-marker { position: absolute; width: 14px; height: 14px; background: var(--atmos-blue); border-radius: 50%; box-shadow: 0 0 25px var(--atmos-blue), 0 0 10px #fff; z-index: 35; margin-left: -7px; margin-top: -7px; cursor: help; pointer-events: auto; }
+        
+        .perihelion-marker:hover .astro-tooltip, .aphelion-marker:hover .astro-tooltip { opacity: 1; visibility: visible; }
+        .perihelion-marker .astro-tooltip { border-color: var(--perihelion-mag); top: 20px; left: 20px; }
+        .aphelion-marker .astro-tooltip { border-color: var(--atmos-blue); bottom: 20px; right: 20px; }
+
+        .earth-pylon-container { position: absolute; width: 64px; height: 64px; margin-left: -32px; margin-top: -32px; z-index: 40; }
+        .earth-axis { position: absolute; width: 2px; height: 140%; top: -20%; left: 50%; margin-left: -1px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.8) 80%, transparent); z-index: 1; box-shadow: 0 0 5px rgba(255,255,255,0.5); transform: rotate(23.5deg); }
+        .earth-pylon { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; z-index: 2; background-color: #020813; transform: rotate(23.5deg) translateZ(0); -webkit-mask-image: -webkit-radial-gradient(white, black); }
+        .globe-surface { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0b2e59; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 128px 64px; background-repeat: repeat-x; animation: pan-surface linear infinite; }
+        @keyframes pan-surface { 0% { background-position: 0px center; } 100% { background-position: 128px center; } }
+        .speed-fast { animation-duration: 2.0s; } .speed-med { animation-duration: 4.0s; } .speed-slow { animation-duration: 7.0s; }
+        .earth-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 3; pointer-events: none; }
+        .alpha-shadow { background: linear-gradient(to top, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
+        .beta-shadow  { background: linear-gradient(to right, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
+        .gamma-shadow { background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
+        .delta-shadow { background: linear-gradient(to left, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
+        .earth-volumetric { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 4; pointer-events: none; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 100%); box-shadow: inset -2px -2px 6px rgba(0,0,0,0.35), inset 2px 2px 6px rgba(255,255,255,0.4), 0 0 10px rgba(167, 255, 131, 0.2); }
+    </style>
+</head>
+<body class="mode-q">
+
+    <div class="matrix-layer"></div>
+    <div class="star-container" id="stars"></div>
+    <div id="axis-hud">GEOMETRIC AXIS DATA</div>
+
+    <div class="wind-panel wind-tl telemetry-node">
+        <div class="h-label" style="margin-top:0;"><span>RISK ASSESSMENT</span> <span class="sys-badge" id="iot-status-badge">IOT: ACTIVE</span></div>
+        <div class="h-val"><span>PROBABILITY INDEX:</span> <span class="val-highlight" id="risk-index">EPHEMERIS SYNCED</span></div>
+        <div class="sparkline-container" id="risk-sparkline"></div>
+        <div class="h-label" style="margin-top:6px;">HAZARD STATUS</div>
+        <div class="h-val"><span>ADVERSE CONDITION:</span> <span class="val-highlight" id="hazard-status" onclick="openImpact()" ontouchstart="event.stopPropagation(); openImpact()">MONITORED</span></div>
+    </div>
+
+    <div class="wind-panel wind-tr telemetry-node" onclick="toggleDeltaView()" ontouchstart="event.stopPropagation(); toggleDeltaView()">
+        <div class="h-label" style="margin-top:0;"><span>METEOROLOGICAL DATA</span> <span class="sys-badge" id="meteo-badge">ATMOS DELTA: LIVE</span></div>
+        <div class="h-val"><span id="lbl-pressure">ATMOSPHERIC PRESSURE:</span> <span class="val-highlight" id="val-pressure">1013 hPa</span></div>
+        <div class="h-val"><span id="lbl-irradiance">SOLAR IRRADIANCE:</span> <span class="val-highlight" id="val-irradiance">ACTIVE</span></div>
+        <div class="h-label" style="margin-top:6px;">PRECIPITATION VECTOR</div>
+        <div class="h-val"><span id="lbl-precip">VOLUME / TREND:</span> <span class="val-highlight" id="val-precip">0.0mm / STABLE</span></div>
+    </div>
+
+    <div class="wind-panel wind-bl telemetry-node">
+        <div class="h-label" style="margin-top:0;"><span id="strat-header">EXPOSURE MODELING</span> <span class="sys-badge">PHASE III</span></div>
+        <div class="h-val"><span id="lbl-yield">YIELD PROJECTION:</span> <span class="val-highlight" id="strat-yield" onclick="openImpact()" ontouchstart="event.stopPropagation(); openImpact()">OPTIMAL</span></div>
+        <div class="h-val"><span id="lbl-alloc">RESOURCE ALLOC:</span> <span class="val-highlight" id="strat-alloc" onclick="openImpact()" ontouchstart="event.stopPropagation(); openImpact()">PHASE 2 (GROWTH)</span></div>
+        <div class="h-label" style="margin-top:6px;">EXECUTION METRICS</div>
+        <div class="h-val"><span>ACTION HORIZON:</span> <span class="val-highlight" id="strat-horizon">+14.00°</span></div>
+    </div>
+
+    <div class="wind-panel wind-br telemetry-node">
+        <div class="h-label" style="margin-top:0;"><span>ENVIRONMENTAL PHASE</span> <span class="sys-badge opt-badge" style="color:var(--env-green); border-color:var(--env-green-dim); transition:0.3s; cursor:pointer;" onclick="openOptions()" ontouchstart="event.stopPropagation(); openOptions()">[ OPT ]</span></div>
+        <div class="h-val"><span>AMBIENT TEMP:</span> <span class="val-highlight" id="val-temp">-- °C</span></div>
+        <div class="h-val"><span>BIOME TENSION:</span> <span class="val-highlight" id="agri-tension">DORMANT / GATHER</span></div>
+        <div class="h-label" style="margin-top:6px;">CROSS-VECTOR TELEMETRY</div>
+        <div class="h-val" style="font-size: 0.65rem;"><span>THERMODYNAMIC FRICTION:</span> <span class="val-highlight" id="thermo-friction">--</span></div>
+    </div>
+
+    <div class="master-wheel-container q-center-dial">
+        <div class="wheel-glass"></div>
+        <div class="equator-hub">
+            <div class="ecliptic-axis" onmouseover="showAxisHUD('CARDINAL CROSS: ECLIPTIC EQUATOR (0°/180° - 90°/270°)')" onmouseout="hideAxisHUD()"></div>
+            <div class="celestial-equator" onmouseover="showAxisHUD('CELESTIAL EQUATOR: PERPENDICULAR TO AXIS (23.5° TO ECLIPTIC)')" onmouseout="hideAxisHUD()"></div>
+            <div class="axial-tilt" onmouseover="showAxisHUD('AXIAL CROSS: 23.5° OBLIQUITY (SEASONAL SHIFT)')" onmouseout="hideAxisHUD()"></div>
+            <div class="apsides-line" onmouseover="showAxisHUD('LINE OF APSIDES: 14° PERIHELION TO 194° APHELION')" onmouseout="hideAxisHUD()"></div>
+            <div class="sun-fulcrum"></div>
+        </div>
+        
+        <div id="seasonal-markers" style="position:absolute; width:100%; height:100%; z-index:50; pointer-events:none;"></div>
+        
+        <div class="earth-pylon-container" style="top: 2.5%; left: 50%;" title="ALPHA / WINTER SOLSTICE / PERIHELION PROXIMITY">
+            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-fast"></div></div><div class="earth-shadow alpha-shadow"></div><div class="earth-volumetric"></div>
+        </div>
+        <div class="earth-pylon-container" style="top: 50%; left: 97.5%;" title="BETA / VERNAL EQUINOX / NOMINAL VELOCITY">
+            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-med"></div></div><div class="earth-shadow beta-shadow"></div><div class="earth-volumetric"></div>
+        </div>
+        <div class="earth-pylon-container" style="top: 97.5%; left: 50%;" title="GAMMA / SUMMER SOLSTICE / APHELION PROXIMITY">
+            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-slow"></div></div><div class="earth-shadow gamma-shadow"></div><div class="earth-volumetric"></div>
+        </div>
+        <div class="earth-pylon-container" style="top: 50%; left: 2.5%;" title="DELTA / AUTUMNAL EQUINOX / NOMINAL VELOCITY">
+            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-med"></div></div><div class="earth-shadow delta-shadow"></div><div class="earth-volumetric"></div>
+        </div>
+
+        <div class="wheel-ring r-outer"></div>
+        <div class="wheel-ring r-mid"></div>
+        <div class="wheel-ring r-inner" id="action-horizon-ring"><div class="horizon-cone"></div></div>
+    </div>
+
+    <div class="master-wheel-container q-center-dial" style="z-index: 60; pointer-events:none;">
+        <div id="orbital-nodes" style="position:absolute; width:100%; height:100%;"></div>
+    </div>
+
+    <script>
+        let liveWeather = null;
+        let sparkBars = [];
+        let showDelta = false;
+        let alertThreshold = 75;
+        let currentAssetMode = "FLORA";
+        let currentRiskVal = 0;
+        let currentRadarStatus = 'STABLE';
+
+        function showAxisHUD(text) {
+            const hud = document.getElementById('axis-hud');
+            hud.innerText = text;
+            hud.style.opacity = '1';
+        }
+
+        function hideAxisHUD() {
+            document.getElementById('axis-hud').style.opacity = '0';
+        }
+
+        function initSparklines() {
+            const container = document.getElementById('risk-sparkline');
+            container.innerHTML = '';
+            sparkBars = [];
+            for(let i=0; i<30; i++) {
+                let bar = document.createElement('div');
+                bar.className = 'spark-bar';
+                container.appendChild(bar);
+                sparkBars.push(bar);
+            }
+        }
+
+        function renderSeasonalMarkers(mode) {
+            const container = document.getElementById('seasonal-markers');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const markers = [
+                { arc: 45, icon: mode === 'FAUNA' ? '❄️' : '🌱' },
+                { arc: 135, icon: mode === 'FAUNA' ? '🐣' : '🌿' },
+                { arc: 225, icon: mode === 'FAUNA' ? '☀️' : '🌾' },
+                { arc: 315, icon: mode === 'FAUNA' ? '🍂' : '🍁' }
+            ];
+            
+            markers.forEach(m => {
+                let el = document.createElement('div');
+                el.className = 'seasonal-marker';
+                el.innerText = m.icon;
+                let angle = (m.arc - 90) * (Math.PI / 180);
+                let x = 50 + 40 * Math.cos(angle);
+                let y = 50 + 40 * Math.sin(angle);
+                el.style.left = x + '%';
+                el.style.top = y + '%';
+                container.appendChild(el);
+            });
+        }
+
+        function renderOrbitalNodes() {
+            const container = document.getElementById('orbital-nodes');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            let peri = document.createElement('div');
+            peri.className = 'perihelion-marker';
+            let pAngle = (14 - 90) * (Math.PI / 180);
+            peri.style.left = (50 + 40 * Math.cos(pAngle)) + '%';
+            peri.style.top = (50 + 40 * Math.sin(pAngle)) + '%';
+            peri.innerHTML = '<div class="astro-tooltip"><div class="astro-tt-head">PERIHELION (14.00°)</div>Maximum orbital velocity. True Ellipse acceleration.</div>';
+            container.appendChild(peri);
+
+            let aph = document.createElement('div');
+            aph.className = 'aphelion-marker';
+            let aAngle = (194 - 90) * (Math.PI / 180);
+            aph.style.left = (50 + 40 * Math.cos(aAngle)) + '%';
+            aph.style.top = (50 + 40 * Math.sin(aAngle)) + '%';
+            aph.innerHTML = '<div class="astro-tooltip"><div class="astro-tt-head">APHELION (194.00°)</div>Minimum orbital velocity. True Ellipse deceleration.</div>';
+            container.appendChild(aph);
+        }
+
+        async function fetchMeteoData() {
+            const API_LOCATIONS = {
+                'CLW': { lat: 27.9659, lon: -82.8001 },
+                'PHL': { lat: 39.9526, lon: -75.1652 },
+                'ENC': { lat: 34.1593, lon: -118.5012 },
+                'GLOBAL': { lat: window.Q_STATE?.location?.lat || 0, lon: window.Q_STATE?.location?.lon || 0 }
+            };
+
+            const anchorEl = document.getElementById('climate-anchor');
+            const anchor = anchorEl ? anchorEl.value : 'CLW';
+            const loc = API_LOCATIONS[anchor] || API_LOCATIONS['CLW']; 
+            
+            try {
+                const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + loc.lat + '&longitude=' + loc.lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const data = await response.json();
+                if (data && data.current) {
+                    liveWeather = data.current;
+                    if(window.Q_LOG) window.Q_LOG('INFO', 'ENVIRONMENTAL', 'METEO_API_SYNC', data.current);
+                    document.getElementById('meteo-badge').innerText = "ATMOS DELTA: LIVE";
+                    document.getElementById('meteo-badge').style.color = "";
+                    document.getElementById('meteo-badge').style.borderColor = "var(--env-green-dim)";
+                }
+            } catch (error) {
+                if(window.Q_LOG) window.Q_LOG('ERROR', 'ENVIRONMENTAL', 'METEO_API_FAILED', { error: error.message, fallback: 'STATIC_BASELINE' });
+                document.getElementById('meteo-badge').innerText = "STATIC BASELINE (DEGRADED)";
+                document.getElementById('meteo-badge').style.color = "var(--alert-red)";
+                document.getElementById('meteo-badge').style.borderColor = "var(--alert-red)";
+                liveWeather = null;
+            }
+        }
+
+        function toggleDeltaView() {
+            showDelta = !showDelta;
+            const badge = document.getElementById('meteo-badge');
+            if (showDelta) {
+                badge.innerText = "100-YR DELTA"; badge.style.borderColor = "var(--squall-amber)"; badge.style.color = "var(--squall-amber)";
+            } else {
+                badge.innerText = liveWeather ? "ATMOS DELTA: LIVE" : "STATIC BASELINE (DEGRADED)"; 
+                if(!liveWeather) { badge.style.borderColor = "var(--alert-red)"; badge.style.color = "var(--alert-red)"; }
+                else { badge.style.borderColor = "var(--env-green-dim)"; badge.style.color = ""; }
+            }
+        }
+
+        window.updateAssetLabels = function() {
+            const modeEl = document.getElementById('asset-track');
+            const mode = modeEl ? modeEl.value : 'FLORA';
+            currentAssetMode = mode;
+            if (mode === "FAUNA") {
+                document.getElementById('strat-header').innerText = "BIOLOGICAL / FAUNA";
+                document.getElementById('lbl-yield').innerText = "EXPOSURE LIMITS:";
+                document.getElementById('lbl-alloc').innerText = "METABOLIC DRAW:";
+            } else { 
+                document.getElementById('strat-header').innerText = "EXPOSURE MODELING";
+                document.getElementById('lbl-yield').innerText = "YIELD PROJECTION:";
+                document.getElementById('lbl-alloc').innerText = "RESOURCE ALLOC:";
+            }
+            renderSeasonalMarkers(mode);
+        };
+
+        function saveOptions() {
+            const threshEl = document.getElementById('risk-thresh');
+            alertThreshold = threshEl ? parseInt(threshEl.value) : 75;
+            window.updateAssetLabels();
+            fetchMeteoData();
+            window.Q_ModalEngine.close();
+        }
+
+        function openOptions() {
+            const html = `
+                <div>
+                    <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">MICRO-CLIMATE ANCHOR</label>
+                    <select id="climate-anchor" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                        <option value="CLW" selected>Clearwater, FL (Current Base)</option>
+                        <option value="PHL">Philadelphia, PA (Eastern Seaboard)</option>
+                        <option value="ENC">Encino, CA (Western Coastal)</option>
+                        <option value="GLOBAL">Global Average (Macro)</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">DOMAIN TRACKING MODE</label>
+                    <select id="asset-track" onchange="window.updateAssetLabels()" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                        <option value="FLORA" ${currentAssetMode === 'FLORA' ? 'selected' : ''}>FLORA / AGRARIAN (Agriculture & Biome)</option>
+                        <option value="FAUNA" ${currentAssetMode === 'FAUNA' ? 'selected' : ''}>FAUNA / BIOLOGICAL (Livestock & Animal Care)</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">RISK THRESHOLD SENSITIVITY: <span id="thresh-val" style="color:var(--env-green);">${alertThreshold}%</span></label>
+                    <input type="range" id="risk-thresh" min="50" max="95" value="${alertThreshold}" class="modal-input" oninput="document.getElementById('thresh-val').innerText = this.value + '%'" style="width: 100%; margin-top: 4px;">
+                </div>
+            `;
+            window.Q_ModalEngine.render('VECTOR PERSONALIZATION', html, 'APPLY & CALIBRATE', saveOptions);
+        }
+        
+        function logShieldingIntent() {
+            if(!window.PYLON_ALPHA_DYNAMIC) return;
+            const t = window.getSimState().isLive ? Date.now() : window.getSimState().simTime;
+            const pDate = new Date(t);
+            const y = pDate.getFullYear();
+            const mo = (pDate.getMonth()+1).toString().padStart(2,'0');
+            const d = pDate.getDate().toString().padStart(2,'0');
+            const key = `${y}-${mo}-${d}-12-00`; 
+
+            window.loadPlannerData();
+            if(!window.qData[key]) window.qData[key] = { text: "", link: "" };
+
+            if(!window.qData[key].text.includes("[SHIELDING/SHELTER]")) {
+                window.qData[key].text = `[SHIELDING/SHELTER] SEVERE ENVIRONMENTAL HAZARD DETECTED. SHELTER PROTOCOL ENGAGED.\n` + window.qData[key].text;
+                window.savePlannerData();
+                window.dispatchEvent(new Event('storage'));
+            }
+            
+            if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('HEAVY');
+            
+            if(window.Q_OmniPlanner && window.Q_OmniPlanner.openPlanner) {
+                window.Q_OmniPlanner.jumpToDate(`${y}-${mo}-${d}`);
+                window.Q_OmniPlanner.openPlanner(true);
+            } else {
+                window.Q_ModalEngine.render('INTENT LOGGED', '<div style="color:var(--env-green); text-align:center; font-family:\'JetBrains Mono\';">SHIELDING/SHELTER intent synchronized to Omni-Planner.</div>', 'ACKNOWLEDGE');
+            }
+        }
+
+        function openImpact() {
+            const isLive = window.getSimState().isLive;
+            let severity = currentRiskVal >= alertThreshold ? "SEVERE" : (currentRiskVal >= alertThreshold - 25 ? "ELEVATED" : "NOMINAL");
+            let apiDataString = "";
+            
+            if (liveWeather && isLive) {
+                apiDataString = '<br><br><span style="color:var(--atmos-blue); font-size:0.65rem; line-height: 1.4; display:block; border-top: 1px dashed var(--atmos-blue); padding-top: 8px; margin-top: 8px;"><strong>[ CROSS-VECTOR API TELEMETRY ]</strong><br>&#x2022; OPEN-METEO (Env): Temp ' + liveWeather.temperature_2m + '°C | Pressure ' + liveWeather.surface_pressure + 'hPa | Irradiance ' + liveWeather.direct_normal_irradiance + 'W/m²</span>';
+            }
+
+            let iotHook = (window.Q_STATE && window.Q_STATE.hardware_hooks) ? window.Q_STATE.hardware_hooks.iot_webhooks : 'STANDBY';
+            let iotString = '<span style="color:var(--env-green); font-weight:bold;">[IoT: ' + iotHook + ']</span> ';
+
+            let desc = "", action = "";
+
+            if (currentAssetMode === "FAUNA") {
+                if (severity === "SEVERE") {
+                    desc = 'Lethal exposure thresholds projected (' + currentRiskVal + '% probability). Significant drop in ambient survivability indices.' + apiDataString;
+                    action = iotString + "ACTION: Mandate indoor sheltering. Adjust feeding schedules to match metabolic caloric burn requirements for extreme temperature resistance.";
+                } else if (severity === "ELEVATED") {
+                    desc = 'Behavioral shift markers detected. Approaching stressful ambient conditions.' + apiDataString;
+                    action = iotString + "ACTION: Shift K-9 or livestock exercise routines to cooler Arc degrees. Increase hydration provisions.";
+                } else {
+                    desc = 'Nominal biological exposure limits.' + apiDataString;
+                    action = iotString + "ACTION: Maintain standard husbandry cycles and outdoor exposure allowances.";
+                }
+            } else { 
+                if (severity === "SEVERE") {
+                    desc = 'Historical cross-reference confirms a ' + currentRiskVal + '% probability of extreme exposure phenomena at this exact coordinate.' + apiDataString;
+                    action = iotString + "ACTION: Execute immediate flora shielding. Alter thermodynamic allocation to mitigate shock.";
+                } else if (severity === "ELEVATED") {
+                    desc = 'Meteorological Delta indicates non-standard atmospheric tension.' + apiDataString;
+                    action = iotString + "ACTION: Prepare contingency harvesting. Withhold non-essential resource allocation until variance passes.";
+                } else {
+                    desc = 'Optimal thermodynamic flow for human and agricultural output.' + apiDataString;
+                    action = iotString + "ACTION: Execute Phase 2 expansion. Maximize resource allocation while quadrature window remains open.";
+                }
+            }
+
+            const html = `
+                <div style="font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--starlight); line-height: 1.5;">${desc}</div>
+                <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--squall-amber); padding: 10px; margin-top: 10px; font-family: 'Orbitron'; color: var(--white-pure); font-size: 0.7rem; letter-spacing: 1px;">${action}</div>
+            `;
+            window.Q_ModalEngine.render('&#x26A0;&#xFE0E; IMPACT DIAGNOSTIC', html);
+        }
+
+        window.addEventListener('q-tick', (e) => {
+            const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
+
+            // Utility function to format legacy strings (grey letters/symbols, env-green numbers)
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--env-green); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(token => {
+                        if (/[0-9]/.test(token)) {
+                            out += `<span style="${numStyle}">${token}</span>`;
+                        } else {
+                            out += `<span style="${letterStyle}">${token}</span>`;
+                        }
+                    });
+                }
+                return out;
+            }
+
+            const legDateEl = document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerText = legacyDateStr.toUpperCase();
+            
+            const legTimeEl = document.getElementById('leg-time');
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
+            
+            if(window.Q_STATE && window.Q_STATE.hardware_hooks) {
+                const badge = document.getElementById('iot-status-badge');
+                if(badge) badge.innerText = 'IOT: ' + window.Q_STATE.hardware_hooks.iot_webhooks;
+            }
+
+            const trueArc = qData.trueArc;
+            const meanArc = qData.meanArc;
+            
+            if (Math.abs(qData.delta) > 0.025 && window.Q_PHASE_III) {
+                window.Q_PHASE_III.executeThermicOverride(qData.delta);
+            }
+            
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+            const qCoordWing = document.getElementById('q-coord-wing');
+            
+            let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+            let smNumStyle = "color:var(--env-green); font-size:1.1rem; font-weight:bold;";
+            
+            if (qCoordWing) {
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--env-green); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--env-green-dim);">${activeBlock.name}</span>`;
+                } else {
+                    let cCycle = activeBlock ? activeBlock.cycle : 0;
+                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
+                }
+            }
+
+            const meanDegEl = document.getElementById('mean-deg');
+            if (meanDegEl) meanDegEl.innerText = meanArc.toFixed(2) + "°";
+            
+            const trueDegEl = document.getElementById('true-deg');
+            if (trueDegEl) trueDegEl.innerText = trueArc.toFixed(2) + "°";
+
+            const continuousMeanDeg = daysElapsed * (360 / 365.24219);
+            const continuousTrueDeg = continuousMeanDeg + qData.delta;
+            document.getElementById('action-horizon-ring').style.transform = `rotate(${continuousTrueDeg}deg)`;
+
+            let dangerProximity = Math.abs(Math.sin((trueArc * Math.PI) / 90)); 
+            currentRiskVal = Math.floor(dangerProximity * 85) + 10; 
+            
+            if (liveWeather && isLive) {
+                if (liveWeather.precipitation > 0) currentRiskVal += (liveWeather.precipitation * 2);
+                if (liveWeather.surface_pressure < 1005) currentRiskVal += 15;
+                if (liveWeather.direct_normal_irradiance > 600) currentRiskVal += 10;
+                currentRiskVal = Math.min(currentRiskVal, 99);
+            } 
+            
+            let riskEl = document.getElementById('risk-index');
+            let hazardEl = document.getElementById('hazard-status');
+            let yieldEl = document.getElementById('strat-yield');
+            let allocEl = document.getElementById('strat-alloc');
+            
+            // Reset default handlers
+            hazardEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
+            yieldEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
+            allocEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
+            
+            riskEl.innerText = currentRiskVal + '% (KEPLERIAN DELTA)';
+            if(currentRiskVal >= alertThreshold) {
+                riskEl.className = "val-alert"; hazardEl.innerText = "IMMINENT THREAT"; hazardEl.className = "val-alert";
+                
+                // Engage SHIELDING Hook on SEVERE probability
+                hazardEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
+                yieldEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
+                allocEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
+                
+            } else if (currentRiskVal >= alertThreshold - 25) {
+                riskEl.className = "val-warn"; hazardEl.innerText = "ELEVATED CONCERN"; hazardEl.className = "val-warn";
+            } else {
+                riskEl.className = "val-highlight"; hazardEl.innerText = "MONITORED / STABLE"; hazardEl.className = "val-highlight";
+            }
+
+            sparkBars.forEach((bar, index) => {
+                let pastArc = trueArc - (30 - index);
+                let pastDanger = Math.abs(Math.sin((pastArc * Math.PI) / 90));
+                let h = Math.floor(pastDanger * 16);
+                bar.style.height = h + 'px';
+                bar.style.background = (pastDanger * 100) >= alertThreshold ? "var(--alert-red)" : ((pastDanger * 100) >= alertThreshold - 25 ? "var(--squall-amber)" : "var(--env-green)");
+            });
+
+            if (showDelta) {
+                document.getElementById('val-pressure').innerText = (currentRiskVal > 50 ? '-' : '+') + (currentRiskVal / 10).toFixed(1) + ' hPa';
+                document.getElementById('val-pressure').className = currentRiskVal >= alertThreshold ? "val-alert" : "val-warn";
+                document.getElementById('val-irradiance').innerText = (currentRiskVal > 50 ? '-12' : '+4') + ' W/m²';
+                document.getElementById('val-precip').innerText = (currentRiskVal > 50 ? '+45%' : '-5%') + ' FROM NORM';
+                document.getElementById('val-precip').className = currentRiskVal > 50 ? "val-alert" : "val-highlight";
+                document.getElementById('val-temp').innerText = (currentRiskVal > 50 ? '+' : '-') + (currentRiskVal / 15).toFixed(1) + ' °C';
+                document.getElementById('val-temp').className = currentRiskVal > 50 ? "val-alert" : "val-highlight";
+            } else {
+                if (liveWeather && isLive) {
+                    document.getElementById('val-pressure').innerText = liveWeather.surface_pressure.toFixed(1) + ' hPa';
+                    document.getElementById('val-pressure').className = liveWeather.surface_pressure < 1005 ? "val-alert" : "val-highlight";
+                    document.getElementById('val-irradiance').innerText = liveWeather.direct_normal_irradiance.toFixed(1) + ' W/m²';
+                    document.getElementById('val-precip').innerText = liveWeather.precipitation.toFixed(1) + 'mm / LIVE';
+                    document.getElementById('val-precip').className = liveWeather.precipitation > 0 ? "val-alert" : "val-highlight";
+                    document.getElementById('val-temp').innerText = liveWeather.temperature_2m.toFixed(1) + ' °C';
+                    document.getElementById('val-temp').className = liveWeather.temperature_2m > 35 || liveWeather.temperature_2m < 0 ? "val-alert" : "val-highlight";
+                } else {
+                    document.getElementById('val-pressure').innerText = (1015 - Math.floor(currentRiskVal/2)) + ' hPa';
+                    document.getElementById('val-pressure').className = "val-highlight";
+                    document.getElementById('val-irradiance').innerText = "ACTIVE / NOMINAL";
+                    document.getElementById('val-precip').innerText = "0.0mm / STABLE";
+                    document.getElementById('val-precip').className = "val-highlight";
+                    document.getElementById('val-temp').innerText = "22.0 °C / STATIC";
+                    document.getElementById('val-temp').className = "val-highlight";
+                }
+            }
+
+            if (currentAssetMode === "FAUNA") {
+                if(currentRiskVal >= alertThreshold) {
+                    yieldEl.innerText = "LETHAL ZONE"; yieldEl.className = "val-alert";
+                    allocEl.innerText = "SHELTER / HYDRATE"; allocEl.className = "val-alert";
+                } else if (currentRiskVal >= alertThreshold - 25) {
+                    yieldEl.innerText = "BEHAVIORAL SHIFT"; yieldEl.className = "val-warn";
+                    allocEl.innerText = "ADJUST CALORIC BURN"; allocEl.className = "val-warn";
+                } else {
+                    yieldEl.innerText = "NOMINAL EXPOSURE"; yieldEl.className = "val-highlight";
+                    allocEl.innerText = "STANDARD ROUTINE"; allocEl.className = "val-highlight";
+                }
+            } else {
+                if(currentRiskVal >= alertThreshold) {
+                    yieldEl.innerText = "COMPROMISED"; yieldEl.className = "val-alert";
+                    allocEl.innerText = "EMERGENCY SHIELD"; allocEl.className = "val-alert";
+                } else if (currentRiskVal >= alertThreshold - 25) {
+                    yieldEl.innerText = "MODERATE VARIANCE"; yieldEl.className = "val-warn";
+                    allocEl.innerText = "CONSERVATION MODE"; allocEl.className = "val-warn";
+                } else {
+                    yieldEl.innerText = "OPTIMAL / GROWTH"; yieldEl.className = "val-highlight";
+                    allocEl.innerText = "PHASE 2 (EXPANSION)"; allocEl.className = "val-highlight";
+                }
+            }
+            
+            let tensionEl = document.getElementById('agri-tension');
+            if (qData.quad === 1) { tensionEl.innerText = "DORMANT / GATHER"; }
+            else if (qData.quad === 2) { tensionEl.innerText = "AWAKENING / PUSH"; }
+            else if (qData.quad === 3) { tensionEl.innerText = "CLIMAX / SUSTAIN"; }
+            else { tensionEl.innerText = "RECESSION / HARVEST"; }
+            
+            // Calculate Thermodynamic Friction
+            const solarBaselineTemp = 22 + 10 * Math.sin((trueArc - 90) * Math.PI / 180);
+            let currentTemp = (liveWeather && isLive) ? liveWeather.temperature_2m : 22.0;
+            let thermoFriction = Math.abs(currentTemp - solarBaselineTemp);
+            
+            const thermoFrictionEl = document.getElementById('thermo-friction');
+            if (thermoFrictionEl) {
+                thermoFrictionEl.innerText = thermoFriction.toFixed(2) + ' ΔT';
+                if (thermoFriction > 5.0) {
+                    thermoFrictionEl.className = "val-alert";
+                } else if (thermoFriction > 2.5) {
+                    thermoFrictionEl.className = "val-warn";
+                } else {
+                    thermoFrictionEl.className = "val-highlight";
+                }
+            }
+            
+            const radarText = document.getElementById('radar-readout');
+            if(currentRiskVal >= alertThreshold) { 
+                currentRadarStatus = 'THERMODYNAMIC FRICTION'; if(radarText) radarText.innerText = "⚠ THERMODYNAMIC FRICTION"; if(radarText) radarText.style.color = "var(--alert-red)"; 
+            } else if(currentRiskVal >= alertThreshold - 25) { 
+                currentRadarStatus = 'THERMAL SPIKE'; if(radarText) radarText.innerText = "THERMAL SPIKE DETECTED"; if(radarText) radarText.style.color = "var(--squall-amber)"; 
+            } else { 
+                currentRadarStatus = 'STABLE'; if(radarText) radarText.innerText = "THERMODYNAMICS STABLE"; if(radarText) radarText.style.color = "var(--env-green)"; 
+            }
+            
+            const phaseTextEl = document.getElementById('resp-phase-text');
+            if (phaseTextEl) {
+                if (currentRadarStatus === 'THERMODYNAMIC FRICTION') {
+                     phaseTextEl.style.color = "var(--alert-red)";
+                } else if (currentRadarStatus === 'THERMAL SPIKE') {
+                     phaseTextEl.style.color = "var(--squall-amber)";
+                } else {
+                     phaseTextEl.style.color = "var(--env-green)";
+                }
+            }
+            
+        });
+
+        if(window.generateStars) window.generateStars('stars');
+        initSparklines();
+        renderSeasonalMarkers(currentAssetMode); 
+        renderOrbitalNodes();
+        fetchMeteoData();
+        setInterval(fetchMeteoData, 300000);
+    </script>
+</body>
+</html>

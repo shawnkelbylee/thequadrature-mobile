@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE QUADRATURE // MECHANICAL VECTOR</title>
+    <script src="q-ui-global.js?v=16.4"></script>
+    <script src="q-core.js?v=16.4"></script>
+    <script src="q-ui-planner.js?v=16.4"></script>
+    <script src="q-hub.js?v=16.4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
+
+        :root {
+            --void: #030406; --core-plat: #e2e8f0; --core-dim: rgba(226, 232, 240, 0.15); --core-glow: rgba(226, 232, 240, 0.4);
+            --cyan-glow: #00f0ff; --cyan-dim: rgba(0, 240, 255, 0.2); --cyan-dark: #0088aa;
+            --magenta-glow: #ff003c; --magenta-dim: rgba(255, 0, 60, 0.2); --magenta-dark: #880020;
+            --titanium: #334155; --carbon: #0f172a; --steel: #64748b;
+            --blur-heavy: blur(20px);
+            --theme-main: var(--cyan-glow); --theme-dim: var(--cyan-dim); --gold: #F4D068;
+            --starlight: rgba(255, 255, 255, 0.6);
+            
+            /* Dynamic variables updated via JS */
+            --dyn-phase-color: var(--magenta-glow);
+            --dyn-phase-dim: var(--magenta-dim);
+        }
+
+        body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; background-color: var(--void); background: radial-gradient(circle at center, #0a0f1a 0%, var(--void) 85%); color: var(--core-plat); font-family: 'JetBrains Mono', monospace; display: flex; justify-content: center; align-items: center; user-select: none; color-scheme: dark; perspective: 1500px; transform-style: preserve-3d; touch-action: manipulation; }
+        
+        /* --- HAPTIC & MODAL Z-INDEX OVERRIDES --- */
+        #q-universal-modal { z-index: 999999 !important; }
+        .mech-panel { pointer-events: auto !important; z-index: 60 !important; }
+        .radar-box, .opt-btn, .globe, .fmt-toggle { pointer-events: auto !important; position: relative; z-index: 100 !important; }
+
+        .matrix-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+        #stars { z-index: 1; }
+
+        .mech-panel { backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy); background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(3, 4, 6, 0.95) 100%); border: 1px solid var(--titanium); border-top: 1px solid var(--cyan-glow); border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.5); padding: 1vw; box-sizing: border-box; position: relative; }
+        
+        .val-display { background: rgba(0,0,0,0.8); border: 1px solid var(--titanium); padding: 0.5vh 1vw; border-radius: 4px; box-shadow: inset 0 0 15px rgba(0,0,0,0.9); margin-bottom: 1vh; min-width: 70%; }
+        .val-red { color: var(--magenta-glow); text-shadow: 0 0 15px var(--magenta-dim); }
+
+        .corner-gearbox { position: absolute; display: flex; flex-direction: column; gap: 0.5vh; z-index: 60; }
+        .mod-tl { top: 9vh; left: 2vw; } .mod-tr { top: 9vh; right: 2vw; } .mod-bl { bottom: 6vh; left: 2vw; } .mod-br { bottom: 6vh; right: 2vw; }
+
+        .m-head { font-family: 'Orbitron'; font-size: 0.55rem; color: var(--core-plat); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px dashed var(--core-dim); padding-bottom: 4px; margin-top: 2px; display: flex; justify-content: space-between; font-weight: 800;}
+        .m-head span { background: rgba(0, 240, 255, 0.1); color: var(--cyan-glow); padding: 1px 5px; border-radius: 2px; border: 1px solid var(--cyan-dim); }
+        
+        /* STANDARDIZED TELEMETRY AESTHETICS */
+        .m-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.55rem; margin-top: 4px; font-weight: 700;}
+        .m-row span:first-child { color: var(--steel); }
+        .m-val { color: var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; text-shadow: 0 0 8px var(--cyan-dim); }
+
+        .respiration-wave { position: absolute; width: 200%; height: 100%; transition: background 1s ease, border 1s ease; left: 0; }
+        @keyframes wave-shift { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
+
+        .radar-box { width: 100%; height: 3vh; min-height: 30px; background: rgba(0,0,0,0.8); border: 1px solid var(--titanium); border-radius: 4px; margin-top: 6px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 15px rgba(0,240,255,0.1); cursor: pointer; transition: 0.3s; }
+        .radar-box:hover { border-color: var(--cyan-glow); box-shadow: inset 0 0 20px rgba(0,240,255,0.3), 0 0 15px var(--cyan-dim); }
+        .radar-sweep { position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4)); animation: sweep 2.5s linear infinite; }
+        .radar-text { font-family: 'Orbitron'; font-size: 0.55rem; font-weight: 900; color: var(--core-plat); z-index: 2; text-shadow: 0 0 5px #000; }
+        @keyframes sweep { 0% { left: -100%; } 100% { left: 200%; } }
+
+        .smear-container { width: 100%; height: 2.5vh; min-height: 20px; background: #000; border: 1px inset var(--titanium); position: relative; overflow: hidden; margin-top: 2px; display: flex; align-items: center; }
+        .smear-wave { position: absolute; height: 100%; width: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255, 0, 60, 0.4) 5px, rgba(255, 0, 60, 0.4) 10px); transition: opacity 0.3s; animation: smear-shift 0.5s linear infinite; }
+        .smear-val { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: #fff; width: 100%; text-align: center; z-index: 2; text-shadow: 0 0 5px #000; font-weight: bold; }
+        @keyframes smear-shift { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
+        
+        #needle-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); border: 1px solid var(--titanium); padding: 8px 18px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 100; opacity: 0; transition: opacity 0.3s ease, border-color 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 1px; color: #fff; }
+
+        .gearbox { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); display: flex; justify-content: center; align-items: center; z-index: 5; }
+        .gear { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .gear-outer { width: 100%; height: 100%; border: 2px solid var(--titanium); background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-radius: 50%; box-shadow: inset 0 0 40px rgba(0,240,255,0.05), 0 0 40px rgba(0,240,255,0.05); }
+        .gear-outer::before { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 50%; border: 1px dashed var(--cyan-glow); opacity: 0.4; animation: spin-slow 120s linear infinite reverse; }
+
+        .orbital-marker { position: absolute; width: 14px; height: 14px; border-radius: 50%; z-index: 35; cursor: help; }
+        .marker-peri { background: var(--magenta-glow); box-shadow: 0 0 20px var(--magenta-glow), 0 0 10px #fff; top: 50%; left: 50%; transform: translate(-50%, -50%) rotateZ(14deg) translateY(calc(var(--dial-size) / -2)); }
+        .marker-aph { background: var(--cyan-glow); box-shadow: 0 0 20px var(--cyan-glow), 0 0 10px #fff; top: 50%; left: 50%; transform: translate(-50%, -50%) rotateZ(194deg) translateY(calc(var(--dial-size) / -2)); }
+
+        .globe { position: absolute; width: 2.2vh; height: 2.2vh; min-width: 22px; min-height: 22px; background: var(--carbon); border: 2px solid var(--core-plat); margin-top: calc(-1.1vh - 2px); margin-left: calc(-1.1vh - 2px); z-index: 10; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(0,0,0,0.8); cursor: pointer; transition: 0.2s; }
+        .globe:hover { box-shadow: 0 0 20px var(--cyan-glow); border-color: #fff; z-index: 30; }
+        .globe::before { content: ''; width: 40%; height: 40%; background: var(--core-plat); box-shadow: 0 0 10px #fff; }
+        
+        .silver-globe { border-color: var(--cyan-glow); } .silver-globe::before { background: var(--cyan-glow); box-shadow: 0 0 15px var(--cyan-glow); } .silver-globe:hover { transform: scale(1.2); }
+        .gold-globe { border-color: var(--magenta-glow); } .gold-globe::before { background: var(--magenta-glow); box-shadow: 0 0 15px var(--magenta-glow); } .gold-globe:hover { transform: scale(1.2); }
+
+        .p-alpha { top: 0%; left: 50%; transform: rotate(45deg); } .p-beta { top: 50%; left: 100%; transform: rotate(45deg); } .p-gamma { top: 100%; left: 50%; transform: rotate(45deg); } .p-delta { top: 50%; left: 0%; transform: rotate(45deg); }
+
+        /* Dynamic Ring bound to phase color */
+        .gear-mid { width: 75%; height: 75%; border: 1px solid var(--dyn-phase-dim); border-radius: 50%; background: transparent; box-shadow: inset 0 0 60px var(--dyn-phase-dim); transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s linear; }
+        .gear-mid::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: 2px dashed var(--dyn-phase-color); opacity: 0.5; transition: border-color 0.2s; }
+        
+        .gear-inner { width: 48%; height: 48%; border: 2px solid var(--titanium); background: rgba(15, 23, 42, 0.6); border-radius: 50%; box-shadow: inset 0 0 50px rgba(0,0,0,0.9); animation: spin-fast-reverse 15s linear infinite; }
+        .gear-inner::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; border: 2px dotted var(--cyan-dim); }
+
+        .core-container { position: absolute; width: 45%; height: 45%; display: flex; justify-content: center; align-items: center; z-index: 20; }
+        .earth-core { position: absolute; width: 100%; height: 100%; border-radius: 50%; background-color: #020813; overflow: hidden; box-shadow: 0 0 30px rgba(0, 240, 255, 0.4), inset -6px -6px 15px rgba(0,0,0,0.9); }
+        .core-star-overlay { position: absolute; width: 100%; height: 100%; z-index: 20; mix-blend-mode: screen; display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 0.8; }
+        
+        .earth-surface { position: absolute; width: 100%; height: 100%; z-index: 30; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 200% 100%; opacity: 0.85; }
+
+        .center-star-sm { position: absolute; width: 30%; height: 30%; display: flex; justify-content: center; align-items: center; z-index: 50; }
+        .star-layer { position: absolute; width: 100%; height: 100%; background: var(--cyan-glow); clip-path: polygon(50% 0%, 52% 48%, 100% 50%, 52% 52%, 50% 100%, 48% 52%, 0% 50%, 48% 48%); }
+        .layer-1 { background: var(--magenta-glow); animation: glitter-fast-1 0.15s infinite; } .layer-2 { background: var(--cyan-glow); animation: glitter-fast-2 0.2s infinite; } .layer-3 { background: #fff; animation: glitter-fast-3 0.18s infinite; } .layer-4 { background: var(--magenta-glow); animation: glitter-fast-4 0.22s infinite; }
+
+        @keyframes glitter-fast-1 { 0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 15px var(--magenta-glow)); } 50% { opacity: 0.6; transform: rotate(0deg) scale(0.85); filter: drop-shadow(0 0 8px var(--magenta-dim)); } }
+        @keyframes glitter-fast-2 { 0%, 100% { opacity: 0.5; transform: rotate(22.5deg) scale(0.85); filter: drop-shadow(0 0 8px var(--cyan-glow)); } 50% { opacity: 1; transform: rotate(22.5deg) scale(1.1); filter: drop-shadow(0 0 20px var(--cyan-glow)); } }
+        @keyframes glitter-fast-3 { 0%, 100% { opacity: 1; transform: rotate(45deg) scale(0.95); filter: drop-shadow(0 0 15px #fff); } 50% { opacity: 0.4; transform: rotate(45deg) scale(0.8); filter: drop-shadow(0 0 5px var(--core-dim)); } }
+        @keyframes glitter-fast-4 { 0%, 100% { opacity: 0.4; transform: rotate(67.5deg) scale(0.8); filter: drop-shadow(0 0 5px var(--magenta-glow)); } 50% { opacity: 0.9; transform: rotate(67.5deg) scale(1); filter: drop-shadow(0 0 15px var(--magenta-glow)); } }
+
+        @keyframes spin-slow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-fast-reverse { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+        
+        @keyframes diamond-pulse {
+            0% { transform: translate(-50%, -50%) rotate(45deg) scale(1); filter: brightness(1); }
+            100% { transform: translate(-50%, -50%) rotate(45deg) scale(1.4); filter: brightness(1.5); }
+        }
+
+        .toggle-wrap { display: flex; justify-content: center; margin-bottom: 10px; background: var(--carbon); border: 1px solid var(--titanium); border-radius: 4px; overflow: hidden; }
+        .toggle-btn { flex: 1; padding: 8px; text-align: center; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: 800; cursor: pointer; color: var(--steel); transition: 0.3s; }
+        .toggle-btn.active { background: var(--cyan-dim); color: var(--cyan-glow); border-bottom: 2px solid var(--cyan-glow); }
+
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px dashed var(--titanium); padding-top: 10px; }
+        .data-col { display: flex; flex-direction: column; }
+        .data-lbl { font-family: 'Orbitron'; font-size: 0.5rem; color: var(--steel); letter-spacing: 1px; }
+        .data-val { font-size: 0.8rem; font-weight: bold; color: var(--core-plat); text-shadow: 0 0 5px var(--core-glow); }
+        .data-val-cy { color: var(--cyan-glow); text-shadow: 0 0 8px var(--cyan-dim); }
+        .data-val-mg { color: var(--magenta-glow); text-shadow: 0 0 8px var(--magenta-dim); }
+    </style>
+</head>
+<body class="mode-q">
+
+    <div class="matrix-layer"></div>
+    <div class="star-container" id="stars"></div>
+    <div id="needle-hud">SYSTEMIC CONTEXT</div>
+
+    <div class="corner-gearbox mech-panel mod-tl telemetry-node">
+        <div class="m-head holo-text">ORBITAL POSITION <span>MODULE 01</span></div>
+        <div class="m-row"><span>NEXT PYLON:</span> <span class="m-val" id="next-pylon">--</span></div>
+        <div class="m-row"><span>DRIFT TO PYLON:</span> <span class="m-val" id="drift-to-pylon">--</span></div>
+        <div class="m-row"><span>PYLON DURATION:</span> <span class="m-val" style="color:var(--cyan-glow);" id="pylon-duration">--</span></div>
+        <div class="m-row"><span>ATOMIC FREQUENCY:</span> <span class="m-val" style="color:var(--steel);">SYNCED</span></div>
+        <div style="width:100%; height:3px; background:#000; margin-top:6px; border:1px solid var(--core-dim);">
+            <div id="macro-bar" style="height:100%; width:0%; background:var(--cyan-glow); box-shadow:0 0 8px var(--cyan-glow); transition: width 0.3s;"></div>
+        </div>
+    </div>
+
+    <div class="corner-gearbox mech-panel mod-tr telemetry-node" onclick="openTelemetry()" ontouchstart="event.stopPropagation(); openTelemetry()" style="cursor: pointer;">
+        <div class="m-head holo-text">TIME DRIFT / Q-DELTA <span>MODULE 02</span></div>
+        <div class="m-row" style="margin-top:4px;"><span>ORBITAL ECCENTRICITY:</span> <span class="m-val">0.0167</span></div>
+        <div class="m-row" style="margin-top:4px;"><span>SYMMETRY LOSS:</span> <span class="m-val" id="sym-loss" style="color:var(--magenta-glow);">--%</span></div>
+        <div class="m-row" style="margin-top:8px;"><span>EQUATION OF TIME (Q-DELTA):</span></div>
+        <div style="margin-top:2px; font-size:0.8rem; padding:6px; text-align:center; border: 1px solid var(--cyan-glow); background: rgba(0, 240, 255, 0.1); color: var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px;" id="rt-delta">--</div>
+    </div>
+
+    <div class="corner-gearbox mech-panel mod-bl telemetry-node">
+        <div class="m-head holo-text">THERMODYNAMICS <span>MODULE 03</span></div>
+        <div class="m-row" style="margin-bottom:2px;"><span>CLIMATIC BASELOAD:</span></div>
+        <div class="thermo-wave-container" style="margin-top: 8px;">
+            <div class="m-row" style="justify-content:center; margin-bottom: 6px;">
+                <span style="font-size:0.65rem; color:var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900;" id="solar-float-delta">KEPLERIAN VELOCITY: --</span>
+            </div>
+            <div class="respiration-box" style="width: 100%; height: 3.5vh; min-height: 25px; background: rgba(0,0,0,0.8); border: 1px solid var(--titanium); border-radius: 4px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,240,255,0.1);">
+                <div class="respiration-wave" id="resp-wave"></div>
+                <div id="resp-phase-text" style="position: absolute; font-family: 'Orbitron'; font-size: 0.55rem; color: #fff; text-shadow: 0 0 5px #000; font-weight: 900; z-index: 2; letter-spacing: 1px;">CALCULATING SMEAR...</div>
+            </div>
+        </div>
+        <div class="m-row" style="margin-top:8px;"><span>ENVIRONMENTAL SCANNER:</span></div>
+        <div class="radar-box" onclick="openRadarModal()" ontouchstart="event.stopPropagation(); openRadarModal()">
+            <div class="radar-sweep"></div>
+            <div class="radar-text" id="radar-readout">CALCULATING THERMAL MODEL...</div>
+        </div>
+    </div>
+
+    <div class="corner-gearbox mech-panel mod-br telemetry-node" id="atomic-panel">
+        <div class="m-head holo-text">CIVIL TIME LAG <span>MODULE 04</span></div>
+        
+        <div class="m-row" style="margin-bottom:2px;"><span>STANDARDIZED INTERVAL:</span> <span class="m-val" style="color:var(--core-plat); text-shadow:0 0 5px #fff;" id="si-lock">ACTIVE</span></div>
+        <div class="val-display" style="padding:4px 8px; margin-bottom:4px;"><div class="val-lg" id="nano-counter" style="font-size:0.9rem; text-align:right;">0.000000000</div></div>
+        
+        <div class="m-row" style="margin-top:6px;"><span id="smear-lbl">GREGORIAN SMEAR (ENTROPY):</span></div>
+        <div class="smear-container">
+            <div class="smear-wave"></div>
+            <div class="smear-val" id="smear-val">+ 0.0000000000</div>
+        </div>
+        
+        <div class="m-row" style="margin-top:8px;"><span>CIVIL TENSION:</span></div>
+        <div class="val-display" style="padding:4px 8px; margin-bottom:0; cursor:pointer;" onclick="openTelemetry()" ontouchstart="event.stopPropagation(); openTelemetry(); event.preventDefault();">
+            <div class="val-lg" id="civil-tension-readout" style="font-size:0.65rem; color:var(--magenta-glow); text-shadow: 0 0 8px var(--magenta-dim); text-align: center; font-family:'JetBrains Mono'; font-weight:700;">
+                CALCULATING OFFSET...
+            </div>
+        </div>
+    </div>
+
+    <div class="gearbox q-center-dial">
+        <div class="gear gear-outer">
+            <div class="orbital-marker marker-peri" title="PERIHELION (14.00°): Maximum orbital velocity. True Ellipse acceleration."></div>
+            <div class="orbital-marker marker-aph" title="APHELION (194.00°): Minimum orbital velocity. True Ellipse deceleration."></div>
+            <div class="globe silver-globe p-alpha" title="ALPHA: WINTER SOLSTICE (0.000°)" onclick="openPylonModal('ALPHA')" ontouchstart="event.stopPropagation(); openPylonModal('ALPHA'); event.preventDefault();"></div>
+            <div class="globe gold-globe p-beta" title="BETA: VERNAL EQUINOX (90.000°)" onclick="openPylonModal('BETA')" ontouchstart="event.stopPropagation(); openPylonModal('BETA'); event.preventDefault();"></div>
+            <div class="globe silver-globe p-gamma" title="GAMMA: SUMMER SOLSTICE (180.000°)" onclick="openPylonModal('GAMMA')" ontouchstart="event.stopPropagation(); openPylonModal('GAMMA'); event.preventDefault();"></div>
+            <div class="globe gold-globe p-delta" title="DELTA: AUTUMNAL EQUINOX (270.000°)" onclick="openPylonModal('DELTA')" ontouchstart="event.stopPropagation(); openPylonModal('DELTA'); event.preventDefault();"></div>
+        </div>
+        <div class="gear gear-mid" id="kepler-ring"></div>
+        <div class="gear gear-inner"></div>
+        
+        <div class="core-container">
+            <div class="earth-core">
+                <div class="core-star-overlay">
+                    <div class="center-star-sm">
+                        <div class="star-layer layer-1"></div>
+                        <div class="star-layer layer-2"></div>
+                        <div class="star-layer layer-3"></div>
+                        <div class="star-layer layer-4"></div>
+                    </div>
+                </div>
+                <div class="earth-surface"></div>
+            </div>
+        </div>
+
+        <div id="transit-diamond-arm" style="position: absolute; width: 100%; height: 100%; z-index: 45; pointer-events: none; transition: transform 0.1s linear;">
+            <div id="q-delta-diamond" style="position: absolute; top: 12.5%; left: 50%; width: 14px; height: 14px; background: #fff; transform: translate(-50%, -50%) rotate(45deg); box-shadow: 0 0 10px #fff; transition: background 0.2s, box-shadow 0.2s; pointer-events: auto; cursor: help;" onmouseover="showNeedleHUD('Q-DELTA DIAMOND: Mathmatically anchored to the Keplerian Ring. Modulates rotational speed and chromatic intensity based on orbital velocity.', '#fff')" onmouseout="hideNeedleHUD()"></div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentRadarStatus = 'STABLE';
+        let lastThermoPhase = "";
+        let isLegacyView = true;
+
+        function showNeedleHUD(text, color) { const hud = document.getElementById('needle-hud'); hud.innerText = text; hud.style.borderColor = color; hud.style.color = color; hud.style.opacity = '1'; }
+        function hideNeedleHUD() { document.getElementById('needle-hud').style.opacity = '0'; }
+
+        function openTelemetry() {
+            const html = `
+                <div style="text-align: center;">
+                    <div style="font-size: 0.65rem; color: var(--steel); margin-bottom: 15px;">MAPPING THE KEPLERIAN SMEAR</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--titanium); padding-bottom: 15px; margin-bottom: 15px;">
+                        <div style="display:flex; flex-direction:column; align-items:center; width: 45%;">
+                            <span style="font-family:'Orbitron'; font-size:0.55rem; color:var(--cyan-glow); margin-bottom: 4px;">MEAN CIRCLE (CIVIL)</span>
+                            <span id="tel-mean" style="font-weight:bold; font-size:1.1rem; color:var(--cyan-glow); text-shadow:0 0 8px var(--cyan-dim);">--°</span>
+                        </div>
+                        <div style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--steel);">VS</div>
+                        <div style="display:flex; flex-direction:column; align-items:center; width: 45%;">
+                            <span style="font-family:'Orbitron'; font-size:0.55rem; color:var(--magenta-glow); margin-bottom: 4px;">TRUE ELLIPSE (PHYSICS)</span>
+                            <span id="tel-true" style="font-weight:bold; font-size:1.1rem; color:var(--magenta-glow); text-shadow:0 0 8px var(--magenta-dim);">--°</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-family:'Orbitron'; font-size:0.65rem; color:var(--core-plat);">Q-DELTA (VARIANCE)</span>
+                        <span id="tel-delta" style="font-weight:900; font-size:1.5rem; color:#fff; text-shadow:0 0 15px var(--core-glow); margin-top:5px;">--°</span>
+                    </div>
+                </div>
+            `;
+            window.Q_ModalEngine.render('DUAL-STATE TELEMETRY', html);
+        }
+
+        window.switchDataView = function(type) {
+            isLegacyView = (type === 'LEGACY');
+            document.getElementById('btn-legacy-view').classList.toggle('active', isLegacyView);
+            document.getElementById('btn-q-view').classList.toggle('active', !isLegacyView);
+            document.getElementById('btn-legacy-view').style.color = isLegacyView ? 'var(--magenta-glow)' : 'var(--steel)';
+            document.getElementById('btn-q-view').style.color = !isLegacyView ? 'var(--cyan-glow)' : 'var(--steel)';
+            document.getElementById('dv-legacy-content').style.display = isLegacyView ? "block" : "none"; 
+            document.getElementById('dv-q-content').style.display = !isLegacyView ? "block" : "none";
+        };
+
+        function openDataView() {
+            const html = `
+                <div class="toggle-wrap" style="border-color:var(--magenta-glow);">
+                    <div class="toggle-btn ${isLegacyView ? 'active' : ''}" id="btn-legacy-view" onclick="switchDataView('LEGACY')" ontouchstart="event.stopPropagation(); switchDataView('LEGACY')" style="color:${isLegacyView ? 'var(--magenta-glow)' : 'var(--steel)'};">LEGACY OS</div>
+                    <div class="toggle-btn ${!isLegacyView ? 'active' : ''}" id="btn-q-view" onclick="switchDataView('QLOGIC')" ontouchstart="event.stopPropagation(); switchDataView('QLOGIC')" style="color:${!isLegacyView ? 'var(--cyan-glow)' : 'var(--steel)'};">Q LOGIC</div>
+                </div>
+                <div id="dv-legacy-content" style="display:${isLegacyView ? 'block' : 'none'};">
+                    <div class="data-grid" style="border-top-color:var(--magenta-glow);">
+                        <div class="data-col"><span class="data-lbl">CIVIL DATE</span><span class="data-val" id="dv-leg-date">--</span></div>
+                        <div class="data-col"><span class="data-lbl">CIVIL TIME (UTC)</span><span class="data-val" id="dv-leg-time">--</span></div>
+                        <div class="data-col"><span class="data-lbl">ARTIFICIAL LAG</span><span class="data-val data-val-mg" id="dv-leg-lag">--</span></div>
+                        <div class="data-col"><span class="data-lbl">STATUS</span><span class="data-val" style="color:var(--steel);">OUT OF SYNC</span></div>
+                    </div>
+                </div>
+                <div id="dv-q-content" style="display:${!isLegacyView ? 'block' : 'none'};">
+                    <div class="data-grid" style="border-top-color:var(--magenta-glow);">
+                        <div class="data-col"><span class="data-lbl">MEAN CIRCLE</span><span class="data-val data-val-cy" id="dv-q-coord">--</span></div>
+                        <div class="data-col"><span class="data-lbl">TRUE ELLIPSE</span><span class="data-val data-val-cy" id="dv-q-arc">--</span></div>
+                        <div class="data-col"><span class="data-lbl">Q-DELTA</span><span class="data-val" id="dv-q-delta">--</span></div>
+                        <div class="data-col"><span class="data-lbl">KEPLERIAN PHASE</span><span class="data-val" id="dv-q-tmr">--</span></div>
+                    </div>
+                </div>
+            `;
+            window.Q_ModalEngine.render('COORDINATE DATA VIEW', html, 'CLOSE VIEW');
+        }
+
+        function openPylonModal(node) {
+            let pylonObj = window.Q_REGISTRY.PYLONS.find(p => p.name.toUpperCase().includes(node));
+            if(!pylonObj) return;
+
+            let pName = pylonObj.name.toUpperCase();
+            let pEvent = pylonObj.event;
+            let pDesc = pylonObj.desc;
+            let pDegree = pylonObj.coord.toFixed(3) + '°';
+            
+            let pTime = window.PYLON_ALPHA_DYNAMIC;
+            if (node !== 'ALPHA') {
+                const currentDays = (Date.now() - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+                const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
+                const targetDays = cycleBaseDays + (pylonObj.coord / (360 / 365.24219));
+                pTime = window.PYLON_ALPHA_DYNAMIC + (targetDays * window.MS_DAY);
+            }
+            
+            const formatted = window.formatLegacyDate(pTime);
+            let durHours = (pylonObj.duration / 3600000).toFixed(4);
+
+            const html = `
+                <div style="font-family:'Orbitron'; color:var(--magenta-glow); font-size:0.8rem; margin-bottom:5px;">${pEvent}</div>
+                <div style="font-size:0.6rem; color:var(--steel); border-bottom:1px solid var(--magenta-glow); padding-bottom:10px; margin-bottom:10px;">${pDesc}<br><br><span style="color:var(--cyan-glow);">SETTLEMENT GEAR DURATION: ${durHours} HOURS</span></div>
+                <div class="data-grid" style="border-top:none; padding-top:0;">
+                    <div class="data-col"><span class="data-lbl">Q COORDINATE</span><span class="data-val data-val-cy">Q${node==='ALPHA'?1:node==='BETA'?2:node==='GAMMA'?3:4} S1 DAY 1</span></div>
+                    <div class="data-col"><span class="data-lbl">TRUE ELLIPSE</span><span class="data-val data-val-cy">${pDegree}</span></div>
+                    <div class="data-col"><span class="data-lbl">LEGACY DATE</span><span class="data-val">${formatted.dateStr}</span></div>
+                    <div class="data-col"><span class="data-lbl">LEGACY TIME</span><span class="data-val">${formatted.timeStr}</span></div>
+                </div>
+            `;
+            window.Q_ModalEngine.render('PYLON PROTOCOL', html, 'CLOSE PROTOCOL');
+        }
+
+        function openRadarModal() {
+            let iconStr, statusStr, descStr, colorStr;
+            if(currentRadarStatus === 'THERMODYNAMIC FRICTION') {
+                iconStr = "🌪"; colorStr = "var(--magenta-glow)";
+                statusStr = "THERMODYNAMIC FRICTION";
+                descStr = "Approaching Cardinal Node. Thermodynamic friction elevated. Predictive modeling active.";
+            } else if(currentRadarStatus === 'THERMAL SPIKE') {
+                iconStr = "⚡"; colorStr = "var(--cyan-glow)";
+                statusStr = "THERMAL SPIKE DETECTED";
+                descStr = "Approaching inter-quadrant threshold. Climatic Baseload Modeler adjusting energy allocations.";
+            } else {
+                iconStr = "⛨"; colorStr = "var(--core-plat)";
+                statusStr = "THERMODYNAMICS STABLE";
+                descStr = "Orbital arc in optimal transit window. No anomalies detected in True Ellipse trajectory.";
+            }
+
+            const html = `
+                <div style="text-align: center; padding: 10px 0;">
+                    <div style="font-size: 2rem; margin-bottom: 10px; color: ${colorStr};">${iconStr}</div>
+                    <div style="font-family: 'Orbitron'; font-size: 1.1rem; color: ${colorStr}; margin-bottom: 5px;">${statusStr}</div>
+                    <div style="font-size: 0.65rem; color: var(--steel); padding: 0 10px;">${descStr}</div>
+                </div>
+            `;
+            window.Q_ModalEngine.render('CLIMATIC BASELOAD MODELING', html);
+        }
+
+        window.addEventListener('q-tick', (e) => {
+            const { t, isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
+            
+            // Utility function to format legacy strings (grey letters/symbols, cyan numbers)
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--steel); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(token => {
+                        if (/[0-9]/.test(token)) {
+                            out += `<span style="${numStyle}">${token}</span>`;
+                        } else {
+                            out += `<span style="${letterStyle}">${token}</span>`;
+                        }
+                    });
+                }
+                return out;
+            }
+
+            // --- MACRO-OS INVERSION STATUS ROTATOR ---
+            if(activePostulate) {
+                const axLeft = document.getElementById('status-axiom-left');
+                const axRight = document.getElementById('status-axiom-right');
+                if(axLeft) axLeft.innerText = activePostulate;
+                if(axRight) axRight.innerText = activePostulate === "LOCATION IS TRUTH" ? "THE ARC IS QUADRATURE" : "LOCATION IS TRUTH";
+            }
+
+            const legDateEl = document.getElementById('leg-date');
+            if (legDateEl) {
+                legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
+            }
+
+            const legTimeEl = document.getElementById('leg-time');
+            if (legTimeEl) {
+                legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
+            }
+
+            const fmtBtn = document.getElementById('fmt-btn');
+            if (fmtBtn) { 
+                fmtBtn.style.color = "var(--theme-main)"; 
+                fmtBtn.style.borderColor = "var(--theme-main)"; 
+            }
+
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+            const qCoordWing = document.getElementById('q-coord-wing');
+            
+            let smLetterStyle = "color:var(--steel); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+            let smNumStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+            
+            if (qCoordWing) {
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
+                } else {
+                    let cCycle = activeBlock ? activeBlock.cycle : 0;
+                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
+                }
+            }
+
+            const meanDegEl = document.getElementById('mean-deg');
+            if (meanDegEl) { 
+                meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
+                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            
+            const trueDegEl = document.getElementById('true-deg');
+            if (trueDegEl) { 
+                trueDegEl.innerText = qData.trueArc.toFixed(2) + "°";
+                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            
+            // --- DYNAMIC Q-DELTA DIAMOND & RING SHIFT ---
+            document.getElementById('transit-diamond-arm').style.transform = `rotate(${qData.meanArc}deg)`;
+            let diamond = document.getElementById('q-delta-diamond');
+            let gearMid = document.getElementById('kepler-ring');
+            
+            let radDist = (qData.trueArc - 14) * (Math.PI / 180);
+            let velocityMult = 1 + 0.0334 * Math.cos(radDist);
+            
+            // Interpolate color phase (1 = Perihelion/Red, 0 = Aphelion/Blue)
+            let phase = (Math.cos(radDist) + 1) / 2;
+            
+            // Magenta: 255, 0, 60
+            // Cyan: 0, 240, 255
+            let r = Math.round(0 + (255 - 0) * phase);
+            let g = Math.round(240 + (0 - 240) * phase);
+            let b = Math.round(255 + (60 - 255) * phase);
+            
+            let interpColor = `rgb(${r}, ${g}, ${b})`;
+            let interpDim = `rgba(${r}, ${g}, ${b}, 0.2)`;
+            
+            // Apply Dynamic Speed and Color to Ring
+            gearMid.style.transform = `rotate(${qData.trueArc * 15}deg)`;
+            gearMid.style.setProperty('--dyn-phase-color', interpColor);
+            gearMid.style.setProperty('--dyn-phase-dim', interpDim);
+
+            // Apply Shift to Diamond
+            diamond.style.background = interpColor;
+            diamond.style.boxShadow = `0 0 15px ${interpColor}, inset 0 0 5px #fff`;
+
+            // Pulse diamond near Apsides
+            if (velocityMult > 1.015 || velocityMult < 0.985) {
+                diamond.style.animation = "diamond-pulse 0.8s infinite alternate";
+            } else {
+                diamond.style.animation = "none";
+                diamond.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
+            }
+            // ---------------------------------
+
+            const earthSurface = document.querySelector('.earth-surface');
+            if (earthSurface) {
+                const siderealDayMs = 86164090;
+                const dayProgress = (t % siderealDayMs) / siderealDayMs;
+                const bgPosition = 200 - (dayProgress * 200);
+                earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
+            }
+
+            // MODAL DUAL-STATE DATA HOOK FIX
+            const modalTitle = document.getElementById('q-modal-title');
+            if (modalTitle && modalTitle.innerText === 'DUAL-STATE TELEMETRY') {
+                const telMean = document.getElementById('tel-mean');
+                if (telMean) {
+                    telMean.innerText = qData.meanArc.toFixed(3) + "°";
+                    document.getElementById('tel-true').innerText = qData.trueArc.toFixed(3) + "°";
+                    document.getElementById('tel-delta').innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
+                }
+            } else if (modalTitle && modalTitle.innerText === 'COORDINATE DATA VIEW') {
+                const dvQCoord = document.getElementById('dv-q-coord');
+                if (dvQCoord) {
+                    document.getElementById('dv-leg-date').innerText = legacyDateStr.toUpperCase();
+                    document.getElementById('dv-leg-time').innerText = legacyTimeStr;
+                    document.getElementById('dv-leg-lag').innerText = `-${lagDays.toFixed(4)} D`;
+                    dvQCoord.innerText = (activeBlock && activeBlock.type === 'PYLON') ? activeBlock.name : `Q${qData.quad} S${qData.sect} DAY ${qData.day}`;
+                    document.getElementById('dv-q-arc').innerText = qData.trueArc.toFixed(4) + "°";
+                    document.getElementById('dv-q-delta').innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
+                    document.getElementById('dv-q-tmr').innerText = currentRadarStatus;
+                }
+            }
+
+            // Asymmetrical Pylon Detection logic including Epsilon Phase
+            let pylonName = "ALPHA";
+            let progressToPylon = 0;
+            let driftDeg = 0;
+            let pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.ALPHA : 86400000;
+            
+            if (qData.trueArc >= 0 && qData.trueArc < 90) { 
+                pylonName = "BETA"; 
+                driftDeg = 90 - qData.trueArc;
+                progressToPylon = (qData.trueArc / 90) * 100; 
+                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.BETA : 84600000;
+            } else if (qData.trueArc >= 90 && qData.trueArc < 180) { 
+                pylonName = "GAMMA"; 
+                driftDeg = 180 - qData.trueArc;
+                progressToPylon = ((qData.trueArc - 90) / 90) * 100; 
+                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.GAMMA : 89662680;
+            } else if (qData.trueArc >= 180 && qData.trueArc < 270) { 
+                pylonName = "DELTA"; 
+                driftDeg = 270 - qData.trueArc;
+                progressToPylon = ((qData.trueArc - 180) / 90) * 100; 
+                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.DELTA : 102599640;
+            } else { 
+                pylonName = "EPSILON"; 
+                driftDeg = 360 - qData.trueArc;
+                progressToPylon = ((qData.trueArc - 270) / 90) * 100; 
+                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.EPSILON : 89662680;
+            }
+            
+            document.getElementById('next-pylon').innerText = pylonName;
+            document.getElementById('drift-to-pylon').innerText = driftDeg.toFixed(2) + "° REMAINING";
+            document.getElementById('pylon-duration').innerText = (pylonDurMs / 3600000).toFixed(4) + "h";
+            document.getElementById('macro-bar').style.width = `${progressToPylon}%`;
+            
+            let symLoss = Math.abs(qData.delta) / 180 * 100; 
+            let symLossEl = document.getElementById('sym-loss');
+            if(symLossEl) symLossEl.innerText = symLoss.toFixed(2) + "%";
+
+            const waveEl = document.getElementById('resp-wave');
+            const phaseTextEl = document.getElementById('resp-phase-text');
+            const deltaEl = document.getElementById('solar-float-delta');
+            
+            let newPhase = "";
+            if (velocityMult > 1.015) {
+                waveEl.style.background = "repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(255,0,60,0.4) 6px, rgba(255,0,60,0.4) 12px)";
+                waveEl.style.animation = "wave-shift 0.8s linear infinite";
+                newPhase = "ACCELERATED (PERIHELION)";
+                phaseTextEl.style.color = "var(--magenta-glow)";
+            } else if (velocityMult < 0.985) {
+                waveEl.style.background = "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,240,255,0.2) 20px, rgba(0,240,255,0.2) 40px)";
+                waveEl.style.animation = "wave-shift 5s linear infinite";
+                newPhase = "DILATED (APHELION)";
+                phaseTextEl.style.color = "var(--cyan-glow)";
+            } else {
+                waveEl.style.background = "repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(226,232,240,0.3) 15px, rgba(226,232,240,0.3) 30px)";
+                waveEl.style.animation = "wave-shift 2.5s linear infinite";
+                newPhase = "NOMINAL TRANSIT";
+                phaseTextEl.style.color = "var(--core-plat)";
+            }
+
+            document.getElementById('rt-delta').innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
+            deltaEl.innerText = `KEPLERIAN MULTIPLIER: ${velocityMult.toFixed(3)}x`;
+            phaseTextEl.innerText = newPhase;
+            
+            if (newPhase !== lastThermoPhase) {
+                if (lastThermoPhase !== "") window.Q_LOG('STATE', 'MECHANICAL', 'KEPLERIAN_PHASE_SHIFT', { from: lastThermoPhase, to: newPhase });
+                lastThermoPhase = newPhase;
+            }
+
+            const radarProximity = Math.abs(Math.sin((qData.trueArc * Math.PI) / 45)); const radarText = document.getElementById('radar-readout');
+            if(radarProximity > 0.98) { currentRadarStatus = 'THERMODYNAMIC FRICTION'; radarText.innerText = "⚠ THERMODYNAMIC FRICTION"; radarText.style.color = "var(--magenta-glow)"; } 
+            else if(radarProximity > 0.85) { currentRadarStatus = 'THERMAL SPIKE'; radarText.innerText = "THERMAL SPIKE DETECTED"; radarText.style.color = "var(--cyan-glow)"; } 
+            else { currentRadarStatus = 'STABLE'; radarText.innerText = "THERMODYNAMICS STABLE"; radarText.style.color = "var(--core-plat)"; }
+
+            const nanoString = (t / 1000).toFixed(9).split('.'); document.getElementById('nano-counter').innerText = `+${nanoString[1]}`;
+            const smearValText = document.getElementById('smear-val');
+            
+            const expected = Math.round(t / 1000) * 1000;
+            const smearVal = (t - expected) / 1000;
+            smearValText.innerText = `${smearVal > 0 ? '+' : ''} ${smearVal.toFixed(10)}`;
+
+            const offsetStr = `[LAG: +${(lagDays * 24).toFixed(2)}h]`; 
+            const civilTensionReadout = document.getElementById('civil-tension-readout');
+            if (civilTensionReadout) {
+                civilTensionReadout.innerHTML = `<span style="color:var(--magenta-glow);">${offsetStr}</span>`; 
+            }
+        });
+
+        if(window.generateStars) window.generateStars('stars');
+    </script>
+</body>
+</html>

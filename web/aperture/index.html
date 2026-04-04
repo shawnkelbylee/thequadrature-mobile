@@ -6,12 +6,11 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>THE QUADRATURE // APERTURE</title>
-    
-    <script src="../q-ui-global.js?v=16.4"></script>
-    <script src="../q-core.js?v=16.4"></script>
-    <script src="../q-ui-planner.js?v=16.4"></script>
-    <script src="../q-hub.js?v=16.4"></script>
+    <title>THE QUADRATURE // CHRONO-INTERFACE</title>
+    <script src="q-ui-global.js?v=16.4"></script>
+    <script src="q-core.js?v=16.4"></script>
+    <script src="q-ui-planner.js?v=16.4"></script>
+    <script src="q-hub.js?v=16.4"></script>
     
     <script>
         // IRONCLAD MOBILE BYPASS: Force class if on native device, bypassing buggy WebView viewports
@@ -39,7 +38,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
 
-        /* ORIGINAL CHRONOFACE VARIABLES (Overridden below for Blueprint) */
         :root {
             --void: #080604; 
             --gold: #F4D068;       
@@ -195,140 +193,6 @@
         @keyframes glitter-4 { 0%, 100% { opacity: 0.4; transform: rotate(67.5deg) scale(0.8); filter: drop-shadow(0 0 4px #fff); } 50% { opacity: 0.9; transform: rotate(67.5deg) scale(1); filter: drop-shadow(0 0 10px #fff); } }
         
         .phil-quote { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: #aaa; text-align: center; font-style: italic; width: 100%; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px; }
-
-
-        /* ========================================================================= */
-        /* --- APERTURE BLUEPRINT OVERRIDES: FORCED WHITE-ON-BLACK AESTHETIC ---     */
-        /* ========================================================================= */
-
-        /* 1. HIDE ALL NAVIGATION AND SCRUBBER PANELS */
-        .q-nav-bar, 
-        .q-global-controls, 
-        #mobile-telemetry-ribbon, 
-        .q-control-strip, 
-        #q-mic-fab, 
-        #q-mic-fab-desktop {
-            display: none !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-
-        /* 2. OVERRIDE ALL THEME VARIABLES TO PURE WHITE */
-        :root {
-            --void: #000000 !important; 
-            --gold: #ffffff !important;       
-            --gold-dim: rgba(255, 255, 255, 0.2) !important;
-            --amber: #ffffff !important;    
-            --amber-dim: rgba(255, 255, 255, 0.2) !important;
-            --white: #ffffff !important; 
-            --silver-glow: rgba(255, 255, 255, 0.2) !important;
-            --glass-liquid: transparent !important; 
-            --blur-high: none !important;
-            --theme-main: #ffffff !important;
-            --theme-dim: rgba(255, 255, 255, 0.2) !important;
-            --sys-cyan: #ffffff !important;
-            --sys-cyan-dim: rgba(255, 255, 255, 0.2) !important;
-            --bio-purple: #ffffff !important;
-            --bio-purple-dim: rgba(255, 255, 255, 0.2) !important;
-            --mech-red: #ffffff !important;
-            --env-green: #ffffff !important;
-            --env-green-dim: rgba(255, 255, 255, 0.2) !important;
-            --starlight: rgba(255, 255, 255, 0.8) !important;
-            --platinum: #ffffff !important;
-            --chrono-amber: #ffffff !important;
-            --chrono-amber-dim: rgba(255, 255, 255, 0.2) !important;
-        }
-
-        /* 3. BLUEPRINT GRID BACKGROUND */
-        body {
-            background-color: #000000 !important;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.15) 1px, transparent 1px) !important;
-            background-size: 30px 30px !important;
-        }
-
-        /* 4. FLATTEN 4 CORNERS AND 2 WINGS INTO SHARP BLUEPRINTS */
-        .vector-anchor, 
-        .wing-content {
-            background: #000000 !important;
-            border: 1px solid #ffffff !important;
-            box-shadow: none !important;
-            border-radius: 0 !important; /* Sharp corners */
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-        
-        .vector-anchor:hover {
-            background: rgba(255, 255, 255, 0.1) !important;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3) !important;
-        }
-
-        /* 5. STRIP GLOWS AND MASK GRADIENTS FROM CENTER DIAL */
-        .gear-container {
-            background: transparent !important;
-            border: 2px solid #ffffff !important;
-            box-shadow: none !important;
-        }
-
-        .gear-container::after {
-            background: transparent !important;
-            border: 1px dashed #ffffff !important;
-            box-shadow: none !important;
-            -webkit-mask: none !important;
-            mask-composite: add !important;
-        }
-        
-        .gyro-ring {
-            background: transparent !important;
-            border: 1px dotted #ffffff !important;
-            box-shadow: none !important;
-            -webkit-mask: none !important;
-            mask-composite: add !important;
-        }
-
-        .ring {
-            border: 1px solid rgba(255,255,255,0.3) !important;
-            box-shadow: none !important;
-        }
-
-        .ring::before { 
-            border: 1px solid #ffffff !important; 
-            background: transparent !important; 
-            -webkit-mask: none !important; 
-            mask-composite: add !important;
-        }
-        #ring-cycle-mean::before { border: 1px solid #ffffff !important; }
-        #ring-cycle-true::before { border: 1px dashed #ffffff !important; }
-        #ring-sector::before { border: 1px dotted #ffffff !important; }
-        #ring-week::before { border: 1px solid rgba(255,255,255,0.5) !important; }
-        #ring-day::before { border: 1px solid #ffffff !important; }
-
-        .ring-node {
-            background: #000 !important;
-            border: 1px solid #fff !important;
-            box-shadow: none !important;
-            filter: none !important;
-            animation: none !important;
-        }
-        
-        .star-layer { 
-            background: #ffffff !important; 
-            filter: none !important; 
-            animation: none !important; 
-            opacity: 1 !important;
-        }
-        .layer-1 { transform: rotate(0deg); } 
-        .layer-2 { transform: rotate(22.5deg); } 
-        .layer-3 { transform: rotate(45deg); } 
-        .layer-4 { transform: rotate(67.5deg); }
-        
-        /* 6. TYPOGRAPHY OVERRIDES */
-        .w-head, .v-head { border-bottom: 1px solid #ffffff !important; color: #ffffff !important; text-shadow: none !important; }
-        .val-lg, .q-val, .fmt-toggle, .val-sm, .t-row span { color: #ffffff !important; text-shadow: none !important; }
-        .fmt-toggle { border: 1px solid #ffffff !important; background: #000000 !important; }
-        .phil-quote { color: rgba(255, 255, 255, 0.6) !important; border-top: 1px dashed rgba(255,255,255,0.3) !important; }
-
     </style>
 </head>
 <body class="mode-q boot-active">
@@ -489,6 +353,8 @@
                 }
             }
 
+            // --- LOCALIZED DATA ROUTING INJECTION ---
+            
             const getEl = (id) => document.getElementById(id);
 
             // BIO DATA

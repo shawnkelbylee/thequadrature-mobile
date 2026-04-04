@@ -3,262 +3,408 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Quadrature - Commercial</title>
-    <style>
-        /* INVARIANT CSS VARIABLES: COMMERCIAL DASHBOARD SKIN */
-        :root {
-            --bg-color: #f4f5f7;
-            --stroke-color: #0f172a;
-            --text-color: #0f172a;
-            --alert-color: #dc2626; /* Functional color for state-changes/alerts */
-            --panel-bg: #ffffff;
-            --font-main: 'Courier New', Courier, monospace;
-            --grid-opacity: 0.05;
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>THE QUADRATURE // CHRONO-INTERFACE</title>
+    <script src="q-ui-global.js?v=16.4"></script>
+    <script src="q-core.js?v=16.4"></script>
+    <script src="q-ui-planner.js?v=16.4"></script>
+    <script src="q-hub.js?v=16.4"></script>
+    
+    <script>
+        // IRONCLAD MOBILE BYPASS: Force class if on native device, bypassing buggy WebView viewports
+        if (/Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768) {
+            document.documentElement.classList.add('is-mobile-device');
+        }
+        
+        // BOOT STATE HANDLER
+        if(sessionStorage.getItem('Q_BOOT_COMPLETE') === 'true') {
+            document.write('<style>#boot-overlay { display: none !important; }</style>');
+            window.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.remove('boot-active');
+            });
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        // OMNI-PLANNER PERSISTENT PROJECTION HOOK
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Q_STATE && window.Q_STATE.logic_layer) {
+                window.Q_STATE.logic_layer.predictive_friction = true;
+                if(window.Q_LOG) window.Q_LOG('INFO', 'CORE', 'PREDICTIVE_PHASE_BORDERING_ACTIVE');
+            }
+        });
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
+
+        :root {
+            --void: #080604; 
+            --gold: #F4D068;       
+            --gold-dim: rgba(244, 208, 104, 0.15);
+            --amber: #B97A35;    
+            --amber-dim: rgba(185, 122, 53, 0.15);
+            --white: #FDF9F1; 
+            --silver-glow: rgba(229, 228, 226, 0.25);
+            --glass-liquid: rgba(20, 15, 10, 0.2); 
+            --blur-high: blur(30px) saturate(1.2);
+            --theme-main: var(--amber);
+            --theme-dim: var(--amber-dim);
+            --sys-cyan: #00f0ff;
+            --sys-cyan-dim: rgba(0, 240, 255, 0.2);
+            --bio-purple: #b829ff;
+            --bio-purple-dim: rgba(184, 41, 255, 0.15);
+            --mech-red: #ff003c;
+            --env-green: #a7ff83;
+            --env-green-dim: rgba(167, 255, 131, 0.2);
+            --starlight: rgba(255, 255, 255, 0.6);
+            --platinum: #E5E4E2;
+        }
+
+        body.mode-legacy {
+            --theme-main: var(--gold);
+            --theme-dim: var(--gold-dim);
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--font-main);
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+            background-color: var(--void);
+            background: radial-gradient(circle at center, #1a130a 0%, var(--void) 80%);
+            color: var(--white);
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0; height: 100dvh; width: 100vw; overflow: hidden; overscroll-behavior: none;
+            display: flex; justify-content: center; align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+            perspective: 1500px; 
+            transform-style: preserve-3d;
+            touch-action: manipulation;
         }
 
-        /* ENTERPRISE GRID BACKGROUND */
-        .commercial-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(15, 23, 42, var(--grid-opacity)) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(15, 23, 42, var(--grid-opacity)) 1px, transparent 1px);
-            background-size: 2vw 2vw;
-            z-index: 0;
-            pointer-events: none;
+        html.is-mobile-device body { perspective: none !important; transform-style: flat !important; }
+        html.is-mobile-device body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
+        html.is-mobile-device .q-nav-brand { font-size: 0.6rem !important; letter-spacing: 1px !important; }
+        html.is-mobile-device #q-global-sim-badge { font-size: 0.4rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; white-space: nowrap !important; margin-left: 0 !important; }
+        
+        body.boot-active .q-nav-bar,
+        body.boot-active #mobile-telemetry-btn,
+        body.boot-active #q-mic-fab,
+        body.boot-active #mobile-telemetry-ribbon {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
-        /* RESTORED: TOP NAVIGATION BAR */
-        .top-nav {
-            width: 100%;
-            height: 60px;
-            border-bottom: 2px solid var(--stroke-color);
-            background-color: var(--panel-bg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 20;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .nav-brand { font-size: 1.2rem; letter-spacing: 2px; }
-        .nav-status { color: var(--alert-color); animation: pulse 2s infinite; }
-
-        /* RESTORED: BOTTOM SCRUBBER PANEL */
-        .bottom-scrubber {
-            width: 100%;
-            height: 60px;
-            border-top: 2px solid var(--stroke-color);
-            background-color: var(--panel-bg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 20;
-            position: absolute;
-            bottom: 0;
+        .vector-anchor {
+            position: absolute; width: calc(var(--mod-w) + 50px); height: auto; min-height: 160px; z-index: 100; cursor: pointer; pointer-events: auto; 
+            display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center;
+            padding: 22px; box-sizing: border-box; transition: all 0.3s ease; 
+            background: rgba(15, 12, 10, 0.9); 
+            backdrop-filter: var(--blur-med); -webkit-backdrop-filter: var(--blur-med);
+            border-radius: 8px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(229, 228, 226, 0.1);
+            border: 1px solid rgba(244, 208, 104, 0.3);
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
         
-        .scrubber-track {
-            flex-grow: 1;
-            height: 4px;
-            background-color: var(--stroke-color);
-            margin: 0 20px;
-            position: relative;
-            opacity: 0.3;
+        .vector-anchor:hover {
+            border-color: var(--theme-main);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.9), inset 0 0 30px rgba(185, 122, 53, 0.2);
         }
-        .scrubber-node {
-            position: absolute;
-            top: -6px;
-            left: 25%;
-            width: 16px;
-            height: 16px;
-            background-color: var(--stroke-color);
-            border-radius: 50%;
-        }
+        
+        .tl { top: 7vh; left: 2vw; }
+        .tr { top: 7vh; right: 2vw; }
+        .bl { bottom: 8vh; left: 2vw; }
+        .br { bottom: 8vh; right: 2vw; }
+        
+        .v-head { font-family: 'Orbitron'; font-weight: 900; font-size: 1.15rem; letter-spacing: 3px; margin-bottom: 12px; width: 100%; border-bottom: 1px dashed rgba(229, 228, 226, 0.3); padding-bottom: 6px; }
+        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.85rem; color: var(--platinum); font-family: 'JetBrains Mono'; margin-bottom: 8px; font-weight: 700; align-items: center;}
+        
+        .t-row span:first-child { color: var(--starlight); }
 
-        /* STRUCTURAL INVARIANT: HUD CONTAINER */
-        .q-hud-container {
-            flex-grow: 1;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 20% 60% 20%;
-            grid-template-rows: 20% 60% 20%;
-            z-index: 10;
-            pointer-events: none;
-            margin-bottom: 60px; /* Offset to clear the scrubber */
-        }
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; z-index: 20;}
+        .val-bio { color: var(--bio-purple); text-shadow: 0 0 10px var(--bio-purple-dim); }
+        .val-com { color: var(--gold); text-shadow: 0 0 10px var(--gold-dim); }
+        .val-env { color: var(--env-green); text-shadow: 0 0 10px var(--env-green-dim); }
+        .val-mec { color: var(--sys-cyan); text-shadow: 0 0 10px var(--sys-cyan-dim); }
 
-        /* 4 CORNER PANELS */
-        .corner-panel {
-            border: 2px solid var(--stroke-color);
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            pointer-events: auto;
-            background-color: var(--panel-bg);
-            box-shadow: 2px 2px 0px rgba(0,0,0,0.05); /* Slight depth for legibility */
+        .gear-container {
+            position: absolute; width: var(--dial-size); height: var(--dial-size); border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; z-index: 30; transform: translateZ(-50px); transform-style: preserve-3d; 
+            background: var(--glass-liquid); backdrop-filter: var(--blur-high); -webkit-backdrop-filter: var(--blur-high);
+            border: 6px solid rgba(244, 208, 104, 0.08);
+            box-shadow: inset 0 0 60px rgba(244, 208, 104, 0.05), inset 0 0 20px rgba(0,0,0,0.9), 0 0 100px rgba(0,0,0,0.9), 0 0 40px rgba(244, 208, 104, 0.1), 0 0 120px rgba(229, 228, 226, 0.15);
         }
-        .top-left { grid-column: 1; grid-row: 1; border-top: none; border-left: none; }
-        .top-right { grid-column: 3; grid-row: 1; border-top: none; border-right: none; text-align: right; }
-        .bottom-left { grid-column: 1; grid-row: 3; border-bottom: none; border-left: none; justify-content: flex-end; }
-        .bottom-right { grid-column: 3; grid-row: 3; border-bottom: none; border-right: none; justify-content: flex-end; text-align: right; }
-
-        /* 2 WING OS */
-        .wing-os {
-            border: 2px solid var(--stroke-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            pointer-events: auto;
-            background-color: var(--panel-bg);
+        
+        .gear-container::after { 
+            content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 4px solid transparent; 
+            background: conic-gradient(var(--gold), var(--amber), var(--platinum), var(--white), var(--platinum), var(--amber), var(--gold), var(--amber), var(--platinum), var(--white), var(--platinum), var(--amber), var(--gold)) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+            box-shadow: 0 0 30px var(--gold-dim), inset 0 0 20px var(--silver-glow);
+            animation: outer-spin 12s linear infinite reverse;
+            pointer-events: none; z-index: 60;
         }
-        .wing-left { grid-column: 1; grid-row: 2; border-left: none; }
-        .wing-right { grid-column: 3; grid-row: 2; border-right: none; }
+        @keyframes outer-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* CENTER DIAL ZONE */
-        .center-zone {
-            grid-column: 2;
-            grid-row: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
+        .gyro-ring {
+            position: absolute; width: 18%; height: 18%; border-radius: 50%; border: 2px solid transparent;
+            background: conic-gradient(var(--gold), var(--platinum), var(--white), var(--platinum), var(--gold), var(--platinum), var(--white), var(--platinum), var(--gold)) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+            box-shadow: 0 0 10px var(--platinum); animation: gyro-spin 0.25s linear infinite; z-index: 40; pointer-events: none; filter: blur(1px); opacity: 0.9;
         }
+        @keyframes gyro-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* CENTER DIAL GEOMETRY (TMR) */
-        .center-dial {
-            width: 55vmin;
-            height: 55vmin;
-            border: 3px solid var(--stroke-color);
-            border-radius: 50%;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
-            background-color: rgba(255, 255, 255, 0.5);
+        .ring { position: absolute; border-radius: 50%; pointer-events: none; display: flex; justify-content: center; border: 1px solid rgba(244, 208, 104, 0.15); box-shadow: 0 0 15px rgba(0,0,0,0.4); }
+
+        .ring::before {
+            content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid transparent;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+            pointer-events: none; z-index: -1;
         }
+        #ring-cycle-mean::before { background: conic-gradient(from 270deg, transparent 0deg, var(--platinum) 90deg, transparent 90deg) border-box; }
+        #ring-cycle-true::before { background: conic-gradient(from 270deg, transparent 0deg, var(--amber) 90deg, transparent 90deg) border-box; }
+        #ring-sector::before { background: conic-gradient(from 270deg, transparent 0deg, var(--gold) 90deg, transparent 90deg) border-box; }
+        #ring-week::before { background: conic-gradient(from 270deg, transparent 0deg, var(--amber) 90deg, transparent 90deg) border-box; }
+        #ring-day::before { background: conic-gradient(from 270deg, transparent 0deg, #fff 90deg, transparent 90deg) border-box; }
 
-        .dial-inner {
-            width: 45vmin;
-            height: 45vmin;
-            border: 2px dashed var(--stroke-color);
-            border-radius: 50%;
-            position: absolute;
-        }
+        #ring-cycle-mean, #ring-cycle-true { width: 90%; height: 90%; }
+        #ring-sector { width: 75%; height: 75%; }
+        #ring-week { width: 60%; height: 60%; }
+        #ring-day { width: 45%; height: 45%; }
+        
+        .ring-node { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 50%; z-index: 40; clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); pointer-events: auto; cursor: help; }
+        
+        #node-cycle-mean { width: 56px; height: 56px; background: var(--platinum); filter: drop-shadow(0 0 10px #fff); top: -28px; animation: pulse-node 2s infinite; }
+        #node-cycle-true { width: 36px; height: 36px; background: var(--amber); filter: drop-shadow(0 0 12px var(--gold)); top: -18px; animation: pulse-node 2s infinite 0.5s; z-index: 45; border: 2px solid var(--void); }
+        #node-sector { width: 36px; height: 36px; background: var(--gold); filter: drop-shadow(0 0 6px var(--amber)); top: -18px; animation: pulse-node 1.5s infinite 0.5s; }
+        #node-week { width: 46px; height: 46px; background: var(--amber); filter: drop-shadow(0 0 12px var(--gold)); top: -23px; animation: pulse-node 3s infinite 1s; }
+        #node-day { width: 26px; height: 26px; background: #fff; filter: drop-shadow(0 0 8px var(--platinum)); top: -13px; animation: pulse-node 1s infinite 0.2s; }
+        
+        @keyframes pulse-node { 0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; } 50% { transform: translateX(-50%) scale(0.8); opacity: 0.7; } }
 
-        .dial-crosshair {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background-color: var(--stroke-color);
-            opacity: 0.8;
-        }
-        .dial-crosshair.vertical {
-            width: 2px;
-            height: 100%;
-        }
+        .core-pupil { position: absolute; z-index: 50; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .center-star-sm { position: absolute; width: 38%; height: 38%; display: flex; justify-content: center; align-items: center; z-index: 50; }
+        .star-layer { position: absolute; width: 100%; height: 100%; background: var(--gold); clip-path: polygon(50% 0%, 52% 48%, 100% 50%, 52% 52%, 50% 100%, 48% 52%, 0% 50%, 48% 48%); }
+        .layer-1 { animation: glitter-1 0.7s infinite; } .layer-2 { background: var(--platinum); animation: glitter-2 0.9s infinite; } .layer-3 { background: var(--amber); animation: glitter-3 1.1s infinite; } .layer-4 { background: #fff; animation: glitter-4 0.8s infinite; }
 
-        /* DATA TYPOGRAPHY */
-        .data-label { opacity: 0.7; margin-bottom: 4px; font-size: 0.75rem; font-weight: bold; }
-        .data-value { font-weight: 900; letter-spacing: 1px; font-size: 1.1rem; }
-        .alert-text { color: var(--alert-color); }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
+        @keyframes glitter-1 { 0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px var(--gold)); } 50% { opacity: 0.6; transform: rotate(0deg) scale(0.85); filter: drop-shadow(0 0 5px var(--gold-dim)); } }
+        @keyframes glitter-2 { 0%, 100% { opacity: 0.5; transform: rotate(22.5deg) scale(0.85); filter: drop-shadow(0 0 5px var(--platinum)); } 50% { opacity: 1; transform: rotate(22.5deg) scale(1.05); filter: drop-shadow(0 0 15px var(--platinum)); } }
+        @keyframes glitter-3 { 0%, 100% { opacity: 1; transform: rotate(45deg) scale(0.95); filter: drop-shadow(0 0 12px var(--amber)); } 50% { opacity: 0.4; transform: rotate(45deg) scale(0.8); filter: drop-shadow(0 0 3px var(--amber-dim)); } }
+        @keyframes glitter-4 { 0%, 100% { opacity: 0.4; transform: rotate(67.5deg) scale(0.8); filter: drop-shadow(0 0 4px #fff); } 50% { opacity: 0.9; transform: rotate(67.5deg) scale(1); filter: drop-shadow(0 0 10px #fff); } }
+        
+        .phil-quote { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: #aaa; text-align: center; font-style: italic; width: 100%; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px; }
     </style>
 </head>
-<body>
-    <div class="top-nav">
-        <div class="nav-brand">THE QUADRATURE // COMMERCIAL</div>
-        <div class="nav-status">NETWORK SYNC: ACTIVE</div>
-    </div>
+<body class="mode-q boot-active">
 
-    <div class="commercial-grid"></div>
+    <div class="star-container" id="star-layer"></div>
 
-    <div class="q-hud-container">
-        
-        <div class="corner-panel top-left">
-            <div class="data-label">MARKET_ARC</div>
-            <div class="data-value">NOMINAL</div>
-        </div>
-        
-        <div class="corner-panel top-right">
-            <div class="data-label">B2B_TELEMETRY</div>
-            <div class="data-value alert-text">AWAITING HANDSHAKE</div>
-        </div>
+    <div class="vector-anchor telemetry-node tl" id="quad-BIO" onclick="window.openSlotRoutingModal('BIO')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('BIO'); event.preventDefault();"></div>
+    <div class="vector-anchor telemetry-node tr" id="quad-COM" onclick="window.openSlotRoutingModal('COM')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('COM'); event.preventDefault();"></div>
+    <div class="vector-anchor telemetry-node bl" id="quad-ENV" onclick="window.openSlotRoutingModal('ENV')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('ENV'); event.preventDefault();"></div>
+    <div class="vector-anchor telemetry-node br" id="quad-MEC" onclick="window.openSlotRoutingModal('MEC')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('MEC'); event.preventDefault();"></div>
 
-        <div class="wing-os wing-left">
-            <div class="data-label">LOGISTICS</div>
-        </div>
-
-        <div class="center-zone">
-            <div class="center-dial">
-                <div class="dial-crosshair"></div>
-                <div class="dial-crosshair vertical"></div>
-                <div class="dial-inner"></div>
+    <div class="gear-container q-center-dial">
+        <div class="ring r-cycle" id="ring-cycle-mean"><div class="ring-node" id="node-cycle-mean" title="MEAN ARC"></div></div>
+        <div class="ring r-cycle" id="ring-cycle-true" style="border:none; box-shadow:none;"><div class="ring-node" id="node-cycle-true" title="TRUE ARC"></div></div>
+        <div class="ring r-sector" id="ring-sector"><div class="ring-node" id="node-sector" title="SECTOR (30-DAY)"></div></div>
+        <div class="ring r-week" id="ring-week"><div class="ring-node" id="node-week" title="WEEK (6-DAY)"></div></div>
+        <div class="ring r-day" id="ring-day"><div class="ring-node" id="node-day" title="Q-DAY (24-HOUR)"></div></div>
+        <div class="gyro-ring"></div>
+        <div class="core-pupil">
+            <div class="center-star-sm">
+                <div class="star-layer layer-1"></div>
+                <div class="star-layer layer-2"></div>
+                <div class="star-layer layer-3"></div>
+                <div class="star-layer layer-4"></div>
             </div>
         </div>
-
-        <div class="wing-os wing-right">
-            <div class="data-label">METRICS</div>
-        </div>
-
-        <div class="corner-panel bottom-left">
-            <div class="data-label">LATENCY</div>
-            <div class="data-value">-- ms</div>
-        </div>
-
-        <div class="corner-panel bottom-right">
-            <div class="data-label">BIFURCATION</div>
-            <div class="data-value">COMM_ACTIVE</div>
-        </div>
-
-    </div>
-
-    <div class="bottom-scrubber">
-        <div class="data-label">T-MINUS</div>
-        <div class="scrubber-track">
-            <div class="scrubber-node"></div>
-        </div>
-        <div class="data-label">T-PLUS</div>
     </div>
 
     <script>
-        console.log("[COMMERCIAL] Init: Structural Invariant Deployed.");
-        console.log("[COMMERCIAL] UI Mode: High-Contrast Dashboard.");
-        // q-core.js and Native Bridge hookups will be routed here.
+        if (window.generateStars) window.generateStars('star-layer');
+
+        const VECTOR_METRICS = {
+            'BIO': { HRV: 'HRV / Elasticity', PHASE: 'Ultradian Phase', LUNAR: 'Lunar Illumination', TIDE: 'Gravitational Tide', RHR: 'Resting Heart Rate', SLEEP: 'Sleep Stage', NOON: 'Solar Noon Proximity' },
+            'COM': { ZODIAC: 'Astrophysical Aspect', LEDGER: 'Sovereign Ledger', TERM: 'Solar Season (Jiéqì)', NODE: 'Q-Coordinate' },
+            'ENV': { FRICTION: 'Thermodynamic Friction', RISK: 'Probability Index', TENSION: 'Biome Tension', GEO: 'Local Coordinate', IRRADIANCE: 'Solar Irradiance', PRESSURE: 'Atmospheric Pressure' },
+            'MEC': { DRIFT: 'Drift to Pylon', ECCENTRICITY: 'Orbital Eccentricity', SYMMETRY: 'Temporal Symmetry Loss', SMEAR: 'Gregorian Smear', VELOCITY: 'Keplerian Velocity' }
+        };
+
+        const PHILOSOPHY = {
+            'BIO': 'Here and Now are Infinitely One',
+            'ENV': 'Based in Science',
+            'COM': 'Bathed in Culture',
+            'MEC': 'Built for the Digital Age'
+        };
+
+        const V_STYLES = {
+            'BIO': { head: 'BIOLOGICAL', class: 'val-bio' },
+            'COM': { head: 'COMMUNAL', class: 'val-com' },
+            'ENV': { head: 'ENVIRONMENTAL', class: 'val-env' },
+            'MEC': { head: 'MECHANICAL', class: 'val-mec' }
+        };
+
+        window.openSlotRoutingModal = function(vector) {
+            const metrics = VECTOR_METRICS[vector];
+            let html = `<div style="font-size:0.65rem; color:#aaa; font-family:'JetBrains Mono'; text-align:center; margin-bottom:15px;">Route data feeds to the 4 available UI slots for the ${V_STYLES[vector].head} vector.</div>`;
+            
+            for(let i=1; i<=4; i++) {
+                const saved = localStorage.getItem(`Q_SLOT_${vector}_${i}`);
+                html += `<div style="margin-bottom:10px;">
+                    <label style="font-size:0.55rem; color:var(--platinum); font-family:'Orbitron'; letter-spacing:1px;">SLOT ${i}</label>
+                    <select id="sel-${vector}-${i}" style="width:100%; background:rgba(0,0,0,0.8); border:1px solid var(--theme-main); color:#fff; padding:8px; font-family:'Orbitron'; font-size:0.65rem; border-radius:4px; outline:none; margin-top:4px;">
+                        <option value="NONE" ${!saved || saved==='NONE' ? 'selected' : ''}>-- UNASSIGNED --</option>`;
+                for (let key in metrics) {
+                    html += `<option value="${key}" ${saved === key ? 'selected' : ''}>${metrics[key]}</option>`;
+                }
+                html += `</select></div>`;
+            }
+
+            window.Q_ModalEngine.render(`${V_STYLES[vector].head} // SLOT ROUTING`, html, 'LOCK ROUTES', () => {
+                for(let i=1; i<=4; i++) {
+                    localStorage.setItem(`Q_SLOT_${vector}_${i}`, document.getElementById(`sel-${vector}-${i}`).value);
+                }
+                window.Q_LOG('STATE', 'INTERFACE', 'SLOT_ROUTES_UPDATED', { vector });
+                window.refreshChronoFace();
+                window.Q_ModalEngine.close();
+                if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
+            });
+        };
+
+        window.refreshChronoFace = function() {
+            // Initialize Defaults if missing
+            if(!localStorage.getItem('Q_SLOT_BIO_1')) {
+                localStorage.setItem('Q_SLOT_BIO_1', 'HRV'); localStorage.setItem('Q_SLOT_BIO_2', 'LUNAR'); localStorage.setItem('Q_SLOT_BIO_3', 'TIDE'); localStorage.setItem('Q_SLOT_BIO_4', 'PHASE');
+                localStorage.setItem('Q_SLOT_COM_1', 'NODE'); localStorage.setItem('Q_SLOT_COM_2', 'ZODIAC'); localStorage.setItem('Q_SLOT_COM_3', 'LEDGER'); localStorage.setItem('Q_SLOT_COM_4', 'TERM');
+                localStorage.setItem('Q_SLOT_ENV_1', 'FRICTION'); localStorage.setItem('Q_SLOT_ENV_2', 'RISK'); localStorage.setItem('Q_SLOT_ENV_3', 'TENSION'); localStorage.setItem('Q_SLOT_ENV_4', 'GEO');
+                localStorage.setItem('Q_SLOT_MEC_1', 'DRIFT'); localStorage.setItem('Q_SLOT_MEC_2', 'ECCENTRICITY'); localStorage.setItem('Q_SLOT_MEC_3', 'SYMMETRY'); localStorage.setItem('Q_SLOT_MEC_4', 'SMEAR');
+            }
+
+            ['BIO', 'COM', 'ENV', 'MEC'].forEach(vec => {
+                const container = document.getElementById(`quad-${vec}`);
+                const sty = V_STYLES[vec];
+                let inner = `<div class="v-head holo-text ${sty.class}">${sty.head}</div>`;
+                let assignedCount = 0;
+                
+                for(let i=1; i<=4; i++) {
+                    const slotKey = localStorage.getItem(`Q_SLOT_${vec}_${i}`);
+                    if(slotKey && slotKey !== 'NONE') {
+                        inner += `<div class="t-row"><span>${VECTOR_METRICS[vec][slotKey].toUpperCase()}:</span> <span id="face-${vec}-${slotKey}" class="val-sm ${sty.class}">--</span></div>`;
+                        assignedCount++;
+                    }
+                }
+                
+                if(assignedCount < 4) {
+                    inner += `<div class="phil-quote">"${PHILOSOPHY[vec]}"</div>`;
+                }
+                
+                container.innerHTML = inner;
+            });
+        };
+
+        window.refreshChronoFace();
+        
+        window.addEventListener('q-tick', (e) => {
+            const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
+
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
+                }
+                return out;
+            }
+
+            const legDateEl = document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
+
+            const legTimeEl = document.getElementById('leg-time');
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
+
+            const continuousMeanDeg = daysElapsed * (360 / 365.24219);
+            const continuousTrueDeg = continuousMeanDeg + qData.delta;
+            document.getElementById('ring-cycle-mean').style.transform = `rotate(${continuousMeanDeg}deg)`;
+            document.getElementById('ring-cycle-true').style.transform = `rotate(${continuousTrueDeg}deg)`;
+            document.getElementById('ring-sector').style.transform = `rotate(${(daysElapsed / 30) * 360}deg)`;
+            document.getElementById('ring-week').style.transform = `rotate(${(daysElapsed / 6) * 360}deg)`;
+            document.getElementById('ring-day').style.transform = `rotate(${((t - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY) * 360}deg)`;
+
+            const meanDegEl = document.getElementById('mean-deg');
+            if (meanDegEl) { meanDegEl.innerText = qData.meanArc.toFixed(2) + "°"; meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important'); }
+            
+            const trueDegEl = document.getElementById('true-deg');
+            if (trueDegEl) { trueDegEl.innerText = qData.trueArc.toFixed(2) + "°"; trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important'); }
+
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+            const qCoordWing = document.getElementById('q-coord-wing');
+            
+            if (qCoordWing) {
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
+                } else {
+                    qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
+                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">Q</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.quad}</span> ` +
+                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">S</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.sect}</span> ` +
+                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">DAY</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.day}</span>`;
+                }
+            }
+
+            // --- LOCALIZED DATA ROUTING INJECTION ---
+            
+            const getEl = (id) => document.getElementById(id);
+
+            // BIO DATA
+            let anchorMins = parseInt(localStorage.getItem('q_bio_anchor')) || 0; 
+            let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
+            let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
+            let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
+            
+            if(getEl('face-BIO-PHASE')) getEl('face-BIO-PHASE').innerText = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            if(getEl('face-BIO-HRV')) getEl('face-BIO-HRV').innerText = (65 + Math.cos(t / 15000) * 10).toFixed(1) + " MS";
+            if(getEl('face-BIO-LUNAR')) getEl('face-BIO-LUNAR').innerText = (qData.lunarPhase > 0.5 ? (1 - qData.lunarPhase) * 200 : qData.lunarPhase * 200).toFixed(1) + '%';
+            if(getEl('face-BIO-TIDE')) getEl('face-BIO-TIDE').innerText = (qData.lunarPhase < 0.05 || qData.lunarPhase > 0.95 || (qData.lunarPhase > 0.45 && qData.lunarPhase < 0.55)) ? "HIGH (SPRING)" : "NOMINAL (NEAP)";
+            if(getEl('face-BIO-RHR')) getEl('face-BIO-RHR').innerText = (55 + Math.sin(t / 10000) * 5).toFixed(1) + " BPM";
+            if(getEl('face-BIO-SLEEP')) getEl('face-BIO-SLEEP').innerText = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP" : "LIGHT/REM";
+            if(getEl('face-BIO-NOON')) getEl('face-BIO-NOON').innerText = "T-" + (12 - new Date(t).getUTCHours()) + "H";
+
+            // COM DATA
+            if(getEl('face-COM-NODE')) getEl('face-COM-NODE').innerText = (activeBlock && activeBlock.type === 'PYLON') ? activeBlock.name : `Q${qData.quad} S${qData.sect} D${qData.day}`;
+            if(getEl('face-COM-ZODIAC')) {
+                const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
+                const sNatal = window.Q_STATE?.metaphysical_layer?.natal_anchor || 'NONE';
+                if (sNatal !== 'NONE') {
+                    let diff = Math.abs(Math.floor(qData.trueArc / 30) - zodiacNames.indexOf(sNatal));
+                    if (diff > 6) diff = 12 - diff; 
+                    getEl('face-COM-ZODIAC').innerText = diff === 0 ? "CONJUNCTION (0°)" : diff === 1 ? "SEMI-SEXTILE (30°)" : diff === 2 ? "SEXTILE (60°)" : diff === 3 ? "SQUARE (90°)" : diff === 4 ? "TRINE (120°)" : diff === 5 ? "QUINCUNX (150°)" : "OPPOSITION (180°)";
+                } else {
+                    getEl('face-COM-ZODIAC').innerText = zodiacNames[Math.floor(qData.meanArc / 30)];
+                }
+            }
+            if(getEl('face-COM-LEDGER')) getEl('face-COM-LEDGER').innerText = `Q${Math.floor(qData.trueArc / 90) + 1} CHECKPOINT`;
+            if(getEl('face-COM-TERM') && window.Q_REGISTRY?.SOLAR_TERMS) getEl('face-COM-TERM').innerText = window.Q_REGISTRY.SOLAR_TERMS[Math.floor(qData.trueArc / 15)].name.toUpperCase();
+
+            // ENV DATA
+            let dangerProximity = Math.abs(Math.sin((qData.trueArc * Math.PI) / 90)); 
+            let currentRiskVal = Math.floor(dangerProximity * 85) + 10; 
+            if(getEl('face-ENV-RISK')) getEl('face-ENV-RISK').innerText = currentRiskVal + "%";
+            if(getEl('face-ENV-TENSION')) getEl('face-ENV-TENSION').innerText = currentRiskVal > 75 ? "ELEVATED" : "NOMINAL";
+            if(getEl('face-ENV-FRICTION')) getEl('face-ENV-FRICTION').innerText = Math.abs(22.0 - (22 + 10 * Math.sin((qData.trueArc - 90) * Math.PI / 180))).toFixed(2) + ' ΔT';
+            if(getEl('face-ENV-GEO') && window.Q_STATE?.location) getEl('face-ENV-GEO').innerText = window.Q_STATE.location.name.substring(0, 15);
+            if(getEl('face-ENV-IRRADIANCE')) getEl('face-ENV-IRRADIANCE').innerText = "ACTIVE";
+            if(getEl('face-ENV-PRESSURE')) getEl('face-ENV-PRESSURE').innerText = (1015 - Math.floor(currentRiskVal/2)) + " hPa";
+
+            // MEC DATA
+            let driftDeg = qData.trueArc < 90 ? 90 - qData.trueArc : qData.trueArc < 180 ? 180 - qData.trueArc : qData.trueArc < 270 ? 270 - qData.trueArc : 360 - qData.trueArc;
+            if(getEl('face-MEC-DRIFT')) getEl('face-MEC-DRIFT').innerText = driftDeg.toFixed(2) + "° REM";
+            if(getEl('face-MEC-SYMMETRY')) getEl('face-MEC-SYMMETRY').innerText = (Math.abs(qData.delta) / 180 * 100).toFixed(2) + "%";
+            if(getEl('face-MEC-SMEAR')) getEl('face-MEC-SMEAR').innerText = ((t - (Math.round(t / 1000) * 1000)) / 1000).toFixed(6);
+            if(getEl('face-MEC-ECCENTRICITY')) getEl('face-MEC-ECCENTRICITY').innerText = "0.0167";
+            if(getEl('face-MEC-VELOCITY')) getEl('face-MEC-VELOCITY').innerText = (1 + 0.0334 * Math.cos((qData.trueArc - 14) * Math.PI / 180)).toFixed(3) + "x";
+        });
     </script>
 </body>
 </html>
