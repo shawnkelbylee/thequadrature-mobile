@@ -96,8 +96,11 @@
             to { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 1; }
         }
 
+        /* OFFSET Q ASSET TO COMPENSATE FOR TAIL BOUNDING BOX */
         .q-core-asset {
             position: absolute; width: 45%; height: 45%;
+            left: 53%; top: 52%; 
+            transform: translate(-50%, -50%);
             background: url('../assets/core-q.png') center/contain no-repeat;
             z-index: 15;
             filter: drop-shadow(0 0 25px var(--q-blue-glow));
@@ -105,8 +108,8 @@
         }
 
         @keyframes subtle-pulse {
-            0%, 100% { transform: scale(1); filter: brightness(1) drop-shadow(0 0 25px var(--q-blue-glow)); }
-            50% { transform: scale(1.05); filter: brightness(1.2) drop-shadow(0 0 40px var(--q-blue-glow)); }
+            0%, 100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1) drop-shadow(0 0 25px var(--q-blue-glow)); }
+            50% { transform: translate(-50%, -50%) scale(1.05); filter: brightness(1.2) drop-shadow(0 0 40px var(--q-blue-glow)); }
         }
 
         /* --- CENTER-ANCHORED CORNER ARMOR PANELS --- */
@@ -144,11 +147,11 @@
         .bl .panel-label { padding-left: 55px; }
         .br .panel-label { padding-right: 55px; }
 
-        /* --- CENTER-ANCHORED LATERAL WINGS --- */
+        /* --- REDUCED LATERAL WINGS --- */
         .wing-panel {
-            position: absolute; width: 240px; height: 350px;
+            position: absolute; width: 240px; height: 250px; 
             z-index: 15; display: flex; flex-direction: column; justify-content: center;
-            padding: 35px 20px; box-sizing: border-box; top: 50%;
+            padding: 20px; box-sizing: border-box; top: 50%;
             transform: translateY(-50%); text-align: center;
         }
 
@@ -197,12 +200,12 @@
 
     <div class="wing-panel wing-l">
         <div class="wing-bg"></div>
-        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 12px;">
             <span class="w-head">LEGACY OS</span>
             <div class="w-lbl">DATE</div>
             <div class="val-lg" id="ap-leg-date" style="color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
-        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 12px;">
             <div style="display:flex; align-items:center; justify-content:center; gap: 5px;">
                 <div class="w-lbl" style="margin:0;">TIME</div>
                 <div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')">UTC</div>
@@ -222,12 +225,12 @@
 
     <div class="wing-panel wing-r">
         <div class="wing-bg"></div>
-        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 12px;">
             <span class="w-head">QUAD OS</span>
             <div class="w-lbl">Q COORDINATE</div>
             <div class="val-lg" id="ap-q-coord" style="margin-top: 4px; color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
-        <div style="display:flex; width: 100%; justify-content: space-around; margin-bottom: 20px;">
+        <div style="display:flex; width: 100%; justify-content: space-around; margin-bottom: 12px;">
             <div style="display:flex; flex-direction:column; align-items:center;">
                 <div class="w-lbl">MEAN CIRCLE</div>
                 <div class="val-sm" id="ap-mean-deg" style="color:var(--micColor) !important; text-shadow:0 0 10px var(--micGlow); margin-top: 4px;">--</div>
