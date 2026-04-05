@@ -6,9 +6,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>THE QUADRATURE // APERTURE GATEWAY</title>
     
-    <script src="../q-ui-global.js?v=17.1"></script>
-    <script src="../q-core.js?v=17.1"></script>
-    <script src="../q-hub.js?v=17.1"></script>
+    <script src="../q-ui-global.js?v=17.3.1"></script>
+    <script src="../q-core.js?v=17.3.1"></script>
+    <script src="../q-hub.js?v=17.3.1"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -26,6 +26,13 @@
             font-family: 'Orbitron', sans-serif;
             color: var(--q-metal);
             display: flex; justify-content: center; align-items: center;
+        }
+
+        /* --- LEGACY UI PURGE --- */
+        #q-wing-left, #q-wing-right, .q-nav-bar, .q-control-strip, #mobile-telemetry-ribbon, #q-universal-controls {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
 
         /* --- KINETIC NEBULA ENGINE --- */
@@ -89,9 +96,9 @@
             50% { transform: scale(1.05); filter: brightness(1.2) drop-shadow(0 0 35px var(--q-blue-glow)); }
         }
 
-        /* --- CORNER ARMOR PANELS --- */
+        /* --- CORNER ARMOR PANELS (CALIBRATED TRIM) --- */
         .corner-panel {
-            position: absolute; width: 280px; height: 90px;
+            position: absolute; width: 250px; height: 75px;
             z-index: 20; cursor: pointer;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -102,25 +109,26 @@
             z-index: -1;
         }
 
-        .tl { top: 5vh; left: 3vw; }
-        .tr { top: 5vh; right: 3vw; }
+        .tl { top: 3vh; left: 2vw; }
+        .tr { top: 3vh; right: 2vw; }
         .tr .panel-bg { transform: scaleX(-1); }
-        .bl { bottom: 5vh; left: 3vw; }
+        .bl { bottom: 3vh; left: 2vw; }
         .bl .panel-bg { transform: scaleY(-1); }
-        .br { bottom: 5vh; right: 3vw; }
+        .br { bottom: 3vh; right: 2vw; }
         .br .panel-bg { transform: scale(-1, -1); }
 
         .panel-label {
             height: 100%; display: flex; align-items: center; justify-content: center;
             font-size: 0.85rem; letter-spacing: 3px; font-weight: 700;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: relative; z-index: 2;
         }
 
-        /* --- LATERAL TELEMETRY WINGS --- */
+        /* --- LATERAL TELEMETRY WINGS (CALIBRATED TRIM) --- */
         .wing-panel {
-            position: absolute; width: 220px; height: 350px;
+            position: absolute; width: 200px; height: 320px;
             z-index: 15; display: flex; flex-direction: column;
-            padding: 40px 20px; box-sizing: border-box;
+            padding: 25px 15px; box-sizing: border-box;
         }
 
         .wing-bg {
@@ -129,13 +137,13 @@
             z-index: -1;
         }
 
-        .wing-l { left: 4vw; top: 50%; transform: translateY(-50%); }
-        .wing-r { right: 4vw; top: 50%; transform: translateY(-50%); }
+        .wing-l { left: 2vw; top: 50%; transform: translateY(-50%); }
+        .wing-r { right: 2vw; top: 50%; transform: translateY(-50%); }
         .wing-r .wing-bg { transform: scaleX(-1); }
 
         .telemetry-row {
             margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 5px;
+            padding-bottom: 5px; position: relative; z-index: 2;
         }
 
         .tel-label { font-size: 0.6rem; color: rgba(226, 232, 240, 0.5); display: block; margin-bottom: 4px; }
