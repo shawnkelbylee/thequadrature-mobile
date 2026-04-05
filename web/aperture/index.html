@@ -11,7 +11,7 @@
     <script src="../q-hub.js?v=17.3.1"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
             --q-blue-glow: rgba(0, 163, 255, 0.3);
@@ -21,6 +21,13 @@
             --center-gap-x: 31vh;
             --corner-gap-y: 24vh;
             --corner-gap-x: 23vh;
+            
+            /* Chrono-Face Sync Variables */
+            --theme-main: #00f0ff;
+            --theme-dim: rgba(0, 240, 255, 0.2);
+            --starlight: rgba(255, 255, 255, 0.6);
+            --micColor: #00f0ff;
+            --micGlow: rgba(0, 240, 255, 0.2);
         }
 
         body, html {
@@ -128,12 +135,19 @@
             font-size: 0.9rem; letter-spacing: 4px; font-weight: 700;
             text-shadow: 0 2px 5px rgba(0,0,0,0.8);
             position: relative; z-index: 2;
+            box-sizing: border-box;
         }
+
+        /* Asymmetrical Padding to repel text from the circular cutout */
+        .tl .panel-label { padding-left: 55px; }
+        .tr .panel-label { padding-right: 55px; }
+        .bl .panel-label { padding-left: 55px; }
+        .br .panel-label { padding-right: 55px; }
 
         /* --- CENTER-ANCHORED LATERAL WINGS --- */
         .wing-panel {
-            position: absolute; width: 220px; height: 350px;
-            z-index: 15; display: flex; flex-direction: column;
+            position: absolute; width: 240px; height: 350px;
+            z-index: 15; display: flex; flex-direction: column; justify-content: center;
             padding: 35px 20px; box-sizing: border-box; top: 50%;
             transform: translateY(-50%); text-align: center;
         }
@@ -148,15 +162,12 @@
         .wing-r { left: calc(50% + var(--center-gap-x)); }
         .wing-r .wing-bg { transform: scaleX(-1); }
 
-        .telemetry-row {
-            margin-bottom: 20px; border-bottom: 1px dashed rgba(255,255,255,0.15);
-            padding-bottom: 8px; position: relative; z-index: 2;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .tel-label { font-size: 0.6rem; color: rgba(226, 232, 240, 0.5); margin-bottom: 6px; letter-spacing: 2px; }
-        .tel-value { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #fff; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
-        .tel-sub { font-size: 0.55rem; color: #00f0ff; margin-top: 4px; letter-spacing: 1px; font-family: 'Orbitron'; }
+        /* --- CHRONO-FACE SYNC CLASSES --- */
+        .w-head { font-family: 'Orbitron'; font-weight: 600; font-size: 0.75rem; letter-spacing: 3px; color: rgba(255,255,255,0.6); border-bottom: 1px solid var(--theme-dim); padding-bottom: 4px; margin-bottom: 8px; display: inline-block; z-index: 20;}
+        .w-lbl { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: var(--starlight); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; z-index: 20;}
+        .val-lg { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; white-space: nowrap; color: #fff; text-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 20;}
+        .val-sm { font-family: 'Orbitron'; font-size: 0.85rem; font-weight: 700; z-index: 20;}
+        .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: var(--micColor); cursor: pointer; border: 1px solid var(--micGlow); padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; }
 
     </style>
 </head>
@@ -186,19 +197,19 @@
 
     <div class="wing-panel wing-l">
         <div class="wing-bg"></div>
-        <div style="font-size:0.7rem; color:var(--q-metal); letter-spacing:3px; margin-bottom:15px; font-weight:900; border-bottom:1px solid rgba(255,255,255,0.3); padding-bottom:5px;">LEGACY OS</div>
-        <div class="telemetry-row">
-            <span class="tel-label">DATE</span>
-            <span class="tel-value" id="leg-date">---</span>
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
+            <span class="w-head">LEGACY OS</span>
+            <div class="w-lbl">DATE</div>
+            <div class="val-lg" id="leg-date" style="color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
-        <div class="telemetry-row">
-            <span class="tel-label">SYSTEM CLOCK</span>
-            <span class="tel-value" id="leg-time">00:00:00</span>
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
+            <div style="display:flex; align-items:center; justify-content:center; gap: 5px;">
+                <div class="w-lbl" style="margin:0;">TIME</div>
+                <div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')">UTC</div>
+            </div>
+            <div class="val-lg" id="leg-time" style="color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
-        <div class="telemetry-row" style="border:none;">
-            <span class="tel-label">STATUS</span>
-            <span class="tel-sub">CONTINUITY ACTIVE</span>
-        </div>
+        <div style="font-size:0.5rem; color:var(--starlight); margin-top:auto; border-top: 1px dashed var(--micGlow); padding-top: 8px; width: 85%; text-align:center; align-self: center;">STATUS: CONTINUITY ACTIVE</div>
     </div>
 
     <div class="aperture-container">
@@ -211,19 +222,22 @@
 
     <div class="wing-panel wing-r">
         <div class="wing-bg"></div>
-        <div style="font-size:0.7rem; color:var(--q-metal); letter-spacing:3px; margin-bottom:15px; font-weight:900; border-bottom:1px solid rgba(255,255,255,0.3); padding-bottom:5px;">QUAD OS</div>
-        <div class="telemetry-row">
-            <span class="tel-label">Q COORDINATE</span>
-            <span class="tel-value" id="q-coord-wing" style="font-size: 0.85rem; color: #F4D068; text-shadow: 0 0 10px rgba(244,208,104,0.3);">---</span>
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
+            <span class="w-head">QUAD OS</span>
+            <div class="w-lbl">Q COORDINATE</div>
+            <div class="val-lg" id="q-coord-wing" style="margin-top: 4px; color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
-        <div class="telemetry-row">
-            <span class="tel-label">MEAN CIRCLE (CIVIL)</span>
-            <span class="tel-value" id="mean-deg">---.---°</span>
+        <div style="display:flex; width: 100%; justify-content: space-around; margin-bottom: 20px;">
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <div class="w-lbl">MEAN CIRCLE</div>
+                <div class="val-sm" id="mean-deg" style="color:var(--micColor) !important; text-shadow:0 0 10px var(--micGlow); margin-top: 4px;">--</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <div class="w-lbl">TRUE ELLIPSE</div>
+                <div class="val-sm" id="true-deg" style="color:var(--micColor) !important; text-shadow:0 0 10px var(--micGlow); margin-top: 4px;">--</div>
+            </div>
         </div>
-        <div class="telemetry-row" style="border:none;">
-            <span class="tel-label">TRUE ELLIPSE (PHYSICS)</span>
-            <span class="tel-value" id="true-deg" style="color: #00f0ff; text-shadow: 0 0 10px rgba(0,240,255,0.3);">---.---°</span>
-        </div>
+        <div style="font-size:0.5rem; color:var(--starlight); margin-top:auto; border-top: 1px dashed var(--micGlow); padding-top: 8px; width: 85%; text-align:center; align-self: center;">DUAL-STATE ENGINE</div>
     </div>
 
     <script>
@@ -265,20 +279,65 @@
             }
         }
 
-        // --- TEMPORAL ENGINE SYNC ---
+        // --- TEMPORAL ENGINE SYNC (CHRONO-FACE FORMATTING LOGIC) ---
         window.addEventListener('q-tick', (e) => {
-            const { qData, legacyDateStr, legacyTimeStr } = e.detail;
+            const { t, qData, legacyDateStr, legacyTimeStr } = e.detail;
+
+            // Dual Color Formatter for Letters vs Numbers
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
+                }
+                return out;
+            }
             
             // Legacy OS Wing Sync
-            document.getElementById('leg-date').innerText = legacyDateStr.toUpperCase();
-            document.getElementById('leg-time').innerText = legacyTimeStr;
+            const legDateEl = document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
+
+            const legTimeEl = document.getElementById('leg-time');
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
             
             // Quad OS Wing Sync
-            const qStr = `QC ${qData.cycle || '01'} Q${qData.quad} S${qData.sect} D${qData.day}`;
-            document.getElementById('q-coord-wing').innerText = qStr;
-            document.getElementById('mean-deg').innerText = qData.meanArc.toFixed(4) + '°';
-            document.getElementById('true-deg').innerText = qData.trueArc.toFixed(4) + '°';
+            const meanDegEl = document.getElementById('mean-deg');
+            if (meanDegEl) meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
+            
+            const trueDegEl = document.getElementById('true-deg');
+            if (trueDegEl) trueDegEl.innerText = qData.trueArc.toFixed(2) + "°"; 
+
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+            const qCoordWing = document.getElementById('q-coord-wing');
+            
+            if (qCoordWing) {
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
+                } else {
+                    qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
+                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">Q</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.quad}</span> ` +
+                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">S</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.sect}</span> ` +
+                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">DAY</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.day}</span>`;
+                }
+            }
         });
+
+        // External Format Toggle Hook
+        window.toggleTimeFmt = function(btnId) {
+            let fmt = localStorage.getItem('Q_TIME_FMT') || 'UTC_24';
+            const cycle = { 'UTC_24': 'LOCAL_24', 'LOCAL_24': 'UTC_12', 'UTC_12': 'LOCAL_12', 'LOCAL_12': 'UTC_24' };
+            let newFmt = cycle[fmt] || 'UTC_24';
+            
+            if (window.Q_UpdateState) window.Q_UpdateState('system_state', 'q_time_fmt', newFmt);
+            else localStorage.setItem('Q_TIME_FMT', newFmt);
+            
+            document.querySelectorAll('.fmt-toggle').forEach(btn => {
+                btn.innerText = newFmt.replace('_', ' ');
+            });
+            if (window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
+        };
 
         initNebula();
         initStars();
