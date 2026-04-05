@@ -6,9 +6,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>THE QUADRATURE // APERTURE GATEWAY</title>
     
-    <script src="q-ui-global.js?v=17.3.1"></script>
-    <script src="q-core.js?v=17.3.1"></script>
-    <script src="q-hub.js?v=17.3.1"></script>
+    <script src="../q-ui-global.js?v=17.3.1"></script>
+    <script src="../q-core.js?v=17.3.1"></script>
+    <script src="../q-hub.js?v=17.3.1"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -74,7 +74,7 @@
 
         .iris-ring {
             position: absolute; inset: 0;
-            background: url('aperture-ring.png') center/contain no-repeat;
+            background: url('../assets/aperture-ring.png') center/contain no-repeat;
             z-index: 12; filter: drop-shadow(0 0 40px rgba(0,0,0,0.9));
         }
 
@@ -98,7 +98,7 @@
 
         .q-core-asset {
             position: absolute; width: 45%; height: 45%;
-            background: url('core-q.png') center/contain no-repeat;
+            background: url('../assets/core-q.png') center/contain no-repeat;
             z-index: 15;
             filter: drop-shadow(0 0 25px var(--q-blue-glow));
             animation: subtle-pulse 4s ease-in-out infinite;
@@ -118,7 +118,7 @@
 
         .panel-bg {
             position: absolute; inset: 0;
-            background: url('panel-frame.png') center/100% 100% no-repeat;
+            background: url('../assets/panel-frame.png') center/100% 100% no-repeat;
             z-index: -1;
         }
 
@@ -154,7 +154,7 @@
 
         .wing-bg {
             position: absolute; inset: 0;
-            background: url('wing-panel.png') center/100% 100% no-repeat;
+            background: url('../assets/wing-panel.png') center/100% 100% no-repeat;
             z-index: -1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));
         }
 
@@ -175,17 +175,17 @@
 
     <div id="nebula-canvas"></div>
 
-    <div class="corner-panel tl" onclick="location.href='personal/'">
+    <div class="corner-panel tl" onclick="location.href='../personal/'">
         <div class="panel-bg"></div>
         <div class="panel-label">PERSONAL QUAD</div>
     </div>
     
-    <div class="corner-panel tr" onclick="location.href='commercial/'">
+    <div class="corner-panel tr" onclick="location.href='../commercial/'">
         <div class="panel-bg"></div>
         <div class="panel-label">COMMERCIAL QUAD</div>
     </div>
 
-    <div class="corner-panel bl" onclick="location.href='physical/'">
+    <div class="corner-panel bl" onclick="location.href='../physical/'">
         <div class="panel-bg"></div>
         <div class="panel-label">PHYSICAL ASSETS</div>
     </div>
@@ -200,14 +200,14 @@
         <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
             <span class="w-head">LEGACY OS</span>
             <div class="w-lbl">DATE</div>
-            <div class="val-lg" id="ap-leg-date" style="color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
+            <div class="val-lg" id="leg-date" style="color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
         <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
             <div style="display:flex; align-items:center; justify-content:center; gap: 5px;">
                 <div class="w-lbl" style="margin:0;">TIME</div>
                 <div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')">UTC</div>
             </div>
-            <div class="val-lg" id="ap-leg-time" style="color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
+            <div class="val-lg" id="leg-time" style="color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
         <div style="font-size:0.5rem; color:var(--starlight); margin-top:auto; border-top: 1px dashed var(--micGlow); padding-top: 8px; width: 85%; text-align:center; align-self: center;">STATUS: CONTINUITY ACTIVE</div>
     </div>
@@ -225,16 +225,16 @@
         <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
             <span class="w-head">QUAD OS</span>
             <div class="w-lbl">Q COORDINATE</div>
-            <div class="val-lg" id="ap-q-coord" style="margin-top: 4px; color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
+            <div class="val-lg" id="q-coord-wing" style="margin-top: 4px; color: var(--micColor); text-shadow: 0 0 10px var(--micGlow);">--</div>
         </div>
         <div style="display:flex; width: 100%; justify-content: space-around; margin-bottom: 20px;">
             <div style="display:flex; flex-direction:column; align-items:center;">
                 <div class="w-lbl">MEAN CIRCLE</div>
-                <div class="val-sm" id="ap-mean-deg" style="color:var(--micColor) !important; text-shadow:0 0 10px var(--micGlow); margin-top: 4px;">--</div>
+                <div class="val-sm" id="mean-deg" style="color:var(--micColor) !important; text-shadow:0 0 10px var(--micGlow); margin-top: 4px;">--</div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:center;">
                 <div class="w-lbl">TRUE ELLIPSE</div>
-                <div class="val-sm" id="ap-true-deg" style="color:var(--micColor) !important; text-shadow:0 0 10px var(--micGlow); margin-top: 4px;">--</div>
+                <div class="val-sm" id="true-deg" style="color:var(--micColor) !important; text-shadow:0 0 10px var(--micGlow); margin-top: 4px;">--</div>
             </div>
         </div>
         <div style="font-size:0.5rem; color:var(--starlight); margin-top:auto; border-top: 1px dashed var(--micGlow); padding-top: 8px; width: 85%; text-align:center; align-self: center;">DUAL-STATE ENGINE</div>
@@ -279,7 +279,7 @@
             }
         }
 
-        // --- TEMPORAL ENGINE SYNC (ISOLATED IDs) ---
+        // --- TEMPORAL ENGINE SYNC (CHRONO-FACE FORMATTING LOGIC) ---
         window.addEventListener('q-tick', (e) => {
             const { t, qData, legacyDateStr, legacyTimeStr } = e.detail;
 
@@ -296,21 +296,21 @@
             }
             
             // Legacy OS Wing Sync
-            const legDateEl = document.getElementById('ap-leg-date');
+            const legDateEl = document.getElementById('leg-date');
             if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
 
-            const legTimeEl = document.getElementById('ap-leg-time');
+            const legTimeEl = document.getElementById('leg-time');
             if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
             
             // Quad OS Wing Sync
-            const meanDegEl = document.getElementById('ap-mean-deg');
-            if (meanDegEl) meanDegEl.innerText = qData.meanArc.toFixed(4) + "°";
+            const meanDegEl = document.getElementById('mean-deg');
+            if (meanDegEl) meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
             
-            const trueDegEl = document.getElementById('ap-true-deg');
-            if (trueDegEl) trueDegEl.innerText = qData.trueArc.toFixed(4) + "°"; 
+            const trueDegEl = document.getElementById('true-deg');
+            if (trueDegEl) trueDegEl.innerText = qData.trueArc.toFixed(2) + "°"; 
 
             let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('ap-q-coord');
+            const qCoordWing = document.getElementById('q-coord-wing');
             
             if (qCoordWing) {
                 if (activeBlock && activeBlock.type === 'PYLON') {
