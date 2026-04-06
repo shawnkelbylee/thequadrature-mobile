@@ -625,6 +625,55 @@
         window.addEventListener('q-tick', (e) => {
             const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
             
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
+                }
+                return out;
+            }
+            
+            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
+
+            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
+            
+            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
+            if (meanDegEl) { 
+                meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
+                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            
+            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
+            if (trueDegEl) { 
+                trueDegEl.innerText = qData.trueArc.toFixed(2) + "°";
+                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
+            
+            let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+            let smNumStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+            
+            if (qCoordWing) {
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
+                } else {
+                    let cCycle = activeBlock ? activeBlock.cycle : 0;
+                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
+                }
+            }
+
             if (activeTime.getUTCFullYear() !== currentRenderedYear || document.getElementById('node-layer').children.length === 0) {
                 currentRenderedYear = activeTime.getUTCFullYear();
                 recalculateDynamicHolidays(currentRenderedYear);
