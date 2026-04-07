@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // ENVIRONMENTAL VECTOR</title>
-    <script src="../q-ui-global.js?v=16.4"></script>
-<script src="../q-core.js?v=16.4"></script>
-<script src="../q-ui-planner.js?v=16.4"></script>
-<script src="../q-hub.js?v=16.4"></script>
+    <script src="../q-ui-global.js?v=22.4"></script>
+<script src="../q-core.js?v=22.4"></script>
+<script src="../q-ui-planner.js?v=22.4"></script>
+<script src="../q-hub.js?v=22.4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
@@ -42,51 +42,47 @@
             touch-action: manipulation;
         }
 
-        /* --- HAPTIC & MODAL Z-INDEX OVERRIDES --- */
         #q-universal-modal { z-index: 999999 !important; }
-        .wind-panel { pointer-events: auto !important; z-index: 60 !important; }
-        .sys-badge.opt-badge, .val-highlight, .val-alert, .val-warn, .fmt-toggle { pointer-events: auto !important; position: relative; z-index: 100 !important; }
 
-        .wind-panel { 
-            position: absolute; width: var(--mod-w); padding: 12px 15px; box-sizing: border-box; 
-            backdrop-filter: var(--blur-med); -webkit-backdrop-filter: var(--blur-med); 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.4); 
-            display: flex; flex-direction: column; justify-content: center; gap: 4px; 
-            border-radius: 12px; border: 1px solid var(--env-green-dim); 
-            transition: all 0.3s ease; 
+        /* Headers bound strictly to the 280px text wrapper edge, shifted outwards by 1 character (8px) */
+        .v-head { 
+            position: absolute; white-space: nowrap;
+            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
+            margin: 0; padding: 0; z-index: 25; border: none;
+            color: var(--theme-main);
+            text-shadow: 0 0 10px var(--theme-dim);
+            transition: color 0.3s, text-shadow 0.3s;
         }
         
-        .wind-tl { top: 7vh; left: 2vw; background: radial-gradient(circle at top left, var(--env-green-dim) 0%, var(--glass-med) 70%); } 
-        .wind-tr { top: 7vh; right: 2vw; background: radial-gradient(circle at top right, var(--env-green-dim) 0%, var(--glass-med) 70%); cursor: pointer; } 
-        .wind-bl { bottom: 8vh; left: 2vw; background: radial-gradient(circle at bottom left, var(--env-green-dim) 0%, var(--glass-med) 70%); } 
-        .wind-br { bottom: 8vh; right: 2vw; background: radial-gradient(circle at bottom right, var(--env-green-dim) 0%, var(--glass-med) 70%); } 
-        .wind-tr:hover { border-color: var(--env-green); box-shadow: 0 0 20px var(--env-green-dim); }
-
-        .h-label { 
-            font-family: 'Orbitron'; font-size: 0.55rem; color: rgba(255,255,255,0.5); 
-            letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px dashed var(--env-green-dim); 
-            padding-bottom: 3px; margin-top: 4px; display: flex; justify-content: space-between;
-        }
-        .h-label:first-child { margin-top: 0; }
+        /* Top Panels: Headers tight BELOW the frame */
+        #quad-BIO .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(8px); }
+        #quad-COM .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(-8px); }
         
-        /* STANDARDIZED TELEMETRY AESTHETICS */
-        .h-val { font-size: 0.65rem; margin-top: 8px; display: flex; justify-content: space-between; align-items: baseline; }
-        .h-val span:first-child { color: var(--starlight); font-family: 'JetBrains Mono'; font-weight: 700; }
-        .h-val span:last-child { color: var(--env-green); font-weight: 700; text-shadow: 0 0 8px var(--env-green-dim); transition: 0.3s; }
-        
-        .h-val span.val-highlight { cursor: pointer; border-bottom: 1px dotted var(--env-green); }
-        .h-val span.val-highlight:hover { color: #fff; text-shadow: 0 0 15px var(--env-green); }
-        .h-val span.val-alert { color: var(--alert-red) !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5) !important; cursor: pointer; border-bottom: 1px dotted var(--alert-red); }
-        .h-val span.val-alert:hover { color: #fff !important; text-shadow: 0 0 15px var(--alert-red) !important; }
-        .h-val span.val-warn { color: var(--squall-amber) !important; text-shadow: 0 0 10px rgba(245, 158, 11, 0.4) !important; cursor: pointer; border-bottom: 1px dotted var(--squall-amber); }
-        .h-val span.val-warn:hover { color: #fff !important; text-shadow: 0 0 15px var(--squall-amber) !important; }
+        /* Bottom Panels: Headers tight ABOVE the frame */
+        #quad-ENV .v-head { top: -16px; right: 0; text-align: right; transform: translateX(8px); }
+        #quad-MEC .v-head { top: -16px; left: 0; text-align: left; transform: translateX(-8px); }
 
-        .sparkline-container { width: 100%; height: 16px; display: flex; align-items: flex-end; gap: 2px; margin-top: 4px; }
+        /* Override global OPT positioning for the OPT Tags to center them in the frame rings */
+        .tl .opt-oval { left: 50px !important; top: 42px !important; font-size: 0.55rem !important; pointer-events: auto !important; letter-spacing: 1px !important; cursor:pointer;}
+        .tr .opt-oval { right: 50px !important; top: 42px !important; font-size: 0.55rem !important; pointer-events: auto !important; letter-spacing: 1px !important; cursor:pointer;}
+        .bl .opt-oval { left: 50px !important; bottom: 42px !important; font-size: 0.55rem !important; pointer-events: auto !important; letter-spacing: 1px !important; cursor:pointer;}
+        .br .opt-oval { right: 50px !important; bottom: 42px !important; font-size: 0.55rem !important; pointer-events: auto !important; letter-spacing: 1px !important; cursor:pointer;}
+
+        /* The Imaginary Rectangle: Expanded width pushes left text left and right text right */
+        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
+        
+        /* Pure White Descriptors for Maximum Readability */
+        .t-row span:first-child { color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.4); text-align: left; flex-shrink: 0; text-transform: uppercase; }
+
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); text-transform: uppercase; transition: 0.3s; }
+        
+        .val-highlight { color: var(--env-green); text-shadow: 0 0 10px var(--env-green-dim); }
+
+        .panel-data-wrapper { position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto; z-index: 20; }
+
+        .sparkline-container { width: 100%; height: 14px; display: flex; align-items: flex-end; gap: 2px; margin: 2px 0; }
         .spark-bar { flex-grow: 1; background: var(--env-green); border-radius: 1px 1px 0 0; transition: height 0.5s ease, background 0.5s ease; opacity: 0.8; box-shadow: 0 0 5px var(--env-green-glow);}
         
-        .sys-badge { font-size: 0.45rem; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--env-green-dim); color: var(--env-green); }
-        .opt-badge:hover { background: var(--platinum); color: var(--void) !important; cursor: pointer; }
-
         .master-wheel-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); display: flex; justify-content: center; align-items: center; z-index: 5; }
         .wheel-glass { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, rgba(167, 255, 131, 0.02) 0%, rgba(14, 165, 233, 0.05) 60%, rgba(2, 6, 23, 0.6) 100%); backdrop-filter: blur(8px); border: 1px solid var(--env-green-dim); box-shadow: 0 0 60px var(--env-green-dim), inset 0 0 40px rgba(0,0,0,0.8); pointer-events: none; }
         .equator-hub { position: absolute; width: 95%; height: 95%; top: 2.5%; left: 2.5%; pointer-events: none; z-index: 10; }
@@ -143,38 +139,6 @@
     <div class="star-container" id="stars"></div>
     <div id="axis-hud">GEOMETRIC AXIS DATA</div>
 
-    <div class="wind-panel wind-tl telemetry-node">
-        <div class="h-label" style="margin-top:0;"><span>RISK ASSESSMENT</span> <span class="sys-badge" id="iot-status-badge">IOT: ACTIVE</span></div>
-        <div class="h-val"><span>PROBABILITY INDEX:</span> <span class="val-highlight" id="risk-index">EPHEMERIS SYNCED</span></div>
-        <div class="sparkline-container" id="risk-sparkline"></div>
-        <div class="h-label" style="margin-top:6px;">HAZARD STATUS</div>
-        <div class="h-val"><span>ADVERSE CONDITION:</span> <span class="val-highlight" id="hazard-status" onclick="openImpact()" ontouchstart="event.stopPropagation(); openImpact()">MONITORED</span></div>
-    </div>
-
-    <div class="wind-panel wind-tr telemetry-node" onclick="toggleDeltaView()" ontouchstart="event.stopPropagation(); toggleDeltaView()">
-        <div class="h-label" style="margin-top:0;"><span>METEOROLOGICAL DATA</span> <span class="sys-badge" id="meteo-badge">ATMOS DELTA: LIVE</span></div>
-        <div class="h-val"><span id="lbl-pressure">ATMOSPHERIC PRESSURE:</span> <span class="val-highlight" id="val-pressure">1013 hPa</span></div>
-        <div class="h-val"><span id="lbl-irradiance">SOLAR IRRADIANCE:</span> <span class="val-highlight" id="val-irradiance">ACTIVE</span></div>
-        <div class="h-label" style="margin-top:6px;">PRECIPITATION VECTOR</div>
-        <div class="h-val"><span id="lbl-precip">VOLUME / TREND:</span> <span class="val-highlight" id="val-precip">0.0mm / STABLE</span></div>
-    </div>
-
-    <div class="wind-panel wind-bl telemetry-node">
-        <div class="h-label" style="margin-top:0;"><span id="strat-header">EXPOSURE MODELING</span> <span class="sys-badge">PHASE III</span></div>
-        <div class="h-val"><span id="lbl-yield">YIELD PROJECTION:</span> <span class="val-highlight" id="strat-yield" onclick="openImpact()" ontouchstart="event.stopPropagation(); openImpact()">OPTIMAL</span></div>
-        <div class="h-val"><span id="lbl-alloc">RESOURCE ALLOC:</span> <span class="val-highlight" id="strat-alloc" onclick="openImpact()" ontouchstart="event.stopPropagation(); openImpact()">PHASE 2 (GROWTH)</span></div>
-        <div class="h-label" style="margin-top:6px;">EXECUTION METRICS</div>
-        <div class="h-val"><span>ACTION HORIZON:</span> <span class="val-highlight" id="strat-horizon">+14.00°</span></div>
-    </div>
-
-    <div class="wind-panel wind-br telemetry-node">
-        <div class="h-label" style="margin-top:0;"><span>ENVIRONMENTAL PHASE</span> <span class="sys-badge opt-badge" style="color:var(--env-green); border-color:var(--env-green-dim); transition:0.3s; cursor:pointer;" onclick="openOptions()" ontouchstart="event.stopPropagation(); openOptions()">[ OPT ]</span></div>
-        <div class="h-val"><span>AMBIENT TEMP:</span> <span class="val-highlight" id="val-temp">-- °C</span></div>
-        <div class="h-val"><span>BIOME TENSION:</span> <span class="val-highlight" id="agri-tension">DORMANT / GATHER</span></div>
-        <div class="h-label" style="margin-top:6px;">CROSS-VECTOR TELEMETRY</div>
-        <div class="h-val" style="font-size: 0.65rem;"><span>THERMODYNAMIC FRICTION:</span> <span class="val-highlight" id="thermo-friction">--</span></div>
-    </div>
-
     <div class="master-wheel-container q-center-dial">
         <div class="wheel-glass"></div>
         <div class="equator-hub">
@@ -213,10 +177,104 @@
         let liveWeather = null;
         let sparkBars = [];
         let showDelta = false;
+        
+        // Modal State Variables
         let alertThreshold = 75;
         let currentAssetMode = "FLORA";
+        let iotProtocol = "MANUAL";
+        let climateAnchor = "CLW";
+        let baroUnit = "hPa";
+        let actionHorizon = "PYLON";
+        let tempUnit = "C";
+        let thermoBaseline = 22.0;
+        let crossVectorSync = true;
+        
         let currentRiskVal = 0;
-        let currentRadarStatus = 'STABLE';
+        let currentOptTarget = '';
+
+        window.injectVectorData = function() {
+            // Apply OPT properties globally to corner cutouts, mapped to distinct targets
+            document.querySelectorAll('.opt-oval').forEach((el, index) => {
+                el.innerText = 'OPT';
+                el.style.setProperty('color', 'var(--env-green)', 'important');
+                el.style.setProperty('text-shadow', '0 0 8px var(--env-green-dim)', 'important');
+                
+                let target = '';
+                if(index === 0) target = 'risk';
+                if(index === 1) target = 'meteo';
+                if(index === 2) target = 'model';
+                if(index === 3) target = 'phase';
+                
+                el.onclick = (e) => { e.stopPropagation(); openOptions(e, target); };
+            });
+
+            const quadBIO = document.getElementById('quad-BIO');
+            if (quadBIO) {
+                quadBIO.innerHTML = `
+                    <div class="panel-data-wrapper">
+                        <div class="v-head">RISK ASSESSMENT</div>
+                        <div class="t-row"><span>SYSTEM HOOK:</span> <span id="iot-status-badge" class="val-sm val-highlight">IOT: ACTIVE</span></div>
+                        <div class="t-row"><span>PROBABILITY INDEX:</span> <span class="val-sm val-highlight" id="risk-index">EPHEMERIS SYNCED</span></div>
+                        <div class="sparkline-container" id="risk-sparkline"></div>
+                        <div class="t-row"><span>ADVERSE CONDITION:</span> <span class="val-sm val-highlight" id="hazard-status" style="cursor:pointer;" onclick="openImpact()">MONITORED</span></div>
+                    </div>
+                `;
+            }
+
+            const quadCOM = document.getElementById('quad-COM');
+            if (quadCOM) {
+                quadCOM.innerHTML = `
+                    <div class="panel-data-wrapper" style="cursor: pointer;" onclick="toggleDeltaView()">
+                        <div class="v-head">METEOROLOGICAL</div>
+                        <div class="t-row"><span>DATA STREAM:</span> <span id="meteo-badge" class="val-sm val-highlight">ATMOS DELTA: LIVE</span></div>
+                        <div class="t-row"><span id="lbl-pressure">ATMOSPHERIC PRESSURE:</span> <span class="val-sm val-highlight" id="val-pressure">1013 hPa</span></div>
+                        <div class="t-row"><span id="lbl-irradiance">SOLAR IRRADIANCE:</span> <span class="val-sm val-highlight" id="val-irradiance">ACTIVE</span></div>
+                        <div class="t-row"><span id="lbl-precip">VOLUME / TREND:</span> <span class="val-sm val-highlight" id="val-precip">0.0mm / STABLE</span></div>
+                    </div>
+                `;
+            }
+
+            const quadENV = document.getElementById('quad-ENV');
+            if (quadENV) {
+                quadENV.innerHTML = `
+                    <div class="panel-data-wrapper">
+                        <div class="v-head" id="strat-header">EXPOSURE MODELING</div>
+                        <div class="t-row"><span id="lbl-yield">YIELD PROJECTION:</span> <span class="val-sm val-highlight" id="strat-yield" style="cursor:pointer;" onclick="openImpact()">OPTIMAL</span></div>
+                        <div class="t-row"><span id="lbl-alloc">RESOURCE ALLOC:</span> <span class="val-sm val-highlight" id="strat-alloc" style="cursor:pointer;" onclick="openImpact()">PHASE 2 (GROWTH)</span></div>
+                        <div class="t-row"><span>ACTION HORIZON:</span> <span class="val-sm val-highlight" id="strat-horizon">+14.00°</span></div>
+                    </div>
+                `;
+            }
+
+            const quadMEC = document.getElementById('quad-MEC');
+            if (quadMEC) {
+                quadMEC.innerHTML = `
+                    <div class="panel-data-wrapper">
+                        <div class="v-head">ENVIRONMENTAL</div>
+                        <div class="t-row"><span>AMBIENT TEMP:</span> <span class="val-sm val-highlight" id="val-temp">-- °C</span></div>
+                        <div class="t-row"><span>BIOME TENSION:</span> <span class="val-sm val-highlight" id="agri-tension">DORMANT / GATHER</span></div>
+                        <div class="t-row"><span>THERMODYNAMIC FRICTION:</span> <span class="val-sm val-highlight" id="thermo-friction">--</span></div>
+                    </div>
+                `;
+            }
+        };
+
+        function initLocalHUD() {
+            const checkExist = setInterval(function() {
+                if (document.getElementById('quad-BIO')) {
+                    clearInterval(checkExist);
+                    if (window.injectVectorData) window.injectVectorData();
+                    initSparklines();
+                }
+            }, 50);
+            setTimeout(() => clearInterval(checkExist), 5000);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLocalHUD);
+        } else {
+            initLocalHUD();
+        }
 
         function showAxisHUD(text) {
             const hud = document.getElementById('axis-hud');
@@ -230,6 +288,7 @@
 
         function initSparklines() {
             const container = document.getElementById('risk-sparkline');
+            if(!container) return;
             container.innerHTML = '';
             sparkBars = [];
             for(let i=0; i<30; i++) {
@@ -295,9 +354,7 @@
                 'GLOBAL': { lat: window.Q_STATE?.location?.lat || 0, lon: window.Q_STATE?.location?.lon || 0 }
             };
 
-            const anchorEl = document.getElementById('climate-anchor');
-            const anchor = anchorEl ? anchorEl.value : 'CLW';
-            const loc = API_LOCATIONS[anchor] || API_LOCATIONS['CLW']; 
+            const loc = API_LOCATIONS[climateAnchor] || API_LOCATIONS['CLW']; 
             
             try {
                 const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + loc.lat + '&longitude=' + loc.lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
@@ -306,15 +363,17 @@
                 if (data && data.current) {
                     liveWeather = data.current;
                     if(window.Q_LOG) window.Q_LOG('INFO', 'ENVIRONMENTAL', 'METEO_API_SYNC', data.current);
-                    document.getElementById('meteo-badge').innerText = "ATMOS DELTA: LIVE";
-                    document.getElementById('meteo-badge').style.color = "";
-                    document.getElementById('meteo-badge').style.borderColor = "var(--env-green-dim)";
+                    const badge = document.getElementById('meteo-badge');
+                    if(badge) {
+                        badge.innerText = "ATMOS DELTA: LIVE";
+                    }
                 }
             } catch (error) {
                 if(window.Q_LOG) window.Q_LOG('ERROR', 'ENVIRONMENTAL', 'METEO_API_FAILED', { error: error.message, fallback: 'STATIC_BASELINE' });
-                document.getElementById('meteo-badge').innerText = "STATIC BASELINE (DEGRADED)";
-                document.getElementById('meteo-badge').style.color = "var(--alert-red)";
-                document.getElementById('meteo-badge').style.borderColor = "var(--alert-red)";
+                const badge = document.getElementById('meteo-badge');
+                if(badge) {
+                    badge.innerText = "STATIC BASELINE (DEGRADED)";
+                }
                 liveWeather = null;
             }
         }
@@ -322,63 +381,137 @@
         function toggleDeltaView() {
             showDelta = !showDelta;
             const badge = document.getElementById('meteo-badge');
+            if(!badge) return;
             if (showDelta) {
-                badge.innerText = "100-YR DELTA"; badge.style.borderColor = "var(--squall-amber)"; badge.style.color = "var(--squall-amber)";
+                badge.innerText = "100-YR DELTA";
             } else {
                 badge.innerText = liveWeather ? "ATMOS DELTA: LIVE" : "STATIC BASELINE (DEGRADED)"; 
-                if(!liveWeather) { badge.style.borderColor = "var(--alert-red)"; badge.style.color = "var(--alert-red)"; }
-                else { badge.style.borderColor = "var(--env-green-dim)"; badge.style.color = ""; }
             }
         }
 
         window.updateAssetLabels = function() {
             const modeEl = document.getElementById('asset-track');
             const mode = modeEl ? modeEl.value : 'FLORA';
-            currentAssetMode = mode;
             if (mode === "FAUNA") {
-                document.getElementById('strat-header').innerText = "BIOLOGICAL / FAUNA";
-                document.getElementById('lbl-yield').innerText = "EXPOSURE LIMITS:";
-                document.getElementById('lbl-alloc').innerText = "METABOLIC DRAW:";
+                const stratHead = document.getElementById('strat-header');
+                if(stratHead) stratHead.innerText = "BIOLOGICAL / FAUNA";
+                const yieldLbl = document.getElementById('lbl-yield');
+                if(yieldLbl) yieldLbl.innerText = "EXPOSURE LIMITS:";
+                const allocLbl = document.getElementById('lbl-alloc');
+                if(allocLbl) allocLbl.innerText = "METABOLIC DRAW:";
             } else { 
-                document.getElementById('strat-header').innerText = "EXPOSURE MODELING";
-                document.getElementById('lbl-yield').innerText = "YIELD PROJECTION:";
-                document.getElementById('lbl-alloc').innerText = "RESOURCE ALLOC:";
+                const stratHead = document.getElementById('strat-header');
+                if(stratHead) stratHead.innerText = "EXPOSURE MODELING";
+                const yieldLbl = document.getElementById('lbl-yield');
+                if(yieldLbl) yieldLbl.innerText = "YIELD PROJECTION:";
+                const allocLbl = document.getElementById('lbl-alloc');
+                if(allocLbl) allocLbl.innerText = "RESOURCE ALLOC:";
             }
             renderSeasonalMarkers(mode);
         };
 
-        function saveOptions() {
-            const threshEl = document.getElementById('risk-thresh');
-            alertThreshold = threshEl ? parseInt(threshEl.value) : 75;
-            window.updateAssetLabels();
-            fetchMeteoData();
-            window.Q_ModalEngine.close();
+        function openOptions(e, target) {
+            if(e) e.stopPropagation();
+            currentOptTarget = target;
+            let title = ""; let html = "";
+
+            if(target === 'risk') {
+                title = "RISK ASSESSMENT METRICS";
+                html = `
+                    <div>
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">RISK THRESHOLD SENSITIVITY: <span id="thresh-val" style="color:var(--env-green);">${alertThreshold}%</span></label>
+                        <input type="range" id="risk-thresh" min="50" max="95" value="${alertThreshold}" class="modal-input" oninput="document.getElementById('thresh-val').innerText = this.value + '%'" style="width: 100%; margin-top: 4px;">
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">IOT SHIELDING PROTOCOL</label>
+                        <select id="iot-protocol" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                            <option value="MANUAL" ${iotProtocol==='MANUAL'?'selected':''}>MANUAL (USER CONFIRMATION)</option>
+                            <option value="AUTONOMOUS" ${iotProtocol==='AUTONOMOUS'?'selected':''}>AUTONOMOUS (AUTO-TRIGGER)</option>
+                        </select>
+                    </div>
+                `;
+            } else if (target === 'meteo') {
+                title = "METEOROLOGICAL DATA SOURCE";
+                html = `
+                    <div>
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">MICRO-CLIMATE ANCHOR</label>
+                        <select id="climate-anchor" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                            <option value="CLW" ${climateAnchor==='CLW'?'selected':''}>Clearwater, FL (Current Base)</option>
+                            <option value="PHL" ${climateAnchor==='PHL'?'selected':''}>Philadelphia, PA (Eastern Seaboard)</option>
+                            <option value="ENC" ${climateAnchor==='ENC'?'selected':''}>Encino, CA (Western Coastal)</option>
+                            <option value="GLOBAL" ${climateAnchor==='GLOBAL'?'selected':''}>Global Average (Macro)</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">BAROMETRIC UNIT</label>
+                        <select id="baro-unit" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                            <option value="hPa" ${baroUnit==='hPa'?'selected':''}>HECTOPASCALS (hPa)</option>
+                            <option value="inHg" ${baroUnit==='inHg'?'selected':''}>INCHES OF MERCURY (inHg)</option>
+                        </select>
+                    </div>
+                `;
+            } else if (target === 'model') {
+                title = "EXPOSURE MODELING PARAMETERS";
+                html = `
+                    <div>
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">DOMAIN TRACKING MODE</label>
+                        <select id="asset-track" class="modal-input" onchange="window.updateAssetLabels()" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                            <option value="FLORA" ${currentAssetMode === 'FLORA' ? 'selected' : ''}>FLORA / AGRARIAN (Agriculture & Biome)</option>
+                            <option value="FAUNA" ${currentAssetMode === 'FAUNA' ? 'selected' : ''}>FAUNA / BIOLOGICAL (Livestock & Animal Care)</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">ACTION HORIZON</label>
+                        <select id="action-horizon" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                            <option value="PYLON" ${actionHorizon==='PYLON'?'selected':''}>NEXT PYLON (CARDINAL)</option>
+                            <option value="SECTOR" ${actionHorizon==='SECTOR'?'selected':''}>NEXT SECTOR (30-DAY)</option>
+                        </select>
+                    </div>
+                `;
+            } else if (target === 'phase') {
+                title = "ENVIRONMENTAL PHASE CALIBRATION";
+                html = `
+                    <div>
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">TEMPERATURE UNIT</label>
+                        <select id="temp-unit" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                            <option value="C" ${tempUnit==='C'?'selected':''}>CELSIUS (°C)</option>
+                            <option value="F" ${tempUnit==='F'?'selected':''}>FAHRENHEIT (°F)</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">THERMODYNAMIC BASELINE (COMFORT): <span id="base-val" style="color:var(--env-green);">${thermoBaseline.toFixed(1)}°</span></label>
+                        <input type="range" id="thermo-base" min="15" max="30" step="0.5" value="${thermoBaseline}" class="modal-input" oninput="document.getElementById('base-val').innerText = this.value + '°'" style="width: 100%; margin-top: 4px;">
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">CROSS-VECTOR SYNC (BIO)</label>
+                        <select id="cv-sync" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                            <option value="ACTIVE" ${crossVectorSync?'selected':''}>ACTIVE (PUSH HRV ALERTS)</option>
+                            <option value="DISABLED" ${!crossVectorSync?'selected':''}>DISABLED (ISOLATED)</option>
+                        </select>
+                    </div>
+                `;
+            }
+            window.Q_ModalEngine.render(title, html, 'APPLY PARAMETERS', saveOptions);
         }
 
-        function openOptions() {
-            const html = `
-                <div>
-                    <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">MICRO-CLIMATE ANCHOR</label>
-                    <select id="climate-anchor" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                        <option value="CLW" selected>Clearwater, FL (Current Base)</option>
-                        <option value="PHL">Philadelphia, PA (Eastern Seaboard)</option>
-                        <option value="ENC">Encino, CA (Western Coastal)</option>
-                        <option value="GLOBAL">Global Average (Macro)</option>
-                    </select>
-                </div>
-                <div style="margin-top: 10px;">
-                    <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">DOMAIN TRACKING MODE</label>
-                    <select id="asset-track" onchange="window.updateAssetLabels()" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                        <option value="FLORA" ${currentAssetMode === 'FLORA' ? 'selected' : ''}>FLORA / AGRARIAN (Agriculture & Biome)</option>
-                        <option value="FAUNA" ${currentAssetMode === 'FAUNA' ? 'selected' : ''}>FAUNA / BIOLOGICAL (Livestock & Animal Care)</option>
-                    </select>
-                </div>
-                <div style="margin-top: 10px;">
-                    <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">RISK THRESHOLD SENSITIVITY: <span id="thresh-val" style="color:var(--env-green);">${alertThreshold}%</span></label>
-                    <input type="range" id="risk-thresh" min="50" max="95" value="${alertThreshold}" class="modal-input" oninput="document.getElementById('thresh-val').innerText = this.value + '%'" style="width: 100%; margin-top: 4px;">
-                </div>
-            `;
-            window.Q_ModalEngine.render('VECTOR PERSONALIZATION', html, 'APPLY & CALIBRATE', saveOptions);
+        function saveOptions() {
+            if (currentOptTarget === 'risk') {
+                alertThreshold = parseInt(document.getElementById('risk-thresh').value);
+                iotProtocol = document.getElementById('iot-protocol').value;
+            } else if (currentOptTarget === 'meteo') {
+                climateAnchor = document.getElementById('climate-anchor').value;
+                baroUnit = document.getElementById('baro-unit').value;
+                fetchMeteoData();
+            } else if (currentOptTarget === 'model') {
+                currentAssetMode = document.getElementById('asset-track').value;
+                actionHorizon = document.getElementById('action-horizon').value;
+                window.updateAssetLabels();
+            } else if (currentOptTarget === 'phase') {
+                tempUnit = document.getElementById('temp-unit').value;
+                thermoBaseline = parseFloat(document.getElementById('thermo-base').value);
+                crossVectorSync = document.getElementById('cv-sync').value === 'ACTIVE';
+            }
+            window.Q_ModalEngine.close();
         }
         
         function logShieldingIntent() {
@@ -415,11 +548,13 @@
             let apiDataString = "";
             
             if (liveWeather && isLive) {
-                apiDataString = '<br><br><span style="color:var(--atmos-blue); font-size:0.65rem; line-height: 1.4; display:block; border-top: 1px dashed var(--atmos-blue); padding-top: 8px; margin-top: 8px;"><strong>[ CROSS-VECTOR API TELEMETRY ]</strong><br>&#x2022; OPEN-METEO (Env): Temp ' + liveWeather.temperature_2m + '°C | Pressure ' + liveWeather.surface_pressure + 'hPa | Irradiance ' + liveWeather.direct_normal_irradiance + 'W/m²</span>';
+                let pDisp = baroUnit === 'inHg' ? (liveWeather.surface_pressure * 0.02953).toFixed(2) + ' inHg' : liveWeather.surface_pressure.toFixed(1) + ' hPa';
+                let tDisp = tempUnit === 'F' ? (liveWeather.temperature_2m * 9/5 + 32).toFixed(1) + ' °F' : liveWeather.temperature_2m.toFixed(1) + ' °C';
+                apiDataString = '<br><br><span style="color:var(--atmos-blue); font-size:0.65rem; line-height: 1.4; display:block; border-top: 1px dashed var(--atmos-blue); padding-top: 8px; margin-top: 8px;"><strong>[ CROSS-VECTOR API TELEMETRY ]</strong><br>&#x2022; OPEN-METEO (Env): Temp ' + tDisp + ' | Pressure ' + pDisp + ' | Irradiance ' + liveWeather.direct_normal_irradiance + 'W/m²</span>';
             }
 
             let iotHook = (window.Q_STATE && window.Q_STATE.hardware_hooks) ? window.Q_STATE.hardware_hooks.iot_webhooks : 'STANDBY';
-            let iotString = '<span style="color:var(--env-green); font-weight:bold;">[IoT: ' + iotHook + ']</span> ';
+            let iotString = '<span style="color:var(--env-green); font-weight:bold;">[IoT: ' + iotProtocol + ']</span> ';
 
             let desc = "", action = "";
 
@@ -475,16 +610,28 @@
                 return out;
             }
 
-            const legDateEl = document.getElementById('leg-date');
-            if (legDateEl) legDateEl.innerText = legacyDateStr.toUpperCase();
-            
-            const legTimeEl = document.getElementById('leg-time');
+            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
+
+            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
             if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
             
-            if(window.Q_STATE && window.Q_STATE.hardware_hooks) {
-                const badge = document.getElementById('iot-status-badge');
-                if(badge) badge.innerText = 'IOT: ' + window.Q_STATE.hardware_hooks.iot_webhooks;
+            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
+            if (meanDegEl) { 
+                meanDegEl.innerText = qData.meanArc.toFixed(4) + "°";
+                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
             }
+            
+            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
+            if (trueDegEl) { 
+                trueDegEl.innerText = qData.trueArc.toFixed(4) + "°";
+                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            
+            const badge = document.getElementById('iot-status-badge');
+            if(badge) badge.innerText = 'IOT: ' + iotProtocol;
 
             const trueArc = qData.trueArc;
             const meanArc = qData.meanArc;
@@ -494,7 +641,7 @@
             }
             
             let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('q-coord-wing');
+            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
             
             let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
             let smNumStyle = "color:var(--env-green); font-size:1.1rem; font-weight:bold;";
@@ -511,15 +658,10 @@
                 }
             }
 
-            const meanDegEl = document.getElementById('mean-deg');
-            if (meanDegEl) meanDegEl.innerText = meanArc.toFixed(2) + "°";
-            
-            const trueDegEl = document.getElementById('true-deg');
-            if (trueDegEl) trueDegEl.innerText = trueArc.toFixed(2) + "°";
-
             const continuousMeanDeg = daysElapsed * (360 / 365.24219);
             const continuousTrueDeg = continuousMeanDeg + qData.delta;
-            document.getElementById('action-horizon-ring').style.transform = `rotate(${continuousTrueDeg}deg)`;
+            const actionRing = document.getElementById('action-horizon-ring');
+            if (actionRing) actionRing.style.transform = `rotate(${continuousTrueDeg}deg)`;
 
             let dangerProximity = Math.abs(Math.sin((trueArc * Math.PI) / 90)); 
             currentRiskVal = Math.floor(dangerProximity * 85) + 10; 
@@ -535,134 +677,149 @@
             let hazardEl = document.getElementById('hazard-status');
             let yieldEl = document.getElementById('strat-yield');
             let allocEl = document.getElementById('strat-alloc');
+            let horizonEl = document.getElementById('strat-horizon');
             
-            // Reset default handlers
-            hazardEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
-            yieldEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
-            allocEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
+            if (hazardEl) hazardEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
+            if (yieldEl) yieldEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
+            if (allocEl) allocEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
             
-            riskEl.innerText = currentRiskVal + '% (KEPLERIAN DELTA)';
+            if(riskEl) riskEl.innerText = currentRiskVal + '% (KEPLERIAN DELTA)';
             if(currentRiskVal >= alertThreshold) {
-                riskEl.className = "val-alert"; hazardEl.innerText = "IMMINENT THREAT"; hazardEl.className = "val-alert";
+                if(hazardEl) hazardEl.innerText = "IMMINENT THREAT";
                 
-                // Engage SHIELDING Hook on SEVERE probability
-                hazardEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
-                yieldEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
-                allocEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
-                
+                if(iotProtocol === "AUTONOMOUS") {
+                    logShieldingIntent();
+                } else {
+                    if(hazardEl) hazardEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
+                    if(yieldEl) yieldEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
+                    if(allocEl) allocEl.onclick = (e) => { e.stopPropagation(); logShieldingIntent(); };
+                }
             } else if (currentRiskVal >= alertThreshold - 25) {
-                riskEl.className = "val-warn"; hazardEl.innerText = "ELEVATED CONCERN"; hazardEl.className = "val-warn";
+                if(hazardEl) hazardEl.innerText = "ELEVATED CONCERN";
             } else {
-                riskEl.className = "val-highlight"; hazardEl.innerText = "MONITORED / STABLE"; hazardEl.className = "val-highlight";
+                if(hazardEl) hazardEl.innerText = "MONITORED / STABLE";
             }
 
             sparkBars.forEach((bar, index) => {
                 let pastArc = trueArc - (30 - index);
                 let pastDanger = Math.abs(Math.sin((pastArc * Math.PI) / 90));
-                let h = Math.floor(pastDanger * 16);
+                let h = Math.floor(pastDanger * 14);
                 bar.style.height = h + 'px';
-                bar.style.background = (pastDanger * 100) >= alertThreshold ? "var(--alert-red)" : ((pastDanger * 100) >= alertThreshold - 25 ? "var(--squall-amber)" : "var(--env-green)");
+                bar.style.background = "var(--env-green)";
             });
 
+            if(horizonEl) horizonEl.innerText = actionHorizon === 'SECTOR' ? '+30.00° (SECTOR)' : '+14.00° (CARDINAL)';
+
             if (showDelta) {
-                document.getElementById('val-pressure').innerText = (currentRiskVal > 50 ? '-' : '+') + (currentRiskVal / 10).toFixed(1) + ' hPa';
-                document.getElementById('val-pressure').className = currentRiskVal >= alertThreshold ? "val-alert" : "val-warn";
-                document.getElementById('val-irradiance').innerText = (currentRiskVal > 50 ? '-12' : '+4') + ' W/m²';
-                document.getElementById('val-precip').innerText = (currentRiskVal > 50 ? '+45%' : '-5%') + ' FROM NORM';
-                document.getElementById('val-precip').className = currentRiskVal > 50 ? "val-alert" : "val-highlight";
-                document.getElementById('val-temp').innerText = (currentRiskVal > 50 ? '+' : '-') + (currentRiskVal / 15).toFixed(1) + ' °C';
-                document.getElementById('val-temp').className = currentRiskVal > 50 ? "val-alert" : "val-highlight";
+                const valPress = document.getElementById('val-pressure');
+                if(valPress) {
+                    let deltaPress = currentRiskVal / 10;
+                    let sign = currentRiskVal > 50 ? '-' : '+';
+                    let v = baroUnit === 'inHg' ? (deltaPress * 0.02953).toFixed(2) : deltaPress.toFixed(1);
+                    let u = baroUnit === 'inHg' ? 'inHg' : 'hPa';
+                    valPress.innerText = `${sign}${v} ${u}`;
+                }
+                const valIrr = document.getElementById('val-irradiance');
+                if(valIrr) {
+                    valIrr.innerText = (currentRiskVal > 50 ? '-12' : '+4') + ' W/m²';
+                }
+                const valPrecip = document.getElementById('val-precip');
+                if(valPrecip) {
+                    valPrecip.innerText = (currentRiskVal > 50 ? '+45%' : '-5%') + ' FROM NORM';
+                }
+                const valTemp = document.getElementById('val-temp');
+                if(valTemp) {
+                    let deltaTemp = currentRiskVal / 15;
+                    let sign = currentRiskVal > 50 ? '+' : '-';
+                    let v = tempUnit === 'F' ? (deltaTemp * 9/5).toFixed(1) : deltaTemp.toFixed(1);
+                    let u = tempUnit === 'F' ? '°F' : '°C';
+                    valTemp.innerText = `${sign}${v} ${u}`;
+                }
             } else {
+                let currentTempC = 22.0;
+                let currentPress = (1015 - Math.floor(currentRiskVal/2));
+                
                 if (liveWeather && isLive) {
-                    document.getElementById('val-pressure').innerText = liveWeather.surface_pressure.toFixed(1) + ' hPa';
-                    document.getElementById('val-pressure').className = liveWeather.surface_pressure < 1005 ? "val-alert" : "val-highlight";
-                    document.getElementById('val-irradiance').innerText = liveWeather.direct_normal_irradiance.toFixed(1) + ' W/m²';
-                    document.getElementById('val-precip').innerText = liveWeather.precipitation.toFixed(1) + 'mm / LIVE';
-                    document.getElementById('val-precip').className = liveWeather.precipitation > 0 ? "val-alert" : "val-highlight";
-                    document.getElementById('val-temp').innerText = liveWeather.temperature_2m.toFixed(1) + ' °C';
-                    document.getElementById('val-temp').className = liveWeather.temperature_2m > 35 || liveWeather.temperature_2m < 0 ? "val-alert" : "val-highlight";
+                    currentTempC = liveWeather.temperature_2m;
+                    currentPress = liveWeather.surface_pressure;
+                    
+                    const valIrr = document.getElementById('val-irradiance');
+                    if(valIrr) valIrr.innerText = liveWeather.direct_normal_irradiance.toFixed(1) + ' W/m²';
+                    
+                    const valPrecip = document.getElementById('val-precip');
+                    if(valPrecip) {
+                        valPrecip.innerText = liveWeather.precipitation.toFixed(1) + 'mm / LIVE';
+                    }
                 } else {
-                    document.getElementById('val-pressure').innerText = (1015 - Math.floor(currentRiskVal/2)) + ' hPa';
-                    document.getElementById('val-pressure').className = "val-highlight";
-                    document.getElementById('val-irradiance').innerText = "ACTIVE / NOMINAL";
-                    document.getElementById('val-precip').innerText = "0.0mm / STABLE";
-                    document.getElementById('val-precip').className = "val-highlight";
-                    document.getElementById('val-temp').innerText = "22.0 °C / STATIC";
-                    document.getElementById('val-temp').className = "val-highlight";
+                    const valIrr = document.getElementById('val-irradiance');
+                    if(valIrr) valIrr.innerText = "ACTIVE / NOMINAL";
+                    const valPrecip = document.getElementById('val-precip');
+                    if(valPrecip) {
+                        valPrecip.innerText = "0.0mm / STABLE";
+                    }
+                }
+                
+                const valPress = document.getElementById('val-pressure');
+                if(valPress) {
+                    let v = baroUnit === 'inHg' ? (currentPress * 0.02953).toFixed(2) : currentPress.toFixed(1);
+                    let u = baroUnit === 'inHg' ? 'inHg' : 'hPa';
+                    valPress.innerText = `${v} ${u}`;
+                }
+                
+                const valTemp = document.getElementById('val-temp');
+                if(valTemp) {
+                    let v = tempUnit === 'F' ? (currentTempC * 9/5 + 32).toFixed(1) : currentTempC.toFixed(1);
+                    let u = tempUnit === 'F' ? '°F' : '°C';
+                    valTemp.innerText = `${v} ${u}`;
                 }
             }
 
             if (currentAssetMode === "FAUNA") {
                 if(currentRiskVal >= alertThreshold) {
-                    yieldEl.innerText = "LETHAL ZONE"; yieldEl.className = "val-alert";
-                    allocEl.innerText = "SHELTER / HYDRATE"; allocEl.className = "val-alert";
+                    if(yieldEl) { yieldEl.innerText = "LETHAL ZONE"; }
+                    if(allocEl) { allocEl.innerText = "SHELTER / HYDRATE"; }
                 } else if (currentRiskVal >= alertThreshold - 25) {
-                    yieldEl.innerText = "BEHAVIORAL SHIFT"; yieldEl.className = "val-warn";
-                    allocEl.innerText = "ADJUST CALORIC BURN"; allocEl.className = "val-warn";
+                    if(yieldEl) { yieldEl.innerText = "BEHAVIORAL SHIFT"; }
+                    if(allocEl) { allocEl.innerText = "ADJUST CALORIC BURN"; }
                 } else {
-                    yieldEl.innerText = "NOMINAL EXPOSURE"; yieldEl.className = "val-highlight";
-                    allocEl.innerText = "STANDARD ROUTINE"; allocEl.className = "val-highlight";
+                    if(yieldEl) { yieldEl.innerText = "NOMINAL EXPOSURE"; }
+                    if(allocEl) { allocEl.innerText = "STANDARD ROUTINE"; }
                 }
             } else {
                 if(currentRiskVal >= alertThreshold) {
-                    yieldEl.innerText = "COMPROMISED"; yieldEl.className = "val-alert";
-                    allocEl.innerText = "EMERGENCY SHIELD"; allocEl.className = "val-alert";
+                    if(yieldEl) { yieldEl.innerText = "COMPROMISED"; }
+                    if(allocEl) { allocEl.innerText = "EMERGENCY SHIELD"; }
                 } else if (currentRiskVal >= alertThreshold - 25) {
-                    yieldEl.innerText = "MODERATE VARIANCE"; yieldEl.className = "val-warn";
-                    allocEl.innerText = "CONSERVATION MODE"; allocEl.className = "val-warn";
+                    if(yieldEl) { yieldEl.innerText = "MODERATE VARIANCE"; }
+                    if(allocEl) { allocEl.innerText = "CONSERVATION MODE"; }
                 } else {
-                    yieldEl.innerText = "OPTIMAL / GROWTH"; yieldEl.className = "val-highlight";
-                    allocEl.innerText = "PHASE 2 (EXPANSION)"; allocEl.className = "val-highlight";
+                    if(yieldEl) { yieldEl.innerText = "OPTIMAL / GROWTH"; }
+                    if(allocEl) { allocEl.innerText = "PHASE 2 (EXPANSION)"; }
                 }
             }
             
             let tensionEl = document.getElementById('agri-tension');
-            if (qData.quad === 1) { tensionEl.innerText = "DORMANT / GATHER"; }
-            else if (qData.quad === 2) { tensionEl.innerText = "AWAKENING / PUSH"; }
-            else if (qData.quad === 3) { tensionEl.innerText = "CLIMAX / SUSTAIN"; }
-            else { tensionEl.innerText = "RECESSION / HARVEST"; }
+            if(tensionEl) {
+                if (qData.quad === 1) { tensionEl.innerText = "DORMANT / GATHER"; }
+                else if (qData.quad === 2) { tensionEl.innerText = "AWAKENING / PUSH"; }
+                else if (qData.quad === 3) { tensionEl.innerText = "CLIMAX / SUSTAIN"; }
+                else { tensionEl.innerText = "RECESSION / HARVEST"; }
+            }
             
-            // Calculate Thermodynamic Friction
-            const solarBaselineTemp = 22 + 10 * Math.sin((trueArc - 90) * Math.PI / 180);
-            let currentTemp = (liveWeather && isLive) ? liveWeather.temperature_2m : 22.0;
-            let thermoFriction = Math.abs(currentTemp - solarBaselineTemp);
+            // Calculate Thermodynamic Friction against baseline
+            const solarBaselineTempC = thermoBaseline + 10 * Math.sin((trueArc - 90) * Math.PI / 180);
+            let currentTempC = (liveWeather && isLive) ? liveWeather.temperature_2m : 22.0;
+            let thermoFrictionC = Math.abs(currentTempC - solarBaselineTempC);
             
             const thermoFrictionEl = document.getElementById('thermo-friction');
             if (thermoFrictionEl) {
-                thermoFrictionEl.innerText = thermoFriction.toFixed(2) + ' ΔT';
-                if (thermoFriction > 5.0) {
-                    thermoFrictionEl.className = "val-alert";
-                } else if (thermoFriction > 2.5) {
-                    thermoFrictionEl.className = "val-warn";
-                } else {
-                    thermoFrictionEl.className = "val-highlight";
-                }
+                let fricDisp = tempUnit === 'F' ? (thermoFrictionC * 9/5).toFixed(2) : thermoFrictionC.toFixed(2);
+                let u = tempUnit === 'F' ? 'ΔF' : 'ΔC';
+                thermoFrictionEl.innerText = `${fricDisp} ${u}`;
             }
-            
-            const radarText = document.getElementById('radar-readout');
-            if(currentRiskVal >= alertThreshold) { 
-                currentRadarStatus = 'THERMODYNAMIC FRICTION'; if(radarText) radarText.innerText = "⚠ THERMODYNAMIC FRICTION"; if(radarText) radarText.style.color = "var(--alert-red)"; 
-            } else if(currentRiskVal >= alertThreshold - 25) { 
-                currentRadarStatus = 'THERMAL SPIKE'; if(radarText) radarText.innerText = "THERMAL SPIKE DETECTED"; if(radarText) radarText.style.color = "var(--squall-amber)"; 
-            } else { 
-                currentRadarStatus = 'STABLE'; if(radarText) radarText.innerText = "THERMODYNAMICS STABLE"; if(radarText) radarText.style.color = "var(--env-green)"; 
-            }
-            
-            const phaseTextEl = document.getElementById('resp-phase-text');
-            if (phaseTextEl) {
-                if (currentRadarStatus === 'THERMODYNAMIC FRICTION') {
-                     phaseTextEl.style.color = "var(--alert-red)";
-                } else if (currentRadarStatus === 'THERMAL SPIKE') {
-                     phaseTextEl.style.color = "var(--squall-amber)";
-                } else {
-                     phaseTextEl.style.color = "var(--env-green)";
-                }
-            }
-            
         });
 
         if(window.generateStars) window.generateStars('stars');
-        initSparklines();
         renderSeasonalMarkers(currentAssetMode); 
         renderOrbitalNodes();
         fetchMeteoData();

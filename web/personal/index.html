@@ -7,10 +7,11 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // CHRONO-INTERFACE</title>
-    <script src="../q-ui-global.js?v=16.4"></script>
-<script src="../q-core.js?v=16.4"></script>
-<script src="../q-ui-planner.js?v=16.4"></script>
-<script src="../q-hub.js?v=16.4"></script>
+    
+    <script src="../q-ui-global.js?v=20.8"></script>
+    <script src="../q-core.js?v=20.8"></script>
+    <script src="../q-ui-planner.js?v=20.8"></script>
+    <script src="../q-hub.js?v=20.8"></script>
     
     <script>
         // IRONCLAD MOBILE BYPASS: Force class if on native device, bypassing buggy WebView viewports
@@ -66,24 +67,7 @@
             --theme-dim: var(--gold-dim);
         }
 
-        body {
-            background-color: var(--void);
-            background: radial-gradient(circle at center, #1a130a 0%, var(--void) 80%);
-            color: var(--white);
-            font-family: 'JetBrains Mono', monospace;
-            margin: 0; height: 100dvh; width: 100vw; overflow: hidden; overscroll-behavior: none;
-            display: flex; justify-content: center; align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
-            perspective: 1500px; 
-            transform-style: preserve-3d;
-            touch-action: manipulation;
-        }
-
         html.is-mobile-device body { perspective: none !important; transform-style: flat !important; }
-        html.is-mobile-device body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
-        html.is-mobile-device .q-nav-brand { font-size: 0.6rem !important; letter-spacing: 1px !important; }
-        html.is-mobile-device #q-global-sim-badge { font-size: 0.4rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; white-space: nowrap !important; margin-left: 0 !important; }
         
         body.boot-active .q-nav-bar,
         body.boot-active #mobile-telemetry-btn,
@@ -94,43 +78,46 @@
             pointer-events: none !important;
         }
 
-        .vector-anchor {
-            position: absolute; width: calc(var(--mod-w) + 50px); height: auto; min-height: 160px; z-index: 100; cursor: pointer; pointer-events: auto; 
-            display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center;
-            padding: 22px; box-sizing: border-box; transition: all 0.3s ease; 
-            background: rgba(15, 12, 10, 0.9); 
-            backdrop-filter: var(--blur-med); -webkit-backdrop-filter: var(--blur-med);
-            border-radius: 8px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(229, 228, 226, 0.1);
-            border: 1px solid rgba(244, 208, 104, 0.3);
-            backface-visibility: hidden;
-            transform: translateZ(0);
+        /* --- Local Chrono-Face Styling for Internal Data Cells --- */
+        
+        /* Headers bound strictly to the 280px text block boundaries */
+        .v-head { 
+            position: absolute; white-space: nowrap;
+            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
+            margin: 0; padding: 0; z-index: 25; border: none;
+            width: 280px; 
+            left: 50%; transform: translateX(-50%);
         }
         
-        .vector-anchor:hover {
-            border-color: var(--theme-main);
-            box-shadow: 0 20px 45px rgba(0,0,0,0.9), inset 0 0 30px rgba(185, 122, 53, 0.2);
-        }
+        /* Top Panels: Headers tight BELOW the frame */
+        #quad-BIO .v-head { bottom: -8px; text-align: right; }
+        #quad-COM .v-head { bottom: -8px; text-align: left; }
         
-        .tl { top: 7vh; left: 2vw; }
-        .tr { top: 7vh; right: 2vw; }
-        .bl { bottom: 8vh; left: 2vw; }
-        .br { bottom: 8vh; right: 2vw; }
-        
-        .v-head { font-family: 'Orbitron'; font-weight: 900; font-size: 1.15rem; letter-spacing: 3px; margin-bottom: 12px; width: 100%; border-bottom: 1px dashed rgba(229, 228, 226, 0.3); padding-bottom: 6px; }
-        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.85rem; color: var(--platinum); font-family: 'JetBrains Mono'; margin-bottom: 8px; font-weight: 700; align-items: center;}
-        
-        .t-row span:first-child { color: var(--starlight); }
+        /* Bottom Panels: Headers tight ABOVE the frame */
+        #quad-ENV .v-head { top: -8px; text-align: right; }
+        #quad-MEC .v-head { top: -8px; text-align: left; }
 
-        .val-sm { font-family: 'Orbitron'; font-weight: 700; z-index: 20;}
+        /* The Imaginary Rectangle: Expanded width pushes left text left and right text right */
+        .t-row { display: flex; justify-content: space-between; width: 280px; margin: 0 auto 3px auto; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
+        
+        /* Pure White Descriptors for Maximum Readability */
+        .t-row span:first-child { color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.4); text-align: left; flex-shrink: 0; }
+
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; }
+        
+        /* Vector Color Overrides */
         .val-bio { color: var(--bio-purple); text-shadow: 0 0 10px var(--bio-purple-dim); }
         .val-com { color: var(--gold); text-shadow: 0 0 10px var(--gold-dim); }
         .val-env { color: var(--env-green); text-shadow: 0 0 10px var(--env-green-dim); }
         .val-mec { color: var(--sys-cyan); text-shadow: 0 0 10px var(--sys-cyan-dim); }
 
+        .phil-quote { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: #aaa; text-align: center; font-style: italic; width: 280px; margin: 4px auto 0 auto; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px; }
+
+        /* --- Center Dial Architecture --- */
         .gear-container {
             position: absolute; width: var(--dial-size); height: var(--dial-size); border-radius: 50%; 
-            display: flex; justify-content: center; align-items: center; z-index: 30; transform: translateZ(-50px); transform-style: preserve-3d; 
+            left: 50%; top: 50%; transform: translate(-50%, -50%) translateZ(-50px);
+            display: flex; justify-content: center; align-items: center; z-index: 30; transform-style: preserve-3d; 
             background: var(--glass-liquid); backdrop-filter: var(--blur-high); -webkit-backdrop-filter: var(--blur-high);
             border: 6px solid rgba(244, 208, 104, 0.08);
             box-shadow: inset 0 0 60px rgba(244, 208, 104, 0.05), inset 0 0 20px rgba(0,0,0,0.9), 0 0 100px rgba(0,0,0,0.9), 0 0 40px rgba(244, 208, 104, 0.1), 0 0 120px rgba(229, 228, 226, 0.15);
@@ -191,18 +178,11 @@
         @keyframes glitter-2 { 0%, 100% { opacity: 0.5; transform: rotate(22.5deg) scale(0.85); filter: drop-shadow(0 0 5px var(--platinum)); } 50% { opacity: 1; transform: rotate(22.5deg) scale(1.05); filter: drop-shadow(0 0 15px var(--platinum)); } }
         @keyframes glitter-3 { 0%, 100% { opacity: 1; transform: rotate(45deg) scale(0.95); filter: drop-shadow(0 0 12px var(--amber)); } 50% { opacity: 0.4; transform: rotate(45deg) scale(0.8); filter: drop-shadow(0 0 3px var(--amber-dim)); } }
         @keyframes glitter-4 { 0%, 100% { opacity: 0.4; transform: rotate(67.5deg) scale(0.8); filter: drop-shadow(0 0 4px #fff); } 50% { opacity: 0.9; transform: rotate(67.5deg) scale(1); filter: drop-shadow(0 0 10px #fff); } }
-        
-        .phil-quote { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: #aaa; text-align: center; font-style: italic; width: 100%; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px; }
     </style>
 </head>
 <body class="mode-q boot-active">
 
     <div class="star-container" id="star-layer"></div>
-
-    <div class="vector-anchor telemetry-node tl" id="quad-BIO" onclick="window.openSlotRoutingModal('BIO')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('BIO'); event.preventDefault();"></div>
-    <div class="vector-anchor telemetry-node tr" id="quad-COM" onclick="window.openSlotRoutingModal('COM')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('COM'); event.preventDefault();"></div>
-    <div class="vector-anchor telemetry-node bl" id="quad-ENV" onclick="window.openSlotRoutingModal('ENV')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('ENV'); event.preventDefault();"></div>
-    <div class="vector-anchor telemetry-node br" id="quad-MEC" onclick="window.openSlotRoutingModal('MEC')" ontouchstart="event.stopPropagation(); window.openSlotRoutingModal('MEC'); event.preventDefault();"></div>
 
     <div class="gear-container q-center-dial">
         <div class="ring r-cycle" id="ring-cycle-mean"><div class="ring-node" id="node-cycle-mean" title="MEAN ARC"></div></div>
@@ -281,9 +261,14 @@
                 localStorage.setItem('Q_SLOT_MEC_1', 'DRIFT'); localStorage.setItem('Q_SLOT_MEC_2', 'ECCENTRICITY'); localStorage.setItem('Q_SLOT_MEC_3', 'SYMMETRY'); localStorage.setItem('Q_SLOT_MEC_4', 'SMEAR');
             }
 
+            // Map data directly into the global UI containers
             ['BIO', 'COM', 'ENV', 'MEC'].forEach(vec => {
                 const container = document.getElementById(`quad-${vec}`);
+                if (!container) return; // Wait for global UI to mount
+
                 const sty = V_STYLES[vec];
+                
+                // The Vector Header (.v-head) is positioned absolutely to sit outside the frame.
                 let inner = `<div class="v-head holo-text ${sty.class}">${sty.head}</div>`;
                 let assignedCount = 0;
                 
@@ -303,28 +288,15 @@
             });
         };
 
-        window.refreshChronoFace();
+        // Ensure injection triggers immediately after DOM load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => window.refreshChronoFace(), 100);
+        });
         
         window.addEventListener('q-tick', (e) => {
             const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
 
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
-                }
-                return out;
-            }
-
-            const legDateEl = document.getElementById('leg-date');
-            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
-
-            const legTimeEl = document.getElementById('leg-time');
-            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-
+            // Update Rings
             const continuousMeanDeg = daysElapsed * (360 / 365.24219);
             const continuousTrueDeg = continuousMeanDeg + qData.delta;
             document.getElementById('ring-cycle-mean').style.transform = `rotate(${continuousMeanDeg}deg)`;
@@ -332,26 +304,6 @@
             document.getElementById('ring-sector').style.transform = `rotate(${(daysElapsed / 30) * 360}deg)`;
             document.getElementById('ring-week').style.transform = `rotate(${(daysElapsed / 6) * 360}deg)`;
             document.getElementById('ring-day').style.transform = `rotate(${((t - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY) * 360}deg)`;
-
-            const meanDegEl = document.getElementById('mean-deg');
-            if (meanDegEl) { meanDegEl.innerText = qData.meanArc.toFixed(2) + "°"; meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important'); }
-            
-            const trueDegEl = document.getElementById('true-deg');
-            if (trueDegEl) { trueDegEl.innerText = qData.trueArc.toFixed(2) + "°"; trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important'); }
-
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('q-coord-wing');
-            
-            if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
-                } else {
-                    qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
-                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">Q</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.quad}</span> ` +
-                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">S</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.sect}</span> ` +
-                                           `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">DAY</span><span style="color:var(--theme-main); font-size:1.1rem; font-weight:bold;">${qData.day}</span>`;
-                }
-            }
 
             // --- LOCALIZED DATA ROUTING INJECTION ---
             
@@ -372,7 +324,10 @@
             if(getEl('face-BIO-NOON')) getEl('face-BIO-NOON').innerText = "T-" + (12 - new Date(t).getUTCHours()) + "H";
 
             // COM DATA
-            if(getEl('face-COM-NODE')) getEl('face-COM-NODE').innerText = (activeBlock && activeBlock.type === 'PYLON') ? activeBlock.name : `Q${qData.quad} S${qData.sect} D${qData.day}`;
+            if(getEl('face-COM-NODE')) {
+                let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+                getEl('face-COM-NODE').innerText = (activeBlock && activeBlock.type === 'PYLON') ? activeBlock.name : `Q${qData.quad} S${qData.sect} D${qData.day}`;
+            }
             if(getEl('face-COM-ZODIAC')) {
                 const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
                 const sNatal = window.Q_STATE?.metaphysical_layer?.natal_anchor || 'NONE';

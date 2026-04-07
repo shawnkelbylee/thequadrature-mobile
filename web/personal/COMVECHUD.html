@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // COMMUNAL VECTOR</title>
-   <script src="../q-ui-global.js?v=16.4"></script>
-<script src="../q-core.js?v=16.4"></script>
-<script src="../q-ui-planner.js?v=16.4"></script>
-<script src="../q-hub.js?v=16.4"></script>
+   <script src="../q-ui-global.js?v=22.0"></script>
+<script src="../q-core.js?v=22.0"></script>
+<script src="../q-ui-planner.js?v=22.0"></script>
+<script src="../q-hub.js?v=22.0"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
@@ -35,39 +35,40 @@
 
         /* --- HAPTIC & MODAL Z-INDEX OVERRIDES --- */
         #q-universal-modal { z-index: 999999 !important; }
-        .scroll-block { pointer-events: auto !important; z-index: 100 !important; }
-        .opt-btn, .fmt-toggle { pointer-events: auto !important; z-index: 110 !important; position: relative; }
 
-        @keyframes shimmer-right { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
-        @keyframes shimmer-left { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
-
-        .val-gold { color: var(--gold-bright); text-shadow: 0 0 15px var(--gold-dim); }
-
-        .scroll-block { 
-            position: absolute; width: var(--mod-w); height: 130px; z-index: 100; cursor: pointer; pointer-events: auto; 
-            display: flex; flex-direction: column; align-items: center; text-align: center; padding: 15px 20px; box-sizing: border-box; 
-            transition: all 0.3s ease; 
-            background: linear-gradient(120deg, rgba(25,20,5,0.7) 0%, rgba(255,215,0,0.1) 40%, rgba(255,255,255,0.15) 50%, rgba(255,215,0,0.1) 60%, rgba(25,20,5,0.7) 100%); 
-            background-size: 300% 100%; backdrop-filter: var(--blur-med); -webkit-backdrop-filter: var(--blur-med); 
-            border: 2px solid var(--copper); border-top: 1px solid rgba(255,215,0,0.5); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5); opacity: 0.6; 
+        /* Headers bound strictly to the 280px text wrapper edge, shifted outwards by 1 character (8px) */
+        .v-head { 
+            position: absolute; white-space: nowrap;
+            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
+            margin: 0; padding: 0; z-index: 25; border: none;
+            color: var(--theme-main);
+            text-shadow: 0 0 10px var(--theme-dim);
+            transition: color 0.3s, text-shadow 0.3s;
         }
-        .scroll-block:hover { opacity: 0.9; border-color: var(--brass); }
-        .scroll-block.mode-active { opacity: 1; border-color: var(--gold-bright); box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 30px var(--active-glow), inset 0 0 20px rgba(255,215,0,0.1); }
         
-        .tl { top: 7vh; left: 2vw; border-top-left-radius: 20px; border-bottom-right-radius: 20px; animation: shimmer-right 6s linear infinite; }
-        .tr { top: 7vh; right: 2vw; border-top-right-radius: 20px; border-bottom-left-radius: 20px; animation: shimmer-left 7.5s linear infinite; }
-        .bl { bottom: 8vh; left: 2vw; border-bottom-left-radius: 20px; border-top-right-radius: 20px; animation: shimmer-right 8s linear infinite reverse; }
-        .br { bottom: 8vh; right: 2vw; border-bottom-right-radius: 20px; border-top-left-radius: 20px; animation: shimmer-left 5.5s linear infinite; }
+        /* Top Panels: Headers tight BELOW the frame */
+        #quad-BIO .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(8px); }
+        #quad-COM .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(-8px); }
+        
+        /* Bottom Panels: Headers tight ABOVE the frame */
+        #quad-ENV .v-head { top: -16px; right: 0; text-align: right; transform: translateX(8px); }
+        #quad-MEC .v-head { top: -16px; left: 0; text-align: left; transform: translateX(-8px); }
 
-        .s-head { font-weight: 800; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 8px; color: var(--gold-bright); text-shadow: 0 0 10px var(--brass); border-bottom: 1px dashed var(--copper); padding-bottom: 6px; width: 100%; transition: 0.3s; }
-        .scroll-block.mode-active .s-head { color: #fff; text-shadow: 0 0 15px var(--gold-bright); border-bottom-color: var(--gold-bright); }
+        /* Override global OPT positioning for the OPT Tags to center them in the frame rings */
+        .tl .opt-oval { left: 35px !important; top: 42px !important; font-size: 0.45rem !important; pointer-events: auto !important; letter-spacing: 1px !important; }
+        .tr .opt-oval { right: 35px !important; top: 42px !important; font-size: 0.45rem !important; pointer-events: auto !important; letter-spacing: 1px !important; }
+        .bl .opt-oval { left: 35px !important; bottom: 42px !important; font-size: 0.45rem !important; pointer-events: auto !important; letter-spacing: 1px !important; }
+        .br .opt-oval { right: 35px !important; bottom: 42px !important; font-size: 0.45rem !important; pointer-events: auto !important; letter-spacing: 1px !important; }
+
+        /* The Imaginary Rectangle: Expanded width pushes left text left and right text right */
+        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
         
-        /* STANDARDIZED TELEMETRY AESTHETICS */
-        .s-data { font-family: 'JetBrains Mono'; font-size: 0.7rem; display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 8px;}
-        .s-data > div > span:first-child { color: var(--starlight); font-weight: 700; }
-        .s-data > div > span:last-child { color: var(--gold-bright); font-weight: 700; text-shadow: 0 0 8px var(--gold-dim); }
-        .s-highlight { color: var(--gold-bright) !important; text-shadow: 0 0 10px var(--gold-dim) !important; }
+        /* Pure White Descriptors for Maximum Readability */
+        .t-row span:first-child { color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.4); text-align: left; flex-shrink: 0; text-transform: uppercase; }
+
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); text-transform: uppercase; }
+
+        .panel-data-wrapper { position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto; cursor: pointer; z-index: 20; }
 
         .opt-btn { font-size: 0.6rem; font-weight: bold; color: var(--gold-bright); background: rgba(0,0,0,0.6); border: 1px solid var(--gold-bright); padding: 3px 12px; border-radius: 4px; cursor: pointer; box-shadow: 0 0 8px var(--gold-dim); transition: 0.3s; margin-top: auto; font-family: 'Orbitron'; }
         .opt-btn:hover { background: var(--gold-bright); color: var(--void); box-shadow: 0 0 15px var(--gold-bright); }
@@ -125,42 +126,6 @@
 
     <div class="star-container" id="stars"></div>
 
-    <div class="scroll-block tl telemetry-node" id="btn-rel" onclick="setMode('rel')" ontouchstart="setMode('rel')">
-        <div class="s-head">RELIGIOUS OVERLAY</div>
-        <div class="s-data" id="data-rel">
-            <div style="display:flex; justify-content:space-between;"><span>SUB-SET:</span> <span class="s-highlight" id="rel-active">MULTI-FAITH</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>NEXT:</span> <span id="rel-next">--</span></div>
-        </div>
-        <div class="opt-btn" onclick="openOptions(event, 'rel')" ontouchstart="event.stopPropagation(); openOptions(event, 'rel')">[OPT]</div>
-    </div>
-
-    <div class="scroll-block tr mode-active telemetry-node" id="btn-zod" onclick="setMode('zod')" ontouchstart="setMode('zod')">
-        <div class="s-head">ZODIACAL TRANSIT</div>
-        <div class="s-data" id="data-zod">
-            <div style="display:flex; justify-content:space-between;"><span>HOUSE:</span> <span class="s-highlight" id="zod-house">--</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>PHASE:</span> <span id="zod-phase">--</span></div>
-        </div>
-        <div class="opt-btn" onclick="openOptions(event, 'zod')" ontouchstart="event.stopPropagation(); openOptions(event, 'zod')">[OPT]</div>
-    </div>
-
-    <div class="scroll-block bl telemetry-node" id="btn-civ" onclick="setMode('civ')" ontouchstart="setMode('civ')">
-        <div class="s-head">CIVIL ANCHOR</div>
-        <div class="s-data" id="data-civ">
-            <div style="display:flex; justify-content:space-between;"><span>LOCALE:</span> <span class="s-highlight" id="civ-active">US (STATIC)</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>NEXT:</span> <span id="civ-next">--</span></div>
-        </div>
-        <div class="opt-btn" onclick="openOptions(event, 'civ')" ontouchstart="event.stopPropagation(); openOptions(event, 'civ')">[OPT]</div>
-    </div>
-
-    <div class="scroll-block br telemetry-node" id="btn-int" onclick="setMode('int')" ontouchstart="setMode('int')">
-        <div class="s-head">INTROSPECTION</div>
-        <div class="s-data" id="data-int">
-            <div style="display:flex; justify-content:space-between;"><span>JIÉQÌ:</span> <span class="s-highlight" id="int-term">--</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>GROWTH ARC:</span> <span id="int-pct">--%</span></div>
-        </div>
-        <div class="opt-btn" onclick="openOptions(event, 'int')" ontouchstart="event.stopPropagation(); openOptions(event, 'int')">[OPT]</div>
-    </div>
-
     <div class="astrolabe q-center-dial">
         <div class="ring ring-outer"></div>
         <div class="ring ring-dynamic" id="dynamic-ring"></div>
@@ -195,10 +160,101 @@
         let ISL_DB = [];
         let SYS_DB = [ { name: "Tax Day (US)", coord: 113.4, type: 'node-sys', glyph: '$' } ];
         
+        window.injectVectorData = function() {
+            document.querySelectorAll('.opt-oval').forEach((el, index) => {
+                el.innerText = 'OPT';
+                el.style.setProperty('color', 'var(--gold-bright)', 'important');
+                el.style.setProperty('text-shadow', '0 0 8px var(--gold-dim)', 'important');
+                
+                let target = '';
+                if(index === 0) target = 'rel';
+                if(index === 1) target = 'zod';
+                if(index === 2) target = 'civ';
+                if(index === 3) target = 'int';
+                
+                el.onclick = (e) => { e.stopPropagation(); openOptions(e, target); };
+            });
+
+            const quadBIO = document.getElementById('quad-BIO');
+            if (quadBIO) {
+                quadBIO.innerHTML = `
+                    <div id="wrapper-rel" class="panel-data-wrapper" onclick="setMode('rel')">
+                        <div class="v-head">RELIGIOUS OVERLAY</div>
+                        <div class="t-row"><span>SUB-SET:</span> <span id="rel-active" class="val-sm">MULTI-FAITH</span></div>
+                        <div class="t-row"><span>NEXT:</span> <span id="rel-next" class="val-sm">--</span></div>
+                    </div>
+                `;
+            }
+
+            const quadCOM = document.getElementById('quad-COM');
+            if (quadCOM) {
+                quadCOM.innerHTML = `
+                    <div id="wrapper-zod" class="panel-data-wrapper" onclick="setMode('zod')">
+                        <div class="v-head">ZODIACAL TRANSIT</div>
+                        <div class="t-row"><span>HOUSE:</span> <span id="zod-house" class="val-sm">--</span></div>
+                        <div class="t-row"><span>PHASE:</span> <span id="zod-phase" class="val-sm">--</span></div>
+                    </div>
+                `;
+            }
+
+            const quadENV = document.getElementById('quad-ENV');
+            if (quadENV) {
+                quadENV.innerHTML = `
+                    <div id="wrapper-civ" class="panel-data-wrapper" onclick="setMode('civ')">
+                        <div class="v-head">CIVIL ANCHOR</div>
+                        <div class="t-row"><span>LOCALE:</span> <span id="civ-active" class="val-sm">US (STATIC)</span></div>
+                        <div class="t-row"><span>NEXT:</span> <span id="civ-next" class="val-sm">--</span></div>
+                    </div>
+                `;
+            }
+
+            const quadMEC = document.getElementById('quad-MEC');
+            if (quadMEC) {
+                quadMEC.innerHTML = `
+                    <div id="wrapper-int" class="panel-data-wrapper" onclick="setMode('int')">
+                        <div class="v-head">INTROSPECTION</div>
+                        <div class="t-row"><span>JIÉQÌ:</span> <span id="int-term" class="val-sm">--</span></div>
+                        <div class="t-row"><span>GROWTH ARC:</span> <span id="int-pct" class="val-sm">--%</span></div>
+                    </div>
+                `;
+            }
+            
+            setMode(currentMode);
+        };
+
+        function initLocalHUD() {
+            const checkExist = setInterval(function() {
+                if (document.getElementById('quad-BIO')) {
+                    clearInterval(checkExist);
+                    if (window.injectVectorData) window.injectVectorData();
+                }
+            }, 50);
+            setTimeout(() => clearInterval(checkExist), 5000);
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLocalHUD);
+        } else {
+            initLocalHUD();
+        }
+        
         function setMode(mode) {
             currentMode = mode;
-            document.querySelectorAll('.scroll-block').forEach(el => el.classList.remove('mode-active'));
-            document.getElementById(`btn-${mode}`).classList.add('mode-active');
+            document.querySelectorAll('.panel-data-wrapper').forEach(el => {
+                const head = el.querySelector('.v-head');
+                if(head) {
+                    head.style.color = 'var(--brass)';
+                    head.style.textShadow = 'none';
+                }
+            });
+            const activeEl = document.getElementById(`wrapper-${mode}`);
+            if(activeEl) {
+                const head = activeEl.querySelector('.v-head');
+                if(head) {
+                    head.style.color = 'var(--gold-bright)';
+                    head.style.textShadow = '0 0 10px var(--gold-bright)';
+                }
+            }
         }
 
         function toggleVisibility(type, btn) {
@@ -525,6 +581,7 @@
             if (savedAnchor !== 'NONE') {
                 const signNames = ['CAPRICORN','AQUARIUS','PISCES','ARIES','TAURUS','GEMINI','CANCER','LEO','VIRGO','LIBRA','SCORPIO','SAGITTARIUS'];
                 let natalIndex = signNames.indexOf(savedAnchor);
+                let currentIndex = Math.floor(trueArc / 30);
                 let diff = Math.abs(clickedIndex - natalIndex);
                 if (diff > 6) diff = 12 - diff; 
                 
