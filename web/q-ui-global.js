@@ -282,9 +282,6 @@ window.injectUniversalUI = function() {
 
             .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; padding-left: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
             
-            #q-mic-fab { position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; border-radius: 50%; background: rgba(5, 8, 15, 0.9); border: 1px solid ${micColor}; color: ${micColor}; display: flex; justify-content: center; align-items: center; z-index: 100000; box-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 10px ${micGlow}; cursor: pointer; font-size: 1.2rem; transition: all 0.3s ease; pointer-events: auto !important; }
-            #q-mic-fab.listening { background: ${micColor}; color: #000; box-shadow: 0 0 25px ${micColor}; animation: pulse-mic 1.5s infinite; }
-
             #mobile-telemetry-ribbon { display: flex !important; position: fixed; top: 50px !important; margin-top: 0 !important; left: 0px !important; height: 45px !important; width: 100vw !important; background: rgba(2, 6, 15, 0.98); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); z-index: 99998 !important; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.9); padding: 0 10px !important; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
             #ribbon-leg-date { white-space: nowrap; font-size: 0.6rem !important; }
             #ribbon-leg { white-space: nowrap; font-size: 0.65rem !important; }
@@ -302,15 +299,59 @@ window.injectUniversalUI = function() {
             #mobile-telemetry-viewport .opt-oval { position: absolute !important; top: 15px !important; right: 15px !important; left: auto !important; bottom: auto !important; }
             
             body.telemetry-open .q-center-dial { display: none !important; }
+
+            /* --- SCRUBBER & MIC BRACKETING --- */
+            .q-global-controls { 
+                display: flex !important; 
+                align-items: center !important; 
+                justify-content: space-between !important;
+                width: 92vw !important; 
+                min-width: unset !important; 
+                box-sizing: border-box !important; 
+                padding: 6px 8px !important; 
+                gap: 8px !important;
+                ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 65px) !important;'}
+            } 
             
-           /* --- SCRUBBER OVERRIDES --- */
-            .q-global-controls { width: 92vw !important; min-width: unset !important; box-sizing: border-box !important; padding: 8px 15px !important; gap: 5px; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} } 
-            .q-scrubber { min-width: 0 !important; width: 100% !important; margin: 0 8px !important; }
+            #q-mic-fab { 
+                position: static !important; /* Release from floating */
+                transform: none !important;
+                width: 38px !important; 
+                height: 38px !important; 
+                border-radius: 6px !important; /* Match the LIVE button aesthetics */
+                font-size: 1.1rem !important; 
+                box-shadow: none !important;
+                order: 1 !important; /* Force to Far Left */
+                flex-shrink: 0 !important;
+                background: rgba(5, 8, 15, 0.9);
+                border: 1px solid ${micColor};
+                color: ${micColor};
+                display: flex; justify-content: center; align-items: center;
+                cursor: pointer; transition: all 0.3s ease; pointer-events: auto !important;
+            }
+            #q-mic-fab.listening { animation: pulse-mic 1.5s infinite; background: ${micColor}; color: #000; box-shadow: 0 0 25px ${micColor} !important; }
+            
+            .q-scrubber { 
+                order: 2 !important; /* Force to Middle */
+                min-width: 0 !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+                flex-grow: 1 !important;
+            }
+            
+            #q-live-toggle {
+                order: 3 !important; /* Force to Far Right */
+                width: auto !important;
+                min-width: 38px !important;
+                height: 38px !important;
+                padding: 0 8px !important;
+                font-size: 0.65rem !important; /* Shrink text to fit */
+                flex-shrink: 0 !important;
+                margin: 0 !important;
+            }
+            .q-ctrl-btn { order: 4 !important; display: none !important; } /* hide step buttons to save space */
         }
-    `; /* 
-    
-    document.head.appendChild(style);
-} /* Ensure the injectCSS function is closed properly if it wasn't already */
+    `;
     document.head.appendChild(style);
 
     const uiContainer = document.createElement('div');
@@ -864,4 +905,14 @@ window.syncScrubberUI = function() {
 
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
+
+    // Relocate the Mic to the Scrubber Panel for Mobile Bracketing
+    if (window.innerWidth <= 950) {
+        const micFab = document.getElementById('q-mic-fab');
+        const controlsPanel = document.getElementById('q-universal-controls');
+        
+        if (micFab && controlsPanel) {
+            controlsPanel.appendChild(micFab);
+        }
+    }
 });
