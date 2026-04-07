@@ -248,7 +248,15 @@ window.injectUniversalUI = function() {
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
             
-            .q-nav-bar { top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; }
+            /* --- NAVBAR OVERRIDES --- */
+            .q-nav-bar { 
+                top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; 
+                height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; 
+                background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: none !important; 
+            }
+            .q-nav-bar * { pointer-events: auto !important; }
+            .q-nav-menu .vector-link { display: none !important; } /* Hides redundant links */
+            
             #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
             
             .q-nav-menu { position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; background: transparent; box-shadow: none; transform: none; width: auto; -webkit-overflow-scrolling: touch; border: none; padding-bottom: 0; gap: 5px; justify-content: flex-start; }
@@ -285,10 +293,20 @@ window.injectUniversalUI = function() {
             #mobile-telemetry-viewport .telemetry-node { display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important; }
             #mobile-telemetry-viewport .wing-panel { display: none !important; }
             
+            /* --- TELEMETRY PANEL OVERRIDES --- */
+            #mobile-telemetry-viewport .corner-panel { height: auto !important; min-height: 120px !important; padding: 20px !important; }
+            #mobile-telemetry-viewport .panel-bg { display: none !important; } 
+            #mobile-telemetry-viewport .frost-zone { inset: 0 !important; border-radius: 8px !important; border: 1px solid rgba(255,255,255,0.1); }
+            #mobile-telemetry-viewport .panel-data-container { padding: 0 !important; margin-top: 10px !important; align-items: center !important; text-align: center !important; }
+            #mobile-telemetry-viewport .panel-label { padding: 0 !important; position: relative !important; }
+            #mobile-telemetry-viewport .opt-oval { position: absolute !important; top: 15px !important; right: 15px !important; left: auto !important; bottom: auto !important; }
+            
             body.telemetry-open .q-center-dial { display: none !important; }
-            .q-global-controls { min-width: 95vw; padding: 8px 12px; gap: 5px; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} } 
+            
+            /* --- SCRUBBER OVERRIDES --- */
+            .q-global-controls { width: 92vw !important; min-width: unset !important; box-sizing: border-box !important; padding: 8px 15px !important; gap: 5px; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} } 
+            .q-scrubber { min-width: 0 !important; width: 100% !important; margin: 0 8px !important; }
         }
-    `;
     document.head.appendChild(style);
 
     const uiContainer = document.createElement('div');
