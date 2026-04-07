@@ -1,6 +1,6 @@
 // THE QUADRATURE: GLOBAL UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase II UI Decoupled. Aggressive Cache-Override Engaged. Dynamic Routing Active.
+// STATUS: Phase III UI Engine. Dual-State Branching Active. Asset Paths Corrected. Typographic Centering Applied.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -13,49 +13,39 @@ window.injectUniversalUI = function() {
     meta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
     document.head.appendChild(meta);
     
-    // Aggressive Cache-Control injection for OAuth Redirects
     let noCache1 = document.createElement('meta'); noCache1.httpEquiv = "Cache-Control"; noCache1.content = "no-cache, no-store, must-revalidate"; document.head.appendChild(noCache1);
     let noCache2 = document.createElement('meta'); noCache2.httpEquiv = "Pragma"; noCache2.content = "no-cache"; document.head.appendChild(noCache2);
     let noCache3 = document.createElement('meta'); noCache3.httpEquiv = "Expires"; noCache3.content = "0"; document.head.appendChild(noCache3);
     
+    // --- DUAL-STATE PATH ROUTER ---
     const path = window.location.pathname.toUpperCase();
+    const isAperture = path.includes("APERTURE");
     const bActive = path.includes("BIO");
     const eActive = path.includes("ENV");
     const mActive = path.includes("MEC");
     const cActive = path.includes("COM");
-    const faceActive = (!bActive && !eActive && !mActive && !cActive);
+    const faceActive = path.includes("PERSONAL") || (!isAperture && !bActive && !eActive && !mActive && !cActive);
     
-    if (faceActive) {
-        document.body.classList.add('q-chrono-face');
-    } else {
-        document.body.classList.add('q-vector-hud');
-    }
+    if (faceActive) document.body.classList.add('q-chrono-face');
+    else document.body.classList.add('q-vector-hud');
     
-    let wingAesthetic = "";
+    // Vector Theme Colors
     let micColor = "var(--sys-cyan, #00f0ff)";
     let micGlow = "var(--neon-cyan-dim, rgba(0,240,255,0.2))";
+    let headerText = "THE QUADRATURE";
 
-    if (bActive) {
-        wingAesthetic = `background: linear-gradient(135deg, rgba(5, 8, 15, 0.8) 0%, rgba(10, 15, 30, 0.95) 100%); border: 1px solid rgba(0, 85, 255, 0.3); border-top: 1px solid var(--bio-cobalt, #0055ff); border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,85,255,0.15);`;
-        micColor = "var(--bio-purple, #b829ff)";
-        micGlow = "var(--bio-purple-dim, rgba(184, 41, 255, 0.2))";
-    } else if (eActive) {
-        wingAesthetic = `background: radial-gradient(circle at center, var(--env-green-dim, rgba(167, 255, 131, 0.2)) 0%, var(--glass-med, rgba(2, 12, 25, 0.65)) 80%); backdrop-filter: var(--blur-med, blur(16px)); -webkit-backdrop-filter: var(--blur-med, blur(16px)); box-shadow: 0 15px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid var(--env-green-dim, rgba(167, 255, 131, 0.2));`;
-        micColor = "var(--env-green, #a7ff83)";
-        micGlow = "var(--env-green-dim, rgba(167, 255, 131, 0.2))";
-    } else if (mActive) {
-        wingAesthetic = `backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(3, 4, 6, 0.95) 100%); border: 1px solid var(--titanium, #334155); border-top: 1px solid var(--sys-cyan, #00f0ff); border-radius: 4px; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,240,255,0.05);`;
-        micColor = "var(--sys-cyan, #00f0ff)";
-        micGlow = "var(--neon-cyan-dim, rgba(0, 240, 255, 0.2))";
-    } else if (cActive) {
-        wingAesthetic = `background: linear-gradient(120deg, rgba(25,20,5,0.85) 0%, rgba(255,215,0,0.1) 40%, rgba(255,255,255,0.15) 50%, rgba(255,215,0,0.1) 60%, rgba(25,20,5,0.85) 100%); background-size: 300% 100%; backdrop-filter: var(--blur-med, blur(16px)); -webkit-backdrop-filter: var(--blur-med, blur(16px)); border: 2px solid var(--gold-bright, #ffd700); border-top: 1px solid rgba(255,215,0,0.5); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,215,0,0.1);`;
-        micColor = "var(--gold-bright, #ffd700)";
-        micGlow = "var(--gold-dim, rgba(255, 215, 0, 0.15))";
-    } else { 
-        wingAesthetic = `background: rgba(15, 12, 10, 0.9); backdrop-filter: var(--blur-med, blur(16px)); -webkit-backdrop-filter: var(--blur-med, blur(16px)); border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 20px rgba(229, 228, 226, 0.1); border: 1px solid rgba(185, 122, 53, 0.3);`;
-        micColor = "var(--chrono-amber, #B97A35)";
-        micGlow = "var(--chrono-amber-dim, rgba(185, 122, 53, 0.2))";
+    if (!isAperture) {
+        if (bActive) { micColor = "var(--bio-purple, #b829ff)"; micGlow = "var(--bio-purple-dim, rgba(184, 41, 255, 0.2))"; headerText = "BIOLOGICAL"; }
+        else if (eActive) { micColor = "var(--env-green, #a7ff83)"; micGlow = "var(--env-green-dim, rgba(167, 255, 131, 0.2))"; headerText = "ENVIRONMENTAL"; }
+        else if (mActive) { micColor = "var(--sys-cyan, #00f0ff)"; micGlow = "var(--neon-cyan-dim, rgba(0, 240, 255, 0.2))"; headerText = "MECHANICAL"; }
+        else if (cActive) { micColor = "var(--gold-bright, #ffd700)"; micGlow = "var(--gold-dim, rgba(255, 215, 0, 0.15))"; headerText = "COMMUNAL"; }
+        else { micColor = "var(--chrono-amber, #B97A35)"; micGlow = "var(--chrono-amber-dim, rgba(185, 122, 53, 0.2))"; headerText = "PERSONAL QUAD"; }
     }
+
+    // OS Panel Data Colors dynamically tied to the Vector theme unless it's the Aperture Gateway
+    let osPanelColor = isAperture ? "#00f0ff" : micColor;
+    let osPanelGlow = isAperture ? "rgba(0,240,255,0.2)" : micGlow;
+    let navPrefix = isAperture ? "../personal/" : "";
 
     const style = document.createElement('style');
     style.innerHTML = `
@@ -65,84 +55,159 @@ window.injectUniversalUI = function() {
             width: 100vw !important; height: var(--app-height, 100vh) !important; 
             margin: 0px !important; padding: 0px !important; 
             overflow: hidden !important; touch-action: none !important; overscroll-behavior: none !important; transform: none !important; 
+            background-color: #010205; 
         }
         #mobile-telemetry-btn { display: none !important; pointer-events: none !important; }
 
-        :root { --wing-w: 240px; --mod-w: 320px; --dial-size: 60vh; --wing-offset: calc((var(--dial-size) / 2) + 4vw); --glass-med: rgba(2, 12, 25, 0.65); --blur-med: blur(16px); --white-pure: #ffffff; --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; --chrono-amber-dim: rgba(185, 122, 53, 0.2); --bio-purple: #b829ff; --bio-purple-dim: rgba(184, 41, 255, 0.15); --bio-cobalt: #0055ff; --bio-cobalt-dim: rgba(0, 85, 255, 0.3); }
+        :root { 
+            --wing-w: 240px; --mod-w: 320px; --dial-size: 60vh; --wing-offset: calc((var(--dial-size) / 2) + 4vw); 
+            --glass-med: rgba(2, 12, 25, 0.65); --blur-med: blur(16px); --white-pure: #ffffff; 
+            --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
+            --chrono-amber-dim: rgba(185, 122, 53, 0.2); --bio-purple: #b829ff; --bio-purple-dim: rgba(184, 41, 255, 0.15); 
+            --bio-cobalt: #0055ff; --bio-cobalt-dim: rgba(0, 85, 255, 0.3);
+            --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
+            --center-gap-x: 31vh; --corner-gap-y: 24vh; --corner-gap-x: 23vh;
+            --panel-h: ${isAperture ? '80px' : '160px'};
+        }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
         .modal-box { width: 400px; background: rgba(2, 6, 15, 0.95); border: 1px solid var(--theme-main, #00f0ff); border-radius: 12px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 16px; cursor: default; pointer-events: auto; }
         .btn-close { background: transparent; border: 1px solid var(--platinum); color: var(--platinum); padding: 10px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px; border-radius: 8px; font-weight: 700; letter-spacing: 2px; }
 
-        .q-nav-bar { position: fixed; top: 0px !important; margin-top: 0px !important; left: 0 !important; width: 100%; height: 45px; background: rgba(2, 6, 15, 0.95); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; box-shadow: 0 5px 20px rgba(0,0,0,0.8); pointer-events: auto !important; }
-        .q-nav-brand { color: #E5E4E2; font-weight: 900; letter-spacing: 4px; font-size: 0.8rem; text-shadow: 0 0 10px rgba(229, 228, 226, 0.4); flex-shrink: 0; }
+        .global-header {
+            position: absolute; top: 4vh; left: 0; width: 100vw;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.8rem; letter-spacing: 16px; padding-left: 16px;
+            color: #ffffff; z-index: 50; pointer-events: none;
+            text-shadow: 0 0 15px rgba(0, 163, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        .global-footer {
+            position: absolute; bottom: 6vh; left: 0; width: 100vw;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            font-family: 'Courier New', Courier, monospace; font-weight: 700; font-size: 1.4rem; letter-spacing: 4px; padding-left: 4px;
+            color: rgba(255, 255, 255, 0.85); z-index: 50; pointer-events: none;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0, 163, 255, 0.3);
+        }
+
+        .space-bg { position: fixed; inset: 0; z-index: 0; background-image: radial-gradient(circle at 50% 50%, #030814 0%, #010205 100%); }
+
+        .nebula-left { position: fixed; top: -10%; bottom: -10%; left: -10%; width: 55vw; z-index: 1; background: url('../assets/nebula-left.png') center/cover no-repeat; mix-blend-mode: screen; animation: nebula-drift-l 35s ease-in-out infinite alternate; -webkit-mask-image: radial-gradient(ellipse 100% 100% at 0% 50%, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 80%); mask-image: radial-gradient(ellipse 100% 100% at 0% 50%, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 80%); pointer-events: none; }
+        .nebula-right { position: fixed; top: -10%; bottom: -10%; right: -10%; width: 55vw; z-index: 1; background: url('../assets/nebula-right.png') center/cover no-repeat; mix-blend-mode: screen; animation: nebula-drift-r 42s ease-in-out infinite alternate-reverse; -webkit-mask-image: radial-gradient(ellipse 100% 100% at 100% 50%, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 80%); mask-image: radial-gradient(ellipse 100% 100% at 100% 50%, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 80%); pointer-events: none; }
+
+        @keyframes nebula-drift-l { 0% { transform: scale(1) translate(0, 0); opacity: 0.5; } 50% { transform: scale(1.05) translate(2%, 2%); opacity: 0.85; } 100% { transform: scale(1.02) translate(-1%, -1%); opacity: 0.6; } }
+        @keyframes nebula-drift-r { 0% { transform: scale(1) translate(0, 0); opacity: 0.6; } 50% { transform: scale(1.05) translate(-2%, 2%); opacity: 0.9; } 100% { transform: scale(1.02) translate(1%, -1%); opacity: 0.55; } }
+        
+        .dust-layer-global { position: fixed; inset: 0; z-index: 2; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise2)' opacity='0.08'/%3E%3C/svg%3E"); mix-blend-mode: screen; pointer-events: none; }
+
+        .corner-panel { position: absolute; width: 340px; height: var(--panel-h); z-index: 20; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.03); }
+
+        .frost-zone { position: absolute; inset: 6px 12px; background: rgba(15, 20, 35, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; z-index: -2; box-shadow: inset 0 0 20px rgba(0, 163, 255, 0.15); transition: 0.3s ease; }
+        .corner-panel:hover .frost-zone { background: rgba(20, 25, 45, 0.65); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), inset 0 0 25px rgba(255, 255, 255, 0.1); }
+
+        .panel-bg { position: absolute; inset: 0; background: url('../assets/panel-frame.png') center/100% 100% no-repeat; z-index: -1; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+
+        .tl { bottom: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); --tx-hover: -2px; --ty-hover: -2px;}
+        .tr { bottom: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); --tx-hover: 2px; --ty-hover: -2px;}
+        .tr .panel-bg { transform: scaleX(-1); }
+        .bl { top: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); --tx-hover: -2px; --ty-hover: 2px;}
+        .bl .panel-bg { transform: scaleY(-1); }
+        .br { top: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); --tx-hover: 2px; --ty-hover: 2px;}
+        .br .panel-bg { transform: scale(-1, -1); }
+
+        .panel-label {
+            height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            font-size: 0.9rem; letter-spacing: 4px; padding-left: 4px; font-weight: 700; color: var(--q-metal);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.4);
+            position: relative; z-index: 2; box-sizing: border-box; font-family: 'Orbitron';
+        }
+        
+        .tl .panel-label { padding-left: 59px; }
+        .tr .panel-label { padding-right: 51px; }
+        .bl .panel-label { padding-left: 59px; }
+        .br .panel-label { padding-right: 51px; }
+
+        .panel-data-container {
+            height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            position: relative; z-index: 2; box-sizing: border-box;
+        }
+
+        .tl .panel-data-container { padding: 15px 15px 15px 55px; }
+        .tr .panel-data-container { padding: 15px 55px 15px 15px; }
+        .bl .panel-data-container { padding: 15px 15px 15px 55px; }
+        .br .panel-data-container { padding: 15px 55px 15px 15px; }
+
+        .opt-oval { position: absolute; width: 32px; height: 16px; border-radius: 8px; border: 1px solid var(--q-metal); color: var(--q-metal); font-family: 'Orbitron'; font-size: 0.45rem; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 30; background: rgba(0,0,0,0.8); transition: 0.3s; }
+        .opt-oval:hover { background: var(--q-metal); color: #000; box-shadow: 0 0 10px var(--q-metal); }
+        .tl .opt-oval { top: 12px; left: 20px; }
+        .tr .opt-oval { top: 12px; right: 20px; }
+        .bl .opt-oval { bottom: 12px; left: 20px; }
+        .br .opt-oval { bottom: 12px; right: 20px; }
+
+        .wing-panel { position: absolute; width: 240px; height: 250px; z-index: 15; box-sizing: border-box; top: 50%; transform: translateY(-50%); text-align: center; }
+        .wing-frost { position: absolute; inset: 12px; background: rgba(10, 15, 25, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 8px; z-index: -2; box-shadow: inset 0 0 30px rgba(0, 163, 255, 0.2); }
+        .wing-bg { position: absolute; inset: 0; background: url('../assets/wing-panel.png') center/100% 100% no-repeat; z-index: -1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); }
+
+        .wing-l { right: calc(50% + var(--center-gap-x)); }
+        .wing-r { left: calc(50% + var(--center-gap-x)); }
+        .wing-r .wing-bg { transform: scaleX(-1); }
+        
+        .wing-r .wing-header, .wing-r .wing-data-center, .wing-r .wing-footer { padding-left: 15px; }
+
+        .wing-header { position: absolute; top: 25px; left: 0; width: 100%; z-index: 10; display: flex; justify-content: center; }
+        .wing-data-center { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; width: 100%; padding: 40px 0; box-sizing: border-box; position: relative; z-index: 10; }
+        .wing-footer { position: absolute; bottom: 20px; left: 0; width: 100%; z-index: 10; display: flex; justify-content: center; }
+
+        .w-head { font-family: 'Orbitron'; font-weight: 600; font-size: 0.75rem; letter-spacing: 3px; padding-left: 3px; color: rgba(255,255,255,0.6); border-bottom: 1px solid var(--theme-dim); padding-bottom: 4px; display: inline-block; z-index: 20; text-align: center; }
+        .w-lbl { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: var(--starlight); letter-spacing: 1px; padding-left: 1px; text-transform: uppercase; margin-bottom: 2px; z-index: 20; text-align: center; }
+        .val-lg { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; padding-left: 1px; white-space: nowrap; color: #fff; text-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 20; text-align: center; }
+        .val-sm { font-family: 'Orbitron'; font-size: 0.85rem; font-weight: 700; z-index: 20; text-align: center; }
+        .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: ${micColor}; cursor: pointer; border: 1px solid ${micGlow}; padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; text-align: center; }
+        .fmt-toggle:hover { background: ${micColor}; color: #000; box-shadow: 0 0 10px ${micColor}; }
+
+        /* --- NAVBAR & SCRUBBER INJECTION --- */
+        .q-nav-bar { 
+            position: fixed; 
+            ${isAperture ? 'display: none !important;' : 'bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: 85vw; max-width: 1000px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
+            height: 45px; background: rgba(2, 6, 15, 0.95); 
+            display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
+        }
+        .q-nav-brand { color: #E5E4E2; font-weight: 900; letter-spacing: 4px; padding-left: 4px; font-size: 0.8rem; text-shadow: 0 0 10px rgba(229, 228, 226, 0.4); flex-shrink: 0; }
         
         .q-nav-menu { display: flex; align-items: center; gap: 1vw; pointer-events: auto !important; }
-        .q-nav-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 6px 12px; border-radius: 4px; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: bold; cursor: pointer; transition: 0.3s; letter-spacing: 1px; text-decoration: none; display: inline-block; text-align: center; pointer-events: auto !important; }
+        .q-nav-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 6px 12px; border-radius: 4px; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: bold; cursor: pointer; transition: 0.3s; letter-spacing: 1px; padding-left: 13px; text-decoration: none; display: inline-block; text-align: center; pointer-events: auto !important; }
         .q-nav-btn:hover { border-color: #fff; color: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
         
-        /* AGGRESSIVE OAUTH CACHE OVERRIDES (!important forces vector colors through any lingering CSS) */
         .q-nav-btn.face-btn.active { border-color: var(--chrono-amber) !important; color: var(--chrono-amber) !important; box-shadow: inset 0 0 10px var(--chrono-amber-dim) !important; }
         .q-nav-btn.bio-btn.active { border-color: var(--bio-purple) !important; color: var(--bio-purple) !important; box-shadow: inset 0 0 10px var(--bio-purple-dim) !important; }
         .q-nav-btn.com-btn.active { border-color: var(--gold, #F4D068) !important; color: var(--gold, #F4D068) !important; box-shadow: inset 0 0 10px rgba(244,208,104,0.2) !important; }
         .q-nav-btn.env-btn.active { border-color: var(--env-green, #a7ff83) !important; color: var(--env-green, #a7ff83) !important; box-shadow: inset 0 0 10px rgba(167,255,131,0.2) !important; }
         .q-nav-btn.mec-btn.active { border-color: var(--sys-cyan, #00f0ff) !important; color: var(--sys-cyan, #00f0ff) !important; box-shadow: inset 0 0 10px rgba(0,240,255,0.2) !important; }
 
-        /* DESKTOP MIC: BOUND TO DYNAMIC THEME */
         #q-mic-fab-desktop { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(5, 8, 15, 0.9); border: 1px solid ${micColor}; color: ${micColor}; display: flex; justify-content: center; align-items: center; z-index: 100000; box-shadow: 0 0 15px rgba(0,0,0,0.8); cursor: pointer; font-size: 1.2rem; transition: all 0.3s ease; pointer-events: auto !important; }
         #q-mic-fab-desktop:hover { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; }
         #q-mic-fab-desktop.listening { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; animation: pulse-mic-desktop 1.5s infinite; }
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } 50% { transform: scale(1.1); box-shadow: 0 0 25px ${micColor}; } 100% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } }
-
-        .q-control-strip { display: none; }
         
-        /* 3D KINETIC STARFIELD CONTAINER */
-        .star-container { position: fixed; top: 0; left: 0; width: 100vw; height: var(--app-height, 100vh); z-index: 1; pointer-events: none; overflow: hidden; transform-style: preserve-3d; perspective: 1500px; }
-        
-        .wing { position: absolute; top: 50%; height: 220px; width: var(--wing-w); min-width: 240px; z-index: 50; display: flex; flex-direction: column; justify-content: center; transform: translateY(-50%); pointer-events: none; }
-        .wing-left { right: calc(50% + var(--wing-offset)); left: auto; perspective: 1000px; }
-        .wing-right { left: calc(50% + var(--wing-offset)); right: auto; perspective: 1000px; }
-        .wing-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; width: 100%; height: 100%; overflow: hidden; pointer-events: auto; ${wingAesthetic} }
-        .w-head { font-family: 'Orbitron'; font-weight: 600; font-size: 0.75rem; letter-spacing: 3px; color: rgba(255,255,255,0.6); border-bottom: 1px solid var(--theme-dim); padding-bottom: 4px; margin-bottom: 8px; display: inline-block; z-index: 20;}
-        .w-lbl { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: var(--starlight); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; z-index: 20;}
-        .val-lg { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; white-space: nowrap; color: #fff; text-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 20;}
-        .q-prefix { font-size: 0.6rem; color: rgba(255,255,255,0.4); font-family: 'JetBrains Mono'; margin-right: 2px; z-index: 20;}
-        .q-val { color: ${micColor}; font-family: 'Orbitron'; font-weight: 700; text-shadow: 0 0 15px ${micGlow}; margin-right: 6px; z-index: 20;}
-
-        .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.6rem; color: ${micColor}; cursor: pointer; border: 1px solid ${micGlow}; padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; }
-        .fmt-toggle:hover { background: ${micColor}; color: #000; box-shadow: 0 0 10px ${micColor}; }
-        
-        /* --- COMMUNAL VECTOR ASTROLABE TOUCH REFINEMENT --- */
-        .zodiac-glyph, .event-node, .astrolabe * { 
-            touch-action: manipulation !important; 
-            -webkit-tap-highlight-color: transparent !important; 
-        }
-        @media (hover: none) {
-            .event-node:hover { transform: none; box-shadow: none; border-color: transparent; }
-            .event-node.touch-active { transform: scale(1.6); border-color: #fff; box-shadow: 0 0 25px #fff; z-index: 60; }
-            .zodiac-glyph:hover { transform: none; text-shadow: none; }
-            .zodiac-glyph.touch-active { color: #fff; text-shadow: 0 0 20px #fff; transform: scale(1.5); opacity: 1; z-index: 70; }
-        }
-        
-        /* --- PHASE II: BOOT SEQUENCE & SCRUBBER CSS INJECTION --- */
-        .boot-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'JetBrains Mono', monospace; color: var(--theme-main, #00f0ff); transition: opacity 1.5s ease-in-out; }
-        .boot-terminal { width: 90%; max-width: 500px; border: 1px solid var(--theme-main, #00f0ff); padding: 30px; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 30px var(--theme-dim, rgba(0, 240, 255, 0.15)); border-radius: 4px; backface-visibility: hidden; transform: translateZ(0); }
-        .boot-terminal h2 { font-family: 'Orbitron'; font-size: 1.8rem; letter-spacing: 6px; text-align: center; margin-top: 0; text-shadow: 0 0 10px var(--theme-main, #00f0ff); white-space: nowrap; }
+        .boot-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'JetBrains Mono', monospace; color: var(--sys-cyan, #00f0ff); transition: opacity 1.5s ease-in-out; }
+        .boot-terminal { width: 90%; max-width: 500px; border: 1px solid var(--sys-cyan, #00f0ff); padding: 30px; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 30px rgba(0, 240, 255, 0.15); border-radius: 4px; backface-visibility: hidden; transform: translateZ(0); }
+        .boot-terminal h2 { font-family: 'Orbitron'; font-size: 1.8rem; letter-spacing: 6px; padding-left: 6px; text-align: center; margin-top: 0; text-shadow: 0 0 10px var(--sys-cyan, #00f0ff); white-space: nowrap; }
         .boot-desc { font-size: 0.7rem; color: #aaa; text-align: center; margin-bottom: 25px; line-height: 1.5; }
         .boot-btn-row { display: flex; gap: 15px; margin-top: 15px; justify-content: center; }
-        .boot-btn { flex: 1; background: transparent; border: 1px solid var(--theme-main, #00f0ff); color: var(--theme-main, #00f0ff); font-family: 'Orbitron'; font-weight: 700; padding: 12px; cursor: pointer; transition: 0.3s; letter-spacing: 2px; font-size: 0.75rem; }
-        .boot-btn:hover { background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 20px var(--theme-main, #00f0ff); }
-        .boot-log { margin-top: 20px; font-size: 0.85rem; min-height: 80px; text-align: center; line-height: 1.6; text-shadow: 0 0 8px var(--theme-main, #00f0ff); }
+        .boot-btn { flex: 1; background: transparent; border: 1px solid var(--sys-cyan, #00f0ff); color: var(--sys-cyan, #00f0ff); font-family: 'Orbitron'; font-weight: 700; padding: 12px; cursor: pointer; transition: 0.3s; letter-spacing: 2px; padding-left: 14px; font-size: 0.75rem; }
+        .boot-btn:hover { background: var(--sys-cyan, #00f0ff); color: #000; box-shadow: 0 0 20px var(--sys-cyan, #00f0ff); }
+        .boot-log { margin-top: 20px; font-size: 0.85rem; min-height: 80px; text-align: center; line-height: 1.6; text-shadow: 0 0 8px var(--sys-cyan, #00f0ff); }
         
-        .q-global-controls { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; min-width: 480px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
-        .q-ctrl-btn { background: transparent; border: 1px solid var(--theme-main, #00f0ff); color: var(--theme-main, #00f0ff); padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; white-space: nowrap; pointer-events: auto; }
+        .q-global-controls { position: fixed; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; min-width: 480px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
+        .q-ctrl-btn { background: transparent; border: 1px solid ${osPanelColor}; color: ${osPanelColor}; padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; padding-left: 15px; white-space: nowrap; pointer-events: auto; }
         .q-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .q-ctrl-btn.active { background: var(--theme-main, #00f0ff); color: #000; }
-        .q-scrubber { flex-grow: 1; accent-color: var(--theme-main, #00f0ff); cursor: pointer; height: 4px; -webkit-appearance: none; margin: 0 10px; border-radius: 2px; background: rgba(255,255,255,0.1); pointer-events: auto; }
-        .q-scrubber::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; background: var(--theme-main, #00f0ff); clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); cursor: grab; pointer-events: auto; }
+        .q-ctrl-btn.active { background: ${osPanelColor}; color: #000; }
+        .q-scrubber { flex-grow: 1; accent-color: ${osPanelColor}; cursor: pointer; height: 4px; -webkit-appearance: none; margin: 0 10px; border-radius: 2px; background: rgba(255,255,255,0.1); pointer-events: auto; }
+        .q-scrubber::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; background: ${osPanelColor}; clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); cursor: grab; pointer-events: auto; }
         .q-scrubber::-webkit-slider-thumb:active { cursor: grabbing; }
 
-        .desktop-only { display: block !important; }
+        .desktop-only { display: flex !important; }
         .mobile-only-flex { display: none !important; }
 
         @media (max-width: 950px) {
@@ -152,41 +217,23 @@ window.injectUniversalUI = function() {
             
             body:not(.telemetry-open) .telemetry-node { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
-            body:not(.telemetry-open) .wing { display: none !important; }
+            body:not(.telemetry-open) .wing-panel { display: none !important; }
+            body:not(.telemetry-open) .corner-panel { display: none !important; }
             
-            .q-nav-bar { 
-                top: 0px !important; margin-top: 0px !important; left: 0px !important; 
-                padding: 0 10px !important; 
-                height: 50px !important; 
-            }
-            
-            .q-nav-brand { font-size: 0.55rem !important; letter-spacing: 1px !important; white-space: nowrap; }
-            
+            .q-nav-bar { top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; }
+            .q-nav-brand { font-size: 0.55rem !important; letter-spacing: 1px !important; padding-left: 1px !important; white-space: nowrap; }
             #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
             
-            .q-nav-menu { 
-                position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; 
-                background: transparent; box-shadow: none; transform: none; width: auto;
-                -webkit-overflow-scrolling: touch; border: none; padding-bottom: 0; gap: 5px;
-            }
+            .q-nav-menu { position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; background: transparent; box-shadow: none; transform: none; width: auto; -webkit-overflow-scrolling: touch; border: none; padding-bottom: 0; gap: 5px; }
             .q-nav-menu::-webkit-scrollbar { display: none; }
             .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; margin-right: 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
-            .vector-link { display: none !important; }
-
+            
             .q-center-dial { margin-top: -3vh !important; }
             
-            .q-control-strip { 
-                position: fixed; bottom: 0 !important; left: 0; width: 100%; 
-                background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); 
-                display: flex; justify-content: space-around; align-items: center; z-index: 100000; 
-                height: 65px !important; 
-                padding-bottom: 0 !important;
-                box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; 
-            }
+            .q-control-strip { position: fixed; bottom: 0 !important; left: 0; width: 100%; background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); display: flex; justify-content: space-around; align-items: center; z-index: 100000; height: 65px !important; padding-bottom: 0 !important; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; }
             .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
             .strip-btn svg { transition: 0.3s; }
             
-            /* Aggressive Mobile Strip Active States */
             .strip-btn.face-strip.active svg { color: var(--chrono-amber) !important; filter: drop-shadow(0 0 8px var(--chrono-amber)) !important; }
             .strip-btn.face-strip.active .strip-lbl { color: var(--chrono-amber) !important; }
             .strip-btn.bio-strip.active svg { color: var(--bio-purple) !important; filter: drop-shadow(0 0 8px var(--bio-purple)) !important; }
@@ -198,100 +245,105 @@ window.injectUniversalUI = function() {
             .strip-btn.mec-strip.active svg { color: var(--sys-cyan, #00f0ff) !important; filter: drop-shadow(0 0 8px var(--sys-cyan, #00f0ff)) !important; }
             .strip-btn.mec-strip.active .strip-lbl { color: var(--sys-cyan, #00f0ff) !important; }
 
-            .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
+            .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; padding-left: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
             
-            /* MOBILE MIC: BOUND TO DYNAMIC THEME */
-            #q-mic-fab { 
-                position: fixed; 
-                bottom: 140px; 
-                left: 50%; 
-                transform: translateX(-50%); 
-                width: 50px; 
-                height: 50px; 
-                border-radius: 50%; 
-                background: rgba(5, 8, 15, 0.9); 
-                border: 1px solid ${micColor}; 
-                color: ${micColor}; 
-                display: flex; 
-                justify-content: center; 
-                align-items: center; 
-                z-index: 100000; 
-                box-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 10px ${micGlow}; 
-                cursor: pointer; 
-                font-size: 1.2rem; 
-                transition: all 0.3s ease; 
-                pointer-events: auto !important;
-            }
+            #q-mic-fab { position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; border-radius: 50%; background: rgba(5, 8, 15, 0.9); border: 1px solid ${micColor}; color: ${micColor}; display: flex; justify-content: center; align-items: center; z-index: 100000; box-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 10px ${micGlow}; cursor: pointer; font-size: 1.2rem; transition: all 0.3s ease; pointer-events: auto !important; }
             #q-mic-fab.listening { background: ${micColor}; color: #000; box-shadow: 0 0 25px ${micColor}; animation: pulse-mic 1.5s infinite; }
 
-            /* STRICT RIBBON WRAP FIX */
-            #mobile-telemetry-ribbon { 
-                display: flex !important; position: fixed; 
-                top: 50px !important; 
-                margin-top: 0 !important; left: 0px !important; height: 45px !important; 
-                width: 100vw !important; background: rgba(2, 6, 15, 0.98); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); 
-                z-index: 99998 !important; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.9); 
-                padding: 0 10px !important; box-sizing: border-box;
-                white-space: nowrap; overflow: hidden;
-            }
-            #ribbon-leg-date {
-                white-space: nowrap;
-                font-size: 0.6rem !important;
-            }
-            #ribbon-leg {
-                white-space: nowrap;
-                font-size: 0.65rem !important;
-            }
+            #mobile-telemetry-ribbon { display: flex !important; position: fixed; top: 50px !important; margin-top: 0 !important; left: 0px !important; height: 45px !important; width: 100vw !important; background: rgba(2, 6, 15, 0.98); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); z-index: 99998 !important; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.9); padding: 0 10px !important; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
+            #ribbon-leg-date { white-space: nowrap; font-size: 0.6rem !important; }
+            #ribbon-leg { white-space: nowrap; font-size: 0.65rem !important; }
 
-            #mobile-telemetry-viewport { 
-                display: none; position: fixed !important; 
-                top: 95px !important; 
-                bottom: 65px !important; 
-                height: auto !important; 
-                left: 0; width: 100vw; 
-                background: rgba(5,5,8,0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99900; 
-                overflow-y: scroll !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
-                flex-direction: column; align-items: center; justify-content: flex-start; 
-                padding-top: 15px !important; margin-top: 0 !important; 
-                padding-bottom: 20px !important; 
-                box-sizing: border-box !important; 
-                gap: 15px; pointer-events: auto !important;
-            }
-            #mobile-telemetry-viewport .telemetry-node { 
-                display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; 
-                transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; 
-                min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; 
-                visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important;
-            }
-            #mobile-telemetry-viewport .wing { display: none !important; }
+            #mobile-telemetry-viewport { display: none; position: fixed !important; top: 95px !important; bottom: 65px !important; height: auto !important; left: 0; width: 100vw; background: rgba(5,5,8,0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99900; overflow-y: scroll !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 15px !important; margin-top: 0 !important; padding-bottom: 20px !important; box-sizing: border-box !important; gap: 15px; pointer-events: auto !important; }
+            #mobile-telemetry-viewport .telemetry-node { display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important; }
+            #mobile-telemetry-viewport .wing-panel { display: none !important; }
             
             body.telemetry-open .q-center-dial { display: none !important; }
-            
-            /* Phase II Mobile Patches */
-            .boot-terminal h2 { font-size: 1.1rem; letter-spacing: 4px; }
-            .q-global-controls { min-width: 95vw; padding: 8px 12px; gap: 5px; bottom: 85px; } 
+            .q-global-controls { min-width: 95vw; padding: 8px 12px; gap: 5px; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} } 
         }
-
-        @keyframes pulse-mic { 0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 10px ${micColor}; } 50% { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 25px ${micColor}; } 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 10px ${micColor}; } }
     `;
     document.head.appendChild(style);
 
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
+    
+    // Build Corner Panels HTML
+    let panelsHTML = "";
+    if (isAperture) {
+        panelsHTML = `
+            <div class="corner-panel tl desktop-only" onclick="location.href='../personal/index.html'">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="panel-label">PERSONAL QUAD</div>
+            </div>
+            <div class="corner-panel tr desktop-only" onclick="location.href='../commercial/index.html'">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="panel-label">COMMERCIAL QUAD</div>
+            </div>
+            <div class="corner-panel bl desktop-only" onclick="location.href='../physical/index.html'">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="panel-label">PHYSICAL ASSETS</div>
+            </div>
+            <div class="corner-panel br desktop-only" onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="panel-label">DASHBOARD</div>
+            </div>
+        `;
+    } else {
+        // Internal data containers receive IDs so the respective HTML pages can natively populate them.
+        panelsHTML = `
+            <div class="corner-panel tl telemetry-node desktop-only">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('BIO')">OPT</div>
+                <div class="panel-data-container" id="quad-BIO"></div>
+            </div>
+            <div class="corner-panel tr telemetry-node desktop-only">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('COM')">OPT</div>
+                <div class="panel-data-container" id="quad-COM"></div>
+            </div>
+            <div class="corner-panel bl telemetry-node desktop-only">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('ENV')">OPT</div>
+                <div class="panel-data-container" id="quad-ENV"></div>
+            </div>
+            <div class="corner-panel br telemetry-node desktop-only">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('MEC')">OPT</div>
+                <div class="panel-data-container" id="quad-MEC"></div>
+            </div>
+        `;
+    }
+
     uiContainer.innerHTML = `
+        <div class="space-bg"></div>
+        <div class="nebula-left"></div>
+        <div class="nebula-right"></div>
+        <div class="dust-layer-global"></div>
+
+        <div class="global-header desktop-only">${headerText}</div>
+        ${isAperture ? `<div class="global-footer desktop-only">BASED IN SCIENCE BATHED IN CULTURE AND BUILT FOR THE DIGITAL AGE</div>` : ``}
+
         <div class="q-nav-bar">
             <div style="display:flex; align-items:center; gap:8px; flex-wrap: nowrap; overflow: hidden;">
                 <span class="q-nav-brand" style="white-space: nowrap;">THE QUADRATURE</span>
                 <div id="q-global-sim-badge" style="display: none; background: var(--chrono-amber); color: #000; font-family: 'Orbitron'; font-size: 0.55rem; font-weight: 900; padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">[ IN THE QUAD ]</div>
             </div>
             <div class="q-nav-menu" id="q-nav-menu">
-                <a href="index.html?v=16.4" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
-                <a href="BIOVECHUD.html?v=16.4" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
-                <a href="COMVECHUD.html?v=16.4" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">COMMUNAL</a>
-                <a href="ENVVECHUD.html?v=16.4" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">ENVIRONMENTAL</a>
-                <a href="MECVECHUD.html?v=16.4" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">MECHANICAL</a>
-                <button class="q-nav-btn omni desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()" ontouchstart="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner(); event.preventDefault();">[ OMNI-PLANNER ]</button>
-                <button class="q-nav-btn special desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()" ontouchstart="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub(); event.preventDefault();">[ DASHBOARD ]</button>
+                <a href="${navPrefix}index.html?v=17.8" class="q-nav-btn face-btn vector-link ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
+                <a href="${navPrefix}BIOVECHUD.html?v=17.8" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
+                <a href="${navPrefix}COMVECHUD.html?v=17.8" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">COMMUNAL</a>
+                <a href="${navPrefix}ENVVECHUD.html?v=17.8" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">ENVIRONMENTAL</a>
+                <a href="${navPrefix}MECVECHUD.html?v=17.8" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">MECHANICAL</a>
+                <button class="q-nav-btn omni desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()" ontouchstart="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner(); event.preventDefault();">[ OMNI-PLANNER ]</button>
+                <button class="q-nav-btn special desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()" ontouchstart="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub(); event.preventDefault();">[ DASHBOARD ]</button>
             </div>
             <button class="mobile-only-flex" style="background:transparent; border:none; color:var(--theme-main, #00f0ff); font-size:1.5rem; padding:0; margin:0; cursor:pointer;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()" ontouchstart="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub(); event.preventDefault();">☰</button>
         </div>
@@ -309,24 +361,24 @@ window.injectUniversalUI = function() {
                 <svg id="tele-icon" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                 <span class="strip-lbl">DATA</span>
             </button>
-            <a href="BIOVECHUD.html?v=16.4" class="strip-btn bio-strip ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}BIOVECHUD.html?v=17.8" class="strip-btn bio-strip ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 <span class="strip-lbl">BIO</span>
             </a>
-            <a href="COMVECHUD.html?v=16.4" class="strip-btn com-strip ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}COMVECHUD.html?v=17.8" class="strip-btn com-strip ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="16"/><circle cx="6" cy="20" r="3"/><circle cx="18" cy="20" r="3"/><line x1="12" y1="16" x2="6" y2="17"/><line x1="12" y1="16" x2="18" y2="17"/></svg>
                 <span class="strip-lbl">COM</span>
             </a>
-            <a href="index.html?v=16.4" class="strip-btn face-strip ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}index.html?v=17.8" class="strip-btn face-strip ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                 <span class="strip-lbl">CHRONO</span>
             </a>
-            <a href="ENVVECHUD.html?v=16.4" class="strip-btn env-strip ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}ENVVECHUD.html?v=17.8" class="strip-btn env-strip ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M2 22h20L12 2z"/></svg>
                 <span class="strip-lbl">ENV</span>
             </a>
-            <a href="MECVECHUD.html?v=16.4" class="strip-btn mec-strip ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
-                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <a href="${navPrefix}MECVECHUD.html?v=17.8" class="strip-btn mec-strip ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span class="strip-lbl">MEC</span>
             </a>
             <button class="strip-btn" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()" ontouchstart="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner(); event.preventDefault();">
@@ -336,43 +388,58 @@ window.injectUniversalUI = function() {
         </div>
 
         <button id="q-mic-fab" class="mobile-only-flex" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()" ontouchstart="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle(); event.preventDefault();">🎙</button>
+        <button id="q-mic-fab-desktop" class="desktop-only" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()" ontouchstart="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle(); event.preventDefault();">🎙</button>
 
-        <div class="wing wing-left telemetry-node" id="q-wing-left">
-            <div class="wing-content">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <span class="w-head">LEGACY OS</span>
+        ${panelsHTML}
+
+        <div class="wing-panel wing-l telemetry-node" id="q-wing-left">
+            <div class="wing-frost"></div>
+            <div class="wing-bg"></div>
+            <div class="wing-header">
+                <span class="w-head">LEGACY OS</span>
+            </div>
+            <div class="wing-data-center">
+                <div style="margin-bottom: 15px;">
                     <div class="w-lbl">DATE</div>
-                    <div class="val-lg" id="leg-date" style="color: ${micColor}; text-shadow: 0 0 10px ${micGlow};">--</div>
+                    <div class="val-lg" id="leg-date" style="color: ${osPanelColor}; text-shadow: 0 0 10px ${osPanelGlow};">--</div>
                 </div>
-                <div style="display:flex; flex-direction:column; align-items:center; margin-top: 10px;">
+                <div>
                     <div style="display:flex; align-items:center; justify-content:center; gap: 5px;">
                         <div class="w-lbl" style="margin:0;">TIME</div>
-                        <div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')" ontouchstart="window.toggleTimeFmt('fmt-btn'); event.preventDefault();" id="fmt-btn" style="border-color: ${micColor}; color: ${micColor};">UTC</div>
+                        <div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')" id="fmt-btn" style="border-color:${osPanelColor}; color:${osPanelColor};">UTC</div>
                     </div>
-                    <div class="val-lg" id="leg-time" style="color: ${micColor}; text-shadow: 0 0 10px ${micGlow};">--</div>
+                    <div class="val-lg" id="leg-time" style="color: ${osPanelColor}; text-shadow: 0 0 10px ${osPanelGlow};">--</div>
                 </div>
-                <div style="font-size:0.5rem; color:var(--starlight); margin-top:12px; border-top: 1px dashed ${micGlow}; padding-top: 8px; width: 85%; text-align:center;">STATUS: CONTINUITY ACTIVE</div>
+            </div>
+            <div class="wing-footer">
+                <div style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed ${osPanelGlow}; padding-top: 8px; width: 85%; margin: 0 auto;">STATUS: CONTINUITY ACTIVE</div>
             </div>
         </div>
 
-        <div class="wing wing-right telemetry-node" id="q-wing-right">
-            <div class="wing-content">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <span class="w-head">QUAD OS</span>
+        <div class="wing-panel wing-r telemetry-node" id="q-wing-right">
+            <div class="wing-frost"></div>
+            <div class="wing-bg"></div>
+            <div class="wing-header">
+                <span class="w-head">QUAD OS</span>
+            </div>
+            <div class="wing-data-center">
+                <div style="margin-bottom: 15px;">
                     <div class="w-lbl">Q COORDINATE</div>
-                    <div class="val-lg" id="q-coord-wing" style="margin-top: 4px; color: ${micColor}; text-shadow: 0 0 10px ${micGlow};">--</div>
+                    <div class="val-lg" id="q-coord-wing" style="margin-top: 4px; color: ${osPanelColor}; text-shadow: 0 0 10px ${osPanelGlow};">--</div>
                 </div>
-                <div style="display:flex; width: 100%; justify-content: space-around; margin-top: 10px;">
+                <div style="display:flex; width: 100%; justify-content: space-around;">
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <div class="w-lbl">MEAN CIRCLE (CIVIL)</div>
-                        <div class="val-sm" id="mean-deg" style="color:${micColor} !important; text-shadow:0 0 10px ${micGlow}; margin-top: 4px;">--</div>
+                        <div class="val-sm" id="mean-deg" style="color:${osPanelColor} !important; text-shadow:0 0 10px ${osPanelGlow}; margin-top: 4px;">--</div>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <div class="w-lbl">TRUE ELLIPSE (PHYSICS)</div>
-                        <div class="val-sm" id="true-deg" style="color:${micColor} !important; text-shadow:0 0 10px ${micGlow}; margin-top: 4px;">--</div>
+                        <div class="val-sm" id="true-deg" style="color:${osPanelColor} !important; text-shadow:0 0 10px ${osPanelGlow}; margin-top: 4px;">--</div>
                     </div>
                 </div>
-                <div style="font-size:0.5rem; color:var(--starlight); margin-top:12px; border-top: 1px dashed ${micGlow}; padding-top: 8px; width: 85%; text-align:center;">DUAL-STATE ENGINE</div>
+            </div>
+            <div class="wing-footer">
+                <div style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed ${osPanelGlow}; padding-top: 8px; width: 85%; margin: 0 auto;">DUAL-STATE ENGINE</div>
             </div>
         </div>
 
@@ -400,7 +467,6 @@ window.injectUniversalUI = function() {
     const refNode = document.body.firstChild;
     while (uiContainer.firstChild) document.body.insertBefore(uiContainer.firstChild, refNode);
 
-    // --- PHASE II INITIALIZATION LOGIC ---
     if(sessionStorage.getItem('Q_BOOT_COMPLETE') !== 'true') {
         document.body.classList.add('boot-active');
         let bootOverlay = document.getElementById('boot-overlay');
@@ -465,6 +531,44 @@ window.injectUniversalUI = function() {
                 ribbonLegDate.innerHTML = `<span style="color:var(--chrono-amber); font-size:0.75rem; font-weight:bold;">${e.detail.legacyDateStr.toUpperCase()}</span>`;
             }
         }
+
+        // Apply dynamic Q-tick formatting into the wings
+        function formatDualColorWing(str) {
+            const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+            const numStyle = `color:${osPanelColor}; font-size:1.1rem; font-weight:bold;`;
+            let out = "";
+            let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+            if (tokens) {
+                tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
+            }
+            return out;
+        }
+
+        const legDateEl = document.getElementById('leg-date');
+        if (legDateEl) legDateEl.innerHTML = `<span style="color:${osPanelColor}; font-weight:bold; text-shadow:0 0 10px ${osPanelGlow};">${e.detail.legacyDateStr.toUpperCase()}</span>`;
+
+        const legTimeEl = document.getElementById('leg-time');
+        if (legTimeEl) legTimeEl.innerHTML = formatDualColorWing(e.detail.legacyTimeStr);
+        
+        const meanDegEl = document.getElementById('mean-deg');
+        if (meanDegEl) meanDegEl.innerText = e.detail.qData.meanArc.toFixed(4) + "°";
+        
+        const trueDegEl = document.getElementById('true-deg');
+        if (trueDegEl) trueDegEl.innerText = e.detail.qData.trueArc.toFixed(4) + "°"; 
+
+        let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(e.detail.t) : null;
+        const qCoordWing = document.getElementById('q-coord-wing');
+        
+        if (qCoordWing) {
+            if (activeBlock && activeBlock.type === 'PYLON') {
+                qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:${osPanelColor}; font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
+            } else {
+                qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:${osPanelColor}; font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
+                                       `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">Q</span><span style="color:${osPanelColor}; font-size:1.1rem; font-weight:bold;">${e.detail.qData.quad}</span> ` +
+                                       `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">S</span><span style="color:${osPanelColor}; font-size:1.1rem; font-weight:bold;">${e.detail.qData.sect}</span> ` +
+                                       `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">DAY</span><span style="color:${osPanelColor}; font-size:1.1rem; font-weight:bold;">${e.detail.qData.day}</span>`;
+            }
+        }
     });
 };
 
@@ -497,7 +601,7 @@ window.toggleTelemetry = function() {
         }
         viewport.style.display = 'flex';
         document.querySelectorAll('.telemetry-node').forEach(node => {
-            if (!node.classList.contains('q-control-strip') && !node.classList.contains('q-nav-bar') && !node.classList.contains('wing')) {
+            if (!node.classList.contains('q-control-strip') && !node.classList.contains('q-nav-bar') && !node.classList.contains('wing-panel')) {
                 viewport.appendChild(node);
             }
         });
@@ -510,7 +614,6 @@ window.toggleTelemetry = function() {
     if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
 };
 
-// --- CHRONO-FACE DYNAMIC QUADRANT ASSIGNMENT ---
 window.openQuadrantAssignmentModal = function(quadrantId) {
     const html = `
         <div style="display:flex; flex-direction:column; gap:12px;">
@@ -576,7 +679,6 @@ window.generateStars = function(containerId) {
     }
 };
 
-// --- DECOUPLED VISUAL WARP ENGINE ---
 (function initWarpEngine() {
     let warpFactor = 0;
     let targetWarp = 0;
@@ -608,8 +710,6 @@ window.generateStars = function(containerId) {
         requestAnimationFrame(tick);
     });
 })();
-
-// --- PHASE II: GLOBAL BOOT & SCRUBBER LOGIC MIGRATION ---
 
 window.runBootSequence = function() {
     sessionStorage.setItem('Q_BOOT_COMPLETE', 'true');
@@ -715,7 +815,6 @@ window.syncScrubberUI = function() {
     }
 };
 
-// Auto-init UI if logic hasn't yet, or standard load
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
 });
