@@ -1,6 +1,6 @@
 // THE QUADRATURE: GLOBAL UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase III UI Engine. Dual-State Branching Active. Asset Paths Corrected. Typographic Centering Applied.
+// STATUS: Phase III UI Engine. Dual-State Branching Active. Production Root Routing Fixed.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -19,7 +19,10 @@ window.injectUniversalUI = function() {
     
     // --- DUAL-STATE PATH ROUTER ---
     const path = window.location.pathname.toUpperCase();
-    const isAperture = path.includes("APERTURE");
+    
+    // Recognizes Aperture via explicit folder (Local) OR absolute domain root (Production)
+    const isAperture = path.includes("APERTURE") || path === "/" || path === "/INDEX.HTML" || path === "";
+    
     const bActive = path.includes("BIO");
     const eActive = path.includes("ENV");
     const mActive = path.includes("MEC");
@@ -45,7 +48,9 @@ window.injectUniversalUI = function() {
     // OS Panel Data Colors dynamically tied to the Vector theme unless it's the Aperture Gateway
     let osPanelColor = isAperture ? "#00f0ff" : micColor;
     let osPanelGlow = isAperture ? "rgba(0,240,255,0.2)" : micGlow;
-    let navPrefix = isAperture ? "../personal/" : "";
+    
+    // Universal Nav Prefix logic: If on Aperture, link into the personal folder. If already in personal, relative links work directly.
+    let navPrefix = isAperture ? "personal/" : "";
 
     const style = document.createElement('style');
     style.innerHTML = `
@@ -271,17 +276,17 @@ window.injectUniversalUI = function() {
     let panelsHTML = "";
     if (isAperture) {
         panelsHTML = `
-            <div class="corner-panel tl desktop-only" onclick="location.href='../personal/index.html'">
+            <div class="corner-panel tl desktop-only" onclick="location.href='${navPrefix}index.html'">
                 <div class="frost-zone"></div>
                 <div class="panel-bg"></div>
                 <div class="panel-label">PERSONAL QUAD</div>
             </div>
-            <div class="corner-panel tr desktop-only" onclick="location.href='../commercial/index.html'">
+            <div class="corner-panel tr desktop-only" onclick="location.href='${navPrefix}../commercial/index.html'">
                 <div class="frost-zone"></div>
                 <div class="panel-bg"></div>
                 <div class="panel-label">COMMERCIAL QUAD</div>
             </div>
-            <div class="corner-panel bl desktop-only" onclick="location.href='../physical/index.html'">
+            <div class="corner-panel bl desktop-only" onclick="location.href='${navPrefix}../physical/index.html'">
                 <div class="frost-zone"></div>
                 <div class="panel-bg"></div>
                 <div class="panel-label">PHYSICAL ASSETS</div>
@@ -337,11 +342,11 @@ window.injectUniversalUI = function() {
                 <div id="q-global-sim-badge" style="display: none; background: var(--chrono-amber); color: #000; font-family: 'Orbitron'; font-size: 0.55rem; font-weight: 900; padding: 4px 8px; border-radius: 4px; cursor: pointer; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">[ IN THE QUAD ]</div>
             </div>
             <div class="q-nav-menu" id="q-nav-menu">
-                <a href="${navPrefix}index.html?v=17.8" class="q-nav-btn face-btn vector-link ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
-                <a href="${navPrefix}BIOVECHUD.html?v=17.8" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
-                <a href="${navPrefix}COMVECHUD.html?v=17.8" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">COMMUNAL</a>
-                <a href="${navPrefix}ENVVECHUD.html?v=17.8" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">ENVIRONMENTAL</a>
-                <a href="${navPrefix}MECVECHUD.html?v=17.8" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">MECHANICAL</a>
+                <a href="${navPrefix}index.html?v=17.9" class="q-nav-btn face-btn vector-link ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
+                <a href="${navPrefix}BIOVECHUD.html?v=17.9" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
+                <a href="${navPrefix}COMVECHUD.html?v=17.9" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">COMMUNAL</a>
+                <a href="${navPrefix}ENVVECHUD.html?v=17.9" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">ENVIRONMENTAL</a>
+                <a href="${navPrefix}MECVECHUD.html?v=17.9" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">MECHANICAL</a>
                 <button class="q-nav-btn omni desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()" ontouchstart="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner(); event.preventDefault();">[ OMNI-PLANNER ]</button>
                 <button class="q-nav-btn special desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()" ontouchstart="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub(); event.preventDefault();">[ DASHBOARD ]</button>
             </div>
@@ -361,23 +366,23 @@ window.injectUniversalUI = function() {
                 <svg id="tele-icon" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                 <span class="strip-lbl">DATA</span>
             </button>
-            <a href="${navPrefix}BIOVECHUD.html?v=17.8" class="strip-btn bio-strip ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}BIOVECHUD.html?v=17.9" class="strip-btn bio-strip ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 <span class="strip-lbl">BIO</span>
             </a>
-            <a href="${navPrefix}COMVECHUD.html?v=17.8" class="strip-btn com-strip ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}COMVECHUD.html?v=17.9" class="strip-btn com-strip ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="16"/><circle cx="6" cy="20" r="3"/><circle cx="18" cy="20" r="3"/><line x1="12" y1="16" x2="6" y2="17"/><line x1="12" y1="16" x2="18" y2="17"/></svg>
                 <span class="strip-lbl">COM</span>
             </a>
-            <a href="${navPrefix}index.html?v=17.8" class="strip-btn face-strip ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}index.html?v=17.9" class="strip-btn face-strip ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                 <span class="strip-lbl">CHRONO</span>
             </a>
-            <a href="${navPrefix}ENVVECHUD.html?v=17.8" class="strip-btn env-strip ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}ENVVECHUD.html?v=17.9" class="strip-btn env-strip ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M2 22h20L12 2z"/></svg>
                 <span class="strip-lbl">ENV</span>
             </a>
-            <a href="${navPrefix}MECVECHUD.html?v=17.8" class="strip-btn mec-strip ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}MECVECHUD.html?v=17.9" class="strip-btn mec-strip ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span class="strip-lbl">MEC</span>
             </a>
