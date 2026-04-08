@@ -27,31 +27,52 @@
             pointer-events: none !important; 
             visibility: hidden !important;
         }
+
+        /* --- NEBULA EXPANSION OVERRIDE --- 
+           Pulls the background nebulas further inward to bridge the gap
+           between the central Iris and the peripheral OS panels.
+        */
+        .nebula-left {
+            width: 65vw !important;
+            -webkit-mask-image: radial-gradient(ellipse 100% 100% at 0% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%) !important;
+            mask-image: radial-gradient(ellipse 100% 100% at 0% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%) !important;
+        }
+        .nebula-right {
+            width: 65vw !important;
+            -webkit-mask-image: radial-gradient(ellipse 100% 100% at 100% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%) !important;
+            mask-image: radial-gradient(ellipse 100% 100% at 100% 50%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%) !important;
+        }
     </style>
 
-    <script src="../q-ui-global.js?v=17.5.0"></script>
-    <script src="../q-core.js?v=17.5.0"></script>
-    <script src="../q-hub.js?v=17.5.0"></script>
+    <script src="../q-ui-global.js?v=17.6.4"></script>
+    <script src="../q-core.js?v=17.6.4"></script>
+    <script src="../q-hub.js?v=17.6.4"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
-            --q-blue-glow: rgba(0, 163, 255, 0.3);
+            /* Override global UI spacing to prevent panel collisions with the Iris */
+            --corner-gap-x: 28vh !important;
+            --corner-gap-y: 26vh !important;
+            --center-gap-x: 36vh !important;
+            --q-blue-glow: rgba(0, 163, 255, 0.5);
         }
 
         /* --- THE APERTURE CORE --- */
         .aperture-container {
             position: absolute; left: 50%; top: 50%;
             transform: translate(-50%, -50%);
-            width: 60vh; height: 60vh;
+            width: 52vh; height: 52vh;
             z-index: 10; display: flex; justify-content: center; align-items: center;
         }
 
         .iris-ring {
             position: absolute; inset: 0;
-            background: url('../assets/aperture-ring.png') center/contain no-repeat;
-            z-index: 12; filter: drop-shadow(0 0 40px rgba(0,0,0,0.9));
+            z-index: 10; /* Dropped behind the Q-Core */
+            filter: drop-shadow(0 0 35px rgba(0,0,0,0.95));
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: none;
         }
 
         .core-void {
@@ -81,8 +102,10 @@
         }
 
         .q-core-asset {
-            position: absolute; width: 45%; height: 45%;
-            left: 53%; top: 52%; 
+            /* Elevated to z-index: 15 to stand proud in front of the converging Iris blades */
+            position: absolute; width: 50%; height: 50%;
+            /* Microscopic offset (51.2%) to counter the asymmetrical weight of the Q's tail */
+            left: 51.2%; top: 50%; 
             transform: translate(-50%, -50%);
             background: url('../assets/core-q.png') center/contain no-repeat;
             z-index: 15;
@@ -114,21 +137,105 @@
     </div>
 
     <script>
+        function injectPerfectIris() {
+            const container = document.querySelector('.iris-ring');
+            if(!container || document.getElementById('perfect-iris-svg')) return;
+            
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("id", "perfect-iris-svg");
+            svg.setAttribute("viewBox", "0 0 100 100");
+            svg.style.cssText = "width:100%; height:100%; position:absolute;";
+            
+            let defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            defs.innerHTML = `
+                <linearGradient id="metal-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#94a3b8" />
+                    <stop offset="50%" stop-color="#475569" />
+                    <stop offset="100%" stop-color="#0f172a" />
+                </linearGradient>
+                <linearGradient id="shiny-rim-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="50%" stop-color="#cbd5e1" />
+                    <stop offset="100%" stop-color="#475569" />
+                </linearGradient>
+                <linearGradient id="glass-bevel" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="rgba(0, 240, 255, 0.8)" />
+                    <stop offset="50%" stop-color="rgba(255, 255, 255, 0.9)" />
+                    <stop offset="100%" stop-color="rgba(0, 163, 255, 0.8)" />
+                </linearGradient>
+                <linearGradient id="blade-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#64748b" />
+                    <stop offset="50%" stop-color="#334155" />
+                    <stop offset="100%" stop-color="#0f172a" />
+                </linearGradient>
+                <filter id="blade-shadow">
+                    <feDropShadow dx="-1" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity="0.95"/>
+                </filter>
+            `;
+            svg.appendChild(defs);
+            
+            // Base Metallic Casing (Main outer housing)
+            let baseRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            baseRing.setAttribute("cx", "50"); baseRing.setAttribute("cy", "50"); baseRing.setAttribute("r", "48");
+            baseRing.setAttribute("fill", "none"); baseRing.setAttribute("stroke", "url(#metal-grad)"); baseRing.setAttribute("stroke-width", "1.5");
+            svg.appendChild(baseRing);
+
+            // Shiny Bevel Casing (Inner depth rim)
+            let shinyRim = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            shinyRim.setAttribute("cx", "50"); shinyRim.setAttribute("cy", "50"); shinyRim.setAttribute("r", "47.1");
+            shinyRim.setAttribute("fill", "none"); shinyRim.setAttribute("stroke", "url(#shiny-rim-grad)"); shinyRim.setAttribute("stroke-width", "0.5");
+            svg.appendChild(shinyRim);
+
+            // Symmetrical Sweeping Iris Blades closing behind the Q-Core
+            let cutsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            cutsGroup.setAttribute("id", "iris-blade-group");
+            
+            for(let i=0; i<8; i++) {
+                let angle = i * 45;
+                
+                let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                // Math calibrated to pierce deeply to the center, sealing the void behind the Q
+                path.setAttribute("d", "M 47,2 A 48,48 0 0,1 84,16 L 38,38 L 22,42 Z");
+                path.setAttribute("fill", "url(#blade-grad)");
+                path.setAttribute("stroke", "#0f172a");
+                path.setAttribute("stroke-width", "0.5");
+                path.setAttribute("filter", "url(#blade-shadow)");
+                path.setAttribute("transform", `rotate(${angle} 50 50)`);
+                cutsGroup.appendChild(path);
+                
+                let highlight = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                highlight.setAttribute("d", "M 47,2 A 48,48 0 0,1 84,16 L 38,38");
+                highlight.setAttribute("fill", "none");
+                highlight.setAttribute("stroke", "rgba(255,255,255,0.3)");
+                highlight.setAttribute("stroke-width", "0.5");
+                highlight.setAttribute("transform", `rotate(${angle} 50 50)`);
+                cutsGroup.appendChild(highlight);
+            }
+            
+            svg.appendChild(cutsGroup);
+
+            // Glass Lens Bevel (Optical Perimeter) - Solid gradient, thick defined border, layered ON TOP
+            let glassBevel = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            glassBevel.setAttribute("cx", "50"); glassBevel.setAttribute("cy", "50"); glassBevel.setAttribute("r", "46");
+            glassBevel.setAttribute("fill", "none"); glassBevel.setAttribute("stroke", "url(#glass-bevel)"); glassBevel.setAttribute("stroke-width", "2.5");
+            glassBevel.setAttribute("filter", "drop-shadow(0 0 6px rgba(0, 240, 255, 0.6))");
+            svg.appendChild(glassBevel);
+
+            container.appendChild(svg);
+        }
+
         function initStars() {
             const coreField = document.getElementById('core-star-field');
             
-            // Core Stars (Density maximized to 450 with extreme origin clustering)
             for(let i=0; i<450; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
                 const angle = Math.random() * Math.PI * 2;
                 
-                // Travel exactly to the edge of the void
                 const dist = Math.random() * 4 + 21; 
                 star.style.setProperty('--tx', Math.cos(angle) * dist + 'vh');
                 star.style.setProperty('--ty', Math.sin(angle) * dist + 'vh');
                 
-                // Expanded size variance: microscopic dust (0.3) to massive foreground (3.5)
                 let size = (Math.random() > 0.85) ? (Math.random() * 2.5 + 1.0) : (Math.random() * 1.2 + 0.3);
                 star.style.width = size + 'px';
                 star.style.height = size + 'px';
@@ -136,25 +243,25 @@
                 star.style.left = '50%';
                 star.style.top = '50%';
                 
-                // Drift Timing: Aggressive cubic-bezier ensures they linger at the origin before accelerating
                 let speedBase = (size > 1.5) ? 8 : 12; 
                 let driftDur = Math.random() * 8 + speedBase;
                 let driftDel = -Math.random() * 20;
                 
-                // Decoupled Twinkle Timing
                 let twinkDur = Math.random() * 1.5 + 0.5;
                 let twinkDel = -Math.random() * 2;
                 
                 star.style.setProperty('--max-op', (size > 1.5) ? (Math.random() * 0.3 + 0.7) : (Math.random() * 0.5 + 0.2));
                 
-                // Dual-Animation Execution
                 star.style.animation = `hyper-jump ${driftDur}s ${driftDel}s cubic-bezier(0.5, 0.0, 1, 1) infinite, twinkle ${twinkDur}s ${twinkDel}s ease-in-out infinite alternate`;
                 
                 coreField.appendChild(star);
             }
         }
 
-        initStars();
+        document.addEventListener('DOMContentLoaded', () => {
+            injectPerfectIris();
+            initStars();
+        });
     </script>
 </body>
 </html>
