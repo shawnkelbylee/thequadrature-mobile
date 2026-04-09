@@ -58,12 +58,8 @@
             position: fixed; inset: 0;
             width: 100vw; height: 100vh;
             border: none; z-index: 1;
-            opacity: 0;
+            opacity: 0 !important; /* CRITICAL FIX: Lock opacity to 0 to prevent unstyled bleed-through */
             pointer-events: none;
-        }
-        body.sequencing #portal-frame {
-            opacity: 1;
-            transition: opacity 0.4s ease-in 0.1s;
         }
 
         /* --- UNIVERSAL SEQUENCING FADE --- */
@@ -282,6 +278,11 @@
 
         // --- AGGRESSIVE CAPTURE-PHASE INTERCEPTOR ---
         window.addEventListener('click', (e) => {
+            // CRITICAL FIX: Bypass interceptor entirely if clicking inside the dashboard or modals
+            if (e.target.closest('.q-hub-overlay') || e.target.closest('.modal-overlay')) {
+                return; 
+            }
+
             let el = e.target;
             let targetUrl = null;
             let depth = 0;
@@ -291,15 +292,21 @@
                 const onClickStr = (el.getAttribute('onclick') || '').toLowerCase();
                 const hrefStr = (el.getAttribute('href') || '').toLowerCase();
 
-                if (hrefStr.includes('/personal') || onClickStr.includes('personal') || text === 'personal quad') {
-                    targetUrl = '../personal/index.html';
-                } else if (hrefStr.includes('/commercial') || onClickStr.includes('commercial') || text === 'commercial quad') {
-                    targetUrl = '../commercial/index.html';
-                } else if (hrefStr.includes('/physical') || onClickStr.includes('physical') || text === 'physical assets') {
-                    targetUrl = '../physical/index.html';
-                } else if (hrefStr.includes('/dashboard') || onClickStr.includes('dashboard') || text === 'dashboard') {
-                    targetUrl = '../dashboard/index.html';
+                // Explicitly intercept Dashboard intents to prevent 404 sequencing
+                if (hrefStr.includes('/dashboard') || onClickStr.includes('dashboard') || text.includes('dashboard')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.Q_IntegrationHub) window.Q_IntegrationHub.openHub();
+                    return; // Halt interceptor loop
                 }
+
+                if (hrefStr.includes('/personal') || onClickStr.includes('personal') || text.includes('personal quad')) {
+                    targetUrl = '../personal/index.html';
+                } else if (hrefStr.includes('/commercial') || onClickStr.includes('commercial') || text.includes('commercial quad')) {
+                    targetUrl = '../commercial/index.html';
+                } else if (hrefStr.includes('/physical') || onClickStr.includes('physical') || text.includes('physical assets')) {
+                    targetUrl = '../physical/index.html';
+                } 
 
                 if (targetUrl) break;
                 el = el.parentElement;
