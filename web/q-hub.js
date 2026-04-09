@@ -106,10 +106,11 @@ window.Q_IntegrationHub = {
         const isUnknown = document.getElementById('cal-tob-unknown').checked;
         const loc = document.getElementById('cal-loc').value;
         const anchor = document.getElementById('cal-anchor').value;
+        const sleepHrs = document.getElementById('cal-sleep').value;
         const natal = document.getElementById('cal-natal').value;
 
-        if (!dob || !loc || !anchor) {
-            alert("DOB, GEOLOCATION, AND WAKE ANCHOR ARE REQUIRED.");
+        if (!dob || !loc || !anchor || !sleepHrs) {
+            alert("DOB, GEOLOCATION, WAKE ANCHOR, AND TARGET SLEEP ARE REQUIRED.");
             return;
         }
 
@@ -121,7 +122,10 @@ window.Q_IntegrationHub = {
 
         const parts = anchor.split(':');
         const mins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
-        localStorage.setItem('q_bio_anchor', mins);
+        window.Q_UpdateState('metaphysical_layer', 'wake_anchor_mins', mins);
+        
+        const sleepMins = Math.floor(parseFloat(sleepHrs) * 60);
+        window.Q_UpdateState('metaphysical_layer', 'sleep_cycle_duration', sleepMins);
 
         if(window.Q_LOG) window.Q_LOG('STATE', 'CORE', 'IDENTITY_PARAMETERS_UPDATED');
         
@@ -149,17 +153,18 @@ window.Q_IntegrationHub = {
         const renderBadge = (statusColor, textColor, text) => `<span style="font-size:0.55rem; background:${statusColor}; color:${textColor}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px;">${text}</span>`;
         const renderUpgradeBtn = (feature, tier, category, color) => `<button onclick="window.Q_IntegrationHub.requestStateGate('${feature}', '${tier}', '${category}')" style="font-size:0.55rem; background:transparent; border:1px solid ${color}; color:${color}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px; cursor:pointer; transition:0.3s; pointer-events:auto;" onmouseover="this.style.background='${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='${color}';">UPGRADE</button>`;
 
+        const authState = window.Q_STATE?.persistence?.auth_status === 'SOVEREIGN_AUTHENTICATED' ? 'ACTIVE' : 'STANDBY';
+        const authColor = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
+        const authText = authState === 'ACTIVE' ? '[ IN THE QUAD ] - IDENTITY SYNCED' : '[ AUTHENTICATE ] - LOCAL CACHE ONLY';
+
         const isBioActive = window.Q_STATE?.hardware_hooks?.biometric_api === 'ACTIVE';
         const bioStatus = isBioActive ? renderBadge('#39ff14', '#000', 'ACTIVE') : renderUpgradeBtn('biometric_api', 'STANDARD TIER', 'hardware_hooks', '#39ff14');
 
         const isEphActive = window.Q_STATE?.metaphysical_layer?.swiss_ephemeris === 'ACTIVE';
         const ephStatus = isEphActive ? renderBadge('#00f0ff', '#000', 'ACTIVE') : renderUpgradeBtn('swiss_ephemeris', 'RESONANT TIER', 'metaphysical_layer', '#00f0ff');
 
-        const isSovActive = window.Q_STATE?.logic_layer?.diplomatic_negotiator === 'ACTIVE';
-        const sovStatus = isSovActive ? renderBadge('#ff003c', '#fff', 'ACTIVE') : renderUpgradeBtn('diplomatic_negotiator', 'SOVEREIGN TIER', 'logic_layer', '#ff003c');
-
-        const isSyndicateActive = window.Q_STATE?.capital_ledger?.civil_exporter === 'ACTIVE';
-        const syndicateStatus = isSyndicateActive ? renderBadge('#b829ff', '#fff', 'ACTIVE') : renderUpgradeBtn('civil_exporter', 'SYNDICATE TIER', 'capital_ledger', '#b829ff');
+        const isSyndicateActive = window.Q_STATE?.metaphysical_layer?.patreon_gating === 'ACTIVE';
+        const syndicateStatus = isSyndicateActive ? renderBadge('#ff003c', '#fff', 'ACTIVE') : renderUpgradeBtn('patreon_gating', 'SYNDICATE TIER', 'metaphysical_layer', '#ff003c');
 
         const isFiatActive = window.Q_STATE?.capital_ledger?.fiat_api === 'ACTIVE';
         const fiatStatus = isFiatActive ? renderBadge('#F4D068', '#000', 'ACTIVE') : renderUpgradeBtn('fiat_api', 'ENTERPRISE TIER', 'capital_ledger', '#F4D068');
@@ -170,8 +175,13 @@ window.Q_IntegrationHub = {
         const sTobUnknown = window.Q_STATE?.metaphysical_layer?.tob_unknown === true;
         const sLoc = window.Q_STATE?.location?.name || "";
         const sNatal = window.Q_STATE?.metaphysical_layer?.natal_anchor || "NONE";
-        const savedAnchorMins = parseInt(localStorage.getItem('q_bio_anchor')) || 0;
+        const savedAnchorMins = window.Q_STATE?.metaphysical_layer?.wake_anchor_mins !== null ? window.Q_STATE.metaphysical_layer.wake_anchor_mins : (parseInt(localStorage.getItem('q_bio_anchor')) || 0);
         const sAnchorStr = `${Math.floor(savedAnchorMins / 60).toString().padStart(2, '0')}:${(savedAnchorMins % 60).toString().padStart(2, '0')}`;
+        
+        const sSleep = window.Q_STATE?.metaphysical_layer?.sleep_cycle_duration || 450;
+        const sSleepHrs = (sSleep / 60).toFixed(1);
+        
+        const sAi = window.Q_STATE?.logic_layer?.preferred_ai_diplomat || 'DEFAULT';
 
         // Diagnostic Status Retrieval
         const jplStatus = window.EPHEMERIS_LIVE ? '<span style="color:#39ff14; text-shadow:0 0 5px rgba(57,255,20,0.5);">[ CONNECTED / LIVE ]</span>' : '<span style="color:#ff003c; text-shadow:0 0 5px rgba(255,0,60,0.5);">[ DISCONNECTED / FAILOVER ]</span>';
@@ -181,6 +191,8 @@ window.Q_IntegrationHub = {
             <div class="q-hub-box" onclick="event.stopPropagation()">
                 <div class="hub-header">SOVEREIGN MATRIX // ACCOUNT</div>
                 
+                <button onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth()" style="background:rgba(0,0,0,0.6); border:1px solid ${authColor}; color:${authColor}; padding: 8px 12px; font-family:'Orbitron'; font-size:0.65rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border-radius:4px; margin-bottom:15px; width:100%; transition:0.3s; box-shadow: inset 0 0 10px rgba(${authState === 'ACTIVE' ? '57,255,20' : '255,0,60'}, 0.1);" onmouseover="this.style.background='${authColor}'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.color='${authColor}';">${authText}</button>
+
                 <div class="hub-tabs">
                     <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
                     <button class="hub-tab-btn ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
@@ -252,9 +264,15 @@ window.Q_IntegrationHub = {
                         <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
                     </div>
 
-                    <div class="hub-input-group">
-                        <label class="hub-input-lbl">WAKE ANCHOR (UTC)</label>
-                        <input type="time" id="cal-anchor" class="hub-input" value="${sAnchorStr}">
+                    <div style="display:flex; gap:10px;">
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">WAKE ANCHOR (UTC)</label>
+                            <input type="time" id="cal-anchor" class="hub-input" value="${sAnchorStr}">
+                        </div>
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">TARGET SLEEP (HRS)</label>
+                            <input type="number" id="cal-sleep" class="hub-input" value="${sSleepHrs}" step="0.5" min="4" max="12">
+                        </div>
                     </div>
 
                     <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
@@ -263,7 +281,7 @@ window.Q_IntegrationHub = {
                 <div class="hub-tab-content ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-content-tiers">
                     <div class="hub-tier-row" style="border-color: rgba(255,255,255,0.3);">
                         <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">BASIC TIER (FREE)</div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">BASIC TIER ($9.99/mo)</div>
                             <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Full Vector HUDs & Omni-Planner.</div>
                         </div>
                         ${renderBadge('#fff', '#000', 'ACTIVE')}
@@ -279,7 +297,7 @@ window.Q_IntegrationHub = {
 
                     <div class="hub-tier-row">
                         <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#00f0ff; font-weight: bold;">RESONANT TIER ($29.99/mo)</div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#00f0ff; font-weight: bold;">RESONANT TIER ($19.99/mo)</div>
                             <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Swiss Ephemeris precision mapping.</div>
                         </div>
                         ${ephStatus}
@@ -287,16 +305,8 @@ window.Q_IntegrationHub = {
                     
                     <div class="hub-tier-row" style="background: rgba(255,0,60,0.05);">
                         <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#ff003c; font-weight: bold;">SOVEREIGN TIER ($49.99/mo)</div>
-                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">AI Diplomatic Negotiator.</div>
-                        </div>
-                        ${sovStatus}
-                    </div>
-
-                    <div class="hub-tier-row" style="background: rgba(184,41,255,0.05);">
-                        <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#b829ff; font-weight: bold;">SYNDICATE TIER ($99.00/mo)</div>
-                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Civil Exporter & 90+1 Ledger.</div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#ff003c; font-weight: bold;">SYNDICATE TIER ($24.99/mo)</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">P2P Social License & Deep Flow.</div>
                         </div>
                         ${syndicateStatus}
                     </div>
@@ -304,7 +314,7 @@ window.Q_IntegrationHub = {
                     <div class="hub-tier-row">
                         <div>
                             <div style="font-family:'Orbitron'; font-size:0.75rem; color:#F4D068; font-weight: bold;">ENTERPRISE TIER ($199.00+/mo)</div>
-                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Commercial Quad & Macro-Telemetry.</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">B2B Resonance & Civil Ledger Exporter.</div>
                         </div>
                         ${fiatStatus}
                     </div>
@@ -317,6 +327,13 @@ window.Q_IntegrationHub = {
                             <option value="ALL">ALL ALERTS & CUES</option>
                             <option value="CRITICAL">CRITICAL THERMODYNAMIC ONLY</option>
                             <option value="NONE">SILENT OPERATION</option>
+                        </select>
+                    </div>
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">AI DIPLOMATIC NEGOTIATOR ENGINE</label>
+                        <select class="hub-input" id="pref-ai-diplomat" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'preferred_ai_diplomat', this.value)">
+                            <option value="DEFAULT" ${sAi === 'DEFAULT' ? 'selected' : ''}>DEFAULT ALGORITHM</option>
+                            <option value="KAIROS" ${sAi === 'KAIROS' ? 'selected' : ''}>KAIROS PROTOCOL</option>
                         </select>
                     </div>
                     <div class="hub-input-group">

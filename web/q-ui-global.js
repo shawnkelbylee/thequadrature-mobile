@@ -1,6 +1,6 @@
 // THE QUADRATURE: GLOBAL UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase III UI Engine. Max Horizontal Expansion. OPT Centering Aggressively Offset.
+// STATUS: Phase III UI Engine. Boot Sequence Purged. Spatial Routing & Sovereign Auth Badge Locked.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -26,8 +26,6 @@ window.injectUniversalUI = function() {
     const mActive = path.includes("MEC");
     const cActive = path.includes("COM");
     
-    // Fix: Chrono-Face should only be active if NO other specific vector is active. 
-    // Removed the "PERSONAL" folder check to prevent persistent highlighting across HUDs.
     const faceActive = (!isAperture && !bActive && !eActive && !mActive && !cActive);
     
     if (faceActive) document.body.classList.add('q-chrono-face');
@@ -71,6 +69,12 @@ window.injectUniversalUI = function() {
             .corner-panel:hover .frost-zone { box-shadow: 0 0 20px ${micGlow}, inset 0 0 25px rgba(255, 255, 255, 0.1) !important; }
         `;
     }
+
+    const authState = window.Q_STATE?.persistence?.auth_status === 'SOVEREIGN_AUTHENTICATED' ? 'ACTIVE' : 'STANDBY';
+    const authBg = authState === 'ACTIVE' ? '#39ff14' : 'transparent';
+    const authColor = authState === 'ACTIVE' ? '#000' : '#ff003c';
+    const authBorder = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
+    const authText = authState === 'ACTIVE' ? '[ IN THE QUAD ]' : '[ AUTHENTICATE ]';
 
     const style = document.createElement('style');
     style.innerHTML = `
@@ -166,7 +170,6 @@ window.injectUniversalUI = function() {
         .bl .panel-data-container { padding: 12px 30px 12px 75px; }
         .br .panel-data-container { padding: 12px 75px 12px 30px; }
 
-        /* Pure Text OPT anchored with JetBrains Mono and inward shifts */
         .opt-oval { position: absolute; font-family: 'JetBrains Mono'; font-size: 0.55rem; font-weight: 700; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 30; transition: 0.3s; }
         .opt-oval:hover { color: #fff !important; text-shadow: 0 0 8px #fff !important; }
         .tl .opt-oval { top: 36px; left: 45px; }
@@ -209,7 +212,7 @@ window.injectUniversalUI = function() {
         .q-nav-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 6px 12px; border-radius: 4px; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: bold; cursor: pointer; transition: 0.3s; letter-spacing: 1px; padding-left: 13px; text-decoration: none; display: inline-block; text-align: center; pointer-events: auto !important; white-space: nowrap; }
         .q-nav-btn:hover { border-color: #fff; color: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
         
-        .q-nav-btn.sim-badge { border-color: var(--chrono-amber) !important; color: #000 !important; background: var(--chrono-amber) !important; padding-left: 12px; }
+        .q-nav-btn.sim-badge { border-color: ${authBorder} !important; color: ${authColor} !important; background: ${authBg} !important; padding-left: 12px; }
         .q-nav-btn.face-btn.active { border-color: var(--chrono-amber) !important; color: var(--chrono-amber) !important; box-shadow: inset 0 0 10px var(--chrono-amber-dim) !important; }
         .q-nav-btn.bio-btn.active { border-color: var(--bio-purple) !important; color: var(--bio-purple) !important; box-shadow: inset 0 0 10px var(--bio-purple-dim) !important; }
         .q-nav-btn.com-btn.active { border-color: var(--gold, #F4D068) !important; color: var(--gold, #F4D068) !important; box-shadow: inset 0 0 10px rgba(244,208,104,0.2) !important; }
@@ -220,15 +223,6 @@ window.injectUniversalUI = function() {
         #q-mic-fab-desktop:hover { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; }
         #q-mic-fab-desktop.listening { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; animation: pulse-mic-desktop 1.5s infinite; }
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } 50% { transform: scale(1.1); box-shadow: 0 0 25px ${micColor}; } 100% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } }
-        
-        .boot-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'JetBrains Mono', monospace; color: var(--sys-cyan, #00f0ff); transition: opacity 1.5s ease-in-out; }
-        .boot-terminal { width: 90%; max-width: 500px; border: 1px solid var(--sys-cyan, #00f0ff); padding: 30px; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 30px rgba(0, 240, 255, 0.15); border-radius: 4px; backface-visibility: hidden; transform: translateZ(0); }
-        .boot-terminal h2 { font-family: 'Orbitron'; font-size: 1.8rem; letter-spacing: 6px; padding-left: 6px; text-align: center; margin-top: 0; text-shadow: 0 0 10px var(--sys-cyan, #00f0ff); white-space: nowrap; }
-        .boot-desc { font-size: 0.7rem; color: #aaa; text-align: center; margin-bottom: 25px; line-height: 1.5; }
-        .boot-btn-row { display: flex; gap: 15px; margin-top: 15px; justify-content: center; }
-        .boot-btn { flex: 1; background: transparent; border: 1px solid var(--sys-cyan, #00f0ff); color: var(--sys-cyan, #00f0ff); font-family: 'Orbitron'; font-weight: 700; padding: 12px; cursor: pointer; transition: 0.3s; letter-spacing: 2px; padding-left: 14px; font-size: 0.75rem; }
-        .boot-btn:hover { background: var(--sys-cyan, #00f0ff); color: #000; box-shadow: 0 0 20px var(--sys-cyan, #00f0ff); }
-        .boot-log { margin-top: 20px; font-size: 0.85rem; min-height: 80px; text-align: center; line-height: 1.6; text-shadow: 0 0 8px var(--sys-cyan, #00f0ff); }
         
         .q-global-controls { position: fixed; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
         .q-ctrl-btn { background: transparent; border: 1px solid ${osPanelColor}; color: ${osPanelColor}; padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; padding-left: 15px; white-space: nowrap; pointer-events: auto; }
@@ -432,7 +426,7 @@ window.injectUniversalUI = function() {
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
                     <a href="${isAperture ? '#' : '../aperture/index.html'}" class="q-nav-btn desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" ontouchstart="window.location.href=this.href; event.preventDefault();">APERTURE</a>
-                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">[ IN THE QUAD ]</button>
+                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">${authText}</button>
                     <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
                     <a href="${navPrefix}BIOVECHUD.html?v=20.0" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
                     
@@ -542,20 +536,7 @@ window.injectUniversalUI = function() {
             </div>
         </div>
 
-        <div class="boot-overlay" id="boot-overlay" style="display: none;">
-            <div class="boot-terminal">
-                <h2>INITIALIZATION</h2>
-                <div class="boot-desc">Establish Sovereign Identity to engage the Quadrature Structure.</div>
-                <div id="boot-inputs">
-                    <div class="boot-btn-row">
-                        <button class="boot-btn" onclick="window.runBootSequence()" ontouchstart="window.runBootSequence(); event.preventDefault();">ENGAGE SEQUENCE</button>
-                    </div>
-                </div>
-                <div class="boot-log" id="boot-log"></div>
-            </div>
-        </div>
-
-        <div class="q-global-controls" id="q-universal-controls" style="display: none;">
+        <div class="q-global-controls" id="q-universal-controls">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
             <input type="range" min="0" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
@@ -565,37 +546,11 @@ window.injectUniversalUI = function() {
     
     const refNode = document.body.firstChild;
     while (uiContainer.firstChild) document.body.insertBefore(uiContainer.firstChild, refNode);
-
-    if(sessionStorage.getItem('Q_BOOT_COMPLETE') !== 'true') {
-        document.body.classList.add('boot-active');
-        let bootOverlay = document.getElementById('boot-overlay');
-        if (bootOverlay) bootOverlay.style.display = 'flex';
-    } else {
-        document.body.classList.remove('boot-active');
-        let ctrlBar = document.getElementById('q-universal-controls');
-        if(ctrlBar) ctrlBar.style.display = 'flex';
-    }
     
     window.bindMasterTickScrubber();
     window.syncScrubberUI();
 
     window.addEventListener('q-tick', (e) => {
-        const badge = document.getElementById('q-global-sim-badge');
-        if (badge) {
-            // Keep the sim badge display block constant to prevent the navbar from becoming unbalanced during Time Scrubbing
-            badge.style.display = 'inline-block';
-            badge.innerText = e.detail.isLive ? "[ IN THE QUAD ]" : "[ TEMPORAL PROJECTION ]";
-            if (!e.detail.isLive) {
-                badge.style.background = "#ff003c";
-                badge.style.color = "#fff";
-                badge.style.border = "1px solid #ff003c";
-            } else {
-                badge.style.background = "var(--chrono-amber)";
-                badge.style.color = "#000";
-                badge.style.border = "1px solid var(--chrono-amber)";
-            }
-        }
-
         const ribbonLeg = document.getElementById('ribbon-leg');
         const ribbonLegDate = document.getElementById('ribbon-leg-date');
         const ribbonFmt = document.getElementById('ribbon-fmt');
@@ -810,40 +765,6 @@ window.generateStars = function(containerId) {
         requestAnimationFrame(tick);
     });
 })();
-
-window.runBootSequence = function() {
-    sessionStorage.setItem('Q_BOOT_COMPLETE', 'true');
-    const log = document.getElementById('boot-log');
-    const overlay = document.getElementById('boot-overlay');
-    const inputs = document.getElementById('boot-inputs');
-    
-    if(inputs) inputs.style.display = 'none';
-
-    log.innerHTML = "POSITION ACQUIRED.<br>";
-    setTimeout(() => { log.innerHTML += "<br>ESTABLISHING CHRONOBIOLOGICAL STATE RESOLUTION... "; }, 300);
-    setTimeout(() => { log.innerHTML += "<br>INITIATING LOCAL TRANSLATION OVERLAY... "; }, 600);
-    setTimeout(() => { log.innerHTML += "<br>ENFORCING DUAL-STATE GEOMETRY... "; }, 900);
-    setTimeout(() => { log.innerHTML += "3... "; }, 1200);
-    setTimeout(() => { log.innerHTML += "2... "; }, 1500);
-    setTimeout(() => { log.innerHTML += "1... "; }, 1800);
-    setTimeout(() => { log.innerHTML += "<span style='color:var(--white-pure, #fff); font-family:Orbitron; font-weight:900;'>YOU... </span>"; }, 2000);
-    setTimeout(() => { log.innerHTML += "<span style='color:var(--white-pure, #fff); font-family:Orbitron; font-weight:900;'>ARE... </span>"; }, 2200);
-    setTimeout(() => { log.innerHTML += "<span style='color:var(--platinum); font-family:Orbitron; font-weight:900; font-size:1.2rem; letter-spacing:4px; text-shadow: 0 0 15px var(--platinum);'>HERE.</span>"; }, 2400);
-    setTimeout(() => { log.innerHTML += "<br><span style='color:var(--gold); font-family:Orbitron; font-weight:700; font-size:0.8rem; letter-spacing:2px; opacity:0.8;'>HERE IS NOW.</span>"; }, 2600);
-    setTimeout(() => { log.innerHTML += "<br><br><span style='color:var(--theme-main); font-family:Orbitron; font-weight:900; font-size:0.9rem; letter-spacing:2px; text-shadow: 0 0 15px var(--theme-main);'>HERE AND NOW ARE INFINITELY ONE!</span>"; }, 2800);
-    
-    setTimeout(() => { 
-        if(window.Q_LOG) window.Q_LOG('INFO', 'INTERFACE', 'BOOT_SEQUENCE_EXECUTED');
-        overlay.style.opacity = '0'; 
-        document.body.classList.remove('boot-active'); 
-        
-        const ctrlBar = document.getElementById('q-universal-controls');
-        if(ctrlBar) {
-            ctrlBar.style.display = 'flex';
-        }
-        setTimeout(() => overlay.style.display = 'none', 400);
-    }, 3200);
-};
 
 window.bindMasterTickScrubber = function() {
     window.addEventListener('q-tick', (e) => {

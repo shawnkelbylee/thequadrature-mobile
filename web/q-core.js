@@ -1,6 +1,6 @@
 // THE QUADRATURE: MASTER CORE LOGIC (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Active. Ephemeris Bridge & Multi-Day Observance Logic Integrated.
+// STATUS: Active. Sovereign Handshake, State Hydration & Biometric Overrides Integrated.
 
 window.MS_DAY = 86400000;
 
@@ -143,7 +143,7 @@ window.Q_LEXICON = {
     SYSTEM: "Q Logic"
 };
 
-// --- SUPABASE CLOUD BRIDGE ---
+// --- SUPABASE CLOUD BRIDGE & HYDRATION PROTOCOL ---
 window.Q_SUPABASE_URL = 'https://wnfpxozpeucrwqmrqpzv.supabase.co';
 window.Q_SUPABASE_KEY = 'sb_publishable_g6JfCH6FefIwEmXztgkdTw_Md1z4se5';
 window.supabaseClient = null;
@@ -166,6 +166,14 @@ window.initCloudBridge = async function() {
     });
 };
 
+window.Q_UpdateStateLocal = function(category, key, value, localStoreKey) {
+    if(window.Q_STATE[category]) window.Q_STATE[category][key] = value;
+    if(localStoreKey) localStorage.setItem(localStoreKey, value);
+    if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_STORE_SET', key: localStoreKey || `q_${key}`, value: value }));
+    }
+};
+
 window.fetchCloudState = async function() {
     if (!window.supabaseClient) return;
     
@@ -176,25 +184,46 @@ window.fetchCloudState = async function() {
     }
 
     try {
-        const { data, error } = await window.supabaseClient
+        const { data: stateData, error: stateErr } = await window.supabaseClient
             .from('system_state')
             .select('*')
             .eq('user_id', session.session.user.id)
             .single();
 
-        if (error) throw error;
+        const { data: idData, error: idErr } = await window.supabaseClient
+            .from('sovereign_identity')
+            .select('*')
+            .eq('user_id', session.session.user.id)
+            .single();
+
+        if (stateErr && stateErr.code !== 'PGRST116') throw stateErr;
+        if (idErr && idErr.code !== 'PGRST116') throw idErr;
         
-        if (data) {
-            if (data.q_time_fmt) {
-                window.Q_STATE.system_state.q_time_fmt = data.q_time_fmt;
-                localStorage.setItem('Q_TIME_FMT', data.q_time_fmt);
-                
-                document.querySelectorAll('.fmt-toggle').forEach(btn => {
-                    btn.innerText = data.q_time_fmt.replace('_', ' ');
-                });
+        if (stateData) {
+            if (stateData.q_time_fmt) {
+                window.Q_UpdateStateLocal('system_state', 'q_time_fmt', stateData.q_time_fmt, 'Q_TIME_FMT');
+                document.querySelectorAll('.fmt-toggle').forEach(btn => { btn.innerText = stateData.q_time_fmt.replace('_', ' '); });
             }
-            window.Q_LOG('STATE', 'CORE', 'CLOUD_STATE_SYNCED_TO_LOCAL');
+            if (stateData.preferred_ai_diplomat) window.Q_UpdateStateLocal('logic_layer', 'preferred_ai_diplomat', stateData.preferred_ai_diplomat, 'q_ai_diplomat');
+            if (stateData.asset_track_mode) window.Q_UpdateStateLocal('system_state', 'asset_track_mode', stateData.asset_track_mode, 'q_asset_mode');
+            if (stateData.active_faiths) window.Q_UpdateStateLocal('metaphysical_layer', 'active_faiths', stateData.active_faiths, 'q_active_faiths');
+            if (stateData.zodiac_visible !== null) window.Q_UpdateStateLocal('metaphysical_layer', 'zodiac_visible', stateData.zodiac_visible, 'q_zodiac_visible');
         }
+
+        if (idData) {
+            if (idData.dob) window.Q_UpdateStateLocal('metaphysical_layer', 'dob', idData.dob, 'q_dob');
+            if (idData.tob) window.Q_UpdateStateLocal('metaphysical_layer', 'tob', idData.tob, 'q_tob');
+            if (idData.tob_unknown !== null) window.Q_UpdateStateLocal('metaphysical_layer', 'tob_unknown', idData.tob_unknown, 'q_tob_unknown');
+            if (idData.location_name) window.Q_UpdateStateLocal('location', 'name', idData.location_name, 'q_current_loc_name');
+            if (idData.lat) window.Q_UpdateStateLocal('location', 'lat', idData.lat, 'q_current_lat');
+            if (idData.lon) window.Q_UpdateStateLocal('location', 'lon', idData.lon, 'q_current_lon');
+            if (idData.wake_anchor_mins !== null) window.Q_UpdateStateLocal('metaphysical_layer', 'wake_anchor_mins', idData.wake_anchor_mins, 'q_bio_anchor');
+            if (idData.sleep_cycle_duration !== null) window.Q_UpdateStateLocal('metaphysical_layer', 'sleep_cycle_duration', idData.sleep_cycle_duration, 'q_sleep_cycle_duration');
+            if (idData.natal_anchor) window.Q_UpdateStateLocal('metaphysical_layer', 'natal_anchor', idData.natal_anchor, 'q_natal_anchor');
+            if (idData.fiat_routing_id) window.Q_UpdateStateLocal('capital_ledger', 'fiat_routing_id', idData.fiat_routing_id, 'q_fiat_routing_id');
+        }
+
+        window.Q_LOG('STATE', 'CORE', 'CLOUD_STATE_HYDRATED');
     } catch (err) {
         window.Q_LOG('ERROR', 'CORE', 'CLOUD_STATE_FETCH_FAILED', { error: err.message });
     }
@@ -203,15 +232,29 @@ window.fetchCloudState = async function() {
 // CENTRALIZED STATE MANAGEMENT
 window.Q_STATE = {
     persistence: { db_migration: 'ACTIVE', auth_status: 'STANDBY', sync_active: false },
-    logic_layer: { predictive_friction: true, civil_exporter: 'ACTIVE' },
+    logic_layer: { 
+        predictive_friction: true, 
+        civil_exporter: 'ACTIVE',
+        preferred_ai_diplomat: localStorage.getItem('q_ai_diplomat') || 'DEFAULT' 
+    },
     hardware_hooks: { biometric_api: 'ACTIVE', iot_webhooks: 'ACTIVE' },
-    capital_ledger: { fiat_api: 'STANDBY', resonance_tracker: 'ACTIVE' },
+    capital_ledger: { 
+        fiat_api: 'STANDBY', 
+        resonance_tracker: 'ACTIVE',
+        fiat_routing_id: localStorage.getItem('q_fiat_routing_id') || null
+    },
     metaphysical_layer: { 
         swiss_ephemeris: 'ACTIVE', 
         patreon_gating: 'STANDBY', 
         access_tier: 0,
         natal_anchor: localStorage.getItem('q_natal_anchor') || 'NONE',
-        dob: localStorage.getItem('q_dob') || null
+        dob: localStorage.getItem('q_dob') || null,
+        tob: localStorage.getItem('q_tob') || '12:00',
+        tob_unknown: localStorage.getItem('q_tob_unknown') === 'true',
+        wake_anchor_mins: parseInt(localStorage.getItem('q_bio_anchor')) || null,
+        sleep_cycle_duration: parseInt(localStorage.getItem('q_sleep_cycle_duration')) || null,
+        active_faiths: localStorage.getItem('q_active_faiths') ? JSON.parse(localStorage.getItem('q_active_faiths')) : [],
+        zodiac_visible: localStorage.getItem('q_zodiac_visible') !== 'false'
     },
     location: { 
         lat: parseFloat(localStorage.getItem('q_current_lat')) || 0, 
@@ -220,7 +263,8 @@ window.Q_STATE = {
         synced: false 
     },
     system_state: {
-        q_time_fmt: localStorage.getItem('Q_TIME_FMT') || 'UTC_24'
+        q_time_fmt: localStorage.getItem('Q_TIME_FMT') || 'UTC_24',
+        asset_track_mode: localStorage.getItem('q_asset_mode') || 'STANDARD'
     }
 };
 
@@ -229,35 +273,50 @@ window.Q_UpdateState = async function(category, key, value) {
         window.Q_STATE[category][key] = value;
     }
 
-    if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_STORE_SET', key: `q_${key}`, value: value }));
-    }
+    const localMap = {
+        'lat': 'q_current_lat', 'lon': 'q_current_lon', 'name': 'q_current_loc_name',
+        'natal_anchor': 'q_natal_anchor', 'dob': 'q_dob', 'tob': 'q_tob', 'tob_unknown': 'q_tob_unknown',
+        'wake_anchor_mins': 'q_bio_anchor', 'sleep_cycle_duration': 'q_sleep_cycle_duration',
+        'fiat_routing_id': 'q_fiat_routing_id', 'q_time_fmt': 'Q_TIME_FMT', 'preferred_ai_diplomat': 'q_ai_diplomat',
+        'asset_track_mode': 'q_asset_mode', 'active_faiths': 'q_active_faiths', 'zodiac_visible': 'q_zodiac_visible'
+    };
+
+    const localKey = localMap[key] || `q_${key}`;
+    const stringValue = typeof value === 'object' ? JSON.stringify(value) : value;
     
-    if(key === 'lat') localStorage.setItem('q_current_lat', value);
-    if(key === 'lon') localStorage.setItem('q_current_lon', value);
-    if(key === 'name') localStorage.setItem('q_current_loc_name', value);
-    if(key === 'natal_anchor') localStorage.setItem('q_natal_anchor', value);
-    if(key === 'dob') localStorage.setItem('q_dob', value);
-    if(key === 'q_time_fmt') localStorage.setItem('Q_TIME_FMT', value);
+    localStorage.setItem(localKey, stringValue);
+
+    if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_STORE_SET', key: localKey, value: stringValue }));
+    }
 
     if (window.supabaseClient) {
         const { data: session } = await window.supabaseClient.auth.getSession();
         if (session?.session?.user) {
             try {
-                let payload = { user_id: session.session.user.id };
-                if (key === 'q_time_fmt') payload.q_time_fmt = value;
+                const identityKeys = ['dob', 'tob', 'tob_unknown', 'location_name', 'lat', 'lon', 'wake_anchor_mins', 'sleep_cycle_duration', 'natal_anchor', 'fiat_routing_id'];
+                const stateKeys = ['q_time_fmt', 'preferred_ai_diplomat', 'asset_track_mode', 'active_faiths', 'zodiac_visible'];
                 
-                const { error } = await window.supabaseClient
-                    .from('system_state')
-                    .upsert(payload, { onConflict: 'user_id' });
+                let targetTable = null;
+                let payload = { user_id: session.session.user.id };
 
-                if (error) throw error;
-                window.Q_LOG('INFO', 'CORE', 'STATE_SYNCED_TO_CLOUD', { key, value });
+                if (identityKeys.includes(key) || key === 'name') {
+                    targetTable = 'sovereign_identity';
+                    let dbKey = key === 'name' ? 'location_name' : key;
+                    payload[dbKey] = value;
+                } else if (stateKeys.includes(key)) {
+                    targetTable = 'system_state';
+                    payload[key] = value;
+                }
+
+                if (targetTable) {
+                    const { error } = await window.supabaseClient.from(targetTable).upsert(payload, { onConflict: 'user_id' });
+                    if (error) throw error;
+                    window.Q_LOG('INFO', 'CORE', 'STATE_SYNCED_TO_CLOUD', { table: targetTable, key, value });
+                }
             } catch (err) {
                 window.Q_LOG('ERROR', 'CORE', 'CLOUD_SYNC_FAILED', { error: err.message });
             }
-        } else {
-             window.Q_LOG('WARN', 'CORE', 'CLOUD_WRITE_ABORTED: Authentication Required.');
         }
     }
 };
@@ -275,6 +334,24 @@ window.getSimState = function() {
     } catch (e) {}
     if (state.isLive) state.simTime = Date.now();
     return state;
+};
+
+// --- NATIVE BIOMETRIC OVERRIDE HIERARCHY ---
+window.Q_LATEST_NATIVE_BIO_DURATION = null;
+window.Q_LATEST_NATIVE_WAKE_ANCHOR = null;
+
+window.getActiveCycleDuration = function() {
+    if (window.Q_STATE.hardware_hooks.biometric_api === 'ACTIVE' && window.Q_LATEST_NATIVE_BIO_DURATION) {
+        return window.Q_LATEST_NATIVE_BIO_DURATION;
+    }
+    return window.Q_STATE.metaphysical_layer.sleep_cycle_duration || parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450; 
+};
+
+window.getActiveWakeAnchor = function() {
+    if (window.Q_STATE.hardware_hooks.biometric_api === 'ACTIVE' && window.Q_LATEST_NATIVE_WAKE_ANCHOR !== null) {
+        return window.Q_LATEST_NATIVE_WAKE_ANCHOR;
+    }
+    return window.Q_STATE.metaphysical_layer.wake_anchor_mins !== null ? window.Q_STATE.metaphysical_layer.wake_anchor_mins : (parseInt(localStorage.getItem('q_bio_anchor')) || 0);
 };
 
 // --- ABSOLUTE PIXEL HEIGHT BINDING FOR MOBILE VIEWPORT SUPREMACY ---
@@ -697,6 +774,10 @@ window.Q_Auth = {
         if (session?.session?.user) {
             window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
+            
+            if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_AUTH_SUCCESS', token: session.session.access_token }));
+            }
             
             const badge = document.getElementById('q-global-sim-badge');
             if (badge) {
