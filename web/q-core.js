@@ -486,10 +486,16 @@ window.Q_UniversalSync = {
             let count = 0;
             if (data.items) {
                 data.items.forEach(ev => {
-                    // Detect both timed (dateTime) and full-day (date) legacy events
-                    let startStr = ev.start?.dateTime || ev.start?.date;
-                    if (startStr && ev.summary) {
-                        const startMs = new Date(startStr);
+                    let startMs = null;
+                    if (ev.start?.dateTime) {
+                        startMs = new Date(ev.start.dateTime);
+                    } else if (ev.start?.date) {
+                        // Normalize all-day events to local High Noon to prevent timezone drift
+                        const parts = ev.start.date.split('-');
+                        startMs = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+                    }
+                    
+                    if (startMs && ev.summary) {
                         this.mapEventToPlanner({ start: startMs, summary: ev.summary });
                         count++;
                     }
@@ -915,6 +921,7 @@ window.Q_Auth = {
         
         try {
             const exactCurrentPage = window.location.href.split('#')[0].split('?')[0];
+            
             const { error } = await window.supabaseClient.auth.signInWithOAuth({
                 provider: provider,
                 options: {
@@ -1042,10 +1049,11 @@ window.Q_Auth = {
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
             
-            // INGEST GOOGLE CALENDAR IF TOKEN IS PRESENT AND IT WAS A SYNC REQUEST
+            // --- CRITICAL FIX: AWAIT THE SYNC BEFORE REDIRECTING ---
             if (session.session.provider_token && session.session.user.app_metadata.provider === 'google') {
                 if (window.Q_UniversalSync && window.Q_UniversalSync.ingestGoogleCalendar) {
-                    window.Q_UniversalSync.ingestGoogleCalendar(session.session.provider_token);
+                    window.Q_LOG('INFO', 'CORE', 'HOLDING_REDIRECT_FOR_CALENDAR_SYNC');
+                    await window.Q_UniversalSync.ingestGoogleCalendar(session.session.provider_token);
                 }
             }
             
@@ -1061,7 +1069,6 @@ window.Q_Auth = {
                 badge.style.color = "#000";
                 badge.style.background = "#39ff14";
                 
-                // Switch the onclick action dynamically
                 badge.onclick = () => window.Q_Auth.signOut();
                 badge.ontouchstart = (e) => { window.Q_Auth.signOut(); e.preventDefault(); };
             }
