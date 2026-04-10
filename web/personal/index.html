@@ -206,7 +206,7 @@
 
         const VECTOR_METRICS = {
             'BIO': { HRV: 'HRV / Elasticity', PHASE: 'Ultradian Phase', LUNAR: 'Lunar Illumination', TIDE: 'Gravitational Tide', RHR: 'Resting Heart Rate', SLEEP: 'Sleep Stage', NOON: 'Solar Noon Proximity' },
-            'COM': { ZODIAC: 'Astrophysical Aspect', LEDGER: 'Sovereign Ledger', TERM: 'Solar Season (Jiéqì)', NODE: 'Q-Coordinate' },
+            'COM': { NEXT: 'Next Civil Anchor', ZODIAC: 'Astrophysical Aspect', LEDGER: 'Sovereign Ledger', TERM: 'Solar Season (Jiéqì)' },
             'ENV': { FRICTION: 'Thermodynamic Friction', RISK: 'Probability Index', TENSION: 'Biome Tension', GEO: 'Local Coordinate', IRRADIANCE: 'Solar Irradiance', PRESSURE: 'Atmospheric Pressure' },
             'MEC': { DRIFT: 'Drift to Pylon', ECCENTRICITY: 'Orbital Eccentricity', SYMMETRY: 'Temporal Symmetry Loss', SMEAR: 'Gregorian Smear', VELOCITY: 'Keplerian Velocity' }
         };
@@ -256,9 +256,14 @@
             // Initialize Defaults if missing
             if(!localStorage.getItem('Q_SLOT_BIO_1')) {
                 localStorage.setItem('Q_SLOT_BIO_1', 'HRV'); localStorage.setItem('Q_SLOT_BIO_2', 'LUNAR'); localStorage.setItem('Q_SLOT_BIO_3', 'TIDE'); localStorage.setItem('Q_SLOT_BIO_4', 'PHASE');
-                localStorage.setItem('Q_SLOT_COM_1', 'NODE'); localStorage.setItem('Q_SLOT_COM_2', 'ZODIAC'); localStorage.setItem('Q_SLOT_COM_3', 'LEDGER'); localStorage.setItem('Q_SLOT_COM_4', 'TERM');
+                localStorage.setItem('Q_SLOT_COM_1', 'NEXT'); localStorage.setItem('Q_SLOT_COM_2', 'ZODIAC'); localStorage.setItem('Q_SLOT_COM_3', 'LEDGER'); localStorage.setItem('Q_SLOT_COM_4', 'TERM');
                 localStorage.setItem('Q_SLOT_ENV_1', 'FRICTION'); localStorage.setItem('Q_SLOT_ENV_2', 'RISK'); localStorage.setItem('Q_SLOT_ENV_3', 'TENSION'); localStorage.setItem('Q_SLOT_ENV_4', 'GEO');
                 localStorage.setItem('Q_SLOT_MEC_1', 'DRIFT'); localStorage.setItem('Q_SLOT_MEC_2', 'ECCENTRICITY'); localStorage.setItem('Q_SLOT_MEC_3', 'SYMMETRY'); localStorage.setItem('Q_SLOT_MEC_4', 'SMEAR');
+            }
+
+            // Auto-migrate legacy 'NODE' selection for Communal Vector de-duplication
+            for(let i=1; i<=4; i++) {
+                if(localStorage.getItem(`Q_SLOT_COM_${i}`) === 'NODE') localStorage.setItem(`Q_SLOT_COM_${i}`, 'NEXT');
             }
 
             // Map data directly into the global UI containers
@@ -324,9 +329,16 @@
             if(getEl('face-BIO-NOON')) getEl('face-BIO-NOON').innerText = "T-" + (12 - new Date(t).getUTCHours()) + "H";
 
             // COM DATA
-            if(getEl('face-COM-NODE')) {
-                let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-                getEl('face-COM-NODE').innerText = (activeBlock && activeBlock.type === 'PYLON') ? activeBlock.name : `Q${qData.quad} S${qData.sect} D${qData.day}`;
+            if(getEl('face-COM-NEXT')) {
+                const currentYear = activeTime.getUTCFullYear();
+                let globalCiv = window.getGlobalHolidays ? window.getGlobalHolidays(currentYear).filter(e => e.type === 'node-civ' || e.type === 'node-hol') : [];
+                globalCiv.push({ name: "Tax Day (US)", coord: 113.4, type: 'node-sys' }); // Add systematic marker
+                globalCiv.sort((a,b) => a.coord - b.coord);
+                
+                let nextCiv = globalCiv.find(e => e.coord > qData.trueArc);
+                if (!nextCiv && globalCiv.length > 0) nextCiv = globalCiv[0]; // Wrap around loop
+                
+                getEl('face-COM-NEXT').innerText = nextCiv ? `${nextCiv.name.substring(0,12).toUpperCase()} @ ${nextCiv.coord.toFixed(1)}°` : "--";
             }
             if(getEl('face-COM-ZODIAC')) {
                 const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];

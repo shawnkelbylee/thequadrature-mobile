@@ -25,6 +25,7 @@
             --sys-cyan: #00f0ff;
             --env-green: #a7ff83;
             --warn-orange: #ffaa00; 
+            --chrono-amber: #B97A35;
             --friction-red: #ff3333;
             --theme-main: var(--bio-purple); 
             --theme-dim: var(--bio-purple-dim);
@@ -93,6 +94,10 @@
         .aura-glow { position: absolute; width: 100%; height: 100%; border-radius: 50%; transition: all 1s ease; opacity: 0.4; z-index: -1; }
         .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); }
         .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse 3s infinite; }
+        .sleep-aura { background: radial-gradient(circle, var(--bio-purple) 0%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); opacity: 0.15; }
+        .inertia-aura { background: radial-gradient(circle, var(--chrono-amber) 0%, transparent 75%); box-shadow: 0 0 60px var(--chrono-amber); animation: aura-pulse 4s infinite; }
+        .dlmo-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, transparent 75%); box-shadow: 0 0 60px var(--bio-cobalt); animation: aura-pulse 4s infinite; }
+        
         @keyframes aura-pulse { 0%, 100% { transform: scale(1); opacity: 0.25; } 50% { transform: scale(1.15); opacity: 0.45; } }
         
         #lunar-nodes-container { position: absolute; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
@@ -415,32 +420,74 @@
                 tidalEl.style.textShadow = tideColor === "var(--friction-red)" ? "0 0 10px rgba(255,51,51,0.4)" : "";
             }
 
+            // --- 5-PHASE THERMODYNAMIC MODEL INTEGRATION ---
             let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
-            let cycleDurMs = cycleDuration * 60000;
-            let cyclePosFloat = (activeMs % cycleDurMs) / cycleDurMs;
-            let currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            let minsSinceWake = Math.floor(activeMs / 60000);
+            
+            let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
+            let wakingDurationMins = 1440 - sleepDuration;
+            let inertiaMins = parseInt(localStorage.getItem('q_sleep_inertia_mins')) || 45;
+            let dlmoMins = parseInt(localStorage.getItem('q_dlmo_offset_mins')) || 90;
+            
+            let currentBioState;
+            let cyclePosFloat = 0;
+            let remainingMins = 0;
+            let elapsedStr = "";
+
+            if (minsSinceWake >= wakingDurationMins) {
+                currentBioState = "SLEEP / RECOVERY";
+                cyclePosFloat = (minsSinceWake - wakingDurationMins) / sleepDuration;
+                remainingMins = 1440 - minsSinceWake;
+                elapsedStr = `${Math.floor(minsSinceWake - wakingDurationMins)} / ${sleepDuration} MIN`;
+            } else if (minsSinceWake < inertiaMins) {
+                currentBioState = "SLEEP INERTIA";
+                cyclePosFloat = minsSinceWake / inertiaMins;
+                remainingMins = inertiaMins - minsSinceWake;
+                elapsedStr = `${minsSinceWake} / ${inertiaMins} MIN`;
+            } else if (minsSinceWake >= wakingDurationMins - dlmoMins) {
+                currentBioState = "DLMO WIND-DOWN";
+                let dlmoElapsed = minsSinceWake - (wakingDurationMins - dlmoMins);
+                cyclePosFloat = dlmoElapsed / dlmoMins;
+                remainingMins = wakingDurationMins - minsSinceWake;
+                elapsedStr = `${dlmoElapsed} / ${dlmoMins} MIN`;
+            } else {
+                let coreMins = minsSinceWake - inertiaMins;
+                cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+                currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+                remainingMins = cycleDuration - (coreMins % cycleDuration);
+                elapsedStr = `${Math.floor(coreMins % cycleDuration)} / ${cycleDuration} MIN`;
+            }
             
             if (currentBioState !== lastBioState) {
                 const bioStateEl = document.getElementById('bio-state');
                 if (bioStateEl) bioStateEl.innerText = currentBioState;
                 
                 const bioAuraEl = document.getElementById('bio-aura');
-                if (bioAuraEl) bioAuraEl.className = currentBioState === "DEEP FLOW" ? "aura-glow flow-aura" : "aura-glow vent-aura";
-                
+                if (bioAuraEl) {
+                    if (currentBioState === "DEEP FLOW") bioAuraEl.className = "aura-glow flow-aura";
+                    else if (currentBioState === "VENT/RECOVERY") bioAuraEl.className = "aura-glow vent-aura";
+                    else if (currentBioState === "SLEEP / RECOVERY") bioAuraEl.className = "aura-glow sleep-aura";
+                    else if (currentBioState === "SLEEP INERTIA") bioAuraEl.className = "aura-glow inertia-aura";
+                    else if (currentBioState === "DLMO WIND-DOWN") bioAuraEl.className = "aura-glow dlmo-aura";
+                }
                 lastBioState = currentBioState;
             }
             
             const bioTimerEl = document.getElementById('bio-timer');
-            if (bioTimerEl) bioTimerEl.innerText = `${Math.floor((activeMs % cycleDurMs) / 60000)} / ${cycleDuration} MIN`;
+            if (bioTimerEl) bioTimerEl.innerText = elapsedStr;
             
             const bioBarEl = document.getElementById('bio-bar');
             if (bioBarEl) bioBarEl.style.width = (cyclePosFloat * 100) + "%";
             
             const matSleepEl = document.getElementById('mat-sleep');
-            if (matSleepEl) matSleepEl.innerText = currentBioState === "VENT/RECOVERY" ? "LIGHT/REM" : "DEEP";
+            if (matSleepEl) {
+                if (currentBioState === "SLEEP / RECOVERY") matSleepEl.innerText = "DEEP";
+                else if (currentBioState === "DLMO WIND-DOWN" || currentBioState === "SLEEP INERTIA") matSleepEl.innerText = "LIGHT/TRANSITION";
+                else matSleepEl.innerText = currentBioState === "VENT/RECOVERY" ? "LIGHT/REM" : "AWAKE";
+            }
 
             // PHASE COMPLETION HOOK
-            let remainingMs = cycleDurMs - (activeMs % cycleDurMs);
+            let remainingMs = remainingMins * 60000;
             let completionAbsoluteMs = t + remainingMs;
             let completionDays = (completionAbsoluteMs - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
             
