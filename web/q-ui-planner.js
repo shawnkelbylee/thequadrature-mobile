@@ -246,7 +246,9 @@ window.Q_OmniPlanner = {
         blocksData.forEach(b => {
             if (b.text && (b.text.includes('[FIXED]') || b.text.includes('[CIVIL]'))) {
                 constraintsCount++;
-                if (b.bioState === 'VENT/RECOVERY') {
+                if (b.bioState === 'SLEEP / RECOVERY') {
+                    tensionScore += 50; 
+                } else if (b.bioState === 'VENT/RECOVERY') {
                     tensionScore += 25; 
                 } else {
                     tensionScore += 10; 
@@ -255,8 +257,8 @@ window.Q_OmniPlanner = {
         });
         
         let advice = "SCHEDULE ALIGNED. True Ellipse resonance maintained.";
-        if (tensionScore > 75) {
-            advice = "SEVERE JAGGEDNESS DETECTED. You have forced Fixed Civil Constraints into Vent/Recovery windows. Burnout probability: HIGH. Resonance Re-alignment strongly advised.";
+        if (tensionScore >= 75) {
+            advice = "SEVERE JAGGEDNESS DETECTED. You have forced Fixed Civil Constraints into Sleep/Recovery windows. Burnout probability: CRITICAL. Resonance Re-alignment strongly advised.";
         } else if (tensionScore > 30) {
             advice = "MODERATE FRICTION. Civil logic is overriding biological flow. Consider shifting non-essential legacy meetings to Bio-Green sectors.";
         }
@@ -351,6 +353,7 @@ window.Q_OmniPlanner = {
             .time-block:hover { background: rgba(255,255,255,0.05); }
             .time-block.flow-state { border-left: 4px solid var(--env-green, #a7ff83); background: rgba(167, 255, 131, 0.05); }
             .time-block.vent-state { border-left: 4px solid var(--sys-cyan, #00f0ff); background: rgba(0, 240, 255, 0.05); }
+            .time-block.sleep-state { border-left: 4px solid var(--bio-purple, #b829ff); background: rgba(184, 41, 255, 0.05); }
             
             .tension-dashboard { background: rgba(0,0,0,0.6); border: 1px dashed var(--magenta-glow, #ff003c); border-radius: 6px; padding: 15px; margin: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; }
             .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--magenta-glow, #ff003c); text-shadow: 0 0 15px var(--magenta-dim, rgba(255,0,60,0.3)); }
@@ -1005,6 +1008,8 @@ window.Q_OmniPlanner = {
         let savedAnchor = localStorage.getItem('q_bio_anchor');
         let anchorMins = (savedAnchor === null || savedAnchor === "") ? 0 : parseInt(savedAnchor); 
         let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
+        let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
+        let wakingDurationMs = (1440 - sleepDuration) * 60000;
         
         const selectedDateObj = new Date(this.selectedDate);
         
@@ -1014,8 +1019,14 @@ window.Q_OmniPlanner = {
             const data = window.qData[key] || { text: "" };
             
             let activeMs = ((blockMs % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
-            let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
-            let currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            let currentBioState;
+            
+            if (activeMs >= wakingDurationMs) {
+                currentBioState = "SLEEP / RECOVERY";
+            } else {
+                let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
+                currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            }
             
             dailyBlocksData.push({ hour: h, text: data.text, bioState: currentBioState, key: key, ms: blockMs });
         }
@@ -1036,7 +1047,11 @@ window.Q_OmniPlanner = {
 
         dailyBlocksData.forEach(b => {
             const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
-            let blockClass = b.bioState === 'DEEP FLOW' ? 'flow-state' : 'vent-state';
+            let blockClass = '';
+            if (b.bioState === 'DEEP FLOW') blockClass = 'flow-state';
+            else if (b.bioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
+            else blockClass = 'vent-state';
+            
             if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
             
             const block = document.createElement('div');
@@ -1051,9 +1066,14 @@ window.Q_OmniPlanner = {
                 timeHeaderHtml = `<div class="time-header" style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:var(--theme-main, #00f0ff); font-family:'Orbitron'; font-weight:bold;">Q:${b.hour.toString().padStart(2,'0')}</span><span style="font-size:0.55rem; color:#aaa; font-weight:bold;">(${civilFmt.timeStr.split(' ')[0]})</span></div>`;
             }
             
-            let badgeHtml = b.bioState === 'DEEP FLOW' 
-                ? `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>` 
-                : `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
+            let badgeHtml = '';
+            if (b.bioState === 'DEEP FLOW') {
+                badgeHtml = `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>`;
+            } else if (b.bioState === 'SLEEP / RECOVERY') {
+                badgeHtml = `<span style="color:var(--bio-purple, #b829ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP / RECOVERY</span>`;
+            } else {
+                badgeHtml = `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
+            }
 
             if (isCivilConstraint) {
                 badgeHtml += ` <span style="background:var(--magenta-glow, #ff003c); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
@@ -1131,6 +1151,8 @@ window.Q_OmniPlanner = {
         let savedAnchor = localStorage.getItem('q_bio_anchor');
         let anchorMins = (savedAnchor === null || savedAnchor === "") ? 0 : parseInt(savedAnchor); 
         let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
+        let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
+        let wakingDurationMs = (1440 - sleepDuration) * 60000;
         
         for(let m=0; m<totalMins; m+=5) {
             let targetMs = baseMs + (this.selectedHour * 3600000) + (m * 60000);
@@ -1140,11 +1162,21 @@ window.Q_OmniPlanner = {
             const orbital = window.getOrbitalData(diff);
             
             let activeMs = ((targetMs % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
-            let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
-            let currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            let currentBioState;
+            
+            if (activeMs >= wakingDurationMs) {
+                currentBioState = "SLEEP / RECOVERY";
+            } else {
+                let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
+                currentBioState = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            }
             
             const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
-            let blockClass = currentBioState === 'DEEP FLOW' ? 'flow-state' : 'vent-state';
+            let blockClass = '';
+            if (currentBioState === 'DEEP FLOW') blockClass = 'flow-state';
+            else if (currentBioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
+            else blockClass = 'vent-state';
+            
             if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
             
             const block = document.createElement('div'); 

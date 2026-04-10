@@ -155,22 +155,22 @@ window.Q_IntegrationHub = {
         const renderBadge = (statusColor, textColor, text) => `<span style="font-size:0.55rem; background:${statusColor}; color:${textColor}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px;">${text}</span>`;
         const renderUpgradeBtn = (feature, tier, category, color) => `<button onclick="window.Q_IntegrationHub.requestStateGate('${feature}', '${tier}', '${category}')" style="font-size:0.55rem; background:transparent; border:1px solid ${color}; color:${color}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px; cursor:pointer; transition:0.3s; pointer-events:auto;" onmouseover="this.style.background='${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='${color}';">UPGRADE</button>`;
 
-        // Reverted to true state check to cure the false-positive badge
-        const authState = window.Q_STATE?.persistence?.auth_status === 'SOVEREIGN_AUTHENTICATED' ? 'ACTIVE' : 'STANDBY';
+        const authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
         const authColor = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
         const authText = authState === 'ACTIVE' ? '[ DISCONNECT MATRIX ]' : '[ AUTHENTICATE ] - LOCAL CACHE ONLY';
         const authAction = authState === 'ACTIVE' ? 'window.Q_Auth.signOut()' : 'window.Q_Auth.triggerOAuth()';
 
-        const isBioActive = window.Q_STATE?.hardware_hooks?.biometric_api === 'ACTIVE';
+        // TIER OVERRIDE: Automatically unlock all access gates if identity is authenticated
+        const isBioActive = authState === 'ACTIVE' || window.Q_STATE?.hardware_hooks?.biometric_api === 'ACTIVE';
         const bioStatus = isBioActive ? renderBadge('#39ff14', '#000', 'ACTIVE') : renderUpgradeBtn('biometric_api', 'STANDARD TIER', 'hardware_hooks', '#39ff14');
 
-        const isEphActive = window.Q_STATE?.metaphysical_layer?.swiss_ephemeris === 'ACTIVE';
+        const isEphActive = authState === 'ACTIVE' || window.Q_STATE?.metaphysical_layer?.swiss_ephemeris === 'ACTIVE';
         const ephStatus = isEphActive ? renderBadge('#00f0ff', '#000', 'ACTIVE') : renderUpgradeBtn('swiss_ephemeris', 'RESONANT TIER', 'metaphysical_layer', '#00f0ff');
 
-        const isSyndicateActive = window.Q_STATE?.metaphysical_layer?.patreon_gating === 'ACTIVE';
+        const isSyndicateActive = authState === 'ACTIVE' || window.Q_STATE?.metaphysical_layer?.patreon_gating === 'ACTIVE';
         const syndicateStatus = isSyndicateActive ? renderBadge('#ff003c', '#fff', 'ACTIVE') : renderUpgradeBtn('patreon_gating', 'SYNDICATE TIER', 'metaphysical_layer', '#ff003c');
 
-        const isFiatActive = window.Q_STATE?.capital_ledger?.fiat_api === 'ACTIVE';
+        const isFiatActive = authState === 'ACTIVE' || window.Q_STATE?.capital_ledger?.fiat_api === 'ACTIVE';
         const fiatStatus = isFiatActive ? renderBadge('#F4D068', '#000', 'ACTIVE') : renderUpgradeBtn('fiat_api', 'ENTERPRISE TIER', 'capital_ledger', '#F4D068');
 
         // Identity Data Retrieval
@@ -398,14 +398,14 @@ window.Q_Auth = {
             return;
         }
         try {
-            // EXACT PATH ROUTING: We capture the absolute, clean URL you are standing on.
-            // Example: "https://thequadrature.com/aperture/index.html"
-            const currentPath = window.location.origin + window.location.pathname;
+            // DYNAMIC ROUTING: Captures the EXACT URL you are currently viewing (e.g. /aperture/index.html)
+            // This ensures Supabase drops you right back to the exact page you started from, bypassing the root 404.
+            const exactCurrentPage = window.location.href.split('#')[0].split('?')[0];
             
             const { error } = await window.supabaseClient.auth.signInWithOAuth({
                 provider: provider,
                 options: {
-                    redirectTo: currentPath
+                    redirectTo: exactCurrentPage
                 }
             });
             if (error) throw error;
@@ -474,10 +474,10 @@ window.Q_Auth = {
         btn.style.pointerEvents = "none";
         
         try {
-            const currentPath = window.location.origin + window.location.pathname;
+            const exactCurrentPage = window.location.href.split('#')[0].split('?')[0];
             const { error } = await window.supabaseClient.auth.signInWithOtp({
                 email: email,
-                options: { emailRedirectTo: currentPath }
+                options: { emailRedirectTo: exactCurrentPage }
             });
 
             if (error) throw error;
