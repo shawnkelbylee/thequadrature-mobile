@@ -874,10 +874,9 @@ window.Q_Onboarding = {
     }
 };
 
-// --- SOVEREIGN AUTHENTICATION (MAGIC LINK & OAUTH) ---
+// --- SOVEREIGN AUTHENTICATION (MERGED PROTOCOL: CORE + HUB) ---
 window.Q_Auth = {
     getRedirectVector: function() {
-        // ALWAYS fallback to the explicit safe harbor to pass the firewall
         const origin = window.location.origin;
         return `${origin}/personal/index.html`;
     },
@@ -887,20 +886,21 @@ window.Q_Auth = {
             return;
         }
         
-        // Cache the user's active screen so we can route them back after Supabase drops them off
         sessionStorage.setItem('Q_AUTH_RETURN_VECTOR', window.location.pathname);
         
         let options = { redirectTo: this.getRedirectVector() };
-        
-        // ONLY attach the restricted scope if explicitly requested, to avoid Google 403 blocks on standard login
         if (provider === 'google' && requestCalendar) {
             options.scopes = 'https://www.googleapis.com/auth/calendar.readonly';
         }
         
         try {
+            const exactCurrentPage = window.location.href.split('#')[0].split('?')[0];
             const { error } = await window.supabaseClient.auth.signInWithOAuth({
                 provider: provider,
-                options: options
+                options: {
+                    ...options,
+                    redirectTo: exactCurrentPage 
+                }
             });
             if (error) throw error;
         } catch (err) {
@@ -925,7 +925,9 @@ window.Q_Auth = {
         try {
             await window.supabaseClient.auth.signOut();
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
-            window.Q_STATE.persistence.auth_status = 'STANDBY';
+            if (window.Q_STATE && window.Q_STATE.persistence) {
+                window.Q_STATE.persistence.auth_status = 'STANDBY';
+            }
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_DISCONNECTED');
             window.location.reload();
         } catch (err) {
@@ -1014,7 +1016,9 @@ window.Q_Auth = {
         
         const { data: session } = await window.supabaseClient.auth.getSession();
         if (session?.session?.user) {
-            window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
+            if (window.Q_STATE && window.Q_STATE.persistence) {
+                window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
+            }
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
             
@@ -1036,6 +1040,10 @@ window.Q_Auth = {
                 badge.innerText = "[ IN THE QUAD ]";
                 badge.style.color = "#000";
                 badge.style.background = "#39ff14";
+                
+                // Switch the onclick action dynamically
+                badge.onclick = () => window.Q_Auth.signOut();
+                badge.ontouchstart = (e) => { window.Q_Auth.signOut(); e.preventDefault(); };
             }
             
             // Contextual UX Return Logic
@@ -1047,7 +1055,9 @@ window.Q_Auth = {
             
         } else {
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
-            window.Q_STATE.persistence.auth_status = 'STANDBY';
+            if (window.Q_STATE && window.Q_STATE.persistence) {
+                window.Q_STATE.persistence.auth_status = 'STANDBY';
+            }
         }
     }
 };
