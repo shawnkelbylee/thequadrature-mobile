@@ -302,7 +302,7 @@
                 }
 
                 // Explicitly route Physical/BL Panel to the Omni-Planner
-                if (hrefStr.includes('/physical') || onClickStr.includes('physical') || text.includes('physical assets') || text.includes('physical quad') || text.includes('omni planner') || text.includes('omniplanner')) {
+                if (hrefStr.includes('/physical') || onClickStr.includes('physical') || text.includes('physical assets') || text.includes('omni-planner') || text.includes('omni planner')) {
                     e.preventDefault();
                     e.stopPropagation();
                     if (window.Q_OmniPlanner) window.Q_OmniPlanner.openPlanner();
@@ -330,6 +330,22 @@
         document.addEventListener('DOMContentLoaded', () => {
             injectPerfectIris();
             initStars();
+            
+            // UI TEXT OVERRIDE: Renames the dynamically injected label from q-ui-global.js
+            const renamePanel = () => {
+                const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+                let node;
+                while ((node = walker.nextNode())) {
+                    if (node.nodeValue.trim().toUpperCase() === 'PHYSICAL ASSETS') {
+                        node.nodeValue = node.nodeValue.replace(/PHYSICAL ASSETS/ig, 'OMNI-PLANNER');
+                    }
+                }
+            };
+            
+            // Run immediately and again slightly delayed to catch the UI injection
+            renamePanel();
+            setTimeout(renamePanel, 150);
+            setTimeout(renamePanel, 500);
         });
     </script>
 </body>
