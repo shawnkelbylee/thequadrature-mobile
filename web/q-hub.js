@@ -155,7 +155,8 @@ window.Q_IntegrationHub = {
         const renderBadge = (statusColor, textColor, text) => `<span style="font-size:0.55rem; background:${statusColor}; color:${textColor}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px;">${text}</span>`;
         const renderUpgradeBtn = (feature, tier, category, color) => `<button onclick="window.Q_IntegrationHub.requestStateGate('${feature}', '${tier}', '${category}')" style="font-size:0.55rem; background:transparent; border:1px solid ${color}; color:${color}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px; cursor:pointer; transition:0.3s; pointer-events:auto;" onmouseover="this.style.background='${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='${color}';">UPGRADE</button>`;
 
-        const authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
+        // Reverted to true state check to cure the false-positive badge
+        const authState = window.Q_STATE?.persistence?.auth_status === 'SOVEREIGN_AUTHENTICATED' ? 'ACTIVE' : 'STANDBY';
         const authColor = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
         const authText = authState === 'ACTIVE' ? '[ DISCONNECT MATRIX ]' : '[ AUTHENTICATE ] - LOCAL CACHE ONLY';
         const authAction = authState === 'ACTIVE' ? 'window.Q_Auth.signOut()' : 'window.Q_Auth.triggerOAuth()';
@@ -398,7 +399,7 @@ window.Q_Auth = {
         }
         try {
             // EXACT PATH ROUTING: We capture the absolute, clean URL you are standing on.
-            // Example: "https://quadrature-mobile...vercel.app/aperture/index.html"
+            // Example: "https://thequadrature.com/aperture/index.html"
             const currentPath = window.location.origin + window.location.pathname;
             
             const { error } = await window.supabaseClient.auth.signInWithOAuth({
