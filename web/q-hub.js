@@ -29,7 +29,7 @@ window.Q_IntegrationHub = {
             .hub-header { font-family:'Orbitron'; text-align:center; padding-bottom:15px; font-size: 1.1rem; color: var(--theme-main, #ff003c); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,0,60,0.2); border-bottom: 1px dashed rgba(255,255,255,0.2); }
             
             .hub-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; gap: 5px; flex-wrap: wrap; }
-            .hub-tab-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; padding: 10px 5px; cursor: pointer; transition: 0.3s; letter-spacing: 1px; border-bottom: 2px solid transparent; min-width: 80px; }
+            .hub-tab-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; padding: 10px 5px; cursor: pointer; transition: 0.3s; letter-spacing: 1px; border-bottom: 2px solid transparent; min-width: 70px; }
             .hub-tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
             .hub-tab-btn.active { color: var(--theme-main, #ff003c); border-bottom-color: var(--theme-main, #ff003c); background: rgba(255,0,60,0.05); }
 
@@ -159,7 +159,6 @@ window.Q_IntegrationHub = {
         const renderBadge = (statusColor, textColor, text) => `<span style="font-size:0.55rem; background:${statusColor}; color:${textColor}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px;">${text}</span>`;
         const renderUpgradeBtn = (feature, tier, category, color) => `<button onclick="window.Q_IntegrationHub.requestStateGate('${feature}', '${tier}', '${category}')" style="font-size:0.55rem; background:transparent; border:1px solid ${color}; color:${color}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px; cursor:pointer; transition:0.3s; pointer-events:auto;" onmouseover="this.style.background='${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='${color}';">UPGRADE</button>`;
 
-        // TIER OVERRIDE: Automatically unlock all access gates if identity is authenticated
         const authState = window.Q_STATE?.persistence?.auth_status === 'SOVEREIGN_AUTHENTICATED' ? 'ACTIVE' : 'STANDBY';
         const authColor = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
         const authText = authState === 'ACTIVE' ? '[ DISCONNECT MATRIX ]' : '[ AUTHENTICATE ] - LOCAL CACHE ONLY';
@@ -196,7 +195,7 @@ window.Q_IntegrationHub = {
         const sDlmo = window.Q_STATE?.metaphysical_layer?.dlmo_offset_mins !== null ? window.Q_STATE?.metaphysical_layer?.dlmo_offset_mins : (parseInt(localStorage.getItem('q_dlmo_offset_mins')) || 90);
         
         const sAi = window.Q_STATE?.logic_layer?.preferred_ai_diplomat || 'DEFAULT';
-        const sDeepFlowEnforcement = window.Q_STATE?.logic_layer?.deep_flow_enforcement !== false; // Defaults to true
+        const sDeepFlowEnforcement = window.Q_STATE?.logic_layer?.deep_flow_enforcement !== false;
 
         // Diagnostic Status Retrieval
         const jplStatus = window.EPHEMERIS_LIVE ? '<span style="color:#39ff14; text-shadow:0 0 5px rgba(57,255,20,0.5);">[ CONNECTED / LIVE ]</span>' : '<span style="color:#ff003c; text-shadow:0 0 5px rgba(255,0,60,0.5);">[ DISCONNECTED / FAILOVER ]</span>';
@@ -213,6 +212,7 @@ window.Q_IntegrationHub = {
                     <button class="hub-tab-btn ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
                     <button class="hub-tab-btn ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-btn-tiers" onclick="window.Q_IntegrationHub.switchTab('tiers')">TIERS</button>
                     <button class="hub-tab-btn ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-btn-prefs" onclick="window.Q_IntegrationHub.switchTab('prefs')">PREFS</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'library' ? 'active' : ''}" id="tab-btn-library" onclick="window.Q_IntegrationHub.switchTab('library')">LIBRARY</button>
                 </div>
 
                 <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
@@ -391,6 +391,16 @@ window.Q_IntegrationHub = {
                     </div>
                     
                     <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">OFFLINE EPHEMERIS CACHE</div>
+                        <div style="font-size:0.6rem; color:#aaa; line-height: 1.4; margin-bottom: 10px;">
+                            Download and lock the planetary telemetry into your device's local storage. This guarantees 100% physics accuracy and continuous system operation even without an active internet connection.
+                        </div>
+                        <div class="hub-input-group">
+                            <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline.'); }">CACHE TELEMETRY DATA</button>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
                         <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">BIOMETRIC HARDWARE SYNC</div>
                         <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:center;">
                             <button class="hub-action-btn" style="flex:1; padding:8px; font-size:0.6rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura')">OURA RING</button>
@@ -409,6 +419,45 @@ window.Q_IntegrationHub = {
                             <label class="hub-input-lbl">SWISS EPHEMERIS API</label>
                             <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${swissStatus}</div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="hub-tab-content ${this.activeTab === 'library' ? 'active' : ''}" id="tab-content-library">
+                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #ff003c); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(255,0,60,0.3); text-align:center;">THE QUADRATURE LIBRARY</div>
+                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; text-align:center;">
+                        Procure physical artifacts and foundational texts to anchor your environment in the True Ellipse.
+                    </div>
+
+                    <div class="hub-tier-row">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">THE ETERNAL NOW</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">The foundational philosophical text.</div>
+                        </div>
+                        <button class="hub-action-btn" style="width:auto; padding:6px 12px; font-size:0.55rem; color:#fff; border-color:#fff;">ACQUIRE</button>
+                    </div>
+
+                    <div class="hub-tier-row">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">COLLECTED ESSAYS</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Deep dives into chronobiology & metrology.</div>
+                        </div>
+                        <button class="hub-action-btn" style="width:auto; padding:6px 12px; font-size:0.55rem; color:#fff; border-color:#fff;">ACQUIRE</button>
+                    </div>
+
+                    <div class="hub-tier-row">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">ARCHITECTURAL POSTERS</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">High-fidelity prints of the Quadrature system.</div>
+                        </div>
+                        <button class="hub-action-btn" style="width:auto; padding:6px 12px; font-size:0.55rem; color:#fff; border-color:#fff;">ACQUIRE</button>
+                    </div>
+
+                    <div class="hub-tier-row">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">PHYSICAL DESK CALENDAR</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Tactile 360-degree daily alignment tool.</div>
+                        </div>
+                        <button class="hub-action-btn" style="width:auto; padding:6px 12px; font-size:0.55rem; color:#fff; border-color:#fff;">ACQUIRE</button>
                     </div>
                 </div>
 

@@ -41,6 +41,7 @@
     <script src="../q-ui-global.js"></script>
     <script src="../q-core.js"></script>
     <script src="../q-hub.js"></script>
+    <script src="../q-ui-planner.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -278,8 +279,8 @@
 
         // --- AGGRESSIVE CAPTURE-PHASE INTERCEPTOR ---
         window.addEventListener('click', (e) => {
-            // CRITICAL FIX: Bypass interceptor entirely if clicking inside the dashboard or modals
-            if (e.target.closest('.q-hub-overlay') || e.target.closest('.modal-overlay')) {
+            // CRITICAL FIX: Bypass interceptor entirely if clicking inside the dashboard, planner, or modals
+            if (e.target.closest('.q-hub-overlay') || e.target.closest('.modal-overlay') || e.target.closest('.q-planner-overlay')) {
                 return; 
             }
 
@@ -300,12 +301,18 @@
                     return; // Halt interceptor loop
                 }
 
+                // Explicitly route Physical/BL Panel to the Omni-Planner
+                if (hrefStr.includes('/physical') || onClickStr.includes('physical') || text.includes('physical assets') || text.includes('physical quad') || text.includes('omni planner') || text.includes('omniplanner')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.Q_OmniPlanner) window.Q_OmniPlanner.openPlanner();
+                    return; // Halt interceptor loop
+                }
+
                 if (hrefStr.includes('/personal') || onClickStr.includes('personal') || text.includes('personal quad')) {
                     targetUrl = '../personal/index.html';
                 } else if (hrefStr.includes('/commercial') || onClickStr.includes('commercial') || text.includes('commercial quad')) {
                     targetUrl = '../commercial/index.html';
-                } else if (hrefStr.includes('/physical') || onClickStr.includes('physical') || text.includes('physical assets')) {
-                    targetUrl = '../physical/index.html';
                 } 
 
                 if (targetUrl) break;
