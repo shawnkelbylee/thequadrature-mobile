@@ -381,6 +381,14 @@ window.Q_IntegrationHub = {
                         <label class="hub-input-lbl">FINANCIAL API BRIDGE (ENTERPRISE)</label>
                         <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:var(--gold); color:var(--gold);" ${isFiatActive ? '' : 'disabled'}>${isFiatActive ? 'MANAGE PLAID / STRIPE' : 'LOCKED (REQUIRES ENTERPRISE)'}</button>
                     </div>
+
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">UNIVERSAL PAYLOAD SYNC</div>
+                        <div class="hub-input-group">
+                            <button class="hub-action-btn" style="background:rgba(0, 240, 255, 0.1); border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_Auth) window.Q_Auth.triggerGoogleCalendarSync()">SYNC GOOGLE CALENDAR</button>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.55rem; color:#aaa; text-align:center; margin-top:4px;">Imports legacy events as [FIXED] civil constraints.</div>
+                        </div>
+                    </div>
                     
                     <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
                         <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">BIOMETRIC HARDWARE SYNC</div>
@@ -433,7 +441,7 @@ window.Q_Auth = {
         const origin = window.location.origin;
         return `${origin}/personal/index.html`;
     },
-    triggerOAuthProvider: async function(provider) {
+    triggerOAuthProvider: async function(provider, requestCalendar = false) {
         if (!window.supabaseClient) {
             alert("CLOUD BRIDGE DISCONNECTED. AWAITING SUPABASE INIT.");
             return;
@@ -442,14 +450,19 @@ window.Q_Auth = {
         sessionStorage.setItem('Q_AUTH_RETURN_VECTOR', window.location.pathname);
         
         let options = { redirectTo: this.getRedirectVector() };
-        if (provider === 'google') {
+        if (provider === 'google' && requestCalendar) {
             options.scopes = 'https://www.googleapis.com/auth/calendar.readonly';
         }
         
         try {
+            const exactCurrentPage = window.location.href.split('#')[0].split('?')[0];
+            
             const { error } = await window.supabaseClient.auth.signInWithOAuth({
                 provider: provider,
-                options: options
+                options: {
+                    ...options,
+                    redirectTo: exactCurrentPage 
+                }
             });
             if (error) throw error;
         } catch (err) {
@@ -463,6 +476,24 @@ window.Q_Auth = {
             window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'OAUTH_LOGIN' }));
         } else {
             this.renderLoginModal();
+        }
+    },
+    triggerGoogleCalendarSync: function() {
+        window.Q_LOG('INFO', 'CORE', 'EXPLICIT_CALENDAR_SYNC_TRIGGERED');
+        this.triggerOAuthProvider('google', true);
+    },
+    signOut: async function() {
+        if (!window.supabaseClient) return;
+        try {
+            await window.supabaseClient.auth.signOut();
+            localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
+            if (window.Q_STATE && window.Q_STATE.persistence) {
+                window.Q_STATE.persistence.auth_status = 'STANDBY';
+            }
+            window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_DISCONNECTED');
+            window.location.reload();
+        } catch (err) {
+            window.Q_LOG('ERROR', 'CORE', 'SIGNOUT_FAILED', { error: err.message });
         }
     },
     renderLoginModal: function() {
@@ -547,11 +578,13 @@ window.Q_Auth = {
         
         const { data: session } = await window.supabaseClient.auth.getSession();
         if (session?.session?.user) {
-            window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
+            if (window.Q_STATE && window.Q_STATE.persistence) {
+                window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
+            }
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
             
-            // INGEST GOOGLE CALENDAR IF TOKEN IS PRESENT
+            // INGEST GOOGLE CALENDAR IF TOKEN IS PRESENT AND IT WAS A SYNC REQUEST
             if (session.session.provider_token && session.session.user.app_metadata.provider === 'google') {
                 if (window.Q_UniversalSync && window.Q_UniversalSync.ingestGoogleCalendar) {
                     window.Q_UniversalSync.ingestGoogleCalendar(session.session.provider_token);
@@ -569,6 +602,10 @@ window.Q_Auth = {
                 badge.innerText = "[ IN THE QUAD ]";
                 badge.style.color = "#000";
                 badge.style.background = "#39ff14";
+                
+                // Switch the onclick action dynamically
+                badge.onclick = () => window.Q_Auth.signOut();
+                badge.ontouchstart = (e) => { window.Q_Auth.signOut(); e.preventDefault(); };
             }
             
             // Contextual UX Return Logic
@@ -580,7 +617,9 @@ window.Q_Auth = {
             
         } else {
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
-            window.Q_STATE.persistence.auth_status = 'STANDBY';
+            if (window.Q_STATE && window.Q_STATE.persistence) {
+                window.Q_STATE.persistence.auth_status = 'STANDBY';
+            }
         }
     }
 };

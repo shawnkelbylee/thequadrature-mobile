@@ -618,8 +618,14 @@ window.Q_OmniPlanner = {
 
     injectHolidays: function(element, date) {
         if (!window.PYLON_ALPHA_DYNAMIC || !window.getGlobalHolidays) return;
-        const year = date.getUTCFullYear();
-        const daysElapsed = (date.getTime() - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+        
+        // NORMALIZE TO UTC HIGH NOON TO PREVENT METROLOGICAL DRIFT
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+        const utcNoonMs = Date.UTC(year, month, day, 12, 0, 0);
+        
+        const daysElapsed = (utcNoonMs - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
         const o = window.getOrbitalData(daysElapsed);
         const dayArc = o.meanArc;
         

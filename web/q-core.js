@@ -496,9 +496,11 @@ window.Q_UniversalSync = {
                 window.savePlannerData();
                 window.dispatchEvent(new Event('storage'));
                 window.Q_LOG('STATE', 'CORE', 'GOOGLE_CALENDAR_SYNCED', { events_processed: count });
+                return count;
             }
         } catch (err) {
             window.Q_LOG('ERROR', 'CORE', 'GOOGLE_CALENDAR_SYNC_FAILED', { error: err.message });
+            return 0;
         }
     },
     mapEventToPlanner: function(ev) {
@@ -879,7 +881,7 @@ window.Q_Auth = {
         const origin = window.location.origin;
         return `${origin}/personal/index.html`;
     },
-    triggerOAuthProvider: async function(provider) {
+    triggerOAuthProvider: async function(provider, requestCalendar = false) {
         if (!window.supabaseClient) {
             alert("CLOUD BRIDGE DISCONNECTED. AWAITING SUPABASE INIT.");
             return;
@@ -889,7 +891,9 @@ window.Q_Auth = {
         sessionStorage.setItem('Q_AUTH_RETURN_VECTOR', window.location.pathname);
         
         let options = { redirectTo: this.getRedirectVector() };
-        if (provider === 'google') {
+        
+        // ONLY attach the restricted scope if explicitly requested, to avoid Google 403 blocks on standard login
+        if (provider === 'google' && requestCalendar) {
             options.scopes = 'https://www.googleapis.com/auth/calendar.readonly';
         }
         
@@ -910,6 +914,22 @@ window.Q_Auth = {
             window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'OAUTH_LOGIN' }));
         } else {
             this.renderLoginModal();
+        }
+    },
+    triggerGoogleCalendarSync: function() {
+        window.Q_LOG('INFO', 'CORE', 'EXPLICIT_CALENDAR_SYNC_TRIGGERED');
+        this.triggerOAuthProvider('google', true);
+    },
+    signOut: async function() {
+        if (!window.supabaseClient) return;
+        try {
+            await window.supabaseClient.auth.signOut();
+            localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
+            window.Q_STATE.persistence.auth_status = 'STANDBY';
+            window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_DISCONNECTED');
+            window.location.reload();
+        } catch (err) {
+            window.Q_LOG('ERROR', 'CORE', 'SIGNOUT_FAILED', { error: err.message });
         }
     },
     renderLoginModal: function() {
@@ -998,7 +1018,7 @@ window.Q_Auth = {
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
             
-            // INGEST GOOGLE CALENDAR IF TOKEN IS PRESENT
+            // INGEST GOOGLE CALENDAR IF TOKEN IS PRESENT AND IT WAS A SYNC REQUEST
             if (session.session.provider_token && session.session.user.app_metadata.provider === 'google') {
                 if (window.Q_UniversalSync && window.Q_UniversalSync.ingestGoogleCalendar) {
                     window.Q_UniversalSync.ingestGoogleCalendar(session.session.provider_token);
