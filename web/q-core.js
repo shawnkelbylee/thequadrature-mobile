@@ -222,6 +222,7 @@ window.fetchCloudState = async function() {
             if (stateData.asset_track_mode) window.Q_UpdateStateLocal('system_state', 'asset_track_mode', stateData.asset_track_mode, 'q_asset_mode');
             if (stateData.active_faiths) window.Q_UpdateStateLocal('metaphysical_layer', 'active_faiths', stateData.active_faiths, 'q_active_faiths');
             if (stateData.zodiac_visible !== null) window.Q_UpdateStateLocal('metaphysical_layer', 'zodiac_visible', stateData.zodiac_visible, 'q_zodiac_visible');
+            if (stateData.deep_flow_enforcement !== null) window.Q_UpdateStateLocal('logic_layer', 'deep_flow_enforcement', stateData.deep_flow_enforcement, 'q_deep_flow_enforcement');
         }
 
         if (idData) {
@@ -255,7 +256,8 @@ window.Q_STATE = {
     logic_layer: { 
         predictive_friction: true, 
         civil_exporter: 'ACTIVE',
-        preferred_ai_diplomat: localStorage.getItem('q_ai_diplomat') || 'DEFAULT' 
+        preferred_ai_diplomat: localStorage.getItem('q_ai_diplomat') || 'DEFAULT',
+        deep_flow_enforcement: localStorage.getItem('q_deep_flow_enforcement') !== 'false'
     },
     hardware_hooks: { biometric_api: 'ACTIVE', iot_webhooks: 'ACTIVE' },
     capital_ledger: { 
@@ -301,7 +303,8 @@ window.Q_UpdateState = async function(category, key, value) {
         'wake_anchor_mins': 'q_bio_anchor', 'sleep_cycle_duration': 'q_sleep_cycle_duration',
         'sleep_inertia_mins': 'q_sleep_inertia_mins', 'dlmo_offset_mins': 'q_dlmo_offset_mins',
         'fiat_routing_id': 'q_fiat_routing_id', 'q_time_fmt': 'Q_TIME_FMT', 'preferred_ai_diplomat': 'q_ai_diplomat',
-        'asset_track_mode': 'q_asset_mode', 'active_faiths': 'q_active_faiths', 'zodiac_visible': 'q_zodiac_visible'
+        'asset_track_mode': 'q_asset_mode', 'active_faiths': 'q_active_faiths', 'zodiac_visible': 'q_zodiac_visible',
+        'deep_flow_enforcement': 'q_deep_flow_enforcement'
     };
 
     const localKey = localMap[key] || `q_${key}`;
@@ -318,7 +321,7 @@ window.Q_UpdateState = async function(category, key, value) {
         if (session?.session?.user) {
             try {
                 const identityKeys = ['dob', 'tob', 'tob_unknown', 'location_name', 'lat', 'lon', 'wake_anchor_mins', 'sleep_cycle_duration', 'sleep_inertia_mins', 'dlmo_offset_mins', 'natal_anchor', 'fiat_routing_id'];
-                const stateKeys = ['q_time_fmt', 'preferred_ai_diplomat', 'asset_track_mode', 'active_faiths', 'zodiac_visible'];
+                const stateKeys = ['q_time_fmt', 'preferred_ai_diplomat', 'asset_track_mode', 'active_faiths', 'zodiac_visible', 'deep_flow_enforcement'];
                 
                 let targetTable = null;
                 let payload = { user_id: session.session.user.id };
@@ -395,6 +398,107 @@ window.getActiveDLMO = function() {
     return val !== null && !isNaN(val) ? val : (parseInt(localStorage.getItem('q_dlmo_offset_mins')) || 90);
 };
 
+window.getBiologicalState = function(t) {
+    let anchorMins = window.getActiveWakeAnchor();
+    let cycleDuration = window.getActiveCycleDuration();
+    let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
+    let minsSinceWake = Math.floor(activeMs / 60000);
+    
+    let sleepDuration = window.Q_STATE.metaphysical_layer.sleep_cycle_duration || 450;
+    let wakingDurationMins = 1440 - sleepDuration;
+    let inertiaMins = window.getActiveSleepInertia();
+    let dlmoMins = window.getActiveDLMO();
+    
+    if (minsSinceWake >= wakingDurationMins) return "SLEEP / RECOVERY";
+    if (minsSinceWake < inertiaMins) return "SLEEP INERTIA";
+    if (minsSinceWake >= wakingDurationMins - dlmoMins) return "DLMO WIND-DOWN";
+    
+    let coreMins = minsSinceWake - inertiaMins;
+    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+    return (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+};
+
+// --- UNIVERSAL PAYLOAD SYNC & ICS INGESTION (TASK 12) ---
+window.Q_UniversalSync = {
+    ingestICS: function(icsData) {
+        window.Q_LOG('INFO', 'CORE', 'ICS_PAYLOAD_INGESTION_STARTED');
+        const lines = icsData.split(/\r\n|\n|\r/);
+        let inEvent = false;
+        let currentEvent = {};
+        let eventCount = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.startsWith('BEGIN:VEVENT')) {
+                inEvent = true;
+                currentEvent = {};
+            } else if (line.startsWith('END:VEVENT')) {
+                inEvent = false;
+                if (currentEvent.start && currentEvent.summary) {
+                    this.mapEventToPlanner(currentEvent);
+                    eventCount++;
+                }
+            } else if (inEvent) {
+                if (line.startsWith('DTSTART')) {
+                    currentEvent.start = this.parseICSDate(line);
+                } else if (line.startsWith('DTEND')) {
+                    currentEvent.end = this.parseICSDate(line);
+                } else if (line.startsWith('SUMMARY:')) {
+                    currentEvent.summary = line.substring(8);
+                }
+            }
+        }
+        
+        window.savePlannerData();
+        window.dispatchEvent(new Event('storage'));
+        window.Q_LOG('STATE', 'CORE', 'ICS_PAYLOAD_SYNCED', { events_processed: eventCount });
+        return eventCount;
+    },
+    parseICSDate: function(line) {
+        const parts = line.split(':');
+        if (parts.length < 2) return null;
+        const dateStr = parts[1];
+        if (dateStr.length < 15) return null;
+        
+        const y = parseInt(dateStr.substring(0,4));
+        const m = parseInt(dateStr.substring(4,6)) - 1;
+        const d = parseInt(dateStr.substring(6,8));
+        const h = parseInt(dateStr.substring(9,11));
+        const min = parseInt(dateStr.substring(11,13));
+        
+        if (dateStr.endsWith('Z')) {
+            return new Date(Date.UTC(y, m, d, h, min));
+        } else {
+            return new Date(y, m, d, h, min);
+        }
+    },
+    mapEventToPlanner: function(ev) {
+        if (!window.qData) window.qData = {};
+        if (!window.getDataKey) return;
+        
+        const key = window.getDataKey(ev.start, ev.start.getHours(), ev.start.getMinutes());
+        if (!window.qData[key]) window.qData[key] = { text: "", link: "" };
+        
+        const prefix = "[FIXED]";
+        if (!window.qData[key].text.includes(ev.summary)) {
+            let existing = window.qData[key].text;
+            window.qData[key].text = existing ? `${existing}\n${prefix} ${ev.summary}` : `${prefix} ${ev.summary}`;
+        }
+    },
+    routeBiometricAuth: function(provider) {
+        window.Q_LOG('INFO', 'CAPITAL', `ROUTING_BIOMETRIC_OAUTH_${provider.toUpperCase()}`);
+        if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ 
+                action: 'INITIATE_EXTERNAL_OAUTH', 
+                provider: provider 
+            }));
+        } else {
+            alert(`[ UNIVERSAL PAYLOAD SYNC ]\nRouting to ${provider} API gateway for hardware authorization...`);
+            window.Q_UpdateState('hardware_hooks', `${provider}_synced`, 'ACTIVE');
+        }
+    }
+};
+
 // --- ABSOLUTE PIXEL HEIGHT BINDING FOR MOBILE VIEWPORT SUPREMACY ---
 window.Q_ForceAppHeight = function() {
     document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
@@ -429,9 +533,42 @@ window.Q_MobileBridge = {
         } else {
             window.Q_LOG('INFO', 'HARDWARE', 'MOCK_HAPTIC_PULSE_BROWSER', { intensity: intensity });
         }
+    },
+    invokeQuadState: function(isActive) {
+        if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ 
+                action: 'SET_QUAD_STATE', 
+                blackout_notifications: isActive,
+                app_lock: isActive 
+            }));
+        }
+        window.Q_LOG('STATE', 'HARDWARE', isActive ? 'IN_THE_QUAD_PROTOCOL_ENGAGED' : 'IN_THE_QUAD_PROTOCOL_DISENGAGED', { blackout: isActive, app_lock: isActive });
     }
 };
 window.Q_MobileBridge.init();
+
+// --- IN THE QUAD PROTOCOL: DEEP FLOW MONITOR ---
+window.Q_DeepFlowMonitor = {
+    lastState: null,
+    lastEnforcementState: null,
+    check: function(t) {
+        const currentState = window.getBiologicalState(t);
+        const enforcementActive = window.Q_STATE.logic_layer.deep_flow_enforcement;
+        
+        const stateChanged = currentState !== this.lastState;
+        const enforcementChanged = enforcementActive !== this.lastEnforcementState;
+
+        if (stateChanged || enforcementChanged) {
+            if (currentState === "DEEP FLOW" && enforcementActive) {
+                window.Q_MobileBridge.invokeQuadState(true);
+            } else {
+                window.Q_MobileBridge.invokeQuadState(false);
+            }
+            this.lastState = currentState;
+            this.lastEnforcementState = enforcementActive;
+        }
+    }
+};
 
 // --- KAIROS SOVEREIGN COMMAND (VOICE LISTENER) ---
 window.Q_KairosVoice = {
@@ -899,6 +1036,8 @@ window.Q_MasterLoop = {
                 }
                 this.lastPylonIndex = currentPylonIndex;
 
+                if (window.Q_DeepFlowMonitor) window.Q_DeepFlowMonitor.check(t);
+
                 window.dispatchEvent(new CustomEvent('q-tick', {
                     detail: { t, isLive: state.isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr: formatted.dateStr, legacyTimeStr: formatted.timeStr, activePostulate }
                 }));
@@ -961,8 +1100,25 @@ window.Q_PHASE_III = {
                         const msg = JSON.parse(e.data);
                         if (msg.type === 'NATIVE_BIOMETRIC_PAYLOAD') {
                             document.removeEventListener('message', bioListener);
-                            window.Q_LOG('INFO', 'BIOLOGICAL', 'NATIVE_HEALTH_PAYLOAD_RECEIVED', { hrv: msg.payload.hrv });
-                            resolve(window.Q_BIOMETRICS.calculateUltradian(msg.payload.hrv));
+                            window.Q_LOG('INFO', 'BIOLOGICAL', 'NATIVE_HEALTH_PAYLOAD_RECEIVED', { status: 'AWAITING_PURGE' });
+                            
+                            // Extract necessary abstract metrics
+                            const derivedDuration = window.Q_BIOMETRICS.calculateUltradian(msg.payload.hrv);
+                            
+                            // THE 256MS PURGE PROTOCOL (Ephemeral Conduit Enforcement)
+                            setTimeout(() => {
+                                // Systematically destroy the raw PHI payload from active memory
+                                msg.payload.hrv = null;
+                                msg.payload.rhr = null;
+                                msg.payload.sleep_stage = null;
+                                delete msg.payload;
+                                
+                                window.Q_LOG('STATE', 'BIOLOGICAL', '256MS_PURGE_PROTOCOL_EXECUTED', { status: 'PHI_DESTROYED' });
+                                
+                                // Resolve with only the mathematically generated Q-metric
+                                resolve(derivedDuration);
+                            }, 256); // strictly 256ms
+
                         } else if (msg.type === 'NATIVE_BIOMETRIC_ERROR') {
                             document.removeEventListener('message', bioListener);
                             window.Q_LOG('ERROR', 'BIOLOGICAL', 'NATIVE_HEALTH_SYNC_FAILED', msg.payload);

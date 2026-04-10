@@ -363,7 +363,7 @@ window.Q_OmniPlanner = {
             .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--magenta-glow, #ff003c); text-shadow: 0 0 15px var(--magenta-dim, rgba(255,0,60,0.3)); }
             .consultant-advice { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: #aaa; max-width: 60%; line-height: 1.4; }
             
-            .fixed-civil-constraint { border: 1px solid var(--magenta-glow, #ff003c) !important; background: rgba(255,0,60,0.08) !important; box-shadow: inset 0 0 15px rgba(255,0,60,0.15); margin: 4px 10px; border-radius: 4px; }
+            .fixed-civil-constraint { border: 1px solid #ff003c !important; background: rgba(255,0,60,0.08) !important; box-shadow: inset 0 0 15px rgba(255,0,60,0.15); margin: 4px 10px; border-radius: 4px; }
             
         @media (max-width: 950px) { 
             .planner-matrix { padding: 5px; gap: 2px; } 
@@ -1097,7 +1097,7 @@ window.Q_OmniPlanner = {
             }
 
             if (isCivilConstraint) {
-                badgeHtml += ` <span style="background:var(--magenta-glow, #ff003c); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
+                badgeHtml += ` <span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
             }
 
             block.innerHTML = `
@@ -1213,6 +1213,11 @@ window.Q_OmniPlanner = {
             
             if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
             
+            let badgeHtml = "";
+            if (isCivilConstraint) {
+                badgeHtml = `<span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">CIVIL CONSTRAINT</span>`;
+            }
+            
             const block = document.createElement('div'); 
             block.className = `slot-block time-block ${blockClass}`;
             
@@ -1229,9 +1234,12 @@ window.Q_OmniPlanner = {
             block.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
                     ${timeHeaderHtml}
-                    <div style="font-size:0.5rem; color:#aaa; font-family:'JetBrains Mono';">COORD: ${orbital.trueArc.toFixed(2)}°</div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        ${badgeHtml}
+                        <div style="font-size:0.5rem; color:#aaa; font-family:'JetBrains Mono';">COORD: ${orbital.trueArc.toFixed(2)}°</div>
+                    </div>
                 </div>
-                <textarea style="width:100%; min-height: 60px; background:transparent; color:#fff; border:none; border-bottom:1px solid rgba(255,255,255,0.2); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none;" placeholder="Enter quadrature intent or [FIXED] civil event..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
+                <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? '#ff003c' : '#fff'}; border:none; border-bottom:1px solid rgba(255,255,255,0.2); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none;" placeholder="Enter quadrature intent or [FIXED] civil event..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
             
             if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
             matrix.appendChild(block);
