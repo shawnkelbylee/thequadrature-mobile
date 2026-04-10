@@ -584,42 +584,6 @@ window.Q_OmniPlanner = {
         if (actionContainer) {
             actionContainer.appendChild(fmtBtn);
             
-            const importBtn = document.createElement('button');
-            importBtn.className = 'back-btn';
-            importBtn.style.borderColor = 'var(--sys-cyan, #00f0ff)';
-            importBtn.style.color = 'var(--sys-cyan, #00f0ff)';
-            importBtn.innerText = 'IMPORT .ICS';
-            importBtn.onclick = () => {
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.accept = '.ics';
-                fileInput.style.display = 'none';
-                fileInput.onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        const icsData = ev.target.result;
-                        if(window.Q_UniversalSync && window.Q_UniversalSync.ingestICS) {
-                            const count = window.Q_UniversalSync.ingestICS(icsData);
-                            if(window.Q_ModalEngine) {
-                                window.Q_ModalEngine.render("SYNC COMPLETE", `<div style="text-align:center; font-family:'JetBrains Mono'; font-size:0.75rem; color:#00f0ff;">Successfully ingested ${count} civil constraints into the Sovereign Ledger.</div>`);
-                            } else {
-                                alert(`Successfully ingested ${count} civil constraints.`);
-                            }
-                            this.refreshView();
-                        } else {
-                            alert("Universal Sync module offline.");
-                        }
-                    };
-                    reader.readAsText(file);
-                };
-                document.body.appendChild(fileInput);
-                fileInput.click();
-                setTimeout(() => fileInput.remove(), 10000);
-            };
-            actionContainer.appendChild(importBtn);
-            
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
                 hardBackBtn.className = 'back-btn';

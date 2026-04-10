@@ -418,9 +418,10 @@ window.getBiologicalState = function(t) {
     return (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
 };
 
-// --- UNIVERSAL PAYLOAD SYNC & ICS INGESTION (TASK 12) ---
+// --- UNIVERSAL PAYLOAD SYNC & GOOGLE CALENDAR INGESTION (TASK 12) ---
 window.Q_UniversalSync = {
     ingestICS: function(icsData) {
+        // Fallback protocol for manual legacy uploads
         window.Q_LOG('INFO', 'CORE', 'ICS_PAYLOAD_INGESTION_STARTED');
         const lines = icsData.split(/\r\n|\n|\r/);
         let inEvent = false;
@@ -470,6 +471,34 @@ window.Q_UniversalSync = {
             return new Date(Date.UTC(y, m, d, h, min));
         } else {
             return new Date(y, m, d, h, min);
+        }
+    },
+    ingestGoogleCalendar: async function(token) {
+        window.Q_LOG('INFO', 'CORE', 'GOOGLE_CALENDAR_SYNC_INITIATED');
+        try {
+            const timeMin = new Date().toISOString();
+            const timeMax = new Date(Date.now() + 90 * window.MS_DAY).toISOString(); // Predict 90 days out
+            const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Google API rejected authorization or scopes.');
+            
+            const data = await res.json();
+            let count = 0;
+            if (data.items) {
+                data.items.forEach(ev => {
+                    if (ev.start && ev.start.dateTime && ev.summary) {
+                        const startMs = new Date(ev.start.dateTime);
+                        this.mapEventToPlanner({ start: startMs, summary: ev.summary });
+                        count++;
+                    }
+                });
+                window.savePlannerData();
+                window.dispatchEvent(new Event('storage'));
+                window.Q_LOG('STATE', 'CORE', 'GOOGLE_CALENDAR_SYNCED', { events_processed: count });
+            }
+        } catch (err) {
+            window.Q_LOG('ERROR', 'CORE', 'GOOGLE_CALENDAR_SYNC_FAILED', { error: err.message });
         }
     },
     mapEventToPlanner: function(ev) {
@@ -859,12 +888,15 @@ window.Q_Auth = {
         // Cache the user's active screen so we can route them back after Supabase drops them off
         sessionStorage.setItem('Q_AUTH_RETURN_VECTOR', window.location.pathname);
         
+        let options = { redirectTo: this.getRedirectVector() };
+        if (provider === 'google') {
+            options.scopes = 'https://www.googleapis.com/auth/calendar.readonly';
+        }
+        
         try {
             const { error } = await window.supabaseClient.auth.signInWithOAuth({
                 provider: provider,
-                options: {
-                    redirectTo: this.getRedirectVector() 
-                }
+                options: options
             });
             if (error) throw error;
         } catch (err) {
@@ -931,10 +963,11 @@ window.Q_Auth = {
         sessionStorage.setItem('Q_AUTH_RETURN_VECTOR', window.location.pathname);
 
         try {
+            const exactCurrentPage = window.location.href.split('#')[0].split('?')[0];
             const { error } = await window.supabaseClient.auth.signInWithOtp({
                 email: email,
                 options: {
-                    emailRedirectTo: this.getRedirectVector() 
+                    emailRedirectTo: exactCurrentPage 
                 }
             });
 
@@ -964,6 +997,13 @@ window.Q_Auth = {
             window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
+            
+            // INGEST GOOGLE CALENDAR IF TOKEN IS PRESENT
+            if (session.session.provider_token && session.session.user.app_metadata.provider === 'google') {
+                if (window.Q_UniversalSync && window.Q_UniversalSync.ingestGoogleCalendar) {
+                    window.Q_UniversalSync.ingestGoogleCalendar(session.session.provider_token);
+                }
+            }
             
             if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_AUTH_SUCCESS', token: session.session.access_token }));
@@ -1274,29 +1314,55 @@ window.calculatePylonAlpha = async function() {
     return window.PYLON_ALPHA_DYNAMIC;
 };
 
+// OFFLINE EPHEMERIS ENGINE (WEB WORKER INTEGRATION)
 window.fetchJPLTelemetry = async function() {
-    try {
-        const tDate = new Date();
-        const eDate = new Date(tDate.getTime() + window.MS_DAY);
-        const fmt = (d) => `${d.getUTCFullYear()}-${(d.getUTCMonth()+1).toString().padStart(2,'0')}-${d.getUTCDate().toString().padStart(2,'0')}`;
-        
-        const startStr = fmt(tDate);
-        const stopStr = fmt(eDate);
-
-        const response = await fetch(`https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27399%27&OBJ_DATA=%27YES%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27500@10%27&START_TIME=%27${startStr}%27&STOP_TIME=%27${stopStr}%27&STEP_SIZE=%271%20d%27&QUANTITIES=%2718%27`);
-        if (!response.ok) throw new Error('Telemetry endpoint unreachable or rate-limited.');
-        const data = await response.json();
-        
-        if (data && data.result) {
-            window.EPHEMERIS_LIVE = true;
-            window.Q_LOG('INFO', 'CORE', 'JPL_TELEMETRY_SYNCED', { source: 'NASA JPL HORIZONS', window: `${startStr} to ${stopStr}` });
-        } else {
-            throw new Error("Invalid telemetry payload.");
+    return new Promise((resolve, reject) => {
+        if (!window.Worker) {
+            window.Q_LOG('WARN', 'CORE', 'WEB_WORKER_UNSUPPORTED', { action: 'ENGAGING_KEPLERIAN_FAILOVER' });
+            window.EPHEMERIS_LIVE = false;
+            resolve(); 
+            return;
         }
-    } catch (err) {
-        window.EPHEMERIS_LIVE = false;
-        window.Q_LOG('WARN', 'CORE', 'JPL_DESYNC_DETECTED', { error: err.message, action: 'ENGAGING_KEPLERIAN_FAILOVER' });
-    }
+
+        if (!window.Q_EphemerisWorker) {
+            window.Q_EphemerisWorker = new Worker('q-ephemeris-worker.js');
+            
+            window.Q_EphemerisWorker.onmessage = function(e) {
+                const msg = e.data;
+                if (msg.type === 'TELEMETRY_SUCCESS') {
+                    window.EPHEMERIS_LIVE = true;
+                    window.Q_LOG('INFO', 'CORE', 'JPL_TELEMETRY_SYNCED', { source: msg.source, window: msg.window });
+                    if (window.Q_PendingTelemetryResolve) {
+                        window.Q_PendingTelemetryResolve();
+                        window.Q_PendingTelemetryResolve = null;
+                    }
+                } else if (msg.type === 'TELEMETRY_FAILED') {
+                    window.EPHEMERIS_LIVE = false;
+                    window.Q_LOG('WARN', 'CORE', 'JPL_DESYNC_DETECTED', { error: msg.error, action: 'ENGAGING_KEPLERIAN_FAILOVER' });
+                    if (window.Q_PendingTelemetryResolve) {
+                        window.Q_PendingTelemetryResolve(); 
+                        window.Q_PendingTelemetryResolve = null;
+                    }
+                }
+            };
+        }
+
+        window.Q_PendingTelemetryResolve = resolve;
+        
+        window.Q_EphemerisWorker.postMessage({
+            action: 'SYNC_TELEMETRY',
+            payload: { timestamp: Date.now() }
+        });
+        
+        setTimeout(() => {
+            if (window.Q_PendingTelemetryResolve) {
+                window.EPHEMERIS_LIVE = false;
+                window.Q_LOG('WARN', 'CORE', 'JPL_WORKER_TIMEOUT', { action: 'ENGAGING_KEPLERIAN_FAILOVER' });
+                window.Q_PendingTelemetryResolve();
+                window.Q_PendingTelemetryResolve = null;
+            }
+        }, 10000);
+    });
 };
 
 window.getOrbitalData = function(daysElapsed) {

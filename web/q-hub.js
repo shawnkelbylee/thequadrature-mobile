@@ -383,6 +383,15 @@ window.Q_IntegrationHub = {
                     </div>
                     
                     <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">BIOMETRIC HARDWARE SYNC</div>
+                        <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:center;">
+                            <button class="hub-action-btn" style="flex:1; padding:8px; font-size:0.6rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura')">OURA RING</button>
+                            <button class="hub-action-btn" style="flex:1; padding:8px; font-size:0.6rem; border-color:#fff; color:#fff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('whoop')">WHOOP</button>
+                            <button class="hub-action-btn" style="flex:1; padding:8px; font-size:0.6rem; border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('health_connect')">HEALTH CONNECT</button>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
                         <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">SYSTEM DIAGNOSTICS</div>
                         <div class="hub-input-group" style="margin-bottom: 8px;">
                             <label class="hub-input-lbl">NASA JPL HORIZONS BARYCENTRIC API</label>
@@ -432,14 +441,15 @@ window.Q_Auth = {
         
         sessionStorage.setItem('Q_AUTH_RETURN_VECTOR', window.location.pathname);
         
+        let options = { redirectTo: this.getRedirectVector() };
+        if (provider === 'google') {
+            options.scopes = 'https://www.googleapis.com/auth/calendar.readonly';
+        }
+        
         try {
-            const exactCurrentPage = window.location.href.split('#')[0].split('?')[0];
-            
             const { error } = await window.supabaseClient.auth.signInWithOAuth({
                 provider: provider,
-                options: {
-                    redirectTo: exactCurrentPage 
-                }
+                options: options
             });
             if (error) throw error;
         } catch (err) {
@@ -540,6 +550,13 @@ window.Q_Auth = {
             window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
+            
+            // INGEST GOOGLE CALENDAR IF TOKEN IS PRESENT
+            if (session.session.provider_token && session.session.user.app_metadata.provider === 'google') {
+                if (window.Q_UniversalSync && window.Q_UniversalSync.ingestGoogleCalendar) {
+                    window.Q_UniversalSync.ingestGoogleCalendar(session.session.provider_token);
+                }
+            }
             
             if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'SECURE_AUTH_SUCCESS', token: session.session.access_token }));
