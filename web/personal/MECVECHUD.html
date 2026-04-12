@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // MECHANICAL VECTOR</title>
-    <script src="./q-ui-global.js?v=22.7"></script>
-<script src="../q-core.js?v=22.7"></script>
-<script src="../q-ui-planner.js?v=22.7"></script>
-<script src="../q-hub.js?v=22.7"></script>
+    <script src="./q-ui-global.js"></script>
+    <script src="../q-core.js"></script>
+    <script src="../q-ui-planner.js"></script>
+    <script src="../q-hub.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
 
@@ -416,68 +419,8 @@
         }
 
         window.addEventListener('q-tick', (e) => {
-            const { t, isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
-            
-            // Utility function to format legacy strings (grey letters/symbols, cyan numbers)
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--steel); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(token => {
-                        if (/[0-9]/.test(token)) {
-                            out += `<span style="${numStyle}">${token}</span>`;
-                        } else {
-                            out += `<span style="${letterStyle}">${token}</span>`;
-                        }
-                    });
-                }
-                return out;
-            }
+            const { t, isLive, activeTime, daysElapsed, qData, lagDays, activePostulate } = e.detail;
 
-            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
-            if (legDateEl) {
-                legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
-            }
-
-            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
-            if (legTimeEl) {
-                legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-            }
-
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
-            
-            let smLetterStyle = "color:var(--steel); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-            let smNumStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-            
-            if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
-                } else {
-                    let cCycle = activeBlock ? activeBlock.cycle : 0;
-                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
-                }
-            }
-
-            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
-            if (meanDegEl) { 
-                meanDegEl.innerText = qData.meanArc.toFixed(4) + "°";
-                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-            
-            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
-            if (trueDegEl) { 
-                trueDegEl.innerText = qData.trueArc.toFixed(4) + "°";
-                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-            
             // --- DYNAMIC Q-DELTA DIAMOND & RING SHIFT ---
             const diamondArm = document.getElementById('transit-diamond-arm');
             if (diamondArm) diamondArm.style.transform = `rotate(${qData.meanArc}deg)`;
@@ -491,8 +434,6 @@
             // Interpolate color phase (1 = Perihelion/Red-Magenta, 0 = Aphelion/Blue-Cyan)
             let phase = (Math.cos(radDist) + 1) / 2;
             
-            // Magenta: 255, 0, 60
-            // Cyan: 0, 240, 255
             let r = Math.round(0 + (255 - 0) * phase);
             let g = Math.round(240 + (0 - 240) * phase);
             let b = Math.round(255 + (60 - 255) * phase);

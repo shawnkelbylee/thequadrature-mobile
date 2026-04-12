@@ -1,6 +1,6 @@
 // THE QUADRATURE: COMMERCIAL UI MATRIX & ENTERPRISE RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase V Enterprise Bifurcation. Strict Filename Routing. Monochrome Corporate Aesthetic Enforced.
+// STATUS: Phase V Enterprise Bifurcation. Universal Template Engine Locked. Dial SVGs extracted to local HTML.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -34,10 +34,10 @@ window.injectUniversalUI = function() {
     let headerText = "COMMERCIAL QUAD";
     let accentColor = "#ffffff"; // Forced White
 
-    if (bActive) headerText = "WORKFORCE RESONANCE (BIO)";
-    else if (eActive) headerText = "MACRO-INFRASTRUCTURE (ENV)";
-    else if (mActive) headerText = "YIELD METROLOGY (MEC)";
-    else if (cActive) headerText = "LOGISTICS & LEDGER (COM)";
+    if (bActive) headerText = "WORKFORCE RESONANCE";
+    else if (eActive) headerText = "MACRO-INFRASTRUCTURE";
+    else if (mActive) headerText = "YIELD METROLOGY";
+    else if (cActive) headerText = "LOGISTICS & LEDGER";
 
     const authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
     const authBg = authState === 'ACTIVE' ? '#ffffff' : 'transparent';
@@ -72,26 +72,25 @@ window.injectUniversalUI = function() {
         .global-header {
             position: absolute; top: 4vh; left: 0; width: 100vw;
             display: flex; justify-content: center; align-items: center; text-align: center;
-            font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.5rem; letter-spacing: 12px; padding-left: 12px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 900; font-size: 2.5rem; letter-spacing: 12px; padding-left: 12px;
             color: ${accentColor}; z-index: 50; pointer-events: none;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(255,255,255,0.1);
         }
 
-        /* PCB BACKGROUND INFRASTRUCTURE */
+        /* DYNAMIC PCB NETWORK INFRASTRUCTURE */
         .pcb-grid {
             position: fixed; inset: 0; z-index: 0;
             background-color: #030303;
             background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
             background-size: 50px 50px;
         }
-        .pcb-traces {
-            position: fixed; inset: 0; z-index: 1; opacity: 0.3;
-            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20 L80 20 L100 40 L180 40 M20 180 L60 180 L80 160 L160 160 M100 40 L100 160' stroke='%23333333' stroke-width='1.5' fill='none'/%3E%3Ccircle cx='20' cy='20' r='3' fill='%23555555'/%3E%3Ccircle cx='180' cy='40' r='3' fill='%23555555'/%3E%3Ccircle cx='20' cy='180' r='3' fill='%23555555'/%3E%3Ccircle cx='160' cy='160' r='3' fill='%23555555'/%3E%3C/svg%3E");
-            background-size: 300px 300px;
-            pointer-events: none;
+        
+        .pcb-svg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 1; pointer-events: none; opacity: 0.85;
         }
 
         /* STRICT CORPORATE BORDERS - IMAGE FRAMES PURGED */
@@ -100,8 +99,8 @@ window.injectUniversalUI = function() {
         .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.02); }
 
-        .frost-zone { position: absolute; inset: 6px 12px; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(12px); border-radius: 4px; border: 1px solid #333; z-index: -2; transition: 0.3s ease; }
-        .corner-panel:hover .frost-zone { border-color: ${accentColor}; box-shadow: 0 0 15px rgba(255,255,255,0.05); }
+        .frost-zone { position: absolute; inset: 6px 12px; background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(12px); border-radius: 4px; border: 1px solid #333; z-index: -2; transition: 0.3s ease; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .corner-panel:hover .frost-zone { border-color: ${accentColor}; box-shadow: 0 0 15px rgba(255,255,255,0.05), inset 0 0 20px rgba(0,0,0,0.8); }
 
         .tl { bottom: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); --tx-hover: -2px; --ty-hover: -2px;}
         .tr { bottom: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); --tx-hover: 2px; --ty-hover: -2px;}
@@ -129,10 +128,9 @@ window.injectUniversalUI = function() {
         .wing-data-center { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; width: 100%; padding: 40px 0; box-sizing: border-box; position: relative; z-index: 10; }
         .wing-footer { position: absolute; bottom: 20px; left: 0; width: 100%; z-index: 10; display: flex; justify-content: center; }
 
-        .w-head { font-family: 'Orbitron'; font-weight: 600; font-size: 0.75rem; letter-spacing: 3px; color: #888; border-bottom: 1px solid #333; padding-bottom: 4px; display: inline-block; z-index: 20; text-align: center; }
+        .w-head { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 0.85rem; letter-spacing: 3px; color: #888; border-bottom: 1px solid #333; padding-bottom: 4px; display: inline-block; z-index: 20; text-align: center; }
         .w-lbl { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: #666; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; z-index: 20; text-align: center; }
         .val-lg { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; white-space: nowrap; color: #fff; z-index: 20; text-align: center; }
-        .val-sm { font-family: 'Orbitron'; font-size: 0.85rem; font-weight: 700; z-index: 20; text-align: center; }
         .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: #ccc; cursor: pointer; border: 1px solid #555; padding: 2px 8px; border-radius: 2px; background: #111; pointer-events: auto; transition: 0.3s; white-space: nowrap; text-align: center; }
         .fmt-toggle:hover { background: #fff; color: #000; border-color: #fff; }
 
@@ -270,7 +268,45 @@ window.injectUniversalUI = function() {
 
     uiContainer.innerHTML = `
         <div class="pcb-grid"></div>
-        <div class="pcb-traces"></div>
+        
+        <svg class="pcb-svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+            <g class="base-traces" fill="none" stroke="#333333" stroke-width="2">
+                <path d="M 400 470 L 300 470" />
+                <path d="M 400 490 L 300 490" />
+                <path d="M 400 510 L 300 510" />
+                <path d="M 400 530 L 300 530" />
+                <path d="M 600 470 L 700 470" />
+                <path d="M 600 490 L 700 490" />
+                <path d="M 600 510 L 700 510" />
+                <path d="M 600 530 L 700 530" />
+                
+                <path d="M 200 470 L 170 470 L 170 300" />
+                <path d="M 200 490 L 185 490 L 185 300" />
+                <path d="M 200 510 L 185 510 L 185 700" />
+                <path d="M 200 530 L 170 530 L 170 700" />
+
+                <path d="M 800 470 L 830 470 L 830 300" />
+                <path d="M 800 490 L 815 490 L 815 300" />
+                <path d="M 800 510 L 815 510 L 815 700" />
+                <path d="M 800 530 L 830 530 L 830 700" />
+
+                <path d="M 100 200 L -50 200" />
+                <path d="M 100 220 L 70 220 L 70 280 L -50 280" />
+                <path d="M 100 240 L 40 240 L 40 360 L -50 360" />
+
+                <path d="M 100 800 L -50 800" />
+                <path d="M 100 780 L 70 780 L 70 720 L -50 720" />
+                <path d="M 100 760 L 40 760 L 40 640 L -50 640" />
+
+                <path d="M 900 200 L 1050 200" />
+                <path d="M 900 220 L 930 220 L 930 280 L 1050 280" />
+                <path d="M 900 240 L 960 240 L 960 360 L 1050 360" />
+
+                <path d="M 900 800 L 1050 800" />
+                <path d="M 900 780 L 930 780 L 930 720 L 1050 720" />
+                <path d="M 900 760 L 960 760 L 960 640 L 1050 640" />
+            </g>
+        </svg>
 
         <div class="global-header desktop-only">${headerText}</div>
 
@@ -280,10 +316,10 @@ window.injectUniversalUI = function() {
                     <a href="../aperture/index.html" class="q-nav-btn desktop-only" ontouchstart="window.location.href=this.href; event.preventDefault();">APERTURE</a>
                     <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();">${authText}</button>
                     <a href="./index.html" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
-                    <a href="./COMBIOVECHUD.html" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">WORKFORCE (BIO)</a>
-                    <a href="./COMCOMVECHUD.html" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">LEDGER (COM)</a>
-                    <a href="./COMENVVECHUD.html" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">INFRA (ENV)</a>
-                    <a href="./COMMECVECHUD.html" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">YIELD (MEC)</a>
+                    <a href="./COMBIOVECHUD.html" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">WORKFORCE</a>
+                    <a href="./COMCOMVECHUD.html" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">LEDGER</a>
+                    <a href="./COMENVVECHUD.html" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">INFRA</a>
+                    <a href="./COMMECVECHUD.html" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">YIELD</a>
                     <button class="q-nav-btn omni desktop-only" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()">[ OMNI-PLANNER ]</button>
                     <button class="q-nav-btn special desktop-only" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()">[ DASHBOARD ]</button>
                 </div>
@@ -296,7 +332,7 @@ window.injectUniversalUI = function() {
         <div class="wing-panel wing-l telemetry-node desktop-only" id="q-wing-left">
             <div class="wing-frost"></div>
             <div class="wing-header">
-                <span class="w-head">CIVIL LEDGER</span>
+                <span class="w-head">CIVIL</span>
             </div>
             <div class="wing-data-center">
                 <div style="margin-bottom: 15px;">
@@ -319,7 +355,7 @@ window.injectUniversalUI = function() {
         <div class="wing-panel wing-r telemetry-node desktop-only" id="q-wing-right">
             <div class="wing-frost"></div>
             <div class="wing-header">
-                <span class="w-head">PHYSICS ENGINE</span>
+                <span class="w-head">QUAD</span>
             </div>
             <div class="wing-data-center">
                 <div style="margin-bottom: 15px;">
@@ -329,11 +365,11 @@ window.injectUniversalUI = function() {
                 <div style="display:flex; width: 100%; justify-content: space-around;">
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <div class="w-lbl">MEAN (CIVIL)</div>
-                        <div class="val-sm" id="mean-deg" style="color:#ccc !important; margin-top: 4px;">--</div>
+                        <div id="mean-deg" style="font-family:'JetBrains Mono'; font-size:0.9rem; font-weight:700; color:#fff; margin-top: 4px;">--</div>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center;">
                         <div class="w-lbl">TRUE (ORBIT)</div>
-                        <div class="val-sm" id="true-deg" style="color:#ccc !important; margin-top: 4px;">--</div>
+                        <div id="true-deg" style="font-family:'JetBrains Mono'; font-size:0.9rem; font-weight:700; color:#fff; margin-top: 4px;">--</div>
                     </div>
                 </div>
             </div>
@@ -352,7 +388,7 @@ window.injectUniversalUI = function() {
     
     const refNode = document.body.firstChild;
     while (uiContainer.firstChild) document.body.insertBefore(uiContainer.firstChild, refNode);
-    
+
     window.bindMasterTickScrubber();
     window.syncScrubberUI();
 
@@ -443,10 +479,10 @@ window.openQuadrantAssignmentModal = function(quadrantId) {
                 Assign macro-telemetry pool to this enterprise sector.
             </div>
             <select id="quad-pool-select" style="background: #111; border: 1px solid #555; color: #fff; padding: 12px; font-family: 'Orbitron'; font-size: 0.75rem; border-radius: 4px; outline: none; width: 100%;">
-                <option value="BIO">WORKFORCE RESONANCE (BIO)</option>
-                <option value="COM">LOGISTICS & LEDGER (COM)</option>
-                <option value="ENV">MACRO-INFRASTRUCTURE (ENV)</option>
-                <option value="MEC">YIELD METROLOGY (MEC)</option>
+                <option value="BIO">WORKFORCE RESONANCE</option>
+                <option value="COM">LOGISTICS & LEDGER</option>
+                <option value="ENV">MACRO-INFRASTRUCTURE</option>
+                <option value="MEC">YIELD METROLOGY</option>
             </select>
         </div>
     `;
@@ -457,152 +493,6 @@ window.openQuadrantAssignmentModal = function(quadrantId) {
             localStorage.setItem('Q_FACE_QUAD_' + quadrantId, selected);
             if (typeof window.refreshChronoFace === 'function') window.refreshChronoFace();
             window.Q_ModalEngine.close();
-        });
-    }
-};
-
-// --- ENTERPRISE DYNAMIC DATA VISUALIZATIONS (Monochrome) ---
-window.initCommercialDials = function(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    const pathStr = window.location.pathname.toUpperCase();
-    const filename = pathStr.split('/').pop() || "INDEX.HTML";
-    
-    const bActive = filename.includes("COMBIOVECHUD");
-    const eActive = filename.includes("COMENVVECHUD");
-    const mActive = filename.includes("COMMECVECHUD");
-    const cActive = filename.includes("COMCOMVECHUD");
-    const faceActive = filename.includes("INDEX");
-
-    container.innerHTML = '';
-    const svgNS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(svgNS, "svg");
-    svg.setAttribute("width", "100%");
-    svg.setAttribute("height", "100%");
-    svg.setAttribute("viewBox", "0 0 400 400");
-    
-    if (faceActive) {
-        // High-Precision Analog Chrono-Dial
-        svg.innerHTML = `
-            <circle cx="200" cy="200" r="180" fill="none" stroke="#333" stroke-width="2"/>
-            <circle cx="200" cy="200" r="160" fill="none" stroke="#111" stroke-width="10"/>
-            <g id="chrono-ticks"></g>
-            <line id="hand-civil" x1="200" y1="200" x2="200" y2="60" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
-            <line id="hand-solar" x1="200" y1="200" x2="200" y2="40" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-dasharray="4"/>
-            <circle cx="200" cy="200" r="8" fill="#ffffff"/>
-        `;
-        container.appendChild(svg);
-
-        const ticks = document.getElementById('chrono-ticks');
-        for(let i=0; i<24; i++) {
-            const angle = (i * 15 - 90) * Math.PI / 180;
-            const x1 = 200 + 160 * Math.cos(angle);
-            const y1 = 200 + 160 * Math.sin(angle);
-            const x2 = 200 + 175 * Math.cos(angle);
-            const y2 = 200 + 175 * Math.sin(angle);
-            const line = document.createElementNS(svgNS, "line");
-            line.setAttribute("x1", x1); line.setAttribute("y1", y1); line.setAttribute("x2", x2); line.setAttribute("y2", y2);
-            line.setAttribute("stroke", i % 6 === 0 ? "#ffffff" : "#555");
-            line.setAttribute("stroke-width", i % 6 === 0 ? "3" : "1");
-            ticks.appendChild(line);
-        }
-
-        window.addEventListener('q-tick', (e) => {
-            const d = new Date(e.detail.t);
-            const civilAngle = (((d.getUTCHours() + d.getUTCMinutes()/60) / 24) * 360) - 90;
-            const solarAngle = (((e.detail.qData.trueArc) / 360) * 360) - 90;
-            document.getElementById('hand-civil').setAttribute("transform", `rotate(${civilAngle} 200 200)`);
-            document.getElementById('hand-solar').setAttribute("transform", `rotate(${solarAngle} 200 200)`);
-        });
-
-    } else if (mActive) {
-        // Yield Metrology: Line Graph (Monochrome)
-        svg.innerHTML = `
-            <rect x="40" y="40" width="320" height="320" fill="none" stroke="#333" stroke-width="1"/>
-            <path id="yield-line-1" d="" fill="none" stroke="#ffffff" stroke-width="3"/>
-            <path id="yield-line-2" d="" fill="none" stroke="#555" stroke-width="2" stroke-dasharray="5"/>
-            <text x="200" y="380" fill="#888" font-family="Orbitron" font-size="12" text-anchor="middle">KEPLERIAN SMEAR / FIAT LOSS</text>
-        `;
-        container.appendChild(svg);
-        
-        window.addEventListener('q-tick', (e) => {
-            let pts1 = "M40,200 "; let pts2 = "M40,200 ";
-            const delta = e.detail.qData.delta;
-            for(let i=1; i<=10; i++) {
-                pts1 += `L${40 + i*32},${200 - (Math.sin(e.detail.t/1000 + i)*20 + delta*10)} `;
-                pts2 += `L${40 + i*32},${200 - (Math.cos(e.detail.t/1500 + i)*15)} `;
-            }
-            document.getElementById('yield-line-1').setAttribute("d", pts1);
-            document.getElementById('yield-line-2').setAttribute("d", pts2);
-        });
-
-    } else if (bActive) {
-        // Workforce Resonance: Stacked Heat Map (Monochrome)
-        svg.innerHTML = `
-            <circle cx="200" cy="200" r="150" fill="none" stroke="#333" stroke-width="2"/>
-            <path id="bio-arc-1" d="" fill="none" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
-            <path id="bio-arc-2" d="" fill="none" stroke="#555" stroke-width="15" stroke-linecap="round"/>
-            <text x="200" y="200" fill="#fff" font-family="Orbitron" font-size="24" text-anchor="middle" id="bio-txt">92%</text>
-            <text x="200" y="225" fill="#888" font-family="JetBrains Mono" font-size="10" text-anchor="middle">FLOW ALIGNMENT</text>
-        `;
-        container.appendChild(svg);
-
-        window.addEventListener('q-tick', (e) => {
-            const arc1End = 90 + (Math.sin(e.detail.t/2000)*30);
-            const a1x = 200 + 130 * Math.cos(arc1End * Math.PI/180);
-            const a1y = 200 + 130 * Math.sin(arc1End * Math.PI/180);
-            document.getElementById('bio-arc-1').setAttribute("d", `M70,200 A130,130 0 0,1 ${a1x},${a1y}`);
-            
-            const arc2End = 180 + (Math.cos(e.detail.t/2500)*20);
-            const a2x = 200 + 100 * Math.cos(arc2End * Math.PI/180);
-            const a2y = 200 + 100 * Math.sin(arc2End * Math.PI/180);
-            document.getElementById('bio-arc-2').setAttribute("d", `M100,200 A100,100 0 0,1 ${a2x},${a2y}`);
-            document.getElementById('bio-txt').innerText = Math.floor(85 + (Math.sin(e.detail.t/1000)*10)) + "%";
-        });
-
-    } else if (eActive) {
-        // Macro-Infrastructure: Multi-ring radial gauge (Monochrome)
-        svg.innerHTML = `
-            <circle cx="200" cy="200" r="160" fill="none" stroke="#222" stroke-width="15"/>
-            <circle cx="200" cy="200" r="130" fill="none" stroke="#222" stroke-width="15"/>
-            <path id="env-ring-1" d="" fill="none" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
-            <path id="env-ring-2" d="" fill="none" stroke="#888" stroke-width="15" stroke-linecap="round"/>
-            <text x="200" y="200" fill="#fff" font-family="Orbitron" font-size="18" text-anchor="middle">BASELOAD</text>
-        `;
-        container.appendChild(svg);
-        
-        window.addEventListener('q-tick', (e) => {
-            const v1 = 180 + (e.detail.qData.trueArc % 180);
-            const x1 = 200 + 160 * Math.cos((v1-90) * Math.PI/180);
-            const y1 = 200 + 160 * Math.sin((v1-90) * Math.PI/180);
-            document.getElementById('env-ring-1').setAttribute("d", `M200,40 A160,160 0 ${v1>180?1:0},1 ${x1},${y1}`);
-            
-            const v2 = 90 + Math.abs(e.detail.qData.delta * 20);
-            const x2 = 200 + 130 * Math.cos((v2-90) * Math.PI/180);
-            const y2 = 200 + 130 * Math.sin((v2-90) * Math.PI/180);
-            document.getElementById('env-ring-2').setAttribute("d", `M200,70 A130,130 0 0,1 ${x2},${y2}`);
-        });
-
-    } else if (cActive) {
-        // Logistics & Ledger: 90-degree quadrant chart (Monochrome)
-        svg.innerHTML = `
-            <rect x="50" y="50" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect x="200" y="50" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect x="50" y="200" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect x="200" y="200" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect id="com-active-quad" x="50" y="50" width="150" height="150" fill="#ffffff" opacity="0.2"/>
-            <text x="200" y="200" fill="#fff" font-family="Orbitron" font-size="14" text-anchor="middle" alignment-baseline="middle">90+1 LEDGER</text>
-        `;
-        container.appendChild(svg);
-        
-        window.addEventListener('q-tick', (e) => {
-            const q = e.detail.qData.quad;
-            const active = document.getElementById('com-active-quad');
-            if (q === 1) { active.setAttribute("x", "200"); active.setAttribute("y", "50"); }
-            if (q === 2) { active.setAttribute("x", "200"); active.setAttribute("y", "200"); }
-            if (q === 3) { active.setAttribute("x", "50"); active.setAttribute("y", "200"); }
-            if (q === 4) { active.setAttribute("x", "50"); active.setAttribute("y", "50"); }
         });
     }
 };
@@ -676,5 +566,4 @@ window.syncScrubberUI = function() {
 
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
-    window.initCommercialDials('q-center-dial'); 
 });

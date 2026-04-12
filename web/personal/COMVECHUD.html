@@ -7,10 +7,12 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // COMMUNAL VECTOR</title>
-    <script src="./q-ui-global.js?v=22.0"></script>
-    <script src="../q-core.js?v=22.0"></script>
-    <script src="../q-ui-planner.js?v=22.0"></script>
-    <script src="../q-hub.js?v=22.0"></script>
+    
+    <script src="./q-ui-global.js"></script>
+    <script src="../q-core.js"></script>
+    <script src="../q-ui-planner.js"></script>
+    <script src="../q-hub.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
@@ -581,7 +583,7 @@
             if (savedAnchor !== 'NONE') {
                 const signNames = ['CAPRICORN','AQUARIUS','PISCES','ARIES','TAURUS','GEMINI','CANCER','LEO','VIRGO','LIBRA','SCORPIO','SAGITTARIUS'];
                 let natalIndex = signNames.indexOf(savedAnchor);
-                let currentIndex = Math.floor(trueArc / 30);
+                let currentIndex = Math.floor(trueArc / 30); // Note: trueArc not in scope here, need to fetch from state or pass
                 let diff = Math.abs(clickedIndex - natalIndex);
                 if (diff > 6) diff = 12 - diff; 
                 
@@ -682,55 +684,6 @@
         window.addEventListener('q-tick', (e) => {
             const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
             
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
-                }
-                return out;
-            }
-            
-            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
-            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
-
-            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
-            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-            
-            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
-            if (meanDegEl) { 
-                meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
-                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-            
-            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
-            if (trueDegEl) { 
-                trueDegEl.innerText = qData.trueArc.toFixed(2) + "°";
-                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
-            
-            let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-            let smNumStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-            
-            if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
-                } else {
-                    let cCycle = activeBlock ? activeBlock.cycle : 0;
-                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
-                }
-            }
-
             if (activeTime.getUTCFullYear() !== currentRenderedYear || document.getElementById('node-layer').children.length === 0) {
                 currentRenderedYear = activeTime.getUTCFullYear();
                 recalculateDynamicHolidays(currentRenderedYear);
@@ -756,37 +709,58 @@
             combinedRel.sort((a,b)=>a.coord-b.coord);
             
             let nextRel = getNextEvent(trueArc, combinedRel);
-            document.getElementById('rel-next').innerText = nextRel ? `${nextRel.name.substring(0,8).toUpperCase()}.. (${nextRel.coord.toFixed(1)}°)` : "--";
+            const relNextEl = document.getElementById('rel-next');
+            if (relNextEl) {
+                 relNextEl.innerText = nextRel ? `${nextRel.name.substring(0,8).toUpperCase()}.. (${nextRel.coord.toFixed(1)}°)` : "--";
+            }
 
             const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
             const savedAnchor = window.Q_STATE?.metaphysical_layer?.natal_anchor || 'NONE';
-            document.getElementById('zod-house').innerText = savedAnchor !== 'NONE' ? savedAnchor : "UNASSIGNED";
             
-            if (savedAnchor !== 'NONE') {
-                let natalIndex = zodiacNames.indexOf(savedAnchor);
-                let currentIndex = Math.floor(trueArc / 30);
-                let diff = Math.abs(currentIndex - natalIndex);
-                if (diff > 6) diff = 12 - diff; 
-                
-                let aspect = "";
-                if (diff === 0) aspect = "CONJUNCTION (0°)";
-                else if (diff === 1) aspect = "SEMI-SEXTILE (30°)";
-                else if (diff === 2) aspect = "SEXTILE (60°)";
-                else if (diff === 3) aspect = "SQUARE (90°)";
-                else if (diff === 4) aspect = "TRINE (120°)";
-                else if (diff === 5) aspect = "QUINCUNX (150°)";
-                else if (diff === 6) aspect = "OPPOSITION (180°)";
-                document.getElementById('zod-phase').innerText = aspect;
-            } else {
-                document.getElementById('zod-phase').innerText = "PENDING CALIBRATION";
+            const zodHouseEl = document.getElementById('zod-house');
+            if (zodHouseEl) zodHouseEl.innerText = savedAnchor !== 'NONE' ? savedAnchor : "UNASSIGNED";
+            
+            const zodPhaseEl = document.getElementById('zod-phase');
+            if (zodPhaseEl) {
+                if (savedAnchor !== 'NONE') {
+                    let natalIndex = zodiacNames.indexOf(savedAnchor);
+                    let currentIndex = Math.floor(trueArc / 30);
+                    let diff = Math.abs(currentIndex - natalIndex);
+                    if (diff > 6) diff = 12 - diff; 
+                    
+                    let aspect = "";
+                    if (diff === 0) aspect = "CONJUNCTION (0°)";
+                    else if (diff === 1) aspect = "SEMI-SEXTILE (30°)";
+                    else if (diff === 2) aspect = "SEXTILE (60°)";
+                    else if (diff === 3) aspect = "SQUARE (90°)";
+                    else if (diff === 4) aspect = "TRINE (120°)";
+                    else if (diff === 5) aspect = "QUINCUNX (150°)";
+                    else if (diff === 6) aspect = "OPPOSITION (180°)";
+                    zodPhaseEl.innerText = aspect;
+                } else {
+                    zodPhaseEl.innerText = "PENDING CALIBRATION";
+                }
             }
 
-            let globalCiv = window.getGlobalHolidays(currentRenderedYear).filter(e => e.type === 'node-civ');
+            let globalCiv = window.getGlobalHolidays ? window.getGlobalHolidays(currentRenderedYear).filter(e => e.type === 'node-civ') : [];
             let nextCiv = getNextEvent(trueArc, globalCiv.concat(SYS_DB));
-            document.getElementById('civ-next').innerText = nextCiv ? `${nextCiv.name.substring(0,10).toUpperCase()}.. (${nextCiv.coord.toFixed(1)}°)` : "--";
+            const civNextEl = document.getElementById('civ-next');
+            if (civNextEl) {
+                 civNextEl.innerText = nextCiv ? `${nextCiv.name.substring(0,10).toUpperCase()}.. (${nextCiv.coord.toFixed(1)}°)` : "--";
+            }
 
-            const termIndex = Math.floor(trueArc / 15); const activeTerm = window.Q_REGISTRY.SOLAR_TERMS[termIndex]; activeTermName = activeTerm.name; const termProgress = ((trueArc - activeTerm.start) / 15) * 100;
-            document.getElementById('int-term').innerText = activeTermName.substring(0,10).toUpperCase(); document.getElementById('int-pct').innerText = `${termProgress.toFixed(1)}% REALIZED`;
+            const termIndex = Math.floor(trueArc / 15); 
+            if (window.Q_REGISTRY && window.Q_REGISTRY.SOLAR_TERMS) {
+                const activeTerm = window.Q_REGISTRY.SOLAR_TERMS[termIndex]; 
+                activeTermName = activeTerm.name; 
+                const termProgress = ((trueArc - activeTerm.start) / 15) * 100;
+                
+                const intTermEl = document.getElementById('int-term');
+                if (intTermEl) intTermEl.innerText = activeTermName.substring(0,10).toUpperCase(); 
+                
+                const intPctEl = document.getElementById('int-pct');
+                if (intPctEl) intPctEl.innerText = `${termProgress.toFixed(1)}% REALIZED`;
+            }
         });
 
         if (window.generateStars) window.generateStars('stars'); 

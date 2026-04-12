@@ -8,10 +8,10 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // LOGISTICS & LEDGER (COM)</title>
     
-    <script src="./q-ui-global.js?v=23.0"></script>
-    <script src="../q-core.js?v=23.0"></script>
-    <script src="../q-ui-planner.js?v=23.0"></script>
-    <script src="../q-hub.js?v=23.0"></script>
+    <script src="./q-ui-global.js"></script>
+    <script src="../q-core.js"></script>
+    <script src="../q-ui-planner.js"></script>
+    <script src="../q-hub.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
@@ -43,7 +43,8 @@
 
         .t-row { display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px; font-size: 0.6rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
         .t-row span:first-child { color: var(--q-metal); }
-        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.8rem; color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.2); text-align: right; }
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.8rem; color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.2); }
+        .tr .val-sm, .br .val-sm { text-align: right; }
 
         /* --- Center Dial Architecture --- */
         .gear-container {
@@ -58,7 +59,16 @@
 </head>
 <body class="mode-q">
 
-    <div class="gear-container q-center-dial" id="q-center-dial"></div>
+    <div class="gear-container q-center-dial" id="q-center-dial">
+        <svg width="100%" height="100%" viewBox="0 0 400 400">
+            <rect x="50" y="50" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
+            <rect x="200" y="50" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
+            <rect x="50" y="200" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
+            <rect x="200" y="200" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
+            <rect id="com-active-quad" x="50" y="50" width="150" height="150" fill="#ffffff" opacity="0.2"/>
+            <text x="200" y="200" fill="#fff" font-family="Orbitron" font-size="14" text-anchor="middle" alignment-baseline="middle">90+1 LEDGER</text>
+        </svg>
+    </div>
 
     <div class="corner-panel tl telemetry-node desktop-only">
         <div class="frost-zone"></div>
@@ -93,8 +103,63 @@
     </div>
 
     <script>
-        // The global script handles the q-tick routing for face-COM-* elements.
-        // No local overrides required. Awaiting next command.
+        // Localized Data Script for COMCOMVECHUD Telemetry
+        window.addEventListener('q-tick', (e) => {
+            const { activeTime, qData } = e.detail;
+            const getEl = (id) => document.getElementById(id);
+
+            // --- CENTER DIAL KINEMATICS ---
+            const q = qData.quad;
+            const active = document.getElementById('com-active-quad');
+            if (active) {
+                if (q === 1) { active.setAttribute("x", "200"); active.setAttribute("y", "50"); }
+                if (q === 2) { active.setAttribute("x", "200"); active.setAttribute("y", "200"); }
+                if (q === 3) { active.setAttribute("x", "50"); active.setAttribute("y", "200"); }
+                if (q === 4) { active.setAttribute("x", "50"); active.setAttribute("y", "50"); }
+            }
+
+            // --- CORNER PANEL MATH ---
+            
+            // NEXT CIVIL ANCHOR
+            if(getEl('face-COM-NEXT')) {
+                const currentYear = activeTime.getUTCFullYear();
+                let globalCiv = window.getGlobalHolidays ? window.getGlobalHolidays(currentYear).filter(ev => ev.type === 'node-civ' || ev.type === 'node-hol') : [];
+                globalCiv.push({ name: "Tax Day (US)", coord: 113.4, type: 'node-sys' }); 
+                globalCiv.sort((a,b) => a.coord - b.coord);
+                
+                let nextCiv = globalCiv.find(ev => ev.coord > qData.trueArc);
+                if (!nextCiv && globalCiv.length > 0) nextCiv = globalCiv[0]; 
+                
+                getEl('face-COM-NEXT').innerText = nextCiv ? `${nextCiv.name.substring(0,12).toUpperCase()} @ ${nextCiv.coord.toFixed(1)}°` : "--";
+            }
+            
+            // TRANSIT METADATA (ZODIAC)
+            if(getEl('face-COM-ZODIAC')) {
+                const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
+                const sNatal = window.Q_STATE?.metaphysical_layer?.natal_anchor || 'NONE';
+                if (sNatal !== 'NONE') {
+                    let diff = Math.abs(Math.floor(qData.trueArc / 30) - zodiacNames.indexOf(sNatal));
+                    if (diff > 6) diff = 12 - diff; 
+                    getEl('face-COM-ZODIAC').innerText = diff === 0 ? "CONJUNCTION (0°)" : diff === 1 ? "SEMI-SEXTILE (30°)" : diff === 2 ? "SEXTILE (60°)" : diff === 3 ? "SQUARE (90°)" : diff === 4 ? "TRINE (120°)" : diff === 5 ? "QUINCUNX (150°)" : "OPPOSITION (180°)";
+                } else {
+                    getEl('face-COM-ZODIAC').innerText = zodiacNames[Math.floor(qData.meanArc / 30)];
+                }
+            }
+            
+            // SOVEREIGN LEDGER
+            if(getEl('face-COM-LEDGER')) {
+                getEl('face-COM-LEDGER').innerText = `Q${Math.floor(qData.trueArc / 90) + 1} CHECKPOINT`;
+            }
+            
+            // MACRO SEASON (SOLAR TERM)
+            if(getEl('face-COM-TERM')) {
+                if (window.Q_REGISTRY && window.Q_REGISTRY.SOLAR_TERMS) {
+                    getEl('face-COM-TERM').innerText = window.Q_REGISTRY.SOLAR_TERMS[Math.floor(qData.trueArc / 15)].name.toUpperCase();
+                } else {
+                    getEl('face-COM-TERM').innerText = "--";
+                }
+            }
+        });
     </script>
 </body>
 </html>

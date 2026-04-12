@@ -8,23 +8,16 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // COMMERCIAL CHRONO-FACE</title>
     
-    <script src="./q-ui-global.js?v=23.0"></script>
-    <script src="../q-core.js?v=23.0"></script>
-    <script src="../q-ui-planner.js?v=23.0"></script>
-    <script src="../q-hub.js?v=23.0"></script>
+    <script src="./q-ui-global.js"></script>
+    <script src="../q-core.js"></script>
+    <script src="../q-ui-planner.js"></script>
+    <script src="../q-hub.js"></script>
     
     <script>
-        // IRONCLAD MOBILE BYPASS: Force class if on native device, bypassing buggy WebView viewports
+        // IRONCLAD MOBILE BYPASS: Force class if on native device
         if (/Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768) {
             document.documentElement.classList.add('is-mobile-device');
         }
-
-        // OMNI-PLANNER PERSISTENT PROJECTION HOOK
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.Q_STATE && window.Q_STATE.logic_layer) {
-                window.Q_STATE.logic_layer.predictive_friction = true;
-            }
-        });
     </script>
 
     <style>
@@ -36,260 +29,127 @@
             --silver-glow: rgba(255, 255, 255, 0.15);
             --glass-liquid: rgba(10, 10, 10, 0.85); 
             --blur-high: blur(20px);
-            --starlight: rgba(255, 255, 255, 0.5);
-            --platinum: #cccccc;
             --q-metal: #888888;
         }
 
-        html.is-mobile-device body { perspective: none !important; transform-style: flat !important; }
-
-        /* --- Local Chrono-Face Styling for Internal Data Cells --- */
-        
-        /* Headers bound strictly to the 280px text block boundaries */
         .v-head { 
             position: absolute; white-space: nowrap;
-            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
-            margin: 0; padding: 0; z-index: 25; border: none;
-            width: 280px; 
+            font-family: 'JetBrains Mono'; font-weight: 700; font-size: 0.75rem; letter-spacing: 2px; 
+            margin: 0; padding: 0; z-index: 25; width: 280px; 
             left: 50%; transform: translateX(-50%);
             color: var(--white) !important;
         }
         
-        /* Top Panels: Headers tight BELOW the frame */
         #quad-BIO .v-head { bottom: -8px; text-align: right; }
         #quad-COM .v-head { bottom: -8px; text-align: left; }
-        
-        /* Bottom Panels: Headers tight ABOVE the frame */
         #quad-ENV .v-head { top: -8px; text-align: right; }
         #quad-MEC .v-head { top: -8px; text-align: left; }
 
-        /* The Imaginary Rectangle: Expanded width pushes left text left and right text right */
         .t-row { display: flex; justify-content: space-between; width: 280px; margin: 0 auto 3px auto; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
-        
-        /* Pure White Descriptors for Maximum Readability */
-        .t-row span:first-child { color: var(--q-metal); text-align: left; flex-shrink: 0; }
+        .t-row span:first-child { color: var(--q-metal); text-align: left; }
 
-        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--white) !important; text-shadow: 0 0 8px var(--silver-glow) !important; }
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; color: var(--white) !important; }
 
-        .phil-quote { font-family: 'JetBrains Mono'; font-size: 0.5rem; color: #666; text-align: center; font-style: italic; width: 280px; margin: 4px auto 0 auto; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px; }
-
-        /* --- Monochrome Corporate Center Dial Architecture --- */
         .gear-container {
-            position: absolute; width: var(--dial-size); height: var(--dial-size); border-radius: 50%; 
-            left: 50%; top: 50%; transform: translate(-50%, -50%) translateZ(-50px);
-            display: flex; justify-content: center; align-items: center; z-index: 30; transform-style: preserve-3d; 
+            position: absolute; width: var(--dial-size, 60vh); height: var(--dial-size, 60vh); border-radius: 50%; 
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; justify-content: center; align-items: center; z-index: 30;
             background: var(--glass-liquid); backdrop-filter: var(--blur-high); -webkit-backdrop-filter: var(--blur-high);
             border: 2px solid #333;
             box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.8);
-        }
-        
-        svg#chrono-clock-svg {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 40;
         }
     </style>
 </head>
 <body class="mode-q">
 
-    <div class="gear-container q-center-dial">
-        <svg id="chrono-clock-svg" viewBox="0 0 400 400">
-            <circle cx="200" cy="200" r="180" fill="none" stroke="#222" stroke-width="2"/>
-            <circle cx="200" cy="200" r="160" fill="none" stroke="#111" stroke-width="8"/>
+    <div class="gear-container q-center-dial" id="local-chrono-dial">
+        <svg width="100%" height="100%" viewBox="0 0 400 400" id="chrono-svg">
+            <circle cx="200" cy="200" r="180" fill="none" stroke="#333" stroke-width="2"/>
+            <circle cx="200" cy="200" r="160" fill="none" stroke="#111" stroke-width="10"/>
             <g id="chrono-ticks"></g>
-            <line id="hand-civil" x1="200" y1="200" x2="200" y2="60" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
-            <line id="hand-solar" x1="200" y1="200" x2="200" y2="40" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-dasharray="4"/>
+            <line id="hand-hour" x1="200" y1="200" x2="200" y2="120" stroke="#888" stroke-width="6" stroke-linecap="round"/>
+            <line id="hand-minute" x1="200" y1="200" x2="200" y2="60" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+            <line id="hand-second" x1="200" y1="200" x2="200" y2="40" stroke="#555" stroke-width="2" stroke-linecap="round"/>
             <circle cx="200" cy="200" r="8" fill="#ffffff"/>
-            <circle cx="200" cy="200" r="3" fill="#000000"/>
-            
-            <text x="200" y="35" fill="#555" font-family="Orbitron" font-size="10" text-anchor="middle">0 / 24</text>
-            <text x="200" y="375" fill="#555" font-family="Orbitron" font-size="10" text-anchor="middle">12</text>
-            <text x="375" y="204" fill="#555" font-family="Orbitron" font-size="10" text-anchor="middle">6</text>
-            <text x="25" y="204" fill="#555" font-family="Orbitron" font-size="10" text-anchor="middle">18</text>
         </svg>
     </div>
 
     <script>
-        // Generate SVG Ticks for the Clock
-        window.addEventListener('DOMContentLoaded', () => {
-            const ticks = document.getElementById('chrono-ticks');
-            if(ticks) {
-                for(let i=0; i<24; i++) {
-                    const angle = (i * 15 - 90) * Math.PI / 180;
-                    const x1 = 200 + 160 * Math.cos(angle);
-                    const y1 = 200 + 160 * Math.sin(angle);
-                    const x2 = 200 + 175 * Math.cos(angle);
-                    const y2 = 200 + 175 * Math.sin(angle);
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", x1); line.setAttribute("y1", y1); line.setAttribute("x2", x2); line.setAttribute("y2", y2);
-                    line.setAttribute("stroke", i % 6 === 0 ? "#888" : "#333");
-                    line.setAttribute("stroke-width", i % 6 === 0 ? "3" : "1");
-                    ticks.appendChild(line);
-                }
-            }
-        });
-
         const VECTOR_METRICS = {
-            'BIO': { HRV: 'HRV / Elasticity', PHASE: 'Ultradian Phase', LUNAR: 'Lunar Illumination', TIDE: 'Gravitational Tide', RHR: 'Resting Heart Rate', SLEEP: 'Sleep Stage', NOON: 'Solar Noon Proximity' },
-            'COM': { NEXT: 'Next Civil Anchor', ZODIAC: 'Astrophysical Aspect', LEDGER: 'Sovereign Ledger', TERM: 'Solar Season (Jiéqì)' },
-            'ENV': { FRICTION: 'Thermodynamic Friction', RISK: 'Probability Index', TENSION: 'Biome Tension', GEO: 'Local Coordinate', IRRADIANCE: 'Solar Irradiance', PRESSURE: 'Atmospheric Pressure' },
-            'MEC': { DRIFT: 'Drift to Pylon', ECCENTRICITY: 'Orbital Eccentricity', SYMMETRY: 'Temporal Symmetry Loss', SMEAR: 'Gregorian Smear', VELOCITY: 'Keplerian Velocity' }
+            'BIO': { HRV: 'HRV / Elasticity', PHASE: 'Ultradian Phase', LUNAR: 'Lunar Illumination', TIDE: 'Gravitational Tide' },
+            'COM': { NEXT: 'Next Civil Anchor', ZODIAC: 'Astrophysical Aspect', LEDGER: 'Sovereign Ledger', TERM: 'Solar Season' },
+            'ENV': { FRICTION: 'Thermodynamic Friction', RISK: 'Probability Index', TENSION: 'Biome Tension', GEO: 'Local Coordinate' },
+            'MEC': { DRIFT: 'Drift to Pylon', ECCENTRICITY: 'Orbital Eccentricity', SYMMETRY: 'Temporal Symmetry Loss', SMEAR: 'Gregorian Smear' }
         };
 
-        // Updated for Corporate Quadrant
-        const PHILOSOPHY = {
-            'BIO': 'WORKFORCE ALIGNMENT',
-            'ENV': 'MACRO-INFRASTRUCTURE',
-            'COM': 'TRANSACTIONAL LOGISTICS',
-            'MEC': 'YIELD METROLOGY'
-        };
-
-        const V_STYLES = {
-            'BIO': { head: 'WORKFORCE (BIO)' },
-            'COM': { head: 'LEDGER (COM)' },
-            'ENV': { head: 'INFRASTRUCTURE (ENV)' },
-            'MEC': { head: 'YIELD (MEC)' }
-        };
-
-        window.openSlotRoutingModal = function(vector) {
-            const metrics = VECTOR_METRICS[vector];
-            let html = `<div style="font-size:0.65rem; color:#aaa; font-family:'JetBrains Mono'; text-align:center; margin-bottom:15px;">Route data feeds to the 4 available UI slots for the ${V_STYLES[vector].head} vector.</div>`;
-            
-            for(let i=1; i<=4; i++) {
-                const saved = localStorage.getItem(`Q_COM_SLOT_${vector}_${i}`) || localStorage.getItem(`Q_SLOT_${vector}_${i}`);
-                html += `<div style="margin-bottom:10px;">
-                    <label style="font-size:0.55rem; color:var(--platinum); font-family:'Orbitron'; letter-spacing:1px;">SLOT ${i}</label>
-                    <select id="sel-${vector}-${i}" style="width:100%; background:rgba(0,0,0,0.8); border:1px solid #fff; color:#fff; padding:8px; font-family:'Orbitron'; font-size:0.65rem; border-radius:2px; outline:none; margin-top:4px;">
-                        <option value="NONE" ${!saved || saved==='NONE' ? 'selected' : ''}>-- UNASSIGNED --</option>`;
-                for (let key in metrics) {
-                    html += `<option value="${key}" ${saved === key ? 'selected' : ''}>${metrics[key]}</option>`;
-                }
-                html += `</select></div>`;
-            }
-
-            window.Q_ModalEngine.render(`${V_STYLES[vector].head} // ROUTING`, html, 'LOCK ROUTES', () => {
-                for(let i=1; i<=4; i++) {
-                    localStorage.setItem(`Q_COM_SLOT_${vector}_${i}`, document.getElementById(`sel-${vector}-${i}`).value);
-                }
-                window.refreshChronoFace();
-                window.Q_ModalEngine.close();
-            });
-        };
+        const V_STYLES = { 'BIO': 'WORKFORCE', 'COM': 'LEDGER', 'ENV': 'INFRASTRUCTURE', 'MEC': 'YIELD' };
 
         window.refreshChronoFace = function() {
-            // Auto-migrate from Personal Quad if Commercial slots aren't set yet
-            if(!localStorage.getItem('Q_COM_SLOT_BIO_1')) {
-                for (let vec of ['BIO', 'COM', 'ENV', 'MEC']) {
-                    for(let i=1; i<=4; i++) {
-                        let pVal = localStorage.getItem(`Q_SLOT_${vec}_${i}`);
-                        if(pVal) localStorage.setItem(`Q_COM_SLOT_${vec}_${i}`, pVal);
-                    }
-                }
-            }
-
-            // Map data directly into the global UI containers
             ['BIO', 'COM', 'ENV', 'MEC'].forEach(vec => {
                 const container = document.getElementById(`quad-${vec}`);
                 if (!container) return; 
-
-                const sty = V_STYLES[vec];
-                
-                let inner = `<div class="v-head">${sty.head}</div>`;
-                let assignedCount = 0;
-                
+                let inner = `<div class="v-head">${V_STYLES[vec]}</div>`;
                 for(let i=1; i<=4; i++) {
-                    const slotKey = localStorage.getItem(`Q_COM_SLOT_${vec}_${i}`);
-                    if(slotKey && slotKey !== 'NONE') {
+                    const slotKey = localStorage.getItem(`Q_COM_SLOT_${vec}_${i}`) || 'NONE';
+                    if(slotKey !== 'NONE') {
                         inner += `<div class="t-row"><span>${VECTOR_METRICS[vec][slotKey].toUpperCase()}:</span> <span id="face-${vec}-${slotKey}" class="val-sm">--</span></div>`;
-                        assignedCount++;
                     }
                 }
-                
-                if(assignedCount < 4) {
-                    inner += `<div class="phil-quote">"${PHILOSOPHY[vec]}"</div>`;
-                }
-                
                 container.innerHTML = inner;
             });
         };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => window.refreshChronoFace(), 100);
-        });
-        
-        window.addEventListener('q-tick', (e) => {
-            const { t, activeTime, daysElapsed, qData } = e.detail;
-
-            // ANIMATE SVG CLOCK
-            const d = new Date(t);
-            const civilAngle = (((d.getUTCHours() + d.getUTCMinutes()/60) / 24) * 360) - 90;
-            const solarAngle = ((qData.trueArc / 360) * 360) - 90;
-            const handCivil = document.getElementById('hand-civil');
-            const handSolar = document.getElementById('hand-solar');
-            if(handCivil) handCivil.setAttribute("transform", `rotate(${civilAngle} 200 200)`);
-            if(handSolar) handSolar.setAttribute("transform", `rotate(${solarAngle} 200 200)`);
-
-            // --- LOCALIZED DATA ROUTING INJECTION ---
-            const getEl = (id) => document.getElementById(id);
-
-            // BIO DATA
-            let anchorMins = parseInt(localStorage.getItem('q_bio_anchor')) || 0; 
-            let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
-            let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
-            let cyclePosFloat = (activeMs % (cycleDuration * 60000)) / (cycleDuration * 60000);
-            
-            if(getEl('face-BIO-PHASE')) getEl('face-BIO-PHASE').innerText = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
-            if(getEl('face-BIO-HRV')) getEl('face-BIO-HRV').innerText = (65 + Math.cos(t / 15000) * 10).toFixed(1) + " MS";
-            if(getEl('face-BIO-LUNAR')) getEl('face-BIO-LUNAR').innerText = (qData.lunarPhase > 0.5 ? (1 - qData.lunarPhase) * 200 : qData.lunarPhase * 200).toFixed(1) + '%';
-            if(getEl('face-BIO-TIDE')) getEl('face-BIO-TIDE').innerText = (qData.lunarPhase < 0.05 || qData.lunarPhase > 0.95 || (qData.lunarPhase > 0.45 && qData.lunarPhase < 0.55)) ? "HIGH (SPRING)" : "NOMINAL (NEAP)";
-            if(getEl('face-BIO-RHR')) getEl('face-BIO-RHR').innerText = (55 + Math.sin(t / 10000) * 5).toFixed(1) + " BPM";
-            if(getEl('face-BIO-SLEEP')) getEl('face-BIO-SLEEP').innerText = (cyclePosFloat >= 0.22 && cyclePosFloat < 0.77) ? "DEEP" : "LIGHT/REM";
-            if(getEl('face-BIO-NOON')) getEl('face-BIO-NOON').innerText = "T-" + (12 - new Date(t).getUTCHours()) + "H";
-
-            // COM DATA
-            if(getEl('face-COM-NEXT')) {
-                const currentYear = activeTime.getUTCFullYear();
-                let globalCiv = window.getGlobalHolidays ? window.getGlobalHolidays(currentYear).filter(e => e.type === 'node-civ' || e.type === 'node-hol') : [];
-                globalCiv.push({ name: "Tax Day (US)", coord: 113.4, type: 'node-sys' }); 
-                globalCiv.sort((a,b) => a.coord - b.coord);
-                
-                let nextCiv = globalCiv.find(e => e.coord > qData.trueArc);
-                if (!nextCiv && globalCiv.length > 0) nextCiv = globalCiv[0]; 
-                
-                getEl('face-COM-NEXT').innerText = nextCiv ? `${nextCiv.name.substring(0,12).toUpperCase()} @ ${nextCiv.coord.toFixed(1)}°` : "--";
-            }
-            if(getEl('face-COM-ZODIAC')) {
-                const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
-                const sNatal = window.Q_STATE?.metaphysical_layer?.natal_anchor || 'NONE';
-                if (sNatal !== 'NONE') {
-                    let diff = Math.abs(Math.floor(qData.trueArc / 30) - zodiacNames.indexOf(sNatal));
-                    if (diff > 6) diff = 12 - diff; 
-                    getEl('face-COM-ZODIAC').innerText = diff === 0 ? "CONJUNCTION (0°)" : diff === 1 ? "SEMI-SEXTILE (30°)" : diff === 2 ? "SEXTILE (60°)" : diff === 3 ? "SQUARE (90°)" : diff === 4 ? "TRINE (120°)" : diff === 5 ? "QUINCUNX (150°)" : "OPPOSITION (180°)";
-                } else {
-                    getEl('face-COM-ZODIAC').innerText = zodiacNames[Math.floor(qData.meanArc / 30)];
+        // Initialize SVG Ticks
+        document.addEventListener('DOMContentLoaded', () => {
+            const ticks = document.getElementById('chrono-ticks');
+            if (ticks) {
+                for(let i=0; i<60; i++) {
+                    const isHour = i % 5 === 0;
+                    const angle = (i * 6 - 90) * Math.PI / 180;
+                    const rInner = isHour ? 160 : 165;
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", 200 + rInner * Math.cos(angle));
+                    line.setAttribute("y1", 200 + rInner * Math.sin(angle));
+                    line.setAttribute("x2", 200 + 175 * Math.cos(angle));
+                    line.setAttribute("y2", 200 + 175 * Math.sin(angle));
+                    line.setAttribute("stroke", isHour ? "#ffffff" : "#333");
+                    line.setAttribute("stroke-width", isHour ? "3" : "1");
+                    ticks.appendChild(line);
                 }
             }
-            if(getEl('face-COM-LEDGER')) getEl('face-COM-LEDGER').innerText = `Q${Math.floor(qData.trueArc / 90) + 1} CHECKPOINT`;
-            if(getEl('face-COM-TERM') && window.Q_REGISTRY?.SOLAR_TERMS) getEl('face-COM-TERM').innerText = window.Q_REGISTRY.SOLAR_TERMS[Math.floor(qData.trueArc / 15)].name.toUpperCase();
+            // Populate slots on load
+            setTimeout(() => window.refreshChronoFace(), 100);
+        });
 
-            // ENV DATA
-            let dangerProximity = Math.abs(Math.sin((qData.trueArc * Math.PI) / 90)); 
-            let currentRiskVal = Math.floor(dangerProximity * 85) + 10; 
-            if(getEl('face-ENV-RISK')) getEl('face-ENV-RISK').innerText = currentRiskVal + "%";
-            if(getEl('face-ENV-TENSION')) getEl('face-ENV-TENSION').innerText = currentRiskVal > 75 ? "ELEVATED" : "NOMINAL";
-            if(getEl('face-ENV-FRICTION')) getEl('face-ENV-FRICTION').innerText = Math.abs(22.0 - (22 + 10 * Math.sin((qData.trueArc - 90) * Math.PI / 180))).toFixed(2) + ' ΔT';
-            if(getEl('face-ENV-GEO') && window.Q_STATE?.location) getEl('face-ENV-GEO').innerText = window.Q_STATE.location.name.substring(0, 15);
-            if(getEl('face-ENV-IRRADIANCE')) getEl('face-ENV-IRRADIANCE').innerText = "ACTIVE";
-            if(getEl('face-ENV-PRESSURE')) getEl('face-ENV-PRESSURE').innerText = (1015 - Math.floor(currentRiskVal/2)) + " hPa";
+        window.addEventListener('q-tick', (e) => {
+            const d = new Date();
+            const h = d.getHours(); const m = d.getMinutes(); const s = d.getSeconds();
+            
+            const handHour = document.getElementById('hand-hour');
+            const handMin = document.getElementById('hand-minute');
+            const handSec = document.getElementById('hand-second');
+            
+            if (handHour) handHour.setAttribute("transform", `rotate(${((h % 12) + m/60) * 30} 200 200)`);
+            if (handMin) handMin.setAttribute("transform", `rotate(${(m + s/60) * 6} 200 200)`);
+            if (handSec) handSec.setAttribute("transform", `rotate(${s * 6} 200 200)`);
 
-            // MEC DATA
-            let driftDeg = qData.trueArc < 90 ? 90 - qData.trueArc : qData.trueArc < 180 ? 180 - qData.trueArc : qData.trueArc < 270 ? 270 - qData.trueArc : 360 - qData.trueArc;
-            if(getEl('face-MEC-DRIFT')) getEl('face-MEC-DRIFT').innerText = driftDeg.toFixed(2) + "° REM";
-            if(getEl('face-MEC-SYMMETRY')) getEl('face-MEC-SYMMETRY').innerText = (Math.abs(qData.delta) / 180 * 100).toFixed(2) + "%";
-            if(getEl('face-MEC-SMEAR')) getEl('face-MEC-SMEAR').innerText = ((t - (Math.round(t / 1000) * 1000)) / 1000).toFixed(6);
-            if(getEl('face-MEC-ECCENTRICITY')) getEl('face-MEC-ECCENTRICITY').innerText = "0.0167";
-            if(getEl('face-MEC-VELOCITY')) getEl('face-MEC-VELOCITY').innerText = (1 + 0.0334 * Math.cos((qData.trueArc - 14) * Math.PI / 180)).toFixed(3) + "x";
+            const { t, qData } = e.detail;
+            const getEl = (id) => document.getElementById(id);
+
+            // Populate Restored Metric Logic for the face data slots
+            if(getEl('face-BIO-HRV')) getEl('face-BIO-HRV').innerText = (65 + Math.cos(t / 15000) * 10).toFixed(1) + " MS";
+            if(getEl('face-BIO-PHASE')) getEl('face-BIO-PHASE').innerText = (window.getBiologicalState && window.getBiologicalState(t)) || "--";
+            if(getEl('face-BIO-LUNAR')) getEl('face-BIO-LUNAR').innerText = (qData.lunarPhase * 100).toFixed(1) + "%";
+            if(getEl('face-BIO-TIDE')) getEl('face-BIO-TIDE').innerText = qData.lunarPhase < 0.1 || qData.lunarPhase > 0.9 ? "SPRING" : "NEAP";
+
+            if(getEl('face-COM-LEDGER')) getEl('face-COM-LEDGER').innerText = `Q${qData.quad} CHECKPOINT`;
+            if(getEl('face-COM-TERM')) getEl('face-COM-TERM').innerText = `SECTOR ${qData.sect}`;
+
+            if(getEl('face-ENV-FRICTION')) getEl('face-ENV-FRICTION').innerText = Math.abs(qData.delta * 2).toFixed(2) + " ΔT";
+            if(getEl('face-ENV-RISK')) getEl('face-ENV-RISK').innerText = Math.floor(Math.abs(qData.delta) * 5) + "%";
+
+            if(getEl('face-MEC-DRIFT')) getEl('face-MEC-DRIFT').innerText = qData.delta.toFixed(4) + "°";
+            if(getEl('face-MEC-SMEAR')) getEl('face-MEC-SMEAR').innerText = (t % 1000 / 1000).toFixed(4);
         });
     </script>
 </body>

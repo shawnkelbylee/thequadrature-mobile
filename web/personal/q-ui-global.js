@@ -1,6 +1,6 @@
-// THE QUADRATURE: GLOBAL UI MATRIX & RENDERER
+// THE QUADRATURE: PERSONAL QUAD UI CONTROLLER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase III UI Engine. Boot Sequence Purged. Spatial Routing & Sovereign Auth Badge Locked.
+// STATUS: Phase V - Localized UI Engine. Gateway/Aperture logic purged. Universal template engine locked.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -17,45 +17,34 @@ window.injectUniversalUI = function() {
     let noCache2 = document.createElement('meta'); noCache2.httpEquiv = "Pragma"; noCache2.content = "no-cache"; document.head.appendChild(noCache2);
     let noCache3 = document.createElement('meta'); noCache3.httpEquiv = "Expires"; noCache3.content = "0"; document.head.appendChild(noCache3);
     
-    // --- DUAL-STATE PATH ROUTER ---
+    // --- LOCALIZED VECTOR PATH ROUTER ---
     const path = window.location.pathname.toUpperCase();
-    const isAperture = path.includes("APERTURE") || path === "/" || path === "/INDEX.HTML" || path === "";
     
     const bActive = path.includes("BIO");
     const eActive = path.includes("ENV");
     const mActive = path.includes("MEC");
     const cActive = path.includes("COM");
-    
-    const faceActive = (!isAperture && !bActive && !eActive && !mActive && !cActive);
+    const faceActive = (!bActive && !eActive && !mActive && !cActive); // index.html fallback
     
     if (faceActive) document.body.classList.add('q-chrono-face');
     else document.body.classList.add('q-vector-hud');
     
     // Vector Theme Colors
-    let micColor = "var(--sys-cyan, #00f0ff)";
-    let micGlow = "var(--neon-cyan-dim, rgba(0,240,255,0.2))";
-    let headerText = "THE QUADRATURE";
+    let micColor = "var(--chrono-amber, #B97A35)";
+    let micGlow = "var(--chrono-amber-dim, rgba(185, 122, 53, 0.15))";
+    let headerText = "PERSONAL QUAD";
 
-    if (!isAperture) {
-        if (bActive) { micColor = "var(--bio-purple, #b829ff)"; micGlow = "var(--bio-purple-dim, rgba(184, 41, 255, 0.15))"; headerText = "BIOLOGICAL VECTOR"; }
-        else if (eActive) { micColor = "var(--env-green, #a7ff83)"; micGlow = "var(--env-green-dim, rgba(167, 255, 131, 0.2))"; headerText = "ENVIRONMENTAL VECTOR"; }
-        else if (mActive) { micColor = "var(--sys-cyan, #00f0ff)"; micGlow = "var(--neon-cyan-dim, rgba(0, 240, 255, 0.2))"; headerText = "MECHANICAL VECTOR"; }
-        else if (cActive) { micColor = "var(--gold, #F4D068)"; micGlow = "var(--gold-dim, rgba(244, 208, 104, 0.15))"; headerText = "COMMUNAL VECTOR"; }
-        else { micColor = "var(--chrono-amber, #B97A35)"; micGlow = "var(--chrono-amber-dim, rgba(185, 122, 53, 0.15))"; headerText = "PERSONAL QUAD"; }
-    }
+    if (bActive) { micColor = "var(--bio-purple, #b829ff)"; micGlow = "var(--bio-purple-dim, rgba(184, 41, 255, 0.15))"; headerText = "BIOLOGICAL VECTOR"; }
+    else if (eActive) { micColor = "var(--env-green, #a7ff83)"; micGlow = "var(--env-green-dim, rgba(167, 255, 131, 0.2))"; headerText = "ENVIRONMENTAL VECTOR"; }
+    else if (mActive) { micColor = "var(--sys-cyan, #00f0ff)"; micGlow = "var(--sys-cyan-dim, rgba(0, 240, 255, 0.2))"; headerText = "MECHANICAL VECTOR"; }
+    else if (cActive) { micColor = "var(--gold, #F4D068)"; micGlow = "var(--gold-dim, rgba(244, 208, 104, 0.15))"; headerText = "COMMUNAL VECTOR"; }
 
-    // OS Panel Data Colors dynamically tied to the Vector theme unless it's the Aperture Gateway
-    let osPanelColor = isAperture ? "#00f0ff" : micColor;
-    let osPanelGlow = isAperture ? "rgba(0,240,255,0.2)" : micGlow;
-    
-    // Universal Nav Prefix logic to resolve locally and in production seamlessly
-    let navPrefix = isAperture ? "../personal/" : "";
+    let osPanelColor = micColor;
+    let osPanelGlow = micGlow;
     
     // Dynamic Corner Panel & OPT Formatting
     let panelColorsCSS = "";
-    if (isAperture) {
-        panelColorsCSS = `.opt-oval { color: #00f0ff; text-shadow: 0 0 5px rgba(0,240,255,0.3); }`;
-    } else if (faceActive) {
+    if (faceActive) {
         panelColorsCSS = `
             .tl .opt-oval { color: var(--bio-purple, #b829ff); text-shadow: 0 0 5px var(--bio-purple-dim, rgba(184, 41, 255, 0.15)); }
             .tr .opt-oval { color: var(--gold, #F4D068); text-shadow: 0 0 5px var(--gold-dim, rgba(244, 208, 104, 0.15)); }
@@ -70,7 +59,7 @@ window.injectUniversalUI = function() {
         `;
     }
 
-    // STRICT PERSISTENCE LOGIC: Bypasses state-load race condition by directly querying localStorage
+    // STRICT PERSISTENCE LOGIC
     const authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
     const authBg = authState === 'ACTIVE' ? '#39ff14' : 'transparent';
     const authColor = authState === 'ACTIVE' ? '#000' : '#ff003c';
@@ -96,11 +85,11 @@ window.injectUniversalUI = function() {
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); --bio-purple: #b829ff; --bio-purple-dim: rgba(184, 41, 255, 0.15); 
             --bio-cobalt: #0055ff; --bio-cobalt-dim: rgba(0, 85, 255, 0.3);
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --center-gap-x: ${isAperture ? '31vh' : '36vh'}; 
-            --corner-gap-y: ${isAperture ? '24vh' : '21vh'}; 
-            --corner-gap-x: ${isAperture ? '23vh' : '32vh'};
-            --panel-w: ${isAperture ? '340px' : '460px'};
-            --panel-h: ${isAperture ? '80px' : '170px'};
+            --center-gap-x: 36vh; 
+            --corner-gap-y: 21vh; 
+            --corner-gap-x: 32vh;
+            --panel-w: 460px;
+            --panel-h: 170px;
         }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
@@ -111,16 +100,8 @@ window.injectUniversalUI = function() {
             position: absolute; top: 4vh; left: 0; width: 100vw;
             display: flex; justify-content: center; align-items: center; text-align: center;
             font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.8rem; letter-spacing: 16px; padding-left: 16px;
-            color: ${isAperture ? '#ffffff' : osPanelColor}; z-index: 50; pointer-events: none;
-            text-shadow: 0 0 15px ${isAperture ? 'rgba(0, 163, 255, 0.8)' : osPanelGlow}, 0 0 5px rgba(255, 255, 255, 0.5);
-        }
-
-        .global-footer {
-            position: absolute; bottom: 6vh; left: 0; width: 100vw;
-            display: flex; justify-content: center; align-items: center; text-align: center;
-            font-family: 'Courier New', Courier, monospace; font-weight: 700; font-size: 1.4rem; letter-spacing: 4px; padding-left: 4px;
-            color: rgba(255, 255, 255, 0.85); z-index: 50; pointer-events: none;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0, 163, 255, 0.3);
+            color: ${osPanelColor}; z-index: 50; pointer-events: none;
+            text-shadow: 0 0 15px ${osPanelGlow}, 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
         .space-bg { position: fixed; inset: 0; z-index: 0; background-image: radial-gradient(circle at 50% 50%, #030814 0%, #010205 100%); }
@@ -137,8 +118,7 @@ window.injectUniversalUI = function() {
         .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.03); }
 
         .frost-zone { position: absolute; inset: 6px 12px; background: rgba(15, 20, 35, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; z-index: -2; box-shadow: inset 0 0 20px rgba(0, 163, 255, 0.15); transition: 0.3s ease; }
-        .corner-panel:hover .frost-zone { background: rgba(20, 25, 45, 0.65); box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), inset 0 0 25px rgba(255, 255, 255, 0.1); }
-
+        
         .panel-bg { position: absolute; inset: 0; background: url('../assets/panel-frame.png') center/100% 100% no-repeat; z-index: -1; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
 
         .tl { bottom: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); --tx-hover: -2px; --ty-hover: -2px;}
@@ -148,18 +128,6 @@ window.injectUniversalUI = function() {
         .bl .panel-bg { transform: scaleY(-1); }
         .br { top: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); --tx-hover: 2px; --ty-hover: 2px;}
         .br .panel-bg { transform: scale(-1, -1); }
-
-        .panel-label {
-            height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-            font-size: 0.9rem; letter-spacing: 4px; padding-left: 4px; font-weight: 700; color: var(--q-metal);
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.4);
-            position: relative; z-index: 2; box-sizing: border-box; font-family: 'Orbitron';
-        }
-        
-        .tl .panel-label { padding-left: 59px; }
-        .tr .panel-label { padding-right: 51px; }
-        .bl .panel-label { padding-left: 59px; }
-        .br .panel-label { padding-right: 51px; }
 
         .panel-data-container {
             height: 100%; width: 100%; display: flex; flex-direction: column; align-items: stretch; justify-content: center; text-align: left;
@@ -203,8 +171,7 @@ window.injectUniversalUI = function() {
 
         /* --- NAVBAR & SCRUBBER INJECTION --- */
         .q-nav-bar { 
-            position: fixed; 
-            ${isAperture ? 'display: none !important;' : 'bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
+            position: fixed; bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);
             height: 45px; background: rgba(2, 6, 15, 0.95); 
             display: flex; justify-content: center; align-items: center; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
         }
@@ -225,7 +192,7 @@ window.injectUniversalUI = function() {
         #q-mic-fab-desktop.listening { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; animation: pulse-mic-desktop 1.5s infinite; }
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } 50% { transform: scale(1.1); box-shadow: 0 0 25px ${micColor}; } 100% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } }
         
-        .q-global-controls { position: fixed; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
+        .q-global-controls { position: fixed; bottom: calc(2.5vh + 60px); left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
         .q-ctrl-btn { background: transparent; border: 1px solid ${osPanelColor}; color: ${osPanelColor}; padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; padding-left: 15px; white-space: nowrap; pointer-events: auto; }
         .q-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .q-ctrl-btn.active { background: ${osPanelColor}; color: #000; }
@@ -246,14 +213,13 @@ window.injectUniversalUI = function() {
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
             
-            /* --- NAVBAR OVERRIDES --- */
             .q-nav-bar { 
                 top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; 
                 height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; 
                 background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: none !important; 
             }
             .q-nav-bar * { pointer-events: auto !important; }
-            .q-nav-menu .vector-link { display: none !important; } /* Hides redundant links */
+            .q-nav-menu .vector-link { display: none !important; } 
             
             #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
             
@@ -288,7 +254,6 @@ window.injectUniversalUI = function() {
             #mobile-telemetry-viewport .telemetry-node { display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important; }
             #mobile-telemetry-viewport .wing-panel { display: none !important; }
             
-            /* --- TELEMETRY PANEL OVERRIDES --- */
             #mobile-telemetry-viewport .corner-panel { height: auto !important; min-height: 120px !important; padding: 20px !important; }
             #mobile-telemetry-viewport .panel-bg { display: none !important; } 
             #mobile-telemetry-viewport .frost-zone { inset: 0 !important; border-radius: 8px !important; border: 1px solid rgba(255,255,255,0.1); }
@@ -298,61 +263,19 @@ window.injectUniversalUI = function() {
             
             body.telemetry-open .q-center-dial { display: none !important; }
 
-            /* --- SCRUBBER & MIC BRACKETING --- */
             .q-global-controls { 
-                display: flex !important; 
-                align-items: center !important; 
-                justify-content: space-between !important;
-                width: 95vw !important; 
-                min-width: unset !important; 
-                box-sizing: border-box !important; 
-                padding: 6px 8px !important; 
-                gap: 4px !important;
-                ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 65px) !important;'}
+                display: flex !important; align-items: center !important; justify-content: space-between !important; width: 95vw !important; min-width: unset !important; box-sizing: border-box !important; padding: 6px 8px !important; gap: 4px !important; bottom: calc(2.5vh + 65px) !important;
             } 
             
             #q-mic-fab { 
-                position: static !important; 
-                transform: none !important;
-                width: 32px !important; 
-                height: 32px !important; 
-                border-radius: 6px !important; 
-                font-size: 1rem !important; 
-                box-shadow: none !important;
-                order: 1 !important; 
-                flex-shrink: 0 !important;
-                background: rgba(5, 8, 15, 0.9);
-                border: 1px solid ${micColor};
-                color: ${micColor};
-                display: flex; justify-content: center; align-items: center;
-                cursor: pointer; transition: all 0.3s ease; pointer-events: auto !important;
+                position: static !important; transform: none !important; width: 32px !important; height: 32px !important; border-radius: 6px !important; font-size: 1rem !important; box-shadow: none !important; order: 1 !important; flex-shrink: 0 !important; background: rgba(5, 8, 15, 0.9); border: 1px solid ${micColor}; color: ${micColor}; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; pointer-events: auto !important;
             }
             #q-mic-fab.listening { animation: pulse-mic 1.5s infinite; background: ${micColor}; color: #000; box-shadow: 0 0 25px ${micColor} !important; }
             
-            /* The < button */
             .q-global-controls > .q-ctrl-btn:nth-child(1) { order: 2 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
-            
-            .q-scrubber { 
-                order: 3 !important; 
-                min-width: 0 !important; 
-                width: 100% !important; 
-                margin: 0 !important; 
-                flex-grow: 1 !important;
-            }
-            
-            /* The > button */
+            .q-scrubber { order: 3 !important; min-width: 0 !important; width: 100% !important; margin: 0 !important; flex-grow: 1 !important; }
             .q-global-controls > .q-ctrl-btn:nth-child(3) { order: 4 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
-
-            #q-live-toggle {
-                order: 5 !important; 
-                width: auto !important;
-                min-width: 32px !important;
-                height: 32px !important;
-                padding: 0 6px !important;
-                font-size: 0.55rem !important; 
-                flex-shrink: 0 !important;
-                margin: 0 !important;
-            }
+            #q-live-toggle { order: 5 !important; width: auto !important; min-width: 32px !important; height: 32px !important; padding: 0 6px !important; font-size: 0.55rem !important; flex-shrink: 0 !important; margin: 0 !important; }
         }
     `;
     document.head.appendChild(style);
@@ -360,59 +283,33 @@ window.injectUniversalUI = function() {
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
     
-    // Build Corner Panels HTML
-    let panelsHTML = "";
-    if (isAperture) {
-        panelsHTML = `
-            <div class="corner-panel tl desktop-only" onclick="location.href='../personal/index.html'">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="panel-label">PERSONAL QUAD</div>
-            </div>
-            <div class="corner-panel tr desktop-only" onclick="location.href='../commercial/index.html'">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="panel-label">COMMERCIAL QUAD</div>
-            </div>
-            <div class="corner-panel bl desktop-only" onclick="location.href='../physical/index.html'">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="panel-label">PHYSICAL ASSETS</div>
-            </div>
-            <div class="corner-panel br desktop-only" onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="panel-label">DASHBOARD</div>
-            </div>
-        `;
-    } else {
-        panelsHTML = `
-            <div class="corner-panel tl telemetry-node desktop-only">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('BIO')">OPT</div>
-                <div class="panel-data-container" id="quad-BIO"></div>
-            </div>
-            <div class="corner-panel tr telemetry-node desktop-only">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('COM')">OPT</div>
-                <div class="panel-data-container" id="quad-COM"></div>
-            </div>
-            <div class="corner-panel bl telemetry-node desktop-only">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('ENV')">OPT</div>
-                <div class="panel-data-container" id="quad-ENV"></div>
-            </div>
-            <div class="corner-panel br telemetry-node desktop-only">
-                <div class="frost-zone"></div>
-                <div class="panel-bg"></div>
-                <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('MEC')">OPT</div>
-                <div class="panel-data-container" id="quad-MEC"></div>
-            </div>
-        `;
-    }
+    // Universal Corner Panels (Empty Data Containers)
+    let panelsHTML = `
+        <div class="corner-panel tl telemetry-node desktop-only">
+            <div class="frost-zone"></div>
+            <div class="panel-bg"></div>
+            <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('BIO')">OPT</div>
+            <div class="panel-data-container" id="quad-BIO"></div>
+        </div>
+        <div class="corner-panel tr telemetry-node desktop-only">
+            <div class="frost-zone"></div>
+            <div class="panel-bg"></div>
+            <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('COM')">OPT</div>
+            <div class="panel-data-container" id="quad-COM"></div>
+        </div>
+        <div class="corner-panel bl telemetry-node desktop-only">
+            <div class="frost-zone"></div>
+            <div class="panel-bg"></div>
+            <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('ENV')">OPT</div>
+            <div class="panel-data-container" id="quad-ENV"></div>
+        </div>
+        <div class="corner-panel br telemetry-node desktop-only">
+            <div class="frost-zone"></div>
+            <div class="panel-bg"></div>
+            <div class="opt-oval" onclick="if(window.openSlotRoutingModal) window.openSlotRoutingModal('MEC')">OPT</div>
+            <div class="panel-data-container" id="quad-MEC"></div>
+        </div>
+    `;
 
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
@@ -421,20 +318,17 @@ window.injectUniversalUI = function() {
         <div class="dust-layer-global"></div>
 
         <div class="global-header desktop-only">${headerText}</div>
-        ${isAperture ? `<div class="global-footer desktop-only">BASED IN SCIENCE BATHED IN CULTURE AND BUILT FOR THE DIGITAL AGE</div>` : ``}
 
         <div class="q-nav-bar">
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
-                    <a href="${isAperture ? '#' : '../aperture/index.html'}" class="q-nav-btn desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" ontouchstart="window.location.href=this.href; event.preventDefault();">APERTURE</a>
+                    <a href="../aperture/index.html" class="q-nav-btn desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" ontouchstart="window.location.href=this.href; event.preventDefault();">APERTURE</a>
                     <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block; border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">${authText}</button>
-                    <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
-                    <a href="${navPrefix}BIOVECHUD.html?v=20.0" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
-                    
-                    <a href="${navPrefix}COMVECHUD.html?v=20.0" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">COMMUNAL</a>
-                    
-                    <a href="${navPrefix}ENVVECHUD.html?v=20.0" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">ENVIRONMENTAL</a>
-                    <a href="${navPrefix}MECVECHUD.html?v=20.0" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">MECHANICAL</a>
+                    <a href="./index.html" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
+                    <a href="./BIOVECHUD.html" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
+                    <a href="./COMVECHUD.html" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">COMMUNAL</a>
+                    <a href="./ENVVECHUD.html" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">ENVIRONMENTAL</a>
+                    <a href="./MECVECHUD.html" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">MECHANICAL</a>
                     <button class="q-nav-btn omni desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()" ontouchstart="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner(); event.preventDefault();">[ OMNI-PLANNER ]</button>
                     <button class="q-nav-btn special desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()" ontouchstart="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub(); event.preventDefault();">[ DASHBOARD ]</button>
                 </div>
@@ -455,23 +349,23 @@ window.injectUniversalUI = function() {
                 <svg id="tele-icon" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                 <span class="strip-lbl">DATA</span>
             </button>
-            <a href="${navPrefix}BIOVECHUD.html?v=20.0" class="strip-btn bio-strip ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="./BIOVECHUD.html" class="strip-btn bio-strip ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 <span class="strip-lbl">BIO</span>
             </a>
-            <a href="${navPrefix}COMVECHUD.html?v=20.0" class="strip-btn com-strip ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="./COMVECHUD.html" class="strip-btn com-strip ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="16"/><circle cx="6" cy="20" r="3"/><circle cx="18" cy="20" r="3"/><line x1="12" y1="16" x2="6" y2="17"/><line x1="12" y1="16" x2="18" y2="17"/></svg>
                 <span class="strip-lbl">COM</span>
             </a>
-            <a href="${navPrefix}index.html?v=20.0" class="strip-btn face-strip ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="./index.html" class="strip-btn face-strip ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                 <span class="strip-lbl">CHRONO</span>
             </a>
-            <a href="${navPrefix}ENVVECHUD.html?v=20.0" class="strip-btn env-strip ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="./ENVVECHUD.html" class="strip-btn env-strip ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M2 22h20L12 2z"/></svg>
                 <span class="strip-lbl">ENV</span>
             </a>
-            <a href="${navPrefix}MECVECHUD.html?v=20.0" class="strip-btn mec-strip ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="./MECVECHUD.html" class="strip-btn mec-strip ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span class="strip-lbl">MEC</span>
             </a>
@@ -551,6 +445,7 @@ window.injectUniversalUI = function() {
     window.bindMasterTickScrubber();
     window.syncScrubberUI();
 
+    // UNIVERSAL TELEMETRY LISTENER (Wings & Mobile Ribbon Only)
     window.addEventListener('q-tick', (e) => {
         const ribbonLeg = document.getElementById('ribbon-leg');
         const ribbonLegDate = document.getElementById('ribbon-leg-date');
@@ -641,7 +536,6 @@ window.toggleTimeFmt = function(btnId) {
     });
     
     if (window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
-    if (window.Q_LOG) window.Q_LOG('INFO', 'INTERFACE', 'TIME_FORMAT_TOGGLED', { format: newFmt });
 };
 
 window.toggleTelemetry = function() {
@@ -689,7 +583,6 @@ window.openQuadrantAssignmentModal = function(quadrantId) {
         window.Q_ModalEngine.render('DYNAMIC ROUTING: ASSIGN POOL', html, 'LOCK ASSIGNMENT', () => {
             const selected = document.getElementById('quad-pool-select').value;
             localStorage.setItem('Q_FACE_QUAD_' + quadrantId, selected);
-            window.Q_LOG('STATE', 'INTERFACE', 'CHRONO_FACE_QUADRANT_REASSIGNED', { quadrant: quadrantId, pool: selected });
             if (typeof window.refreshChronoFace === 'function') window.refreshChronoFace();
             window.Q_ModalEngine.close();
             if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
@@ -844,9 +737,6 @@ window.addEventListener('DOMContentLoaded', () => {
     if (window.innerWidth <= 950) {
         const micFab = document.getElementById('q-mic-fab');
         const controlsPanel = document.getElementById('q-universal-controls');
-        
-        if (micFab && controlsPanel) {
-            controlsPanel.appendChild(micFab);
-        }
+        if (micFab && controlsPanel) controlsPanel.appendChild(micFab);
     }
 });
