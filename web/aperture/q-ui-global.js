@@ -1,6 +1,6 @@
 // THE QUADRATURE: APERTURE GATEWAY UI CONTROLLER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Version 23.7 - Interceptor restored to verified v23.3 matchers. Specific Vector HUD bypass logic safely nested.
+// STATUS: Version 23.3 - Gateway Controller Optimized. UI render logic offloaded to HTML. Handles strict routing and universal states.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -41,53 +41,8 @@ window.injectUniversalUI = function() {
     };
 };
 
-// --- DOMAIN SHIFT & AUTH LOGIC (APERTURE LEVEL) ---
-window.triggerDomainShift = function(e) {
-    if(e) e.preventDefault();
-    let authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
-    
-    if(authState !== 'ACTIVE') {
-        if(window.Q_Auth) window.Q_Auth.triggerOAuth();
-        else alert("OAuth Service Unavailable. Please reload the Gateway.");
-        return;
-    }
-
-    let rawEnt = localStorage.getItem('Q_ENTITLEMENTS');
-    let entitlements = [];
-    try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
-
-    // Master Access Fallback Check
-    let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
-    if (authUser.toUpperCase() === 'KELBY' || authUser.includes('MASTER')) {
-        entitlements = ["PERSONAL", "COMMERCIAL"];
-        localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(entitlements));
-    }
-
-    if(entitlements.includes("PERSONAL") && entitlements.includes("COMMERCIAL")) {
-        const html = `
-            <div style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#aaa; margin-bottom: 15px; text-align:center;">
-                Dual entitlements detected. Select operating domain.
-            </div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button onclick="window.location.href='../personal/index.html'" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #F4D068; color: #F4D068; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(244, 208, 104, 0.25);">
-                    PERSONAL MATRIX
-                </button>
-                <button onclick="window.location.href='../commercial/index.html'" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #ffffff; color: #ffffff; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);">
-                    ENTERPRISE LEDGER
-                </button>
-                <button onclick="window.Q_ModalEngine.close()" style="padding: 10px; background: transparent; border: 1px solid #555; color: #888; font-family: 'Orbitron'; font-size: 0.7rem; cursor: pointer; border-radius: 4px; margin-top: 5px;">
-                    CANCEL / REMAIN
-                </button>
-            </div>
-        `;
-        if(window.Q_ModalEngine) window.Q_ModalEngine.render('DOMAIN SHIFT PROTOCOL', html);
-        else alert("Routing Module Unavailable.");
-    } else {
-        if(window.Q_Auth) window.Q_Auth.triggerOAuth(); // Resync or show status if single tier
-    }
-};
-
-// 3. AGGRESSIVE CAPTURE-PHASE ROUTING INTERCEPTOR (RESTORED MATCHERS)
+// 3. AGGRESSIVE CAPTURE-PHASE ROUTING INTERCEPTOR
+// Centralized kinematic routing logic for the Gateway
 window.addEventListener('click', (e) => {
     // Bypass interceptor entirely if clicking inside the dashboard, planner, or modals
     if (e.target.closest('.q-hub-overlay') || e.target.closest('.modal-overlay') || e.target.closest('.q-planner-overlay')) {
@@ -96,7 +51,6 @@ window.addEventListener('click', (e) => {
 
     let el = e.target;
     let targetUrl = null;
-    let bypassSequence = false;
     let depth = 0;
 
     while (el && depth < 5 && el !== document.body) {
@@ -105,7 +59,7 @@ window.addEventListener('click', (e) => {
         const hrefStr = (el.getAttribute('href') || '').toLowerCase();
         const dataTarget = (el.getAttribute('data-target') || '').toLowerCase();
 
-        // Explicitly intercept Dashboard intents
+        // Explicitly intercept Dashboard intents to prevent 404 sequencing
         if (dataTarget === 'dashboard' || hrefStr.includes('/dashboard') || onClickStr.includes('dashboard') || text.includes('dashboard')) {
             e.preventDefault();
             e.stopPropagation();
@@ -121,39 +75,14 @@ window.addEventListener('click', (e) => {
             return; // Halt interceptor loop
         }
 
-        // GATEWAY ROUTING RESOLUTION
-        if (dataTarget.includes('personal') || hrefStr.includes('/personal') || onClickStr.includes('personal') || text.includes('personal quad') || text.includes('personal matrix')) {
-            const actualHref = el.getAttribute('href');
-            const actualOnClick = el.getAttribute('onclick');
-            
-            if (actualHref && actualHref.toLowerCase().includes('.html') && !actualHref.toLowerCase().includes('index.html')) {
-                targetUrl = actualHref;
-                bypassSequence = true;
-            } else if (actualOnClick && actualOnClick.toLowerCase().includes('.html') && !actualOnClick.toLowerCase().includes('index.html')) {
-                const match = actualOnClick.match(/['"]([^'"]+\.html)['"]/);
-                targetUrl = match ? match[1] : '../personal/index.html';
-                bypassSequence = !!match;
-            } else {
-                targetUrl = '../personal/index.html';
-            }
-            break;
-        } else if (dataTarget.includes('commercial') || hrefStr.includes('/commercial') || onClickStr.includes('commercial') || text.includes('commercial quad') || text.includes('enterprise ledger')) {
-            const actualHref = el.getAttribute('href');
-            const actualOnClick = el.getAttribute('onclick');
-            
-            if (actualHref && actualHref.toLowerCase().includes('.html') && !actualHref.toLowerCase().includes('index.html')) {
-                targetUrl = actualHref;
-                bypassSequence = true;
-            } else if (actualOnClick && actualOnClick.toLowerCase().includes('.html') && !actualOnClick.toLowerCase().includes('index.html')) {
-                const match = actualOnClick.match(/['"]([^'"]+\.html)['"]/);
-                targetUrl = match ? match[1] : '../commercial/index.html';
-                bypassSequence = !!match;
-            } else {
-                targetUrl = '../commercial/index.html';
-            }
-            break;
+        // GATEWAY ROUTING RESOLUTION (Jumping out of /aperture/ into target quads)
+        if (dataTarget.includes('personal') || hrefStr.includes('/personal') || onClickStr.includes('personal') || text.includes('personal quad')) {
+            targetUrl = '../personal/index.html';
+        } else if (dataTarget.includes('commercial') || hrefStr.includes('/commercial') || onClickStr.includes('commercial') || text.includes('commercial quad')) {
+            targetUrl = '../commercial/index.html';
         } 
 
+        if (targetUrl) break;
         el = el.parentElement;
         depth++;
     }
@@ -161,9 +90,7 @@ window.addEventListener('click', (e) => {
     if (targetUrl) {
         e.preventDefault();
         e.stopPropagation(); 
-        
-        // Target specifically index.html for animation, bypass all other .html views
-        if (window.executeApertureSequence && !bypassSequence) {
+        if (window.executeApertureSequence) {
             window.executeApertureSequence(targetUrl);
         } else {
             window.location.href = targetUrl;

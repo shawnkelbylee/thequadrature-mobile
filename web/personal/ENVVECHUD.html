@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // ENVIRONMENTAL VECTOR</title>
-    <script src="./q-ui-global.js"></script>
-    <script src="../q-core.js"></script>
-    <script src="../q-ui-planner.js"></script>
-    <script src="../q-hub.js"></script>
+    <script src="./q-ui-global.js?v=22.4"></script>
+<script src="../q-core.js?v=22.4"></script>
+<script src="../q-ui-planner.js?v=22.4"></script>
+<script src="../q-hub.js?v=22.4"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
@@ -590,13 +590,72 @@
         }
 
         window.addEventListener('q-tick', (e) => {
-            const { t, isLive, activeTime, daysElapsed, qData, activePostulate } = e.detail;
+            const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
+
+            // Utility function to format legacy strings (grey letters/symbols, env-green numbers)
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--env-green); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(token => {
+                        if (/[0-9]/.test(token)) {
+                            out += `<span style="${numStyle}">${token}</span>`;
+                        } else {
+                            out += `<span style="${letterStyle}">${token}</span>`;
+                        }
+                    });
+                }
+                return out;
+            }
+
+            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
+
+            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
+            
+            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
+            if (meanDegEl) { 
+                meanDegEl.innerText = qData.meanArc.toFixed(4) + "°";
+                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            
+            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
+            if (trueDegEl) { 
+                trueDegEl.innerText = qData.trueArc.toFixed(4) + "°";
+                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            
+            const badge = document.getElementById('iot-status-badge');
+            if(badge) badge.innerText = 'IOT: ' + iotProtocol;
 
             const trueArc = qData.trueArc;
             const meanArc = qData.meanArc;
             
             if (Math.abs(qData.delta) > 0.025 && window.Q_PHASE_III) {
                 window.Q_PHASE_III.executeThermicOverride(qData.delta);
+            }
+            
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
+            
+            let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+            let smNumStyle = "color:var(--env-green); font-size:1.1rem; font-weight:bold;";
+            
+            if (qCoordWing) {
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--env-green); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--env-green-dim);">${activeBlock.name}</span>`;
+                } else {
+                    let cCycle = activeBlock ? activeBlock.cycle : 0;
+                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
+                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
+                }
             }
 
             const continuousMeanDeg = daysElapsed * (360 / 365.24219);

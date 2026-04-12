@@ -8,10 +8,10 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // WORKFORCE RESONANCE (BIO)</title>
     
-    <script src="./q-ui-global.js"></script>
-    <script src="../q-core.js"></script>
-    <script src="../q-ui-planner.js"></script>
-    <script src="../q-hub.js"></script>
+    <script src="./q-ui-global.js?v=23.0"></script>
+    <script src="../q-core.js?v=23.0"></script>
+    <script src="../q-ui-planner.js?v=23.0"></script>
+    <script src="../q-hub.js?v=23.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
@@ -58,15 +58,7 @@
 </head>
 <body class="mode-q">
 
-    <div class="gear-container q-center-dial" id="q-center-dial">
-        <svg width="100%" height="100%" viewBox="0 0 400 400">
-            <circle cx="200" cy="200" r="150" fill="none" stroke="#333" stroke-width="2"/>
-            <path id="bio-arc-1" d="" fill="none" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
-            <path id="bio-arc-2" d="" fill="none" stroke="#555" stroke-width="15" stroke-linecap="round"/>
-            <text x="200" y="200" fill="#fff" font-family="Orbitron" font-size="24" text-anchor="middle" id="bio-txt">92%</text>
-            <text x="200" y="225" fill="#888" font-family="JetBrains Mono" font-size="10" text-anchor="middle">FLOW ALIGNMENT</text>
-        </svg>
-    </div>
+    <div class="gear-container q-center-dial" id="q-center-dial"></div>
 
     <div class="corner-panel tl telemetry-node desktop-only">
         <div class="frost-zone"></div>
@@ -108,19 +100,7 @@
         window.addEventListener('q-tick', (e) => {
             const { t, qData } = e.detail;
             
-            // --- CENTER DIAL KINEMATICS ---
-            const arc1End = 90 + (Math.sin(t/2000)*30);
-            const a1x = 200 + 130 * Math.cos(arc1End * Math.PI/180);
-            const a1y = 200 + 130 * Math.sin(arc1End * Math.PI/180);
-            document.getElementById('bio-arc-1').setAttribute("d", `M70,200 A130,130 0 0,1 ${a1x},${a1y}`);
-            
-            const arc2End = 180 + (Math.cos(t/2500)*20);
-            const a2x = 200 + 100 * Math.cos(arc2End * Math.PI/180);
-            const a2y = 200 + 100 * Math.sin(arc2End * Math.PI/180);
-            document.getElementById('bio-arc-2').setAttribute("d", `M100,200 A100,100 0 0,1 ${a2x},${a2y}`);
-            document.getElementById('bio-txt').innerText = Math.floor(85 + (Math.sin(t/1000)*10)) + "%";
-
-            // --- CORNER PANEL MATH ---
+            // Core Biological Math Abstraction
             let anchorMins = parseInt(localStorage.getItem('q_bio_anchor')) || 0; 
             let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
             let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;

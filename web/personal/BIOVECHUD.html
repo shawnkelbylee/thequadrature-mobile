@@ -8,10 +8,10 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // BIOLOGICAL VECTOR</title>
     
-    <script src="./q-ui-global.js"></script>
-    <script src="../q-core.js"></script>
-    <script src="../q-ui-planner.js"></script>
-    <script src="../q-hub.js"></script>
+    <script src="./q-ui-global.js?v=21.8"></script>
+    <script src="../q-core.js?v=21.8"></script>
+    <script src="../q-ui-planner.js?v=21.8"></script>
+    <script src="../q-hub.js?v=21.8"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
@@ -339,6 +339,51 @@
             if (lastRenderedScrub === null || Math.abs(daysElapsed - lastRenderedScrub) > 0.05) {
                 renderDynamicMoons(daysElapsed);
                 lastRenderedScrub = daysElapsed;
+            }
+
+            function formatDualColor(str) {
+                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
+                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
+                let out = "";
+                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
+                if (tokens) {
+                    tokens.forEach(token => {
+                        if (/[0-9]/.test(token)) out += `<span style="${numStyle}">${token}</span>`;
+                        else out += `<span style="${letterStyle}">${token}</span>`;
+                    });
+                }
+                return out;
+            }
+
+            const legDateEl = document.getElementById('leg-date');
+            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
+            
+            const legTimeEl = document.getElementById('leg-time');
+            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
+
+            const qCoordWing = document.getElementById('q-coord-wing');
+            if (qCoordWing) {
+                let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
+                if (activeBlock && activeBlock.type === 'PYLON') {
+                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
+                } else {
+                    let cCycle = activeBlock ? activeBlock.cycle : 0;
+                    qCoordWing.innerHTML = `<span style="color:var(--starlight);">QC</span><span style="color:var(--theme-main); font-weight:bold;">${cCycle}</span> <span style="color:var(--starlight);">Q</span><span style="color:var(--theme-main); font-weight:bold;">${qData.quad}</span> <span style="color:var(--starlight);">S</span><span style="color:var(--theme-main); font-weight:bold;">${qData.sect}</span> <span style="color:var(--starlight);">DAY</span><span style="color:var(--theme-main); font-weight:bold;">${qData.day}</span>`;
+                }
+            }
+
+            const meanDegEl = document.getElementById('mean-deg');
+            if (meanDegEl) { 
+                meanDegEl.innerText = qData.meanArc.toFixed(4) + "°";
+                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
+            }
+            
+            const trueDegEl = document.getElementById('true-deg');
+            if (trueDegEl) { 
+                trueDegEl.innerText = qData.trueArc.toFixed(4) + "°";
+                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
+                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
             }
 
             const earthSurface = document.querySelector('.bio-earth-surface');

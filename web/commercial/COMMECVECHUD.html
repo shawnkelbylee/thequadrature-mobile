@@ -8,10 +8,10 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // YIELD METROLOGY (MEC)</title>
     
-    <script src="./q-ui-global.js"></script>
-    <script src="../q-core.js"></script>
-    <script src="../q-ui-planner.js"></script>
-    <script src="../q-hub.js"></script>
+    <script src="./q-ui-global.js?v=23.0"></script>
+    <script src="../q-core.js?v=23.0"></script>
+    <script src="../q-ui-planner.js?v=23.0"></script>
+    <script src="../q-hub.js?v=23.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
@@ -58,14 +58,7 @@
 </head>
 <body class="mode-q">
 
-    <div class="gear-container q-center-dial" id="q-center-dial">
-        <svg width="100%" height="100%" viewBox="0 0 400 400">
-            <rect x="40" y="40" width="320" height="320" fill="none" stroke="#333" stroke-width="1"/>
-            <path id="yield-line-1" d="" fill="none" stroke="#ffffff" stroke-width="3"/>
-            <path id="yield-line-2" d="" fill="none" stroke="#555" stroke-width="2" stroke-dasharray="5"/>
-            <text x="200" y="380" fill="#888" font-family="Orbitron" font-size="12" text-anchor="middle">KEPLERIAN SMEAR / FIAT LOSS</text>
-        </svg>
-    </div>
+    <div class="gear-container q-center-dial" id="q-center-dial"></div>
 
     <div class="corner-panel tl telemetry-node desktop-only">
         <div class="frost-zone"></div>
@@ -104,21 +97,9 @@
         window.addEventListener('q-tick', (e) => {
             const { t, qData } = e.detail;
             
-            // --- CENTER DIAL KINEMATICS ---
-            let pts1 = "M40,200 "; let pts2 = "M40,200 ";
-            const delta = qData.delta;
-            for(let i=1; i<=10; i++) {
-                pts1 += `L${40 + i*32},${200 - (Math.sin(t/1000 + i)*20 + delta*10)} `;
-                pts2 += `L${40 + i*32},${200 - (Math.cos(t/1500 + i)*15)} `;
-            }
-            const l1 = document.getElementById('yield-line-1');
-            const l2 = document.getElementById('yield-line-2');
-            if(l1) l1.setAttribute("d", pts1);
-            if(l2) l2.setAttribute("d", pts2);
-
-            // --- CORNER PANEL MATH ---
             const getEl = (id) => document.getElementById(id);
 
+            // Yield Metrology (MEC) Data Math
             let driftDeg = qData.trueArc < 90 ? 90 - qData.trueArc : qData.trueArc < 180 ? 180 - qData.trueArc : qData.trueArc < 270 ? 270 - qData.trueArc : 360 - qData.trueArc;
             
             if(getEl('face-MEC-DRIFT')) getEl('face-MEC-DRIFT').innerText = driftDeg.toFixed(2) + "° REM";

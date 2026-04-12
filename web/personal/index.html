@@ -8,10 +8,10 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // CHRONO-INTERFACE</title>
     
-    <script src="./q-ui-global.js"></script>
-    <script src="../q-core.js"></script>
-    <script src="../q-ui-planner.js"></script>
-    <script src="../q-hub.js"></script>
+    <script src="./q-ui-global.js?v=20.8"></script>
+    <script src="../q-core.js?v=20.8"></script>
+    <script src="../q-ui-planner.js?v=20.8"></script>
+    <script src="../q-hub.js?v=20.8"></script>
     
     <script>
         // IRONCLAD MOBILE BYPASS: Force class if on native device, bypassing buggy WebView viewports
@@ -19,10 +19,19 @@
             document.documentElement.classList.add('is-mobile-device');
         }
         
+        // BOOT STATE HANDLER
+        if(sessionStorage.getItem('Q_BOOT_COMPLETE') === 'true') {
+            document.write('<style>#boot-overlay { display: none !important; }</style>');
+            window.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.remove('boot-active');
+            });
+        }
+
         // OMNI-PLANNER PERSISTENT PROJECTION HOOK
         document.addEventListener('DOMContentLoaded', () => {
             if (window.Q_STATE && window.Q_STATE.logic_layer) {
                 window.Q_STATE.logic_layer.predictive_friction = true;
+                if(window.Q_LOG) window.Q_LOG('INFO', 'CORE', 'PREDICTIVE_PHASE_BORDERING_ACTIVE');
             }
         });
     </script>
@@ -59,6 +68,15 @@
         }
 
         html.is-mobile-device body { perspective: none !important; transform-style: flat !important; }
+        
+        body.boot-active .q-nav-bar,
+        body.boot-active #mobile-telemetry-btn,
+        body.boot-active #q-mic-fab,
+        body.boot-active #mobile-telemetry-ribbon {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
 
         /* --- Local Chrono-Face Styling for Internal Data Cells --- */
         
@@ -162,7 +180,7 @@
         @keyframes glitter-4 { 0%, 100% { opacity: 0.4; transform: rotate(67.5deg) scale(0.8); filter: drop-shadow(0 0 4px #fff); } 50% { opacity: 0.9; transform: rotate(67.5deg) scale(1); filter: drop-shadow(0 0 10px #fff); } }
     </style>
 </head>
-<body class="mode-q">
+<body class="mode-q boot-active">
 
     <div class="star-container" id="star-layer"></div>
 
@@ -227,6 +245,7 @@
                 for(let i=1; i<=4; i++) {
                     localStorage.setItem(`Q_SLOT_${vector}_${i}`, document.getElementById(`sel-${vector}-${i}`).value);
                 }
+                window.Q_LOG('STATE', 'INTERFACE', 'SLOT_ROUTES_UPDATED', { vector });
                 window.refreshChronoFace();
                 window.Q_ModalEngine.close();
                 if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
@@ -234,6 +253,7 @@
         };
 
         window.refreshChronoFace = function() {
+            // Initialize Defaults if missing
             if(!localStorage.getItem('Q_SLOT_BIO_1')) {
                 localStorage.setItem('Q_SLOT_BIO_1', 'HRV'); localStorage.setItem('Q_SLOT_BIO_2', 'LUNAR'); localStorage.setItem('Q_SLOT_BIO_3', 'TIDE'); localStorage.setItem('Q_SLOT_BIO_4', 'PHASE');
                 localStorage.setItem('Q_SLOT_COM_1', 'NEXT'); localStorage.setItem('Q_SLOT_COM_2', 'ZODIAC'); localStorage.setItem('Q_SLOT_COM_3', 'LEDGER'); localStorage.setItem('Q_SLOT_COM_4', 'TERM');
@@ -241,16 +261,19 @@
                 localStorage.setItem('Q_SLOT_MEC_1', 'DRIFT'); localStorage.setItem('Q_SLOT_MEC_2', 'ECCENTRICITY'); localStorage.setItem('Q_SLOT_MEC_3', 'SYMMETRY'); localStorage.setItem('Q_SLOT_MEC_4', 'SMEAR');
             }
 
+            // Auto-migrate legacy 'NODE' selection for Communal Vector de-duplication
             for(let i=1; i<=4; i++) {
                 if(localStorage.getItem(`Q_SLOT_COM_${i}`) === 'NODE') localStorage.setItem(`Q_SLOT_COM_${i}`, 'NEXT');
             }
 
+            // Map data directly into the global UI containers
             ['BIO', 'COM', 'ENV', 'MEC'].forEach(vec => {
                 const container = document.getElementById(`quad-${vec}`);
-                if (!container) return;
+                if (!container) return; // Wait for global UI to mount
 
                 const sty = V_STYLES[vec];
                 
+                // The Vector Header (.v-head) is positioned absolutely to sit outside the frame.
                 let inner = `<div class="v-head holo-text ${sty.class}">${sty.head}</div>`;
                 let assignedCount = 0;
                 
@@ -270,12 +293,13 @@
             });
         };
 
+        // Ensure injection triggers immediately after DOM load
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => window.refreshChronoFace(), 100);
         });
         
         window.addEventListener('q-tick', (e) => {
-            const { t, isLive, activeTime, daysElapsed, qData } = e.detail;
+            const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
 
             // Update Rings
             const continuousMeanDeg = daysElapsed * (360 / 365.24219);
@@ -286,6 +310,8 @@
             document.getElementById('ring-week').style.transform = `rotate(${(daysElapsed / 6) * 360}deg)`;
             document.getElementById('ring-day').style.transform = `rotate(${((t - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY) * 360}deg)`;
 
+            // --- LOCALIZED DATA ROUTING INJECTION ---
+            
             const getEl = (id) => document.getElementById(id);
 
             // BIO DATA
@@ -305,12 +331,12 @@
             // COM DATA
             if(getEl('face-COM-NEXT')) {
                 const currentYear = activeTime.getUTCFullYear();
-                let globalCiv = window.getGlobalHolidays ? window.getGlobalHolidays(currentYear).filter(ev => ev.type === 'node-civ' || ev.type === 'node-hol') : [];
-                globalCiv.push({ name: "Tax Day (US)", coord: 113.4, type: 'node-sys' }); 
+                let globalCiv = window.getGlobalHolidays ? window.getGlobalHolidays(currentYear).filter(e => e.type === 'node-civ' || e.type === 'node-hol') : [];
+                globalCiv.push({ name: "Tax Day (US)", coord: 113.4, type: 'node-sys' }); // Add systematic marker
                 globalCiv.sort((a,b) => a.coord - b.coord);
                 
-                let nextCiv = globalCiv.find(ev => ev.coord > qData.trueArc);
-                if (!nextCiv && globalCiv.length > 0) nextCiv = globalCiv[0]; 
+                let nextCiv = globalCiv.find(e => e.coord > qData.trueArc);
+                if (!nextCiv && globalCiv.length > 0) nextCiv = globalCiv[0]; // Wrap around loop
                 
                 getEl('face-COM-NEXT').innerText = nextCiv ? `${nextCiv.name.substring(0,12).toUpperCase()} @ ${nextCiv.coord.toFixed(1)}°` : "--";
             }

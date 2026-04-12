@@ -8,10 +8,10 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // LOGISTICS & LEDGER (COM)</title>
     
-    <script src="./q-ui-global.js"></script>
-    <script src="../q-core.js"></script>
-    <script src="../q-ui-planner.js"></script>
-    <script src="../q-hub.js"></script>
+    <script src="./q-ui-global.js?v=23.0"></script>
+    <script src="../q-core.js?v=23.0"></script>
+    <script src="../q-ui-planner.js?v=23.0"></script>
+    <script src="../q-hub.js?v=23.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
@@ -43,8 +43,7 @@
 
         .t-row { display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px; font-size: 0.6rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
         .t-row span:first-child { color: var(--q-metal); }
-        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.8rem; color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.2); }
-        .tr .val-sm, .br .val-sm { text-align: right; }
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.8rem; color: var(--white); text-shadow: 0 0 8px rgba(255,255,255,0.2); text-align: right; }
 
         /* --- Center Dial Architecture --- */
         .gear-container {
@@ -59,16 +58,7 @@
 </head>
 <body class="mode-q">
 
-    <div class="gear-container q-center-dial" id="q-center-dial">
-        <svg width="100%" height="100%" viewBox="0 0 400 400">
-            <rect x="50" y="50" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect x="200" y="50" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect x="50" y="200" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect x="200" y="200" width="150" height="150" fill="none" stroke="#333" stroke-width="2"/>
-            <rect id="com-active-quad" x="50" y="50" width="150" height="150" fill="#ffffff" opacity="0.2"/>
-            <text x="200" y="200" fill="#fff" font-family="Orbitron" font-size="14" text-anchor="middle" alignment-baseline="middle">90+1 LEDGER</text>
-        </svg>
-    </div>
+    <div class="gear-container q-center-dial" id="q-center-dial"></div>
 
     <div class="corner-panel tl telemetry-node desktop-only">
         <div class="frost-zone"></div>
@@ -108,18 +98,6 @@
             const { activeTime, qData } = e.detail;
             const getEl = (id) => document.getElementById(id);
 
-            // --- CENTER DIAL KINEMATICS ---
-            const q = qData.quad;
-            const active = document.getElementById('com-active-quad');
-            if (active) {
-                if (q === 1) { active.setAttribute("x", "200"); active.setAttribute("y", "50"); }
-                if (q === 2) { active.setAttribute("x", "200"); active.setAttribute("y", "200"); }
-                if (q === 3) { active.setAttribute("x", "50"); active.setAttribute("y", "200"); }
-                if (q === 4) { active.setAttribute("x", "50"); active.setAttribute("y", "50"); }
-            }
-
-            // --- CORNER PANEL MATH ---
-            
             // NEXT CIVIL ANCHOR
             if(getEl('face-COM-NEXT')) {
                 const currentYear = activeTime.getUTCFullYear();

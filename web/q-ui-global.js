@@ -1,6 +1,6 @@
 // THE QUADRATURE: GLOBAL UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase III UI Engine. Boot Sequence Purged. Spatial Routing & Sovereign Auth Badge Locked.
+// STATUS: Phase III UI Engine. Max Horizontal Expansion. OPT Centering Aggressively Offset.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -25,8 +25,7 @@ window.injectUniversalUI = function() {
     const eActive = path.includes("ENV");
     const mActive = path.includes("MEC");
     const cActive = path.includes("COM");
-    
-    const faceActive = (!isAperture && !bActive && !eActive && !mActive && !cActive);
+    const faceActive = path.includes("PERSONAL") || (!isAperture && !bActive && !eActive && !mActive && !cActive);
     
     if (faceActive) document.body.classList.add('q-chrono-face');
     else document.body.classList.add('q-vector-hud');
@@ -69,13 +68,6 @@ window.injectUniversalUI = function() {
             .corner-panel:hover .frost-zone { box-shadow: 0 0 20px ${micGlow}, inset 0 0 25px rgba(255, 255, 255, 0.1) !important; }
         `;
     }
-
-    // STRICT PERSISTENCE LOGIC: Bypasses state-load race condition by directly querying localStorage
-    const authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
-    const authBg = authState === 'ACTIVE' ? '#39ff14' : 'transparent';
-    const authColor = authState === 'ACTIVE' ? '#000' : '#ff003c';
-    const authBorder = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
-    const authText = authState === 'ACTIVE' ? '[ IN THE QUAD ]' : '[ AUTHENTICATE ]';
 
     const style = document.createElement('style');
     style.innerHTML = `
@@ -171,6 +163,7 @@ window.injectUniversalUI = function() {
         .bl .panel-data-container { padding: 12px 30px 12px 75px; }
         .br .panel-data-container { padding: 12px 75px 12px 30px; }
 
+        /* Pure Text OPT anchored with JetBrains Mono and inward shifts */
         .opt-oval { position: absolute; font-family: 'JetBrains Mono'; font-size: 0.55rem; font-weight: 700; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 30; transition: 0.3s; }
         .opt-oval:hover { color: #fff !important; text-shadow: 0 0 8px #fff !important; }
         .tl .opt-oval { top: 36px; left: 45px; }
@@ -213,7 +206,7 @@ window.injectUniversalUI = function() {
         .q-nav-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 6px 12px; border-radius: 4px; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: bold; cursor: pointer; transition: 0.3s; letter-spacing: 1px; padding-left: 13px; text-decoration: none; display: inline-block; text-align: center; pointer-events: auto !important; white-space: nowrap; }
         .q-nav-btn:hover { border-color: #fff; color: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
         
-        .q-nav-btn.sim-badge { border-color: ${authBorder} !important; color: ${authColor} !important; background: ${authBg} !important; padding-left: 12px; }
+        .q-nav-btn.sim-badge { border-color: var(--chrono-amber) !important; color: #000 !important; background: var(--chrono-amber) !important; padding-left: 12px; }
         .q-nav-btn.face-btn.active { border-color: var(--chrono-amber) !important; color: var(--chrono-amber) !important; box-shadow: inset 0 0 10px var(--chrono-amber-dim) !important; }
         .q-nav-btn.bio-btn.active { border-color: var(--bio-purple) !important; color: var(--bio-purple) !important; box-shadow: inset 0 0 10px var(--bio-purple-dim) !important; }
         .q-nav-btn.com-btn.active { border-color: var(--gold, #F4D068) !important; color: var(--gold, #F4D068) !important; box-shadow: inset 0 0 10px rgba(244,208,104,0.2) !important; }
@@ -224,6 +217,15 @@ window.injectUniversalUI = function() {
         #q-mic-fab-desktop:hover { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; }
         #q-mic-fab-desktop.listening { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; animation: pulse-mic-desktop 1.5s infinite; }
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } 50% { transform: scale(1.1); box-shadow: 0 0 25px ${micColor}; } 100% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } }
+        
+        .boot-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'JetBrains Mono', monospace; color: var(--sys-cyan, #00f0ff); transition: opacity 1.5s ease-in-out; }
+        .boot-terminal { width: 90%; max-width: 500px; border: 1px solid var(--sys-cyan, #00f0ff); padding: 30px; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 30px rgba(0, 240, 255, 0.15); border-radius: 4px; backface-visibility: hidden; transform: translateZ(0); }
+        .boot-terminal h2 { font-family: 'Orbitron'; font-size: 1.8rem; letter-spacing: 6px; padding-left: 6px; text-align: center; margin-top: 0; text-shadow: 0 0 10px var(--sys-cyan, #00f0ff); white-space: nowrap; }
+        .boot-desc { font-size: 0.7rem; color: #aaa; text-align: center; margin-bottom: 25px; line-height: 1.5; }
+        .boot-btn-row { display: flex; gap: 15px; margin-top: 15px; justify-content: center; }
+        .boot-btn { flex: 1; background: transparent; border: 1px solid var(--sys-cyan, #00f0ff); color: var(--sys-cyan, #00f0ff); font-family: 'Orbitron'; font-weight: 700; padding: 12px; cursor: pointer; transition: 0.3s; letter-spacing: 2px; padding-left: 14px; font-size: 0.75rem; }
+        .boot-btn:hover { background: var(--sys-cyan, #00f0ff); color: #000; box-shadow: 0 0 20px var(--sys-cyan, #00f0ff); }
+        .boot-log { margin-top: 20px; font-size: 0.85rem; min-height: 80px; text-align: center; line-height: 1.6; text-shadow: 0 0 8px var(--sys-cyan, #00f0ff); }
         
         .q-global-controls { position: fixed; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
         .q-ctrl-btn { background: transparent; border: 1px solid ${osPanelColor}; color: ${osPanelColor}; padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; padding-left: 15px; white-space: nowrap; pointer-events: auto; }
@@ -246,15 +248,7 @@ window.injectUniversalUI = function() {
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
             
-            /* --- NAVBAR OVERRIDES --- */
-            .q-nav-bar { 
-                top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; 
-                height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; 
-                background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: none !important; 
-            }
-            .q-nav-bar * { pointer-events: auto !important; }
-            .q-nav-menu .vector-link { display: none !important; } /* Hides redundant links */
-            
+            .q-nav-bar { top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; }
             #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
             
             .q-nav-menu { position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; background: transparent; box-shadow: none; transform: none; width: auto; -webkit-overflow-scrolling: touch; border: none; padding-bottom: 0; gap: 5px; justify-content: flex-start; }
@@ -280,6 +274,9 @@ window.injectUniversalUI = function() {
 
             .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; padding-left: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
             
+            #q-mic-fab { position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; border-radius: 50%; background: rgba(5, 8, 15, 0.9); border: 1px solid ${micColor}; color: ${micColor}; display: flex; justify-content: center; align-items: center; z-index: 100000; box-shadow: 0 0 20px rgba(0,0,0,0.8), 0 0 10px ${micGlow}; cursor: pointer; font-size: 1.2rem; transition: all 0.3s ease; pointer-events: auto !important; }
+            #q-mic-fab.listening { background: ${micColor}; color: #000; box-shadow: 0 0 25px ${micColor}; animation: pulse-mic 1.5s infinite; }
+
             #mobile-telemetry-ribbon { display: flex !important; position: fixed; top: 50px !important; margin-top: 0 !important; left: 0px !important; height: 45px !important; width: 100vw !important; background: rgba(2, 6, 15, 0.98); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); z-index: 99998 !important; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.9); padding: 0 10px !important; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
             #ribbon-leg-date { white-space: nowrap; font-size: 0.6rem !important; }
             #ribbon-leg { white-space: nowrap; font-size: 0.65rem !important; }
@@ -288,71 +285,8 @@ window.injectUniversalUI = function() {
             #mobile-telemetry-viewport .telemetry-node { display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important; }
             #mobile-telemetry-viewport .wing-panel { display: none !important; }
             
-            /* --- TELEMETRY PANEL OVERRIDES --- */
-            #mobile-telemetry-viewport .corner-panel { height: auto !important; min-height: 120px !important; padding: 20px !important; }
-            #mobile-telemetry-viewport .panel-bg { display: none !important; } 
-            #mobile-telemetry-viewport .frost-zone { inset: 0 !important; border-radius: 8px !important; border: 1px solid rgba(255,255,255,0.1); }
-            #mobile-telemetry-viewport .panel-data-container { padding: 0 !important; margin-top: 10px !important; align-items: center !important; text-align: center !important; }
-            #mobile-telemetry-viewport .panel-label { padding: 0 !important; position: relative !important; }
-            #mobile-telemetry-viewport .opt-oval { position: absolute !important; top: 15px !important; right: 15px !important; left: auto !important; bottom: auto !important; }
-            
             body.telemetry-open .q-center-dial { display: none !important; }
-
-            /* --- SCRUBBER & MIC BRACKETING --- */
-            .q-global-controls { 
-                display: flex !important; 
-                align-items: center !important; 
-                justify-content: space-between !important;
-                width: 95vw !important; 
-                min-width: unset !important; 
-                box-sizing: border-box !important; 
-                padding: 6px 8px !important; 
-                gap: 4px !important;
-                ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 65px) !important;'}
-            } 
-            
-            #q-mic-fab { 
-                position: static !important; 
-                transform: none !important;
-                width: 32px !important; 
-                height: 32px !important; 
-                border-radius: 6px !important; 
-                font-size: 1rem !important; 
-                box-shadow: none !important;
-                order: 1 !important; 
-                flex-shrink: 0 !important;
-                background: rgba(5, 8, 15, 0.9);
-                border: 1px solid ${micColor};
-                color: ${micColor};
-                display: flex; justify-content: center; align-items: center;
-                cursor: pointer; transition: all 0.3s ease; pointer-events: auto !important;
-            }
-            #q-mic-fab.listening { animation: pulse-mic 1.5s infinite; background: ${micColor}; color: #000; box-shadow: 0 0 25px ${micColor} !important; }
-            
-            /* The < button */
-            .q-global-controls > .q-ctrl-btn:nth-child(1) { order: 2 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
-            
-            .q-scrubber { 
-                order: 3 !important; 
-                min-width: 0 !important; 
-                width: 100% !important; 
-                margin: 0 !important; 
-                flex-grow: 1 !important;
-            }
-            
-            /* The > button */
-            .q-global-controls > .q-ctrl-btn:nth-child(3) { order: 4 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
-
-            #q-live-toggle {
-                order: 5 !important; 
-                width: auto !important;
-                min-width: 32px !important;
-                height: 32px !important;
-                padding: 0 6px !important;
-                font-size: 0.55rem !important; 
-                flex-shrink: 0 !important;
-                margin: 0 !important;
-            }
+            .q-global-controls { min-width: 95vw; padding: 8px 12px; gap: 5px; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} } 
         }
     `;
     document.head.appendChild(style);
@@ -426,13 +360,10 @@ window.injectUniversalUI = function() {
         <div class="q-nav-bar">
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
-                    <a href="${isAperture ? '#' : '../aperture/index.html'}" class="q-nav-btn desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" ontouchstart="window.location.href=this.href; event.preventDefault();">APERTURE</a>
-                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block; border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">${authText}</button>
-                    <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
+                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: none;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">[ IN THE QUAD ]</button>
+                    <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
                     <a href="${navPrefix}BIOVECHUD.html?v=20.0" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
-                    
                     <a href="${navPrefix}COMVECHUD.html?v=20.0" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">COMMUNAL</a>
-                    
                     <a href="${navPrefix}ENVVECHUD.html?v=20.0" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">ENVIRONMENTAL</a>
                     <a href="${navPrefix}MECVECHUD.html?v=20.0" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">MECHANICAL</a>
                     <button class="q-nav-btn omni desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()" ontouchstart="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner(); event.preventDefault();">[ OMNI-PLANNER ]</button>
@@ -463,7 +394,7 @@ window.injectUniversalUI = function() {
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="5" r="3"/><line x1="12" y1="8" x2="12" y2="16"/><circle cx="6" cy="20" r="3"/><circle cx="18" cy="20" r="3"/><line x1="12" y1="16" x2="6" y2="17"/><line x1="12" y1="16" x2="18" y2="17"/></svg>
                 <span class="strip-lbl">COM</span>
             </a>
-            <a href="${navPrefix}index.html?v=20.0" class="strip-btn face-strip ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
+            <a href="${navPrefix}index.html?v=20.0" class="strip-btn face-strip ${faceActive && !isAperture ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                 <span class="strip-lbl">CHRONO</span>
             </a>
@@ -537,7 +468,20 @@ window.injectUniversalUI = function() {
             </div>
         </div>
 
-        <div class="q-global-controls" id="q-universal-controls">
+        <div class="boot-overlay" id="boot-overlay" style="display: none;">
+            <div class="boot-terminal">
+                <h2>INITIALIZATION</h2>
+                <div class="boot-desc">Establish Sovereign Identity to engage the Quadrature Structure.</div>
+                <div id="boot-inputs">
+                    <div class="boot-btn-row">
+                        <button class="boot-btn" onclick="window.runBootSequence()" ontouchstart="window.runBootSequence(); event.preventDefault();">ENGAGE SEQUENCE</button>
+                    </div>
+                </div>
+                <div class="boot-log" id="boot-log"></div>
+            </div>
+        </div>
+
+        <div class="q-global-controls" id="q-universal-controls" style="display: none;">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
             <input type="range" min="0" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
@@ -547,11 +491,36 @@ window.injectUniversalUI = function() {
     
     const refNode = document.body.firstChild;
     while (uiContainer.firstChild) document.body.insertBefore(uiContainer.firstChild, refNode);
+
+    if(sessionStorage.getItem('Q_BOOT_COMPLETE') !== 'true') {
+        document.body.classList.add('boot-active');
+        let bootOverlay = document.getElementById('boot-overlay');
+        if (bootOverlay) bootOverlay.style.display = 'flex';
+    } else {
+        document.body.classList.remove('boot-active');
+        let ctrlBar = document.getElementById('q-universal-controls');
+        if(ctrlBar) ctrlBar.style.display = 'flex';
+    }
     
     window.bindMasterTickScrubber();
     window.syncScrubberUI();
 
     window.addEventListener('q-tick', (e) => {
+        const badge = document.getElementById('q-global-sim-badge');
+        if (badge) {
+            badge.style.display = e.detail.isLive ? 'inline-block' : 'none';
+            badge.innerText = e.detail.isLive ? "[ IN THE QUAD ]" : "[ TEMPORAL PROJECTION ]";
+            if (!e.detail.isLive) {
+                badge.style.background = "#ff003c";
+                badge.style.color = "#fff";
+                badge.style.border = "1px solid #ff003c";
+            } else {
+                badge.style.background = "var(--chrono-amber)";
+                badge.style.color = "#000";
+                badge.style.border = "1px solid var(--chrono-amber)";
+            }
+        }
+
         const ribbonLeg = document.getElementById('ribbon-leg');
         const ribbonLegDate = document.getElementById('ribbon-leg-date');
         const ribbonFmt = document.getElementById('ribbon-fmt');
@@ -767,6 +736,40 @@ window.generateStars = function(containerId) {
     });
 })();
 
+window.runBootSequence = function() {
+    sessionStorage.setItem('Q_BOOT_COMPLETE', 'true');
+    const log = document.getElementById('boot-log');
+    const overlay = document.getElementById('boot-overlay');
+    const inputs = document.getElementById('boot-inputs');
+    
+    if(inputs) inputs.style.display = 'none';
+
+    log.innerHTML = "POSITION ACQUIRED.<br>";
+    setTimeout(() => { log.innerHTML += "<br>ESTABLISHING CHRONOBIOLOGICAL STATE RESOLUTION... "; }, 300);
+    setTimeout(() => { log.innerHTML += "<br>INITIATING LOCAL TRANSLATION OVERLAY... "; }, 600);
+    setTimeout(() => { log.innerHTML += "<br>ENFORCING DUAL-STATE GEOMETRY... "; }, 900);
+    setTimeout(() => { log.innerHTML += "3... "; }, 1200);
+    setTimeout(() => { log.innerHTML += "2... "; }, 1500);
+    setTimeout(() => { log.innerHTML += "1... "; }, 1800);
+    setTimeout(() => { log.innerHTML += "<span style='color:var(--white-pure, #fff); font-family:Orbitron; font-weight:900;'>YOU... </span>"; }, 2000);
+    setTimeout(() => { log.innerHTML += "<span style='color:var(--white-pure, #fff); font-family:Orbitron; font-weight:900;'>ARE... </span>"; }, 2200);
+    setTimeout(() => { log.innerHTML += "<span style='color:var(--platinum); font-family:Orbitron; font-weight:900; font-size:1.2rem; letter-spacing:4px; text-shadow: 0 0 15px var(--platinum);'>HERE.</span>"; }, 2400);
+    setTimeout(() => { log.innerHTML += "<br><span style='color:var(--gold); font-family:Orbitron; font-weight:700; font-size:0.8rem; letter-spacing:2px; opacity:0.8;'>HERE IS NOW.</span>"; }, 2600);
+    setTimeout(() => { log.innerHTML += "<br><br><span style='color:var(--theme-main); font-family:Orbitron; font-weight:900; font-size:0.9rem; letter-spacing:2px; text-shadow: 0 0 15px var(--theme-main);'>HERE AND NOW ARE INFINITELY ONE!</span>"; }, 2800);
+    
+    setTimeout(() => { 
+        if(window.Q_LOG) window.Q_LOG('INFO', 'INTERFACE', 'BOOT_SEQUENCE_EXECUTED');
+        overlay.style.opacity = '0'; 
+        document.body.classList.remove('boot-active'); 
+        
+        const ctrlBar = document.getElementById('q-universal-controls');
+        if(ctrlBar) {
+            ctrlBar.style.display = 'flex';
+        }
+        setTimeout(() => overlay.style.display = 'none', 400);
+    }, 3200);
+};
+
 window.bindMasterTickScrubber = function() {
     window.addEventListener('q-tick', (e) => {
         const { isLive, daysElapsed } = e.detail;
@@ -839,14 +842,4 @@ window.syncScrubberUI = function() {
 
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
-
-    // Relocate the Mic to the Scrubber Panel for Mobile Bracketing
-    if (window.innerWidth <= 950) {
-        const micFab = document.getElementById('q-mic-fab');
-        const controlsPanel = document.getElementById('q-universal-controls');
-        
-        if (micFab && controlsPanel) {
-            controlsPanel.appendChild(micFab);
-        }
-    }
 });

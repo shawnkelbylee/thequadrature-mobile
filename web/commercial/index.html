@@ -8,13 +8,12 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // COMMERCIAL CHRONO-FACE</title>
     
-    <script src="./q-ui-global.js"></script>
-    <script src="../q-core.js"></script>
-    <script src="../q-ui-planner.js"></script>
-    <script src="../q-hub.js"></script>
+    <script src="./q-ui-global.js?v=23.2"></script>
+    <script src="../q-core.js?v=23.2"></script>
+    <script src="../q-ui-planner.js?v=23.2"></script>
+    <script src="../q-hub.js?v=23.2"></script>
     
     <script>
-        // IRONCLAD MOBILE BYPASS: Force class if on native device
         if (/Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768) {
             document.documentElement.classList.add('is-mobile-device');
         }
@@ -51,7 +50,7 @@
         .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; color: var(--white) !important; }
 
         .gear-container {
-            position: absolute; width: var(--dial-size, 60vh); height: var(--dial-size, 60vh); border-radius: 50%; 
+            position: absolute; width: var(--dial-size); height: var(--dial-size); border-radius: 50%; 
             left: 50%; top: 50%; transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center; z-index: 30;
             background: var(--glass-liquid); backdrop-filter: var(--blur-high); -webkit-backdrop-filter: var(--blur-high);
@@ -99,44 +98,32 @@
             });
         };
 
-        // Initialize SVG Ticks
-        document.addEventListener('DOMContentLoaded', () => {
-            const ticks = document.getElementById('chrono-ticks');
-            if (ticks) {
-                for(let i=0; i<60; i++) {
-                    const isHour = i % 5 === 0;
-                    const angle = (i * 6 - 90) * Math.PI / 180;
-                    const rInner = isHour ? 160 : 165;
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", 200 + rInner * Math.cos(angle));
-                    line.setAttribute("y1", 200 + rInner * Math.sin(angle));
-                    line.setAttribute("x2", 200 + 175 * Math.cos(angle));
-                    line.setAttribute("y2", 200 + 175 * Math.sin(angle));
-                    line.setAttribute("stroke", isHour ? "#ffffff" : "#333");
-                    line.setAttribute("stroke-width", isHour ? "3" : "1");
-                    ticks.appendChild(line);
-                }
-            }
-            // Populate slots on load
-            setTimeout(() => window.refreshChronoFace(), 100);
-        });
+        const ticks = document.getElementById('chrono-ticks');
+        for(let i=0; i<60; i++) {
+            const isHour = i % 5 === 0;
+            const angle = (i * 6 - 90) * Math.PI / 180;
+            const rInner = isHour ? 160 : 165;
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", 200 + rInner * Math.cos(angle));
+            line.setAttribute("y1", 200 + rInner * Math.sin(angle));
+            line.setAttribute("x2", 200 + 175 * Math.cos(angle));
+            line.setAttribute("y2", 200 + 175 * Math.sin(angle));
+            line.setAttribute("stroke", isHour ? "#ffffff" : "#333");
+            line.setAttribute("stroke-width", isHour ? "3" : "1");
+            ticks.appendChild(line);
+        }
 
         window.addEventListener('q-tick', (e) => {
             const d = new Date();
             const h = d.getHours(); const m = d.getMinutes(); const s = d.getSeconds();
-            
-            const handHour = document.getElementById('hand-hour');
-            const handMin = document.getElementById('hand-minute');
-            const handSec = document.getElementById('hand-second');
-            
-            if (handHour) handHour.setAttribute("transform", `rotate(${((h % 12) + m/60) * 30} 200 200)`);
-            if (handMin) handMin.setAttribute("transform", `rotate(${(m + s/60) * 6} 200 200)`);
-            if (handSec) handSec.setAttribute("transform", `rotate(${s * 6} 200 200)`);
+            document.getElementById('hand-hour').setAttribute("transform", `rotate(${((h % 12) + m/60) * 30} 200 200)`);
+            document.getElementById('hand-minute').setAttribute("transform", `rotate(${(m + s/60) * 6} 200 200)`);
+            document.getElementById('hand-second').setAttribute("transform", `rotate(${s * 6} 200 200)`);
 
             const { t, qData } = e.detail;
             const getEl = (id) => document.getElementById(id);
 
-            // Populate Restored Metric Logic for the face data slots
+            // Populate Restored Metric Logic
             if(getEl('face-BIO-HRV')) getEl('face-BIO-HRV').innerText = (65 + Math.cos(t / 15000) * 10).toFixed(1) + " MS";
             if(getEl('face-BIO-PHASE')) getEl('face-BIO-PHASE').innerText = (window.getBiologicalState && window.getBiologicalState(t)) || "--";
             if(getEl('face-BIO-LUNAR')) getEl('face-BIO-LUNAR').innerText = (qData.lunarPhase * 100).toFixed(1) + "%";
@@ -150,6 +137,10 @@
 
             if(getEl('face-MEC-DRIFT')) getEl('face-MEC-DRIFT').innerText = qData.delta.toFixed(4) + "°";
             if(getEl('face-MEC-SMEAR')) getEl('face-MEC-SMEAR').innerText = (t % 1000 / 1000).toFixed(4);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.refreshChronoFace();
         });
     </script>
 </body>
