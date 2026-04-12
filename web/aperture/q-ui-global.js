@@ -1,6 +1,6 @@
 // THE QUADRATURE: APERTURE GATEWAY UI CONTROLLER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Version 23.3 - Gateway Controller Optimized. UI render logic offloaded to HTML. Handles strict routing and universal states.
+// STATUS: Version 23.4 - Gateway Controller Optimized. Domain Shift Protocol & Universal Auth Patch Applied.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -39,6 +39,52 @@ window.injectUniversalUI = function() {
         
         if (window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
     };
+};
+
+// --- DOMAIN SHIFT & AUTH LOGIC (APERTURE LEVEL) ---
+window.triggerDomainShift = function(e) {
+    if(e) e.preventDefault();
+    let authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
+    
+    if(authState !== 'ACTIVE') {
+        if(window.Q_Auth) window.Q_Auth.triggerOAuth();
+        else alert("OAuth Service Unavailable. Please reload the Gateway.");
+        return;
+    }
+
+    let rawEnt = localStorage.getItem('Q_ENTITLEMENTS');
+    let entitlements = [];
+    try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
+
+    // Master Access Fallback Check
+    let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
+    if (authUser.toUpperCase() === 'KELBY' || authUser.includes('MASTER')) {
+        entitlements = ["PERSONAL", "COMMERCIAL"];
+        localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(entitlements));
+    }
+
+    if(entitlements.includes("PERSONAL") && entitlements.includes("COMMERCIAL")) {
+        const html = `
+            <div style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#aaa; margin-bottom: 15px; text-align:center;">
+                Dual entitlements detected. Select operating domain.
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button onclick="window.location.href='../personal/index.html'" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #F4D068; color: #F4D068; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(244, 208, 104, 0.25);">
+                    PERSONAL MATRIX
+                </button>
+                <button onclick="window.location.href='../commercial/index.html'" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #ffffff; color: #ffffff; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);">
+                    ENTERPRISE LEDGER
+                </button>
+                <button onclick="window.Q_ModalEngine.close()" style="padding: 10px; background: transparent; border: 1px solid #555; color: #888; font-family: 'Orbitron'; font-size: 0.7rem; cursor: pointer; border-radius: 4px; margin-top: 5px;">
+                    CANCEL / REMAIN
+                </button>
+            </div>
+        `;
+        if(window.Q_ModalEngine) window.Q_ModalEngine.render('DOMAIN SHIFT PROTOCOL', html);
+        else alert("Routing Module Unavailable.");
+    } else {
+        if(window.Q_Auth) window.Q_Auth.triggerOAuth(); // Resync or show status if single tier
+    }
 };
 
 // 3. AGGRESSIVE CAPTURE-PHASE ROUTING INTERCEPTOR
