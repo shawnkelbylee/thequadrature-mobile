@@ -6,6 +6,11 @@ window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
     if (document.getElementById('q-ui-injected-flag')) return;
 
+    // CRITICAL FIX: Force removal of 'boot-active' lock to prevent mobile UI elements from remaining invisible
+    if (document.body.classList.contains('boot-active')) {
+        document.body.classList.remove('boot-active');
+    }
+
     let oldMeta = document.querySelector('meta[name="viewport"]');
     if (oldMeta) oldMeta.remove();
     let meta = document.createElement('meta');
@@ -258,7 +263,6 @@ window.injectUniversalUI = function() {
             #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
             
             .q-nav-menu { position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; background: transparent; box-shadow: none; transform: none; width: auto; -webkit-overflow-scrolling: touch; border: none; padding-bottom: 0; gap: 5px; justify-content: flex-start; }
-            .q-nav-menu::-webkit-scrollbar { display: none; }
             .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; margin-right: 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
             .q-center-dial { margin-top: -3vh !important; }
@@ -427,7 +431,7 @@ window.injectUniversalUI = function() {
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
                     <a href="${isAperture ? '#' : '../aperture/index.html'}" class="q-nav-btn desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" ontouchstart="window.location.href=this.href; event.preventDefault();">APERTURE</a>
-                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block; border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();" ontouchstart="if(window.Q_Auth) window.Q_Auth.triggerOAuth(); event.preventDefault();">${authText}</button>
+                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block; border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="window.triggerDomainShift(event)" ontouchstart="window.triggerDomainShift(event); event.preventDefault();">${authText}</button>
                     <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
                     <a href="${navPrefix}BIOVECHUD.html?v=20.0" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">BIOLOGICAL</a>
                     
@@ -628,6 +632,48 @@ window.injectUniversalUI = function() {
     });
 };
 
+// --- DOMAIN SHIFT PROTOCOL (PERSONAL) ---
+window.triggerDomainShift = function(e) {
+    if(e) e.preventDefault();
+    let authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
+    
+    if(authState !== 'ACTIVE') {
+        if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth();
+        else alert("OAuth Service Unavailable. Boot from Aperture Gateway.");
+        return;
+    }
+
+    let rawEnt = localStorage.getItem('Q_ENTITLEMENTS');
+    let entitlements = [];
+    try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
+
+    let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
+    if (authUser.toUpperCase() === 'KELBY' || authUser.includes('MASTER')) {
+        entitlements = ["PERSONAL", "COMMERCIAL"];
+        localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(entitlements));
+    }
+
+    if(entitlements.includes("PERSONAL") && entitlements.includes("COMMERCIAL")) {
+        const html = `
+            <div style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#aaa; margin-bottom: 15px; text-align:center;">
+                Dual entitlements detected. Select operating domain.
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button onclick="if(window.Q_ModalEngine) window.Q_ModalEngine.close()" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #F4D068; color: #F4D068; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(244,208,104,0.4);">
+                    REMAIN IN PERSONAL MATRIX
+                </button>
+                <button onclick="window.location.href='../commercial/index.html'" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #ffffff; color: #ffffff; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(255,255,255,0.2);">
+                    SWITCH TO ENTERPRISE LEDGER
+                </button>
+            </div>
+        `;
+        if(window.Q_ModalEngine) window.Q_ModalEngine.render('DOMAIN SHIFT PROTOCOL', html);
+        else alert("Routing Module Unavailable.");
+    } else {
+        if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth(); 
+    }
+};
+
 window.toggleTimeFmt = function(btnId) {
     let fmt = localStorage.getItem('Q_TIME_FMT') || 'UTC_24';
     const cycle = { 'UTC_24': 'LOCAL_24', 'LOCAL_24': 'UTC_12', 'UTC_12': 'LOCAL_12', 'LOCAL_12': 'UTC_24' };
@@ -689,7 +735,7 @@ window.openQuadrantAssignmentModal = function(quadrantId) {
         window.Q_ModalEngine.render('DYNAMIC ROUTING: ASSIGN POOL', html, 'LOCK ASSIGNMENT', () => {
             const selected = document.getElementById('quad-pool-select').value;
             localStorage.setItem('Q_FACE_QUAD_' + quadrantId, selected);
-            window.Q_LOG('STATE', 'INTERFACE', 'CHRONO_FACE_QUADRANT_REASSIGNED', { quadrant: quadrantId, pool: selected });
+            if(window.Q_LOG) window.Q_LOG('STATE', 'INTERFACE', 'CHRONO_FACE_QUADRANT_REASSIGNED', { quadrant: quadrantId, pool: selected });
             if (typeof window.refreshChronoFace === 'function') window.refreshChronoFace();
             window.Q_ModalEngine.close();
             if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
