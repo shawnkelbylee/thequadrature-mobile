@@ -230,7 +230,7 @@
             100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--radius)) translateZ(500px); opacity: 0; }
         }
 
-        /* --- KINETIC ACTUATION STATES (NEW) --- */
+        /* --- KINETIC ACTUATION STATES --- */
         
         #portal-frame {
             position: fixed; inset: 0;
@@ -241,14 +241,14 @@
             clip-path: circle(5% at 50% 50%);
         }
 
-        /* 1. Blades spin, scale up, and retract INSIDE the SVG clip-path mask */
+        /* 1. Blades spin, scale up, and retract INSIDE the static SVG wrapper mask */
         #iris-blade-group {
             transform-origin: 50px 50px;
             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-in 0.2s;
         }
         
         body.sequencing #iris-blade-group { 
-            transform: rotate(90deg) scale(1.6); /* Increased scale to ensure total center clearance */
+            transform: rotate(90deg) scale(1.6); 
             opacity: 0;
         }
 
@@ -429,9 +429,13 @@
             shinyRim.setAttribute("fill", "none"); shinyRim.setAttribute("stroke", "url(#shiny-rim-grad)"); shinyRim.setAttribute("stroke-width", "0.5");
             svg.appendChild(shinyRim);
 
+            // STATIC WRAPPER: Holds the clip-path steady
+            let staticWrapper = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            staticWrapper.setAttribute("clip-path", "url(#iris-housing-clip)");
+
+            // KINETIC BLADE GROUP: Scales and rotates inside the static wrapper
             let cutsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
             cutsGroup.setAttribute("id", "iris-blade-group");
-            cutsGroup.setAttribute("clip-path", "url(#iris-housing-clip)");
             
             for(let i=0; i<8; i++) {
                 let angle = i * 45;
@@ -452,7 +456,9 @@
                 highlight.setAttribute("transform", `rotate(${angle} 50 50)`);
                 cutsGroup.appendChild(highlight);
             }
-            svg.appendChild(cutsGroup);
+            
+            staticWrapper.appendChild(cutsGroup);
+            svg.appendChild(staticWrapper);
 
             let glassBevel = document.createElementNS("http://www.w3.org/2000/svg", "circle");
             glassBevel.setAttribute("cx", "50"); glassBevel.setAttribute("cy", "50"); glassBevel.setAttribute("r", "46");
