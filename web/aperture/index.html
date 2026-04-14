@@ -241,14 +241,14 @@
             clip-path: circle(5% at 50% 50%);
         }
 
-        /* 1. Blades spin and retract while rim stays stationary */
+        /* 1. Blades spin, scale up, and retract INSIDE the SVG clip-path mask */
         #iris-blade-group {
             transform-origin: 50px 50px;
             transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-in 0.2s;
         }
         
         body.sequencing #iris-blade-group { 
-            transform: rotate(90deg) scale(1.3);
+            transform: rotate(90deg) scale(1.6); /* Increased scale to ensure total center clearance */
             opacity: 0;
         }
 
@@ -413,6 +413,9 @@
                 <filter id="blade-shadow">
                     <feDropShadow dx="-1" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity="0.95"/>
                 </filter>
+                <clipPath id="iris-housing-clip">
+                    <circle cx="50" cy="50" r="47.5" />
+                </clipPath>
             `;
             svg.appendChild(defs);
             
@@ -428,6 +431,7 @@
 
             let cutsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
             cutsGroup.setAttribute("id", "iris-blade-group");
+            cutsGroup.setAttribute("clip-path", "url(#iris-housing-clip)");
             
             for(let i=0; i<8; i++) {
                 let angle = i * 45;
