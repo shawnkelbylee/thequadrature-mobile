@@ -1,6 +1,6 @@
 // THE QUADRATURE: GLOBAL UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase III UI Engine. Boot Sequence Purged. Spatial Routing & Sovereign Auth Badge Locked.
+// STATUS: Phase III UI Engine. Boot Sequence Purged. Spatial Routing & Sovereign Auth Badge Locked. Master Access Override & Aperture Tab Injected.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -431,7 +431,7 @@ window.injectUniversalUI = function() {
         <div class="q-nav-bar">
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
-                    <a href="${isAperture ? '#' : '../aperture/index.html'}" class="q-nav-btn desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" onclick="window.location.href=this.href; return false;">APERTURE</a>
+                    <a href="${isAperture ? '#' : '../aperture/index.html'}" class="q-nav-btn" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" onclick="window.location.href=this.href; return false;">APERTURE</a>
                     <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block; border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="window.triggerDomainShift(event)">${authText}</button>
                     <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">CHRONO-FACE</a>
                     <a href="${navPrefix}BIOVECHUD.html?v=20.0" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">BIOLOGICAL</a>
@@ -652,8 +652,12 @@ window.triggerDomainShift = function(e) {
     try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
 
     let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
-    if (authUser.toUpperCase() === 'KELBY' || authUser.includes('MASTER')) {
-        entitlements = ["PERSONAL", "COMMERCIAL"];
+    let isLocalEnv = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
+    
+    if (isLocalEnv || authUser.toUpperCase().includes('KELBY') || authUser.toUpperCase().includes('MASTER') || localStorage.getItem('Q_ARCHITECT_MODE') === 'TRUE') {
+        if (!entitlements.includes("PERSONAL")) entitlements.push("PERSONAL");
+        if (!entitlements.includes("COMMERCIAL")) entitlements.push("COMMERCIAL");
+        if (!entitlements.includes("ENTERPRISE")) entitlements.push("ENTERPRISE");
         localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(entitlements));
     }
 

@@ -265,7 +265,7 @@
             100% { transform: translate(-50%, -50%) scale(40); filter: brightness(8) drop-shadow(0 0 0px var(--white-flash)); opacity: 0; }
         }
 
-        /* --- THE MOBILE APERTURE PROTOCOL (NEW) --- */
+        /* --- THE MOBILE APERTURE PROTOCOL --- */
         .desktop-only { display: flex !important; }
 
         .mobile-routing-grid {
@@ -591,11 +591,15 @@
             let entitlements = [];
             try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
             
-            // Override for Master Access
+            // --- MASTER ACCESS OVERRIDE (THE ARCHITECT) ---
             let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
-            if (authUser.toUpperCase() === 'KELBY' || authUser.includes('MASTER')) {
-                entitlements = ["PERSONAL", "COMMERCIAL"];
+            let isLocalEnv = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
+            
+            if (isLocalEnv || authUser.toUpperCase().includes('KELBY') || authUser.toUpperCase().includes('MASTER') || localStorage.getItem('Q_ARCHITECT_MODE') === 'TRUE') {
+                if (!entitlements.includes("COMMERCIAL")) entitlements.push("COMMERCIAL");
+                if (!entitlements.includes("ENTERPRISE")) entitlements.push("ENTERPRISE");
             }
+            // ----------------------------------------------
 
             const comPanel = document.getElementById('m-panel-com');
             const lockIcon = document.getElementById('m-com-lock');

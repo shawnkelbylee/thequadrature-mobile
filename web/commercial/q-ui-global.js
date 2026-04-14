@@ -1,6 +1,6 @@
 // THE QUADRATURE: COMMERCIAL UI MATRIX & ENTERPRISE RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase V Enterprise Bifurcation. Simplified Analog Clock & Degree Formatting Applied.
+// STATUS: Phase V Enterprise Bifurcation. Simplified Analog Clock & Degree Formatting Applied. Master Access Override & Aperture Tab Injected.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -314,7 +314,7 @@ window.injectUniversalUI = function() {
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
                     <a href="../aperture/index.html" class="q-nav-btn desktop-only" ontouchstart="window.location.href=this.href; event.preventDefault();">APERTURE</a>
-                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="if(window.Q_Auth) window.Q_Auth.triggerOAuth();">${authText}</button>
+                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="window.triggerDomainShift(event)">${authText}</button>
                     <a href="./index.html" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">CHRONO-FACE</a>
                     <a href="./COMBIOVECHUD.html" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">WORKFORCE</a>
                     <a href="./COMCOMVECHUD.html" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" ontouchstart="window.location.href=this.href; event.preventDefault();">LEDGER</a>
@@ -429,6 +429,52 @@ window.injectUniversalUI = function() {
             }
         }
     });
+};
+
+// --- DOMAIN SHIFT PROTOCOL (COMMERCIAL) ---
+window.triggerDomainShift = function(e) {
+    if(e && typeof e.preventDefault === 'function') e.preventDefault();
+    let authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
+    
+    if(authState !== 'ACTIVE') {
+        if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth();
+        else alert("OAuth Service Unavailable. Boot from Aperture Gateway.");
+        return;
+    }
+
+    let rawEnt = localStorage.getItem('Q_ENTITLEMENTS');
+    let entitlements = [];
+    try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
+
+    let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
+    let isLocalEnv = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
+    
+    if (isLocalEnv || authUser.toUpperCase().includes('KELBY') || authUser.toUpperCase().includes('MASTER') || localStorage.getItem('Q_ARCHITECT_MODE') === 'TRUE') {
+        if (!entitlements.includes("PERSONAL")) entitlements.push("PERSONAL");
+        if (!entitlements.includes("COMMERCIAL")) entitlements.push("COMMERCIAL");
+        if (!entitlements.includes("ENTERPRISE")) entitlements.push("ENTERPRISE");
+        localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(entitlements));
+    }
+
+    if(entitlements.includes("PERSONAL") && entitlements.includes("COMMERCIAL")) {
+        const html = `
+            <div style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#aaa; margin-bottom: 15px; text-align:center;">
+                Dual entitlements detected. Select operating domain.
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button onclick="window.location.href='../personal/index.html'" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #F4D068; color: #F4D068; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(244,208,104,0.4);">
+                    SWITCH TO PERSONAL MATRIX
+                </button>
+                <button onclick="if(window.Q_ModalEngine) window.Q_ModalEngine.close()" style="padding: 15px; background: rgba(0,0,0,0.8); border: 1px solid #ffffff; color: #ffffff; font-family: 'Orbitron'; font-size: 0.9rem; cursor: pointer; border-radius: 4px; box-shadow: 0 0 15px rgba(255,255,255,0.2);">
+                    REMAIN IN ENTERPRISE LEDGER
+                </button>
+            </div>
+        `;
+        if(window.Q_ModalEngine) window.Q_ModalEngine.render('DOMAIN SHIFT PROTOCOL', html);
+        else alert("Routing Module Unavailable.");
+    } else {
+        if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth(); 
+    }
 };
 
 window.toggleTimeFmt = function(btnId) {
@@ -547,7 +593,7 @@ window.initCommercialDials = function(containerId) {
         }
 
         window.addEventListener('q-tick', (e) => {
-            const d = new Date(); // Use system local time
+            const d = new Date(); 
             const h = d.getHours();
             const m = d.getMinutes();
             const s = d.getSeconds();

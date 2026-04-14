@@ -1,6 +1,6 @@
 // THE QUADRATURE: APERTURE GATEWAY UI CONTROLLER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Version 23.8 - Gateway Controller Optimized. Interceptor bug fixed (TextNode/closest resolution) and Domain Shift Protocol Integrated.
+// STATUS: Version 24.0 - Gateway Controller Optimized. Architect Master Override integrated and Aperture Return Tab injected.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -39,6 +39,42 @@ window.injectUniversalUI = function() {
         
         if (window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
     };
+
+    // 3. APERTURE RETURN TAB INJECTION
+    // Injects a global return button into the top navigation bar to return to the gateway.
+    setTimeout(() => {
+        const navBar = document.querySelector('.q-nav-bar') || document.querySelector('header');
+        if (navBar && !document.getElementById('btn-return-aperture')) {
+            const returnBtn = document.createElement('button');
+            returnBtn.id = 'btn-return-aperture';
+            returnBtn.innerText = 'APERTURE';
+            returnBtn.style.cssText = "background: rgba(0, 240, 255, 0.1); border: 1px solid #00f0ff; color: #00f0ff; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; padding: 6px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 2px; position: absolute; right: 70px; top: 50%; transform: translateY(-50%); z-index: 1000; box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); transition: 0.3s;";
+            
+            returnBtn.onmouseover = () => { 
+                returnBtn.style.background = '#00f0ff'; 
+                returnBtn.style.color = '#000'; 
+                returnBtn.style.boxShadow = '0 0 15px #00f0ff'; 
+            };
+            returnBtn.onmouseout = () => { 
+                returnBtn.style.background = 'rgba(0, 240, 255, 0.1)'; 
+                returnBtn.style.color = '#00f0ff'; 
+                returnBtn.style.boxShadow = '0 0 10px rgba(0, 240, 255, 0.2)'; 
+            };
+
+            returnBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Route back to the root gateway
+                window.location.href = '/'; 
+            };
+            
+            // Ensure the navbar can hold absolute children without breaking layout
+            if (window.getComputedStyle(navBar).position === 'static') {
+                navBar.style.position = 'relative';
+            }
+            navBar.appendChild(returnBtn);
+        }
+    }, 500); 
 };
 
 // --- DOMAIN SHIFT & AUTH LOGIC (APERTURE LEVEL) ---
@@ -56,12 +92,16 @@ window.triggerDomainShift = function(e) {
     let entitlements = [];
     try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
 
-    // Master Access Fallback Check
+    // --- MASTER ACCESS OVERRIDE (THE ARCHITECT) ---
     let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
-    if (authUser.toUpperCase() === 'KELBY' || authUser.includes('MASTER')) {
-        entitlements = ["PERSONAL", "COMMERCIAL"];
+    let isLocalEnv = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
+    
+    if (isLocalEnv || authUser.toUpperCase().includes('KELBY') || authUser.toUpperCase().includes('MASTER') || localStorage.getItem('Q_ARCHITECT_MODE') === 'TRUE') {
+        if (!entitlements.includes("PERSONAL")) entitlements.push("PERSONAL");
+        if (!entitlements.includes("COMMERCIAL")) entitlements.push("COMMERCIAL");
         localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(entitlements));
     }
+    // ----------------------------------------------
 
     if(entitlements.includes("PERSONAL") && entitlements.includes("COMMERCIAL")) {
         const html = `
@@ -83,26 +123,22 @@ window.triggerDomainShift = function(e) {
         if(window.Q_ModalEngine) window.Q_ModalEngine.render('DOMAIN SHIFT PROTOCOL', html);
         else alert("Routing Module Unavailable.");
     } else {
-        if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth(); // Resync or show status if single tier
+        if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth(); 
     }
 };
 
 // 3. BULLETPROOF ROUTING INTERCEPTOR
-// Fixed: Handles TextNodes to prevent 'closest is not a function' TypeError.
 window.addEventListener('click', (e) => {
     try {
         let el = e.target;
         
-        // CRITICAL FIX: If clicking exactly on a text element, resolve to parent node.
         if (el && el.nodeType === Node.TEXT_NODE) {
             el = el.parentNode;
         }
         
-        // Failsafe for invalid targets
         if (!el || typeof el.closest !== 'function') return;
 
-        // Bypass interceptor entirely if clicking inside the dashboard, planner, or modals
-        if (el.closest('.q-hub-overlay') || el.closest('.modal-overlay') || el.closest('.q-planner-overlay')) {
+        if (el.closest('.q-hub-overlay') || el.closest('.modal-overlay') || el.closest('.q-planner-overlay') || el.id === 'btn-return-aperture') {
             return; 
         }
 
@@ -116,27 +152,24 @@ window.addEventListener('click', (e) => {
             const hrefStr = (checkEl.getAttribute && checkEl.getAttribute('href') || '').toLowerCase();
             const dataTarget = (checkEl.getAttribute && checkEl.getAttribute('data-target') || '').toLowerCase();
 
-            // Explicitly intercept Dashboard intents
             if (dataTarget === 'dashboard' || hrefStr.includes('/dashboard') || onClickStr.includes('dashboard') || text.includes('dashboard')) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (window.Q_IntegrationHub && typeof window.Q_IntegrationHub.openHub === 'function') {
                     window.Q_IntegrationHub.openHub();
                 }
-                return; // Halt interceptor loop
+                return; 
             }
 
-            // Explicitly route Omni-Planner intents
             if (dataTarget === 'planner' || hrefStr.includes('/physical') || onClickStr.includes('physical') || text.includes('physical assets') || text.includes('omni-planner') || text.includes('omni planner')) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.openPlanner === 'function') {
                     window.Q_OmniPlanner.openPlanner();
                 }
-                return; // Halt interceptor loop
+                return; 
             }
 
-            // GATEWAY ROUTING RESOLUTION (Jumping out of /aperture/ into target quads)
             if (dataTarget.includes('personal') || hrefStr.includes('/personal') || onClickStr.includes('personal') || text.includes('personal quad')) {
                 targetUrl = '../personal/index.html';
                 break;
@@ -167,7 +200,6 @@ window.addEventListener('click', (e) => {
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
     
-    // UI TEXT OVERRIDE: Failsafe to ensure Omni-Planner nomenclature is enforced globally
     const renamePanel = () => {
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
         let node;
