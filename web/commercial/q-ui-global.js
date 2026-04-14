@@ -1,6 +1,6 @@
 // THE QUADRATURE: COMMERCIAL UI MATRIX & ENTERPRISE RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase V Enterprise Bifurcation. Simplified Analog Clock Applied. Master Access Override & Mobile HUD Injected.
+// STATUS: Phase V Enterprise Bifurcation. Mobile Scrubber & Mic HUD brackets restored.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -229,10 +229,61 @@ window.injectUniversalUI = function() {
             
             body.telemetry-open .q-center-dial { display: none !important; }
             
-            .q-global-controls { display: flex !important; width: 95vw !important; padding: 6px 8px !important; bottom: calc(2.5vh + 65px) !important; background: #0a0a0a !important; border: 1px solid #333 !important; } 
+            /* --- RESTORED MOBILE FLEX BRACKETING --- */
+            .q-global-controls { 
+                display: flex !important; 
+                align-items: center !important; 
+                justify-content: space-between !important;
+                width: 95vw !important; 
+                box-sizing: border-box !important; 
+                padding: 6px 8px !important; 
+                gap: 4px !important;
+                bottom: calc(2.5vh + 65px) !important;
+                background: #0a0a0a !important; 
+                border: 1px solid #333 !important; 
+            } 
             
-            #q-mic-fab { position: static !important; width: 32px !important; height: 32px !important; border-radius: 4px !important; font-size: 1rem !important; order: 1 !important; flex-shrink: 0 !important; background: #111; border: 1px solid #555; color: #fff; display: flex; justify-content: center; align-items: center; cursor: pointer; pointer-events: auto !important; }
+            #q-mic-fab { 
+                position: static !important; 
+                transform: none !important;
+                width: 32px !important; 
+                height: 32px !important; 
+                border-radius: 4px !important; 
+                font-size: 1rem !important; 
+                order: 1 !important; 
+                flex-shrink: 0 !important;
+                background: #111; 
+                border: 1px solid #555; 
+                color: #fff; 
+                display: flex; justify-content: center; align-items: center; 
+                cursor: pointer; pointer-events: auto !important; 
+            }
             #q-mic-fab.listening { background: #fff; color: #000; }
+            
+            /* The < button */
+            .q-global-controls > .q-ctrl-btn:nth-child(1) { order: 2 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
+            
+            .q-scrubber { 
+                order: 3 !important; 
+                min-width: 0 !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+                flex-grow: 1 !important;
+            }
+            
+            /* The > button */
+            .q-global-controls > .q-ctrl-btn:nth-child(3) { order: 4 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
+
+            #q-live-toggle {
+                order: 5 !important; 
+                width: auto !important;
+                min-width: 32px !important;
+                height: 32px !important;
+                padding: 0 6px !important;
+                font-size: 0.55rem !important; 
+                flex-shrink: 0 !important;
+                margin: 0 !important;
+            }
         }
     `;
     document.head.appendChild(style);
@@ -423,7 +474,11 @@ window.injectUniversalUI = function() {
             <input type="range" min="0" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
             <button class="q-ctrl-btn" id="q-live-toggle" onclick="window.setLiveClock()">LIVE</button>
+            
+            <button id="q-mic-fab" class="mobile-only-flex" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
         </div>
+        
+        <button id="q-mic-fab-desktop" class="desktop-only" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
     `;
     
     const refNode = document.body.firstChild;
@@ -488,10 +543,25 @@ window.triggerDomainShift = function(e) {
     let entitlements = [];
     try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
 
-    let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
+    let authEmail = "";
+    let authUser = (localStorage.getItem('Q_SOVEREIGN_USER') || '').toUpperCase();
+
+    // --- THE SUPABASE SCANNER ---
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+        if (key && key.startsWith('sb-') && (key.endsWith('-auth-token') || key.includes('auth'))) {
+            try {
+                let sessionData = JSON.parse(localStorage.getItem(key));
+                if (sessionData && sessionData.user && sessionData.user.email) {
+                    authEmail = sessionData.user.email.toUpperCase();
+                }
+            } catch(err) {}
+        }
+    }
+
     let isLocalEnv = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
     
-    if (isLocalEnv || authUser.toUpperCase().includes('KELBY') || authUser.toUpperCase().includes('MASTER') || localStorage.getItem('Q_ARCHITECT_MODE') === 'TRUE') {
+    if (isLocalEnv || authUser.includes('KELBY') || authUser.includes('SHAWN') || authEmail.includes('SHAWNKELBYLEE@GMAIL.COM') || authEmail.includes('KELBY') || localStorage.getItem('Q_ARCHITECT_MODE') === 'TRUE') {
         if (!entitlements.includes("PERSONAL")) entitlements.push("PERSONAL");
         if (!entitlements.includes("COMMERCIAL")) entitlements.push("COMMERCIAL");
         if (!entitlements.includes("ENTERPRISE")) entitlements.push("ENTERPRISE");
@@ -806,4 +876,13 @@ window.syncScrubberUI = function() {
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
     window.initCommercialDials('q-center-dial'); 
+    
+    // Explicit DOM relocation for the mobile microphone
+    if (window.innerWidth <= 950) {
+        const micFab = document.getElementById('q-mic-fab');
+        const controlsPanel = document.getElementById('q-universal-controls');
+        if (micFab && controlsPanel) {
+            controlsPanel.appendChild(micFab);
+        }
+    }
 });
