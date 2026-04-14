@@ -9,8 +9,15 @@
     <title>THE QUADRATURE // APERTURE GATEWAY</title>
     
     <script>
-        // GATEWAY DIRECT OVERRIDE: Neutralize boot overlays
+        // --- HARD NULLIFICATION PROTOCOL ---
+        // Aggressively neutralize all boot sequence logic before q-core loads.
         sessionStorage.setItem('Q_BOOT_COMPLETE', 'true');
+        window.Q_BOOT_COMPLETE = true;
+        
+        // Intercept and permanently disable common boot functions
+        window.runBootSequence = function() { console.log("[APERTURE GATEWAY] Boot sequence intercepted and nullified."); return; };
+        window.initBoot = function() { return; };
+        window.triggerBoot = function() { return; };
     </script>
 
     <script src="/aperture/q-ui-global.js"></script>
@@ -21,13 +28,21 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
-        /* --- IRONCLAD VIEWPORT RECOVERY --- */
+        /* --- IRONCLAD VIEWPORT RECOVERY & BOOT NUKE --- */
         html, body { 
             position: fixed !important; top: 0px !important; left: 0px !important; right: 0px !important; bottom: 0px !important; 
             width: 100vw !important; height: var(--app-height, 100vh) !important; 
             margin: 0px !important; padding: 0px !important; 
             overflow: hidden !important; touch-action: none !important; overscroll-behavior: none !important; transform: none !important; 
             background-color: #010205; 
+        }
+
+        /* FAILSAFE: Physically hide any boot artifacts that q-core.js attempts to render */
+        #q-boot-overlay, .q-boot-screen, #boot-sequence-container {
+            display: none !important; opacity: 0 !important; pointer-events: none !important; z-index: -9999 !important; visibility: hidden !important;
+        }
+        body.boot-active > *:not(.aperture-container):not(#portal-frame):not(script):not(style):not(.mobile-routing-grid) {
+            opacity: 1 !important; pointer-events: auto !important; /* Force override if body retains class */
         }
 
         :root { 
