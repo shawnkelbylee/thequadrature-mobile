@@ -549,11 +549,10 @@ window.Q_MANUSCRIPTS = {
 
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">VECTOR 04—COMMUNAL METADATA (METAPHYSICAL)</h4>
             <p><strong style="color:#fff;">The Interoperability Bridge</strong></p>
-            <p>The Communal Vector is the spiritual bridge between your individuated journey and the collective consciousness of humanity. Cultural and religious observances are no longer arbitrary dates pinned to a static, inaccurate calendar; they are mapped directly onto the true orbital arc. The Quadrature resolves the friction between tradition and reality by honoring the multi-faith pulse as objective, shared metadata.</p>
-            <p>We do not destroy human culture; we align it with physics.</p>
-            <p><strong style="color:#fff;">Zodiacal Resonance and the Natal Anchor</strong></p>
-            <p>By utilizing your Natal Anchor, the Communal Vector identifies your unique, invariant geometric relationship with the cosmos. We are translating legacy astrology into objective True Ellipse coordinates, anchored firmly to the International Celestial Reference Frame (ICRF).</p>
-            <p>This is the precision mapping of your origin point, allowing you to coordinate seamlessly with legacy society while remaining absolutely anchored to your own astrophysical truth. The heavens are not a mythological abstraction; they are a measurable, thermodynamic matrix. By anchoring your personal origin point to the deepest, most stable reference frame in the universe, you locate your precise geometric relationship to the Eternal Now.</p>
+            <p>The Communal Vector serves as the interoperability bridge for global human coordination. It layers civil holidays, multi-faith observances, and financial market cycles directly onto the True Ellipse as metadata. By treating these events as spatial coordinates rather than arbitrary dates on a Gregorian page, the system neutralizes cultural drift and creates a unified cross-platform compatibility across the entire globe.</p>
+            <p><strong style="color:#fff;">Z-Axis Zodiacal Integration & High-Fidelity Mapping</strong></p>
+            <p>Unlike legacy astrology, which is fatally flawed by its reliance on static sidereal tables that ignore deep-time precession, the Communal Vector utilizes high-fidelity Swiss Ephemeris mapping of True Ellipse orbital resonance. We are anchoring personal and cultural coordinates directly to the International Celestial Reference Frame (ICRF).</p>
+            <p>The UI utilizes Z-axis fanning to prevent the geometric collision of dense data points, allowing users to track major anchors through the lens of precision geometric aspects relative to their specific Natal Anchor. By relying on Barycentric observation rather than simulation, we ensure that societal milestones and personal origin points remain permanently synchronized with the most stable reference frame in the observable universe.</p>
 
             <div style="background:rgba(255,255,255,0.05); padding:15px; border-left:3px solid var(--theme-main, #ff003c); margin:20px 0;">
                 <strong style="color:#fff;">Philosophical Postulate: The Objective Sky</strong><br>
@@ -730,7 +729,7 @@ window.Q_MANUSCRIPTS = {
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:15px;">VIII. INDIVIDUATED REVENUE & THE 6-TIER ACCESS ARCHITECTURE</h4>
             <p>Access is governed by a unified 6-Tier licensing model, scaling from personal observation to macro-ecological enterprise management.</p>
             <ul style="color:#aaa;">
-                <li style="margin-bottom:8px;"><strong style="color:#fff;">Basic Tier (Free):</strong> Read-access to the 4 Primary Vectors. Core Omni-Planner margin manual constraint entry. Baseline Mean Circle/True Ellipse visualization.</li>
+                <li style="margin-bottom:8px;"><strong style="color:#fff;">Basic Tier (Free):</strong> Read-access to the 4 Primary Vectors. Core Omni-Planner with manual constraint entry. Baseline Mean Circle/True Ellipse visualization.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#fff;">Standard Tier ($14.99 / mo):</strong> The Biological Bridge. Unlocks active ingestion via Apple Health / Google Health Connect. Automates the Physiological Vector tracking HRV elasticity and Ultradian rhythms.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#fff;">Resonant Tier ($29.99 / mo):</strong> The Metaphysical Hook. Integration of the Swiss Ephemeris API and offline JPL data packs. Unlocks total notification blackout controls.</li>
                 <li style="margin-bottom:8px;"><strong style="color:#fff;">Sovereign Tier ($49.99 / mo):</strong> The Diplomat. Unlocks the AI Firewall (The Diplomatic Negotiator) to autonomously intercept and reschedule civil constraints, actively defending your biological resonance.</li>
@@ -1149,9 +1148,6 @@ window.Q_IntegrationHub = {
         const authState = window.Q_STATE?.persistence?.auth_status === 'SOVEREIGN_AUTHENTICATED' ? 'ACTIVE' : 'STANDBY';
         const authColor = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
         const authText = authState === 'ACTIVE' ? '[ DISCONNECT MATRIX ]' : '[ AUTHENTICATE ] - LOCAL CACHE ONLY';
-        
-        // Directly routing click handler instead of wrapping in inline execution blocks.
-        const authAction = authState === 'ACTIVE' ? "window.Q_Auth ? window.Q_Auth.signOut() : alert('Auth Bridge Not Ready')" : "window.Q_Auth ? window.Q_Auth.triggerOAuth() : alert('Auth Bridge Not Ready')";
 
         // ENFORCED GHOST-KEY PURGE: Only read entitlements if the system is actually verified.
         let ents = [];
@@ -1160,19 +1156,20 @@ window.Q_IntegrationHub = {
             try { ents = entitlementsRaw ? JSON.parse(entitlementsRaw) : []; } catch(e) {}
         }
 
-        const isBioActive = ents.includes('STANDARD') || window.Q_STATE?.hardware_hooks?.biometric_api === 'ACTIVE';
+        // STRICT TIER BINDING: UI relies exclusively on Q_ENTITLEMENTS array, ignoring Q_STATE fallbacks.
+        const isBioActive = ents.includes('STANDARD');
         const bioStatus = isBioActive ? renderBadge('#39ff14', '#000', 'ACTIVE') : renderUpgradeBtn('biometric_api', 'STANDARD TIER', 'hardware_hooks', '#39ff14');
 
-        const isEphActive = ents.includes('RESONANT') || window.Q_STATE?.metaphysical_layer?.swiss_ephemeris === 'ACTIVE';
+        const isEphActive = ents.includes('RESONANT');
         const ephStatus = isEphActive ? renderBadge('#00f0ff', '#000', 'ACTIVE') : renderUpgradeBtn('swiss_ephemeris', 'RESONANT TIER', 'metaphysical_layer', '#00f0ff');
 
-        const isSovereignActive = ents.includes('SOVEREIGN') || window.Q_STATE?.logic_layer?.preferred_ai_diplomat === 'KAIROS';
+        const isSovereignActive = ents.includes('SOVEREIGN');
         const sovStatus = isSovereignActive ? renderBadge('#b829ff', '#000', 'ACTIVE') : renderUpgradeBtn('ai_diplomat', 'SOVEREIGN TIER', 'logic_layer', '#b829ff');
 
-        const isSyndicateActive = ents.includes('SYNDICATE') || window.Q_STATE?.metaphysical_layer?.patreon_gating === 'ACTIVE';
+        const isSyndicateActive = ents.includes('SYNDICATE');
         const syndicateStatus = isSyndicateActive ? renderBadge('#ff003c', '#fff', 'ACTIVE') : renderUpgradeBtn('patreon_gating', 'SYNDICATE TIER', 'metaphysical_layer', '#ff003c');
 
-        const isFiatActive = ents.includes('ENTERPRISE') || window.Q_STATE?.capital_ledger?.fiat_api === 'ACTIVE';
+        const isFiatActive = ents.includes('ENTERPRISE');
         const fiatStatus = isFiatActive ? renderBadge('#F4D068', '#000', 'ACTIVE') : renderUpgradeBtn('fiat_api', 'ENTERPRISE TIER', 'capital_ledger', '#F4D068');
 
         // Identity Data Retrieval
@@ -1201,7 +1198,7 @@ window.Q_IntegrationHub = {
             <div class="q-hub-box" onclick="event.stopPropagation()">
                 <div class="hub-header">SOVEREIGN MATRIX // ACCOUNT</div>
                 
-                <button onclick="${authAction}" style="background:rgba(0,0,0,0.6); border:1px solid ${authColor}; color:${authColor}; padding: 8px 12px; font-family:'Orbitron'; font-size:0.65rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border-radius:4px; margin-bottom:15px; width:100%; transition:0.3s; box-shadow: inset 0 0 10px rgba(${authState === 'ACTIVE' ? '57,255,20' : '255,0,60'}, 0.1);" onmouseover="this.style.background='${authColor}'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.color='${authColor}';">${authText}</button>
+                <button id="hub-main-auth-btn" style="background:rgba(0,0,0,0.6); border:1px solid ${authColor}; color:${authColor}; padding: 8px 12px; font-family:'Orbitron'; font-size:0.65rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border-radius:4px; margin-bottom:15px; width:100%; transition:0.3s; box-shadow: inset 0 0 10px rgba(${authState === 'ACTIVE' ? '57,255,20' : '255,0,60'}, 0.1);" onmouseover="this.style.background='${authColor}'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.color='${authColor}';">${authText}</button>
 
                 <div class="hub-tabs">
                     <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
@@ -1468,6 +1465,27 @@ window.Q_IntegrationHub = {
             </div>
         `;
         document.body.appendChild(dom);
+
+        // HARDENED NATIVE AUTH BRIDGE (Scope Bypass)
+        const authBtn = document.getElementById('hub-main-auth-btn');
+        if (authBtn) {
+            authBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (authState === 'ACTIVE') {
+                    if (window.Q_Auth && typeof window.Q_Auth.signOut === 'function') {
+                        window.Q_Auth.signOut();
+                    } else {
+                        alert('Auth Bridge Not Ready. Ensure q-core.js has loaded.');
+                    }
+                } else {
+                    if (window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') {
+                        window.Q_Auth.triggerOAuth();
+                    } else {
+                        alert('Auth Bridge Not Ready. Ensure q-core.js has loaded.');
+                    }
+                }
+            });
+        }
     },
 
     openHub: function() { 

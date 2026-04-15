@@ -1,6 +1,6 @@
 // THE QUADRATURE: MASTER CORE LOGIC (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Active. Sovereign Handshake, Safe-Harbor Auth Routing & Session Memory Rerouting Integrated.
+// STATUS: Active. Sovereign Handshake, Safe-Harbor Auth Routing & Session Memory Rerouting Integrated. Ghost Keys Purged.
 
 window.MS_DAY = 86400000;
 
@@ -250,7 +250,7 @@ window.fetchCloudState = async function() {
     }
 };
 
-// CENTRALIZED STATE MANAGEMENT
+// CENTRALIZED STATE MANAGEMENT (Ghost Keys Purged)
 window.Q_STATE = {
     persistence: { 
         db_migration: 'ACTIVE', 
@@ -263,14 +263,14 @@ window.Q_STATE = {
         preferred_ai_diplomat: localStorage.getItem('q_ai_diplomat') || 'DEFAULT',
         deep_flow_enforcement: localStorage.getItem('q_deep_flow_enforcement') !== 'false'
     },
-    hardware_hooks: { biometric_api: 'ACTIVE', iot_webhooks: 'ACTIVE' },
+    hardware_hooks: { biometric_api: 'STANDBY', iot_webhooks: 'STANDBY' },
     capital_ledger: { 
         fiat_api: 'STANDBY', 
         resonance_tracker: 'ACTIVE',
         fiat_routing_id: localStorage.getItem('q_fiat_routing_id') || null
     },
     metaphysical_layer: { 
-        swiss_ephemeris: 'ACTIVE', 
+        swiss_ephemeris: 'STANDBY', 
         patreon_gating: 'STANDBY', 
         access_tier: 0,
         natal_anchor: localStorage.getItem('q_natal_anchor') || 'NONE',
