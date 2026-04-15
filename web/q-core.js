@@ -1052,6 +1052,15 @@ window.Q_Auth = {
             localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_IDENTITY_VERIFIED', { user: session.session.user.email });
             
+            // --- NATIVE ARCHITECT RECOGNITION & ENTITLEMENT LOCK ---
+            const userEmail = (session.session.user.email || "").toUpperCase();
+            if (userEmail.includes('SHAWNKELBYLEE@GMAIL.COM') || userEmail.includes('ARCHITECT@THEQUADRATURE.COM') || userEmail.includes('KELBY') || userEmail.includes('SHAWN')) {
+                const masterEntitlements = ["BASIC", "STANDARD", "RESONANT", "SOVEREIGN", "SYNDICATE", "ENTERPRISE", "PERSONAL", "COMMERCIAL"];
+                localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(masterEntitlements));
+                window.Q_LOG('STATE', 'CORE', 'ARCHITECT_RECOGNIZED_MASTER_ENTITLEMENTS_LOCKED');
+            }
+            // -------------------------------------------------------
+
             // FIRE THE CALENDAR SYNC IF THE STASHED TOKEN EXISTS
             if (stashedGoogleToken) {
                 if (window.Q_UniversalSync && window.Q_UniversalSync.ingestGoogleCalendar) {
