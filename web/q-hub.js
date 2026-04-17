@@ -251,14 +251,14 @@ window.Q_MANUSCRIPTS = {
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">VECTOR 04—COMMUNAL METADATA (METAPHYSICAL)</h4>
             <p><strong style="color:#fff;">Neutralizing Cultural Drift into Objective Coordinates</strong></p>
             <p>The Communal Vector serves as the interoperability bridge for global human coordination. It layers civil holidays, multi-faith observances, and financial market cycles directly onto the True Ellipse as metadata. By treating these events as spatial coordinates rather than arbitrary dates on a Gregorian page, the system neutralizes cultural drift and creates a unified cross-platform compatibility across the entire globe.</p>
-            <p><strong style="color:#fff;">Z-Axis Zodiacal Integration & High-Fidelity Mapping</strong></p>
-            <p>Unlike legacy astrology, which is fatally flawed by its reliance on static sidereal tables that ignore deep-time precession, the Communal Vector utilizes high-fidelity Swiss Ephemeris mapping of True Ellipse orbital resonance. We are anchoring personal and cultural coordinates directly to the International Celestial Reference Frame (ICRF).</p>
-            <p>The UI utilizes Z-axis fanning to prevent the geometric collision of dense data points, allowing users to track major anchors through the lens of precision geometric aspects relative to their specific Natal Anchor. By relying on Barycentric observation rather than simulation, we ensure that societal milestones and personal origin points remain permanently synchronized with the most stable reference frame in the observable universe.</p>
+            <p><strong style="color:#fff;">High-Fidelity Ephemeris Mapping</strong></p>
+            <p>The Communal Vector utilizes high-fidelity Swiss Ephemeris mapping of True Ellipse orbital resonance. We are anchoring cultural and administrative coordinates directly to the International Celestial Reference Frame (ICRF).</p>
+            <p>The UI utilizes Z-axis fanning to prevent the geometric collision of dense data points, allowing users to track major anchors through the lens of absolute geometric precision. By relying on Barycentric observation rather than simulation, we ensure that societal milestones remain permanently synchronized with the most stable reference frame in the observable universe.</p>
 
             <div style="background:rgba(255,255,255,0.05); padding:15px; border-left:3px solid var(--theme-main, #ff003c); margin:20px 0;">
                 <strong style="color:#fff;">Technical Data Block:</strong><br>
-                <span style="color:var(--theme-main, #ff003c);">Metaphysical Hook:</span> Integration of the Swiss Ephemeris API to replace generic astrological approximations with invariant orbital physics.<br>
-                <span style="color:var(--theme-main, #ff003c);">Geometric Aspects:</span> Calculating precise spatial relationships relative to the user’s exact origin coordinate (Time and Location of Birth).<br>
+                <span style="color:var(--theme-main, #ff003c);">Ephemeris Hook:</span> Integration of the Swiss Ephemeris API for invariant orbital physics data.<br>
+                <span style="color:var(--theme-main, #ff003c);">Geometric Mapping:</span> Calculating precise spatial relationships of civil events relative to the Barycentric coordinate.<br>
                 <span style="color:var(--theme-main, #ff003c);">Metadata Layering:</span> Neutralizing global cultural and religious events into objective, shared spatial coordinates.
             </div>
 
@@ -337,14 +337,14 @@ window.Q_MANUSCRIPTS = {
 
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">GEOMETRIC RESONANCE DISCOVERY</h4>
             <p><strong style="color:#fff;">The Sovereign Social Graph</strong></p>
-            <p>The Quadrature moves entirely beyond superficial, legacy social metrics (likes, follows, endless feeds) by deploying Geometric Resonance as a true P2P networking engine. The Resonance Discovery Protocol identifies users whose specific birth coordinates (Natal Anchors) create harmonic geometric aspects—such as Trines (120°) or Sextiles (60°)—with the current orbital position or with the coordinates of other sovereign nodes on the network.</p>
+            <p>The Quadrature moves entirely beyond superficial, legacy social metrics (likes, follows, endless feeds) by deploying Geometric Resonance as a true P2P networking engine. The Resonance Discovery Protocol identifies users whose specific Biological Vectors create harmonic alignment with the current orbital position or with the biological capacity of other sovereign nodes on the network.</p>
             <p><strong style="color:#fff;">Astrophysical Synchronization</strong></p>
             <p>Through secure, real-time state sharing via Supabase, the system enables "High-Resonance Sprints". By overlaying the Biological Vectors of multiple authorized users, the OS identifies the exact orbital degrees where team Ultradian rhythms naturally overlap.</p>
             <p>This allows for the synchronization of collective flow states, maximizing collaborative yield by completely eliminating asynchronous physiological friction. It is the end of forcing exhausted people into misaligned meetings.</p>
 
             <div style="background:rgba(255,255,255,0.05); padding:15px; border-left:3px solid var(--theme-main, #ff003c); margin:20px 0;">
                 <strong style="color:#fff;">Technical Data Block:</strong><br>
-                <span style="color:var(--theme-main, #ff003c);">Resonance Discovery Protocol:</span> Identifying harmonic mathematical aspects between disparate Natal Anchors using the Swiss Ephemeris.<br>
+                <span style="color:var(--theme-main, #ff003c);">Resonance Discovery Protocol:</span> Identifying harmonic telemetry overlaps between disparate user nodes.<br>
                 <span style="color:var(--theme-main, #ff003c);">P2P State Sharing:</span> Real-time broadcasting of Biological Vector telemetry for precise group synchronization.<br>
                 <span style="color:var(--theme-main, #ff003c);">High-Resonance Sprints:</span> Executing collaborative tasks exclusively during overlapping Ultradian flow windows.
             </div>
@@ -630,11 +630,11 @@ window.Q_MANUSCRIPTS = {
             <img src="assets/w11tb.png" style="width:100%; border-radius:4px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2);" alt="Biological Breath">
 
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">VECTOR 04—COMMUNAL METADATA (METAPHYSICAL)</h4>
-            <p><strong style="color:#fff;">The Interoperability Bridge</strong></p>
+            <p><strong style="color:#fff;">Neutralizing Cultural Drift into Objective Coordinates</strong></p>
             <p>The Communal Vector serves as the interoperability bridge for global human coordination. It layers civil holidays, multi-faith observances, and financial market cycles directly onto the True Ellipse as metadata. By treating these events as spatial coordinates rather than arbitrary dates on a Gregorian page, the system neutralizes cultural drift and creates a unified cross-platform compatibility across the entire globe.</p>
-            <p><strong style="color:#fff;">Z-Axis Zodiacal Integration & High-Fidelity Mapping</strong></p>
-            <p>Unlike legacy astrology, which is fatally flawed by its reliance on static sidereal tables that ignore deep-time precession, the Communal Vector utilizes high-fidelity Swiss Ephemeris mapping of True Ellipse orbital resonance. We are anchoring personal and cultural coordinates directly to the International Celestial Reference Frame (ICRF).</p>
-            <p>The UI utilizes Z-axis fanning to prevent the geometric collision of dense data points, allowing users to track major anchors through the lens of precision geometric aspects relative to their specific Natal Anchor. By relying on Barycentric observation rather than simulation, we ensure that societal milestones and personal origin points remain permanently synchronized with the most stable reference frame in the observable universe.</p>
+            <p><strong style="color:#fff;">High-Fidelity Ephemeris Mapping</strong></p>
+            <p>The Communal Vector utilizes high-fidelity Swiss Ephemeris mapping of True Ellipse orbital resonance. We are anchoring cultural and administrative coordinates directly to the International Celestial Reference Frame (ICRF).</p>
+            <p>The UI utilizes Z-axis fanning to prevent the geometric collision of dense data points, allowing users to track major anchors through the lens of absolute geometric precision. By relying on Barycentric observation rather than simulation, we ensure that societal milestones remain permanently synchronized with the most stable reference frame in the observable universe.</p>
 
             <div style="background:rgba(255,255,255,0.05); padding:15px; border-left:3px solid var(--theme-main, #ff003c); margin:20px 0;">
                 <strong style="color:#fff;">Philosophical Postulate: The Objective Sky</strong><br>
@@ -799,7 +799,6 @@ window.Q_MANUSCRIPTS = {
             <p>This vector maps the social, cultural, and economic momentum of the human hive. It allows you to engage with society when friction is lowest and retreat when social volatility is high.</p>
             <ul style="color:#aaa; font-family:'JetBrains Mono'; font-size:0.8rem; line-height:1.6; list-style-type:none; padding-left:0;">
                 <li style="margin-bottom:10px;"><strong style="color:#fff;">Religious Overlay (Top-Left Panel):</strong> Tracks upcoming cultural and faith-based observances across the globe.<br><strong style="color:var(--gold);">Action:</strong> Use this to anticipate shifts in the 'social vibe'. Knowing a period of fasting or celebration is approaching allows you to calibrate your empathy and expectations when doing business with others.</li>
-                <li style="margin-bottom:10px;"><strong style="color:#fff;">Zodiacal Transit (Top-Right Panel):</strong> Maps the Earth's current physical position against your personal birth coordinate (Natal Anchor).<br><strong style="color:var(--gold);">Action:</strong> Identifies periods of ease or resistance in your life. Use harmonious phases to push social initiatives and tense phases to step back, re-evaluate, and adjust your plans.</li>
                 <li style="margin-bottom:10px;"><strong style="color:#fff;">Civil Anchor (Bottom-Left Panel):</strong> Tracks standard government holidays and financial checkpoints based on your location.<br><strong style="color:var(--gold);">Action:</strong> A preemptive strike against legacy friction. Use this to ensure you have capital liquidity and adjust your workflows before banks close or legacy businesses halt operations.</li>
                 <li><strong style="color:#fff;">Introspection (Bottom-Right Panel):</strong> Tracks the traditional 24-phase agricultural cycle (Solar Terms) and your progress within it.<br><strong style="color:var(--gold);">Action:</strong> Provides a philosophical framework for your efforts. It tells you whether the current planetary energy supports planting new ideas, aggressive cultivation, or quiet reflection.</li>
             </ul>
@@ -1023,7 +1022,6 @@ window.Q_IntegrationHub = {
         const loc = document.getElementById('cal-loc').value;
         const anchor = document.getElementById('cal-anchor').value;
         const sleepHrs = document.getElementById('cal-sleep').value;
-        const natal = document.getElementById('cal-natal').value;
         const inertia = parseInt(document.getElementById('cal-inertia').value) || 45;
         const dlmo = parseInt(document.getElementById('cal-dlmo').value) || 90;
 
@@ -1037,7 +1035,6 @@ window.Q_IntegrationHub = {
             window.Q_UpdateState('metaphysical_layer', 'tob', isUnknown ? '12:00' : tob);
             window.Q_UpdateState('metaphysical_layer', 'tob_unknown', isUnknown);
             window.Q_UpdateState('location', 'name', loc.toUpperCase());
-            window.Q_UpdateState('metaphysical_layer', 'natal_anchor', natal);
 
             const parts = anchor.split(':');
             const mins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
@@ -1107,7 +1104,6 @@ window.Q_IntegrationHub = {
         const sTob = window.Q_STATE?.metaphysical_layer?.tob || "12:00";
         const sTobUnknown = window.Q_STATE?.metaphysical_layer?.tob_unknown === true;
         const sLoc = window.Q_STATE?.location?.name || "";
-        const sNatal = window.Q_STATE?.metaphysical_layer?.natal_anchor || "NONE";
         const savedAnchorMins = window.Q_STATE?.metaphysical_layer?.wake_anchor_mins !== null ? window.Q_STATE?.metaphysical_layer?.wake_anchor_mins : (parseInt(localStorage.getItem('q_bio_anchor')) || 0);
         const sAnchorStr = `${Math.floor(savedAnchorMins / 60).toString().padStart(2, '0')}:${(savedAnchorMins % 60).toString().padStart(2, '0')}`;
         
@@ -1185,17 +1181,6 @@ window.Q_IntegrationHub = {
                     <label class="hub-checkbox-group" style="justify-content: flex-end; margin-top:-10px;">
                         <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown (Defaults 12:00)
                     </label>
-
-                    <div class="hub-input-group">
-                        <label class="hub-input-lbl">NATAL ANCHOR (ZODIACAL)</label>
-                        <select id="cal-natal" class="hub-input">
-                            <option value="NONE" ${sNatal==='NONE'?'selected':''}>-- UNASSIGNED --</option>
-                            <option value="ARIES" ${sNatal==='ARIES'?'selected':''}>ARIES</option><option value="TAURUS" ${sNatal==='TAURUS'?'selected':''}>TAURUS</option><option value="GEMINI" ${sNatal==='GEMINI'?'selected':''}>GEMINI</option>
-                            <option value="CANCER" ${sNatal==='CANCER'?'selected':''}>CANCER</option><option value="LEO" ${sNatal==='LEO'?'selected':''}>LEO</option><option value="VIRGO" ${sNatal==='VIRGO'?'selected':''}>VIRGO</option>
-                            <option value="LIBRA" ${sNatal==='LIBRA'?'selected':''}>LIBRA</option><option value="SCORPIO" ${sNatal==='SCORPIO'?'selected':''}>SCORPIO</option><option value="SAGITTARIUS" ${sNatal==='SAGITTARIUS'?'selected':''}>SAGITTARIUS</option>
-                            <option value="CAPRICORN" ${sNatal==='CAPRICORN'?'selected':''}>CAPRICORN</option><option value="AQUARIUS" ${sNatal==='AQUARIUS'?'selected':''}>AQUARIUS</option><option value="PISCES" ${sNatal==='PISCES'?'selected':''}>PISCES</option>
-                        </select>
-                    </div>
 
                     <div class="hub-input-group">
                         <label class="hub-input-lbl">GEOLOCATION (CITY, REGION)</label>
