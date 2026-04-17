@@ -309,22 +309,20 @@ window.Q_MANUSCRIPTS = {
 
             <img src="./assets/w17ta.png" style="width:100%; border-radius:4px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2);" alt="Resonance Discovery">
 
-            <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">THE QHUD CHRONO-DIAL</h4>
-            <p><strong style="color:#fff;">Hardware Manifestation</strong></p>
-            <p>The ultimate physical anchor of The Quadrature is the QHUD Chrono-Dial. Moving beyond digital SaaS interfaces and smartphone screens, this asset-backed hardware pipeline translates the Dual-State Engine into a tangible, machined instrument. It is the manifestation of the OS in the physical realm.</p>
-            <p><strong style="color:#fff;">Keplerian Mechanics vs. Quartz Oscillators</strong></p>
-            <p>Unlike legacy timepieces that rely on standard quartz oscillation to blindly track the 86,400 SI seconds of a civil day, the Chrono-Dial operates on Keplerian mechanics. It visually tracks the Mean Circle on the primary face, while a decoupled, physical complication indicates the Q-Delta.</p>
-            <p>This renders the precise expansion and contraction of the Fluid Degree—the actual speed of the planet—directly on the wrist of the Architect. The physical execution of the Chrono-Dial demands uncompromising material integrity. Encased in DLC-coated titanium with raw bronze patina accents, it carries the deliberate, heavy weight of a true navigational instrument. The central Keplerian complication does not simply rotate; it breathes, mechanically expanding and contracting its sweep to mirror the exact orbital velocity of the planet at that precise moment. It is a sovereign anchor locked to the wrist, a defiant physical rejection of the quartz oscillator.</p>
-            <p>Machining and manufacturing are strictly funded by established SaaS revenue, ensuring zero external debt and total sovereign control over the supply chain.</p>
+            <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">THE SOVEREIGN MOBILE NODE</h4>
+            <p><strong style="color:#fff;">Hardware Agnosticism</strong></p>
+            <p>The anchor of The Quadrature operates through strict hardware agnosticism. Rather than machining titanium and relying on supply chains, the system commandeers the Sovereign's mobile hardware. This translates the Dual-State Engine into a digital instrument. It is the zero-friction manifestation of the OS in the physical realm, bypassing the liabilities of manufacturing while maximizing UX deployment velocity.</p>
+            <p><strong style="color:#fff;">The Digital Complication</strong></p>
+            <p>Unlike legacy timepieces that rely on quartz oscillation to blindly track SI seconds, the Q-OS native shell operates as the primary anchor. It visually tracks the Mean Circle, while a digital complication indicates the Q-Delta. This renders the precise expansion and contraction of the Fluid Degree directly on the screen without the drag of physical gears. It is a sovereign anchor locked to the device, a defiant rejection of the quartz oscillator.</p>
 
             <div style="background:rgba(255,255,255,0.05); padding:15px; border-left:3px solid var(--theme-main, #ff003c); margin:20px 0;">
                 <strong style="color:#fff;">Technical Data Block:</strong><br>
-                <span style="color:var(--theme-main, #ff003c);">QHUD Chrono-Dial:</span> The physical hardware manifestation of the Dual-State Engine.<br>
-                <span style="color:var(--theme-main, #ff003c);">Keplerian Complication:</span> Mechanical or digital-hybrid rendering of real-time orbital acceleration and deceleration.<br>
-                <span style="color:var(--theme-main, #ff003c);">Asset-Backed Autonomy:</span> Utilizing software subscription revenue to fund precision CAD modeling and prototype machining.
+                <span style="color:var(--theme-main, #ff003c);">Hardware Agnosticism:</span> Eradicating supply chain liabilities via mobile UX integration.<br>
+                <span style="color:var(--theme-main, #ff003c);">Digital Complication:</span> Rendering real-time orbital acceleration and deceleration.<br>
+                <span style="color:var(--theme-main, #ff003c);">Asset Autonomy:</span> Manifesting the Dual-State Engine with absolute zero friction.
             </div>
 
-            <img src="./assets/w18ta.png" style="width:100%; border-radius:4px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2);" alt="Chrono Dial">
+            <img src="./assets/w18ta.png" style="width:100%; border-radius:4px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2);" alt="Sovereign Mobile Node">
 
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">THE PRINCIPLE OF QUADIFICATION</h4>
             <p><strong style="color:#fff;">Total System Yield</strong></p>
@@ -633,18 +631,18 @@ window.Q_MANUSCRIPTS = {
 
             <img src="./assets/w17tb.png" style="width:100%; border-radius:4px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2);" alt="Resonance Discovery">
 
-            <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">THE QHUD CHRONO-DIAL</h4>
-            <p><strong style="color:#fff;">The Physical Anchor</strong></p>
-            <p>Your journey through the architecture of time culminates in a tangible reality. The digital overlay of the Omni-Planner is brought into the physical world through the Chrono-Dial. It serves as a wearable manifestation of the Dual-State Engine, machined with the same absolute precision as the planetary physics it tracks.</p>
-            <p><strong style="color:#fff;">A Talisman of the Eternal Now</strong></p>
-            <p>To wear the Chrono-Dial is to carry the True Ellipse with you. It is a constant, physical reminder that you are not bound by the mechanical tick of civil society or the anxiety of the Gregorian calendar. It is the hardware anchor of your life within the arc—a talisman proving to yourself and the world that you have transcended the Gregorian Smear.</p>
+            <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">THE SOVEREIGN MOBILE NODE</h4>
+            <p><strong style="color:#fff;">The Digital Anchor</strong></p>
+            <p>Your journey through time culminates not in forged metal, but in digital reality. The transparent overlay of the Omni-Planner is brought into the physical world through the Sovereign Mobile Node. By commandeering your existing mobile hardware, the system serves as a continuous manifestation of the Dual-State Engine. It is tracked with the same absolute precision as the planetary physics it represents, eliminating the liability of physical oscillators.</p>
+            <p><strong style="color:#fff;">A Virtual Talisman</strong></p>
+            <p>To utilize the digital Chrono-Face is to carry the True Ellipse with you. It serves as a visual reminder that you are not bound by the mechanical tick of civil society or the anxiety of the Gregorian calendar. It is the psychological anchor of your life within the invariant arc. You do not need to machine raw titanium to break civil conditioning; you simply overwrite the interface of the device that previously bound you to the machine.</p>
 
             <div style="background:rgba(255,255,255,0.05); padding:15px; border-left:3px solid var(--theme-main, #ff003c); margin:20px 0;">
-                <strong style="color:#fff;">Philosophical Postulate: The Tangible Arc</strong><br>
-                The ultimate realization of a philosophy is its physical manifestation. The Chrono-Dial bridges the gap between digital telemetry and the physical reality of the wrist.
+                <strong style="color:#fff;">Philosophical Postulate: The Unmediated Arc</strong><br>
+                The ultimate realization of a philosophy is its behavioral manifestation. The Sovereign Mobile Node bridges the gap between digital telemetry and the psychological reality of the mind.
             </div>
 
-            <img src="./assets/w18tb.png" style="width:100%; border-radius:4px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2);" alt="Chrono Dial">
+            <img src="./assets/w18tb.png" style="width:100%; border-radius:4px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2);" alt="Sovereign Mobile Node">
 
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:30px;">THE PRINCIPLE OF QUADIFICATION</h4>
             <p><strong style="color:#fff;">The Conscious Harmonization</strong></p>
