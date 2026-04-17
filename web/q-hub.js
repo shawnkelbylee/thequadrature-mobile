@@ -23,6 +23,48 @@ window.Q_MANUSCRIPTS = {
 
             <hr style="border: 0; border-top: 1px dashed rgba(255,255,255,0.2); margin: 30px 0;">
 
+            <h3 style="color:var(--theme-main, #ff003c); font-family:'Orbitron'; margin-top:20px; letter-spacing:1px;">TABLE OF CONTENTS: FOUNDATIONAL ESSAYS (TRACK A)</h3>
+            <ul style="color:#ccc; font-family:'JetBrains Mono'; font-size:0.85rem; line-height:1.6; list-style-type:square; padding-left:20px;">
+                <li><strong style="color:#fff;">PHASE I: THE ILLUSION OF TIME</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>THE OBSERVER'S FALLACY & THE SUMERIAN CIRCLE</li>
+                        <li>THE GREGORIAN SMEAR & THE 365-DAY ILLUSION</li>
+                        <li>LUNISOLAR FRICTION & THE FRAGMENTED HEAVENS</li>
+                        <li>THE HEXAGESIMAL PULSE</li>
+                    </ul>
+                </li>
+                <li style="margin-top:10px;"><strong style="color:#fff;">PHASE II: THE INVARIANT ARC</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>THE PRIMARY POSTULATE & DUAL-STATE ENGINE</li>
+                        <li>THE KEPLERIAN SMEAR</li>
+                        <li>THE CARDINAL PYLONS (ALPHA TO DELTA)</li>
+                        <li>EPSILON TERMINAL & NODAL SETTLEMENT</li>
+                    </ul>
+                </li>
+                <li style="margin-top:10px;"><strong style="color:#fff;">PHASE III: VECTOR CODIFICATION</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>VECTOR 01—THE MECHANICAL ROOT (PHYSICAL)</li>
+                        <li>VECTOR 02—ENVIRONMENTAL ALMANAC (ENVIRONMENTAL)</li>
+                        <li>VECTOR 03—BIOLOGICAL RESONANCE (PHYSIOLOGICAL)</li>
+                        <li>VECTOR 04—COMMUNAL METADATA (METAPHYSICAL)</li>
+                        <li>THE COMMERCIAL QUAD—ENTERPRISE BIFURCATION</li>
+                        <li>SOVEREIGN COMMAND</li>
+                    </ul>
+                </li>
+                <li style="margin-top:10px;"><strong style="color:#fff;">PHASE IV: THE QUADIFIED LIFE</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>THE OMNI-PLANNER VISUALIZATION</li>
+                        <li>THE 90+1 ACCOUNTING LEDGER</li>
+                        <li>GEOMETRIC RESONANCE DISCOVERY</li>
+                        <li>THE SOVEREIGN MOBILE NODE</li>
+                        <li>THE PRINCIPLE OF QUADIFICATION</li>
+                        <li>THE ETERNAL NOW</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <hr style="border: 0; border-top: 1px dashed rgba(255,255,255,0.2); margin: 30px 0;">
+
             <h3 style="color:var(--theme-main, #ff003c); font-family:'Orbitron'; margin-top:20px; letter-spacing:1px;">PHASE I: THE ILLUSION OF TIME</h3>
             <h4 style="color:#fff; font-family:'Orbitron'; margin-top:15px;">THE OBSERVER'S FALLACY & THE SUMERIAN CIRCLE</h4>
             <p><strong style="color:#fff;">The Failure of the Administrative Proxy</strong></p>
@@ -376,6 +418,48 @@ window.Q_MANUSCRIPTS = {
             <h3 style="color:#fff; font-family:'Orbitron'; margin-top:20px; letter-spacing:1px;">DOCUMENT STRUCTURE</h3>
             <p>This track strictly isolates the conceptual, cognitive, and philosophical framing of the system. It dismantles the illusion of linear time and the administrative ledgers that bind human energy to the machine.</p>
             <p>Each spatial node within this document concludes with a <strong style="color:#fff;">Philosophical Postulate</strong>—a singular, actionable thesis that anchors the user's intent to the physical solar coordinate for that specific phase of the journey, ensuring absolute alignment with the eternal now.</p>
+
+            <hr style="border: 0; border-top: 1px dashed rgba(255,255,255,0.2); margin: 30px 0;">
+
+            <h3 style="color:var(--theme-main, #ff003c); font-family:'Orbitron'; margin-top:20px; letter-spacing:1px;">TABLE OF CONTENTS: FOUNDATIONAL ESSAYS (TRACK B)</h3>
+            <ul style="color:#ccc; font-family:'JetBrains Mono'; font-size:0.85rem; line-height:1.6; list-style-type:square; padding-left:20px;">
+                <li><strong style="color:#fff;">PHASE I: THE ILLUSION OF TIME</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>THE OBSERVER'S FALLACY & THE SUMERIAN CIRCLE</li>
+                        <li>THE GREGORIAN SMEAR & THE 365-DAY ILLUSION</li>
+                        <li>LUNISOLAR FRICTION & THE FRAGMENTED HEAVENS</li>
+                        <li>THE HEXAGESIMAL PULSE</li>
+                    </ul>
+                </li>
+                <li style="margin-top:10px;"><strong style="color:#fff;">PHASE II: THE INVARIANT ARC</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>THE PRIMARY POSTULATE & DUAL-STATE ENGINE</li>
+                        <li>THE KEPLERIAN SMEAR</li>
+                        <li>THE CARDINAL PYLONS (ALPHA TO DELTA)</li>
+                        <li>EPSILON TERMINAL & NODAL SETTLEMENT</li>
+                    </ul>
+                </li>
+                <li style="margin-top:10px;"><strong style="color:#fff;">PHASE III: VECTOR CODIFICATION</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>VECTOR 01—THE MECHANICAL ROOT (PHYSICAL)</li>
+                        <li>VECTOR 02—ENVIRONMENTAL ALMANAC (ENVIRONMENTAL)</li>
+                        <li>VECTOR 03—BIOLOGICAL RESONANCE (PHYSIOLOGICAL)</li>
+                        <li>VECTOR 04—COMMUNAL METADATA (METAPHYSICAL)</li>
+                        <li>THE COMMERCIAL QUAD—ENTERPRISE BIFURCATION</li>
+                        <li>SOVEREIGN COMMAND</li>
+                    </ul>
+                </li>
+                <li style="margin-top:10px;"><strong style="color:#fff;">PHASE IV: THE QUADIFIED LIFE</strong>
+                    <ul style="list-style-type:circle; padding-left:20px; color:#aaa;">
+                        <li>THE OMNI-PLANNER VISUALIZATION</li>
+                        <li>THE 90+1 ACCOUNTING LEDGER</li>
+                        <li>GEOMETRIC RESONANCE DISCOVERY</li>
+                        <li>THE SOVEREIGN MOBILE NODE</li>
+                        <li>THE PRINCIPLE OF QUADIFICATION</li>
+                        <li>THE ETERNAL NOW</li>
+                    </ul>
+                </li>
+            </ul>
 
             <hr style="border: 0; border-top: 1px dashed rgba(255,255,255,0.2); margin: 30px 0;">
 
