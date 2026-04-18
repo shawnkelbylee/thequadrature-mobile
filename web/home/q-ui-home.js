@@ -1,6 +1,6 @@
-// THE QUADRATURE: APERTURE GATEWAY UI CONTROLLER
+// THE QUADRATURE: SYSTEM HOME UI CONTROLLER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Version 24.2 - Gateway Controller Optimized. Architect Master Override integrated with Supabase Extractor. Mobile String-Bleed Mitigated.
+// STATUS: Version 24.2 - Home Controller Optimized. Architect Master Override integrated with Supabase Extractor. Mobile String-Bleed Mitigated.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -39,10 +39,10 @@ window.injectUniversalUI = function() {
 
     setTimeout(() => {
         const navBar = document.querySelector('.q-nav-bar') || document.querySelector('header');
-        if (navBar && !document.getElementById('btn-return-aperture')) {
+        if (navBar && !document.getElementById('btn-return-home')) {
             const returnBtn = document.createElement('button');
-            returnBtn.id = 'btn-return-aperture';
-            returnBtn.innerText = 'APERTURE';
+            returnBtn.id = 'btn-return-home';
+            returnBtn.innerText = 'HOME';
             returnBtn.style.cssText = "background: rgba(0, 240, 255, 0.1); border: 1px solid #00f0ff; color: #00f0ff; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; padding: 6px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 2px; position: absolute; right: 70px; top: 50%; transform: translateY(-50%); z-index: 1000; box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); transition: 0.3s;";
             
             returnBtn.onmouseover = () => { 
@@ -73,9 +73,9 @@ window.injectUniversalUI = function() {
 window.triggerDomainShift = function(e) {
     if(e) e.preventDefault();
     
-    let authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
+    let authState = localStorage.getItem('Q_PRO_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
     let authEmail = "";
-    let authUser = (localStorage.getItem('Q_SOVEREIGN_USER') || '').toUpperCase();
+    let authUser = (localStorage.getItem('Q_PRO_USER') || '').toUpperCase();
 
     for (let i = 0; i < localStorage.length; i++) {
         let key = localStorage.key(i);
@@ -92,7 +92,7 @@ window.triggerDomainShift = function(e) {
 
     if(authState !== 'ACTIVE') {
         if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth();
-        else alert("OAuth Service Unavailable. Please reload the Gateway.");
+        else alert("OAuth Service Unavailable. Please reload System Home.");
         return;
     }
 
@@ -143,7 +143,7 @@ window.addEventListener('click', (e) => {
         
         if (!el || typeof el.closest !== 'function') return;
 
-        if (el.closest('.q-hub-overlay') || el.closest('.modal-overlay') || el.closest('.q-planner-overlay') || el.id === 'btn-return-aperture') {
+        if (el.closest('.q-hub-overlay') || el.closest('.modal-overlay') || el.closest('.q-planner-overlay') || el.id === 'btn-return-home') {
             return; 
         }
 
@@ -194,8 +194,8 @@ window.addEventListener('click', (e) => {
         if (targetUrl) {
             e.preventDefault();
             e.stopPropagation(); 
-            if (typeof window.executeApertureSequence === 'function') {
-                window.executeApertureSequence(targetUrl);
+            if (typeof window.executeHomeSequence === 'function') {
+                window.executeHomeSequence(targetUrl);
             } else {
                 window.location.href = targetUrl;
             }

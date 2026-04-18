@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // LOGISTICS & LEDGER (COM)</title>
     
-    <script src="./q-ui-global.js?v=23.0"></script>
+    <script src="./q-ui-commercial.js?v=23.0"></script>
     <script src="../q-core.js?v=23.0"></script>
     <script src="../q-ui-planner.js?v=23.0"></script>
     <script src="../q-hub.js?v=23.0"></script>
@@ -79,7 +79,7 @@
     <div class="corner-panel bl telemetry-node desktop-only">
         <div class="frost-zone"></div>
         <div class="panel-data-container">
-            <div class="v-head">SOVEREIGN LEDGER</div>
+            <div class="v-head">PRO USER LEDGER</div>
             <div class="t-row"><span>STATUS:</span> <span id="face-COM-LEDGER" class="val-sm">--</span></div>
         </div>
     </div>
@@ -124,7 +124,7 @@
                 }
             }
             
-            // SOVEREIGN LEDGER
+            // PRO USER LEDGER
             if(getEl('face-COM-LEDGER')) {
                 getEl('face-COM-LEDGER').innerText = `Q${Math.floor(qData.trueArc / 90) + 1} CHECKPOINT`;
             }

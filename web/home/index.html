@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>THE QUADRATURE // APERTURE GATEWAY</title>
+    <title>THE QUADRATURE // SYSTEM HOME</title>
     
     <script>
         // --- HARD NULLIFICATION PROTOCOL ---
@@ -41,7 +41,7 @@
         });
     </script>
 
-    <script src="/aperture/q-ui-global.js"></script>
+    <script src="q-ui-home.js"></script>
     <script src="../q-core.js"></script>
     <script src="../q-hub.js"></script>
     <script src="../q-ui-planner.js"></script>
@@ -60,7 +60,7 @@
 
         /* --- THE QUARANTINE PROTOCOL --- */
         /* Physically hide ANY unknown root element injected by q-core.js, EXCEPT authorized UI overlays */
-        body > *:not(.aperture-container):not(#portal-frame):not(.space-bg):not(#warp-star-field):not(.nebula-left):not(.nebula-right):not(.dust-layer-global):not(.global-header):not(.global-footer):not(.corner-panel):not(.mobile-routing-grid):not(.wing-panel):not(script):not(style):not(iframe):not(meta):not(title):not(#q-ui-injected-flag):not(.q-hub-overlay):not(.q-planner-overlay):not(#q-library-reader-overlay) {
+        body > *:not(.home-container):not(#portal-frame):not(.space-bg):not(#warp-star-field):not(.nebula-left):not(.nebula-right):not(.dust-layer-global):not(.global-header):not(.global-footer):not(.corner-panel):not(.mobile-routing-grid):not(.wing-panel):not(script):not(style):not(iframe):not(meta):not(title):not(#q-ui-injected-flag):not(.q-hub-overlay):not(.q-planner-overlay):not(#q-library-reader-overlay) {
             display: none !important; 
             opacity: 0 !important; 
             pointer-events: none !important; 
@@ -96,7 +96,7 @@
         }
 
         /* --- UNIVERSAL SEQUENCING FADE --- */
-        body.sequencing > *:not(.aperture-container):not(#portal-frame):not(script):not(style):not(.mobile-routing-grid) {
+        body.sequencing > *:not(.home-container):not(#portal-frame):not(script):not(style):not(.mobile-routing-grid) {
             opacity: 0 !important;
             transition: opacity 0.4s ease-out;
             pointer-events: none;
@@ -194,8 +194,8 @@
         .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: #00f0ff; cursor: pointer; border: 1px solid rgba(0,240,255,0.2); padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; text-align: center; }
         .fmt-toggle:hover { background: #00f0ff; color: #000; box-shadow: 0 0 10px #00f0ff; }
 
-        /* --- THE APERTURE CORE --- */
-        .aperture-container {
+        /* --- THE HOME CORE --- */
+        .home-container {
             position: absolute; left: 50%; top: 50%;
             transform: translate(-50%, -50%);
             width: 52vh; height: 52vh;
@@ -304,7 +304,7 @@
             100% { transform: translate(-50%, -50%) scale(40); filter: brightness(8) drop-shadow(0 0 0px var(--white-flash)); opacity: 0; }
         }
 
-        /* --- THE MOBILE APERTURE PROTOCOL (VERTICAL CASCADE) --- */
+        /* --- THE MOBILE HOME PROTOCOL (VERTICAL CASCADE) --- */
         .desktop-only { display: flex !important; }
 
         .mobile-routing-grid {
@@ -364,7 +364,7 @@
     <div class="dust-layer-global"></div>
 
     <div class="global-header desktop-only">THE QUADRATURE</div>
-    <div class="global-footer desktop-only">BASED IN SCIENCE BATHED IN CULTURE AND BUILT FOR THE DIGITAL AGE</div>
+    <div class="global-footer desktop-only">ALIGN YOUR LIFE. MEET ME ON THE QUAD.</div>
 
     <div class="corner-panel tl desktop-only" data-target="../personal/index.html">
         <div class="frost-zone"></div>
@@ -402,7 +402,7 @@
         </div>
         <div class="m-panel" data-route="dashboard">
             <div class="m-frost"></div><div class="m-bg" style="transform: scale(-1, -1);"></div>
-            <div class="m-label">MATRIX HUB</div>
+            <div class="m-label">THE DASHBOARD</div>
         </div>
     </div>
 
@@ -457,7 +457,7 @@
         </div>
     </div>
 
-    <div class="aperture-container q-center-dial">
+    <div class="home-container q-center-dial">
         <div class="core-void">
             <div class="star-field" id="core-star-field"></div>
         </div>
@@ -610,7 +610,7 @@
             requestAnimationFrame(tick);
         }
 
-        window.executeApertureSequence = function(targetUrl) {
+        window.executeHomeSequence = function(targetUrl) {
             if (document.body.classList.contains('sequencing')) return;
             document.body.classList.add('sequencing');
             
@@ -627,7 +627,7 @@
             try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
             
             let authEmail = "";
-            let authUser = (localStorage.getItem('Q_SOVEREIGN_USER') || '').toUpperCase();
+            let authUser = (localStorage.getItem('Q_PRO_USER') || '').toUpperCase();
 
             for (let i = 0; i < localStorage.length; i++) {
                 let key = localStorage.key(i);
@@ -664,8 +664,8 @@
                 lockIcon.style.display = 'none';
                 comPanel.onclick = (e) => {
                     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-                    if (typeof window.executeApertureSequence === 'function') {
-                        window.executeApertureSequence('../commercial/index.html');
+                    if (typeof window.executeHomeSequence === 'function') {
+                        window.executeHomeSequence('../commercial/index.html');
                     } else {
                         window.location.href = '../commercial/index.html';
                     }
@@ -673,7 +673,7 @@
             }
         }
 
-        function initMobileAperture() {
+        function initMobileHome() {
             document.addEventListener('click', (e) => {
                 if(window.innerWidth <= 950 && !isMobileRevealed && !e.target.closest('.m-panel')) {
                     document.body.classList.add('mobile-revealed');
@@ -691,8 +691,8 @@
                     } else if(target === 'planner') {
                         if (window.Q_OmniPlanner) window.Q_OmniPlanner.openPlanner();
                     } else {
-                        if (typeof window.executeApertureSequence === 'function') {
-                            window.executeApertureSequence(target);
+                        if (typeof window.executeHomeSequence === 'function') {
+                            window.executeHomeSequence(target);
                         } else {
                             window.location.href = target;
                         }
@@ -729,7 +729,7 @@
             const qCoordWing = document.getElementById('q-coord-wing');
             
             if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
+                if (activeBlock && activeBlock.type === 'ANCHOR') {
                     qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:#00f0ff; font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
                 } else {
                     qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:#00f0ff; font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
@@ -744,7 +744,7 @@
             injectPerfectIris();
             initStars();
             initWarpEngine();
-            initMobileAperture();
+            initMobileHome();
         });
     </script>
 </body>

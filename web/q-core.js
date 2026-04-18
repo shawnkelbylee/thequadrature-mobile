@@ -1,6 +1,6 @@
 // THE QUADRATURE: MASTER CORE LOGIC (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Active. Sovereign Handshake, Safe-Harbor Auth Routing & Session Memory Rerouting Integrated. Ghost Keys Purged. Voice Matrix Active.
+// STATUS: Active. Personal Node Handshake, Safe-Harbor Auth Routing & Session Memory Rerouting Integrated. Ghost Keys Purged. Voice Matrix Active.
 
 window.MS_DAY = 86400000;
 
@@ -55,12 +55,12 @@ window.Q_REGISTRY = {
         { name: "Autumnal Equinox", start: 270, theme: "Balance before the descent." }, { name: "Cold Dew", start: 285, theme: "Letting go of the non-essential." }, { name: "Frost Descends", start: 300, theme: "Finalizing storage and protection." }, 
         { name: "Winter Begins", start: 315, theme: "Retreating inward." }, { name: "Minor Snow", start: 330, theme: "Quieting the mind." }, { name: "Major Snow", start: 345, theme: "Absolute stillness before rebirth." }
     ],
-    PYLONS: [
-        { name: "Alpha Pylon", coord: 0, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.ALPHA, event: 'WINTER SOLSTICE (NADIR)', desc: "PRINCIPLE: Quadrature Nadir. Zero-crossing metrology anchor. Initiates primary orbital cycle.", renderUI: true },
-        { name: "Beta Pylon", coord: 90, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.BETA, event: 'VERNAL EQUINOX', desc: "PRINCIPLE: First Quadrant Anchor. Balance threshold. Initiates Q2 thermodynamic shift.", renderUI: true },
-        { name: "Gamma Pylon", coord: 180, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.GAMMA, event: 'SUMMER SOLSTICE (APEX)', desc: "PRINCIPLE: Quadrature Apex. Maximum orbital variance. Initiates Q3 decline.", renderUI: true },
-        { name: "Delta Pylon", coord: 270, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.DELTA, event: 'AUTUMNAL EQUINOX', desc: "PRINCIPLE: Final Quadrant Anchor. Entropy return threshold. Initiates Q4 system transit.", renderUI: true },
-        { name: "Epsilon Pylon", coord: 360, type: 'node-pyl', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.EPSILON, event: 'TERMINAL RESOLUTION', desc: "PRINCIPLE: Terminal Oddity integration. Resolution of the Keplerian Smear. Closes the Mean Circle.", renderUI: false }
+    ANCHORS: [
+        { name: "Alpha Anchor", coord: 0, type: 'node-anc', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.ALPHA, event: 'WINTER SOLSTICE (NADIR)', desc: "PRINCIPLE: Quadrature Nadir. Zero-crossing metrology anchor. Initiates primary orbital cycle.", renderUI: true },
+        { name: "Beta Anchor", coord: 90, type: 'node-anc', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.BETA, event: 'VERNAL EQUINOX', desc: "PRINCIPLE: First Quadrant Anchor. Balance threshold. Initiates Q2 thermodynamic shift.", renderUI: true },
+        { name: "Gamma Anchor", coord: 180, type: 'node-anc', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.GAMMA, event: 'SUMMER SOLSTICE (APEX)', desc: "PRINCIPLE: Quadrature Apex. Maximum orbital variance. Initiates Q3 decline.", renderUI: true },
+        { name: "Delta Anchor", coord: 270, type: 'node-anc', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.DELTA, event: 'AUTUMNAL EQUINOX', desc: "PRINCIPLE: Final Quadrant Anchor. Entropy return threshold. Initiates Q4 system transit.", renderUI: true },
+        { name: "Epsilon Anchor", coord: 360, type: 'node-anc', glyph: '⬟', duration: window.Q_GEAR_CONSTANTS.EPSILON, event: 'TERMINAL RESOLUTION', desc: "PRINCIPLE: Terminal Oddity integration. Resolution of the Orbital Velocity Variance. Closes the Mean Circle.", renderUI: false }
     ],
     CIV_LEDGER: [
         { name: "New Year", month: 0, day: 1, type: 'node-civ', glyph: '🏛', durationDays: 1 },
@@ -83,7 +83,7 @@ window.Q_EphemerisBridge = {
         if (window.Q_ACTIVE_EPHEMERIS && window.Q_ACTIVE_EPHEMERIS.year === year) return;
 
         if (this.offlineMode) {
-            window.Q_LOG('INFO', 'PHYSICS', 'SOVEREIGN_EPHEMERIS_ACTIVE', { year, status: 'INDEXED_DB_HOOK_PENDING' });
+            window.Q_LOG('INFO', 'PHYSICS', 'PERSONAL_NODE_EPHEMERIS_ACTIVE', { year, status: 'INDEXED_DB_HOOK_PENDING' });
             return;
         }
 
@@ -110,18 +110,18 @@ window.Q_EphemerisBridge = {
     toggleOfflineMode: function(enabled) {
         this.offlineMode = enabled;
         localStorage.setItem('Q_EPHEMERIS_OFFLINE', enabled ? 'true' : 'false');
-        window.Q_LOG('STATE', 'PHYSICS', enabled ? 'SOVEREIGN_EPHEMERIS_ENGAGED' : 'CLOUD_EPHEMERIS_ENGAGED');
+        window.Q_LOG('STATE', 'PHYSICS', enabled ? 'PERSONAL_NODE_EPHEMERIS_ENGAGED' : 'CLOUD_EPHEMERIS_ENGAGED');
     }
 };
 
 // GLOBAL HOLIDAY COORDINATE RESOLVER
 window.getGlobalHolidays = function(year) {
-    if (!window.PYLON_ALPHA_DYNAMIC) return [];
+    if (!window.ANCHOR_ALPHA_DYNAMIC) return [];
     let list = [];
     
     window.Q_REGISTRY.CIV_LEDGER.forEach(ev => {
         let ts = Date.UTC(year, ev.month, ev.day, 12, 0, 0);
-        let days = (ts - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+        let days = (ts - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
         list.push({ ...ev, coord: window.getOrbitalData(days).meanArc, durationDays: ev.durationDays || 1 });
     });
     
@@ -135,7 +135,7 @@ window.getGlobalHolidays = function(year) {
         });
     }
     
-    window.Q_REGISTRY.PYLONS.forEach(ev => list.push({ ...ev, durationDays: 1 }));
+    window.Q_REGISTRY.ANCHORS.forEach(ev => list.push({ ...ev, durationDays: 1 }));
     return list;
 };
 
@@ -145,7 +145,7 @@ window.Q_LEXICON = {
     PHYSICS: "True Ellipse",
     INTERFACE: "The Quadrature HUD",
     SYSTEM: "Q Logic",
-    USER_INDIVIDUAL: "Sovereign",
+    USER_INDIVIDUAL: "Pro User",
     USER_ENTERPRISE: "Entity"
 };
 
@@ -178,13 +178,13 @@ window.bindAuthListener = function() {
     if(!window.supabaseClient) return;
     window.supabaseClient.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
-            localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
+            localStorage.setItem('Q_PRO_AUTH', 'true');
             // DEAD SIMPLE INTERCEPT: Grab token before it vanishes
             if (session.provider_token) {
                 sessionStorage.setItem('Q_GOOGLE_TOKEN', session.provider_token);
             }
         } else if (event === 'SIGNED_OUT') {
-            localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
+            localStorage.setItem('Q_PRO_AUTH', 'false');
             window.Q_STATE.persistence.auth_status = 'STANDBY';
         }
     });
@@ -203,7 +203,7 @@ window.fetchCloudState = async function() {
     
     const { data: session } = await window.supabaseClient.auth.getSession();
     if (!session?.session?.user) {
-        window.Q_LOG('WARN', 'CORE', 'CLOUD_SYNC_ABORTED: No Active Sovereign/Entity Session.');
+        window.Q_LOG('WARN', 'CORE', 'CLOUD_SYNC_ABORTED: No Active Pro User/Entity Session.');
         return; 
     }
 
@@ -215,7 +215,7 @@ window.fetchCloudState = async function() {
             .single();
 
         const { data: idData, error: idErr } = await window.supabaseClient
-            .from('sovereign_identity')
+            .from('pro_identity')
             .select('*')
             .eq('user_id', session.session.user.id)
             .single();
@@ -258,18 +258,18 @@ window.fetchCloudState = async function() {
 window.Q_STATE = {
     persistence: { 
         db_migration: 'ACTIVE', 
-        auth_status: localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'SOVEREIGN_AUTHENTICATED' : 'STANDBY', 
+        auth_status: localStorage.getItem('Q_PRO_AUTH') === 'true' ? 'PRO_AUTHENTICATED' : 'STANDBY', 
         sync_active: false 
     },
     logic_layer: { 
         predictive_friction: true, 
-        civil_exporter: 'ACTIVE',
+        civil_exporter: 'STANDBY', // Explicitly Deferred to Phase II
         preferred_ai_diplomat: localStorage.getItem('q_ai_diplomat') || 'DEFAULT',
         deep_flow_enforcement: localStorage.getItem('q_deep_flow_enforcement') !== 'false'
     },
     hardware_hooks: { biometric_api: 'STANDBY', iot_webhooks: 'STANDBY' },
     capital_ledger: { 
-        fiat_api: 'STANDBY', 
+        fiat_api: 'STANDBY', // Explicitly Deferred to Phase II
         resonance_tracker: 'ACTIVE',
         fiat_routing_id: localStorage.getItem('q_fiat_routing_id') || null
     },
@@ -334,7 +334,7 @@ window.Q_UpdateState = async function(category, key, value) {
                 let payload = { user_id: session.session.user.id };
 
                 if (identityKeys.includes(key) || key === 'name') {
-                    targetTable = 'sovereign_identity';
+                    targetTable = 'pro_identity';
                     let dbKey = key === 'name' ? 'location_name' : key;
                     payload[dbKey] = value;
                 } else if (stateKeys.includes(key)) {
@@ -408,7 +408,7 @@ window.getActiveDLMO = function() {
 // DECOUPLED BIOLOGICAL PHYSICS ENGINE: Calculates physiological phase via Keplerian Multiplier overlaid on 1440-min canvas.
 window.getBiologicalState = function(t, qData) {
     if (!qData) {
-        const daysElapsed = (t - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+        const daysElapsed = (t - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
         qData = window.getOrbitalData(daysElapsed);
     }
 
@@ -556,15 +556,16 @@ window.Q_UniversalSync = {
             }
         }
     },
-    routeBiometricAuth: function(provider) {
-        window.Q_LOG('INFO', 'CAPITAL', `ROUTING_BIOMETRIC_OAUTH_${provider.toUpperCase()}`);
+    routeBiometricAuth: function(provider, mode = 'ON_DEMAND') {
+        window.Q_LOG('INFO', 'CAPITAL', `ROUTING_BIOMETRIC_OAUTH_${provider.toUpperCase()}`, { mode });
         if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(JSON.stringify({ 
                 action: 'INITIATE_EXTERNAL_OAUTH', 
-                provider: provider 
+                provider: provider,
+                sync_mode: mode
             }));
         } else {
-            alert(`[ UNIVERSAL PAYLOAD SYNC ]\nRouting to ${provider} API gateway for hardware authorization...`);
+            alert(`[ UNIVERSAL PAYLOAD SYNC ]\nRouting to ${provider} API gateway for explicit ${mode} hardware authorization...`);
             window.Q_UpdateState('hardware_hooks', `${provider}_synced`, 'ACTIVE');
         }
     }
@@ -641,7 +642,7 @@ window.Q_DeepFlowMonitor = {
     }
 };
 
-// --- KAIROS SOVEREIGN COMMAND (VOICE MATRIX) ---
+// --- KAIROS PERSONAL NODE COMMAND (VOICE MATRIX) ---
 window.Q_KairosVoice = {
     recognition: null,
     isListening: false,
@@ -677,7 +678,7 @@ window.Q_KairosVoice = {
             const lastResult = event.results[event.results.length - 1];
             if (lastResult.isFinal) {
                 const rawTranscript = lastResult[0].transcript;
-                window.Q_LOG('INFO', 'INTERFACE', 'SOVEREIGN_COMMAND_DETECTED', { raw: rawTranscript });
+                window.Q_LOG('INFO', 'INTERFACE', 'PERSONAL_NODE_COMMAND_DETECTED', { raw: rawTranscript });
                 this.showFeedback(rawTranscript);
                 this.processCommand(rawTranscript);
             }
@@ -758,7 +759,7 @@ window.Q_KairosVoice = {
     },
     processCommand: function(cmd) {
         const normalized = cmd.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-        window.Q_LOG('INFO', 'INTERFACE', 'SOVEREIGN_COMMAND_PROCESSING', { cmd: normalized });
+        window.Q_LOG('INFO', 'INTERFACE', 'PERSONAL_NODE_COMMAND_PROCESSING', { cmd: normalized });
 
         const currentPath = window.location.pathname.toLowerCase();
         const isCommercial = currentPath.includes('commercial');
@@ -842,7 +843,7 @@ window.Q_KairosVoice = {
     }
 };
 
-// --- SOVEREIGN ONBOARDING (FIRST-BOOT INITIATION) ---
+// --- PRO USER ONBOARDING (FIRST-BOOT INITIATION) ---
 window.Q_Onboarding = {
     check: function() {
         const currentVersion = "16.1.1"; 
@@ -869,7 +870,7 @@ window.Q_Onboarding = {
         
         overlay.innerHTML = `
             <div style="width: 90%; max-width: 400px; border: 1px solid #00f0ff; padding: 25px; background: rgba(0, 240, 255, 0.05); box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); border-radius: 8px;">
-                <h3 style="text-align:center; letter-spacing:3px; text-shadow:0 0 10px #00f0ff; margin-top:0;">SOVEREIGN INITIATION</h3>
+                <h3 style="text-align:center; letter-spacing:3px; text-shadow:0 0 10px #00f0ff; margin-top:0;">PRO USER INITIATION</h3>
                 <div style="font-family:'JetBrains Mono'; font-size:0.7rem; color:#aaa; margin-bottom: 25px; text-align:center; line-height: 1.5;">Define your personal metrological anchors to calibrate the Quadrature Structure.</div>
                 
                 <label style="font-size:0.65rem; color:#fff; font-weight:bold;">DATE OF BIRTH (NATAL METROLOGY)</label>
@@ -903,7 +904,7 @@ window.Q_Onboarding = {
         const anchor = document.getElementById('init-anchor').value;
         
         if(!dob || !loc || !anchor) {
-            alert("ALL FIELDS REQUIRED FOR SOVEREIGN INITIATION.");
+            alert("ALL FIELDS REQUIRED FOR PRO USER INITIATION.");
             return;
         }
         
@@ -917,11 +918,11 @@ window.Q_Onboarding = {
         const overlay = document.getElementById('q-onboarding-overlay');
         if (overlay) overlay.remove();
         
-        window.Q_LOG('STATE', 'CORE', 'SOVEREIGN_INITIATION_COMPLETE');
+        window.Q_LOG('STATE', 'CORE', 'PRO_USER_INITIATION_COMPLETE');
     }
 };
 
-// --- SOVEREIGN AUTHENTICATION ---
+// --- PRO USER AUTHENTICATION ---
 window.Q_Auth = {
     getRedirectVector: function() {
         const origin = window.location.origin;
@@ -972,7 +973,7 @@ window.Q_Auth = {
         if (!window.supabaseClient) return;
         try {
             await window.supabaseClient.auth.signOut();
-            localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
+            localStorage.setItem('Q_PRO_AUTH', 'false');
             localStorage.removeItem('Q_ENTITLEMENTS');
             if (window.Q_STATE && window.Q_STATE.persistence) {
                 window.Q_STATE.persistence.auth_status = 'STANDBY';
@@ -1068,15 +1069,15 @@ window.Q_Auth = {
         
         if (session?.session?.user) {
             if (window.Q_STATE && window.Q_STATE.persistence) {
-                window.Q_STATE.persistence.auth_status = 'SOVEREIGN_AUTHENTICATED';
+                window.Q_STATE.persistence.auth_status = 'PRO_AUTHENTICATED';
             }
-            localStorage.setItem('Q_SOVEREIGN_AUTH', 'true');
+            localStorage.setItem('Q_PRO_AUTH', 'true');
             window.Q_LOG('STATE', 'CORE', 'IDENTITY_VERIFIED', { user: session.session.user.email });
             
             // --- NATIVE ARCHITECT RECOGNITION & ENTITLEMENT LOCK ---
             const userEmail = (session.session.user.email || "").toUpperCase();
             if (userEmail.includes('SHAWNKELBYLEE@GMAIL.COM') || userEmail.includes('ARCHITECT@THEQUADRATURE.COM') || userEmail.includes('KELBY') || userEmail.includes('SHAWN')) {
-                const masterEntitlements = ["BASIC", "STANDARD", "RESONANT", "SOVEREIGN", "SYNDICATE", "ENTERPRISE", "PERSONAL", "COMMERCIAL"];
+                const masterEntitlements = ["BASIC", "STANDARD", "RESONANT", "PRO", "TEAM", "ENTERPRISE", "PERSONAL", "COMMERCIAL"];
                 localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(masterEntitlements));
                 window.Q_LOG('STATE', 'CORE', 'ARCHITECT_RECOGNIZED_MASTER_ENTITLEMENTS_LOCKED');
             }
@@ -1102,7 +1103,7 @@ window.Q_Auth = {
             }
             
         } else {
-            localStorage.setItem('Q_SOVEREIGN_AUTH', 'false');
+            localStorage.setItem('Q_PRO_AUTH', 'false');
             if (window.Q_STATE && window.Q_STATE.persistence) {
                 window.Q_STATE.persistence.auth_status = 'STANDBY';
             }
@@ -1126,15 +1127,15 @@ window.formatLegacyDate = function(ms) {
 
 // --- THE MASTER RENDER LOOP ---
 window.Q_MasterLoop = {
-    lastPylonIndex: null,
+    lastAnchorIndex: null,
 
     start: function() {
         const loop = () => {
-            if(window.PYLON_ALPHA_DYNAMIC) {
+            if(window.ANCHOR_ALPHA_DYNAMIC) {
                 const state = window.getSimState();
                 const t = state.isLive ? Date.now() : state.simTime;
                 const activeTime = new Date(t);
-                const diff = t - window.PYLON_ALPHA_DYNAMIC;
+                const diff = t - window.ANCHOR_ALPHA_DYNAMIC;
                 const daysElapsed = diff / window.MS_DAY;
                 
                 // Execute Zero-Redundancy Orbital Mapping
@@ -1143,16 +1144,16 @@ window.Q_MasterLoop = {
                 const lagDays = 10.5 + (daysElapsed * 0.0001);
                 const formatted = window.formatLegacyDate(t);
 
-                const sovereignPostulates = ["LOCATION IS TRUTH", "THE ARC IS QUADRATURE"];
-                const postulateIndex = Math.floor((t / 90000) % sovereignPostulates.length);
-                const activePostulate = sovereignPostulates[postulateIndex];
+                const nodePostulates = ["LOCATION IS TRUTH", "THE ARC IS QUADRATURE"];
+                const postulateIndex = Math.floor((t / 90000) % nodePostulates.length);
+                const activePostulate = nodePostulates[postulateIndex];
 
-                let currentPylonIndex = Math.floor(qData.trueArc / 90);
-                if (this.lastPylonIndex !== null && currentPylonIndex !== this.lastPylonIndex) {
-                    window.Q_LOG('STATE', 'PHYSICS', 'CARDINAL_PYLON_CROSSED', { arc: qData.trueArc });
+                let currentAnchorIndex = Math.floor(qData.trueArc / 90);
+                if (this.lastAnchorIndex !== null && currentAnchorIndex !== this.lastAnchorIndex) {
+                    window.Q_LOG('STATE', 'PHYSICS', 'SEASONAL_ANCHOR_CROSSED', { arc: qData.trueArc });
                     window.Q_MobileBridge.pulse('HEAVY');
                 }
-                this.lastPylonIndex = currentPylonIndex;
+                this.lastAnchorIndex = currentAnchorIndex;
 
                 if (window.Q_DeepFlowMonitor) window.Q_DeepFlowMonitor.check(t, qData);
 
@@ -1176,7 +1177,9 @@ window.Q_BIOMETRICS = {
 window.Q_PHASE_II = {
     thresholds: { friction_warn: 0.015, thermic_spike: 0.030 },
     allocateResource: function(name, amount, type) {
-        const daysElapsed = (Date.now() - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+        window.Q_LOG('WARN', 'CAPITAL', 'DEFERRED_TO_PHASE_II_BETA', { action: 'allocateResource' });
+        // Maintained strictly for testing; UI hook is locked.
+        const daysElapsed = (Date.now() - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
         const orbital = window.getOrbitalData(daysElapsed);
         const entry = {
             id: `RES-${Date.now()}`, name: name, value: amount, mode: type,
@@ -1186,7 +1189,6 @@ window.Q_PHASE_II = {
         if (!window.qData.ledger) window.qData.ledger = [];
         window.qData.ledger.push(entry);
         window.savePlannerData();
-        window.Q_LOG('STATE', 'CAPITAL', 'RESOURCE_ALLOCATED', entry);
         return entry;
     },
     checkScheduleFriction: function(meanArcTarget) {
@@ -1202,15 +1204,16 @@ window.Q_PHASE_II = {
 };
 
 window.Q_PHASE_III = {
-    syncBiometrics: function() {
+    syncBiometrics: function(mode = 'ON_DEMAND') {
         return new Promise((resolve, reject) => {
-            window.Q_LOG('INFO', 'BIOLOGICAL', 'NATIVE_HEALTH_SYNC_INITIATED');
+            window.Q_LOG('INFO', 'BIOLOGICAL', `NATIVE_HEALTH_SYNC_INITIATED_${mode}`);
             
             if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ 
                     action: 'REQUEST_NATIVE_BIOMETRICS',
                     providers: ['HealthConnect', 'HealthKit'],
-                    metrics: ['HRV', 'RHR', 'SLEEP_STAGE']
+                    metrics: ['HRV', 'RHR', 'SLEEP_STAGE'],
+                    sync_mode: mode
                 }));
                 
                 const bioListener = (e) => {
@@ -1248,7 +1251,7 @@ window.Q_PHASE_III = {
                 }, 10000);
             } else {
                 window.Q_LOG('WARN', 'BIOLOGICAL', 'NATIVE_BRIDGE_MISSING_ABORTING_SYNC');
-                reject(new Error("Native bridge missing. Run in Sovereign Container."));
+                reject(new Error("Native bridge missing. Run in Personal Node Container."));
             }
         });
     },
@@ -1256,7 +1259,7 @@ window.Q_PHASE_III = {
         if (window.Q_STATE.hardware_hooks.iot_webhooks !== 'ACTIVE') return;
         const payload = {
             vector: 'ENVIRONMENTAL',
-            pylon: window.CURRENT_TRUE_ARC < 90 ? 'ALPHA' : 'OTHER',
+            anchor: window.CURRENT_TRUE_ARC < 90 ? 'ALPHA' : 'OTHER',
             action: 'ADJUST_BASELOAD',
             adjustment: currentDelta > 0 ? -2 : 0 
         };
@@ -1265,7 +1268,7 @@ window.Q_PHASE_III = {
 };
 
 window.Q_EVENT_BUFFER = [];
-window.PYLON_ALPHA_DYNAMIC = null;
+window.ANCHOR_ALPHA_DYNAMIC = null;
 window.EPHEMERIS_LIVE = false;
 
 window.syncGeoLocation = async function() {
@@ -1375,16 +1378,16 @@ window.Q_LOG = function(level, vector, event, data = {}) {
     } catch (e) {}
 })();
 
-window.calculatePylonAlpha = async function() {
+window.calculateAnchorAlpha = async function() {
     try {
         const absoluteEpochMs = new Date(Date.UTC(2025, 11, 21, 15, 3, 0)).getTime();
-        window.PYLON_ALPHA_DYNAMIC = absoluteEpochMs;
-        window.Q_LOG('STATE', 'CORE', 'PYLON_ALPHA_ANCHORED', { year: 2025, timestamp: window.PYLON_ALPHA_DYNAMIC, dynamic: false });
+        window.ANCHOR_ALPHA_DYNAMIC = absoluteEpochMs;
+        window.Q_LOG('STATE', 'CORE', 'ALPHA_ANCHOR_ESTABLISHED', { year: 2025, timestamp: window.ANCHOR_ALPHA_DYNAMIC, dynamic: false });
     } catch (err) {
         window.Q_LOG('ERROR', 'CORE', 'ALPHA_ANCHOR_FAILED', { error: err.message });
-        window.PYLON_ALPHA_DYNAMIC = new Date(Date.UTC(2025, 11, 21, 15, 3, 0)).getTime(); 
+        window.ANCHOR_ALPHA_DYNAMIC = new Date(Date.UTC(2025, 11, 21, 15, 3, 0)).getTime(); 
     }
-    return window.PYLON_ALPHA_DYNAMIC;
+    return window.ANCHOR_ALPHA_DYNAMIC;
 };
 
 // OFFLINE EPHEMERIS ENGINE
@@ -1464,7 +1467,7 @@ window.getOrbitalData = function(daysElapsed) {
     let sect = Math.floor((meanArc % 90) / 30) + 1; if(sect > 3) sect = 3;
     let day = Math.floor(cycleDays % 30) + 1; 
 
-    const absoluteTime = window.PYLON_ALPHA_DYNAMIC ? window.PYLON_ALPHA_DYNAMIC + (daysElapsed * window.MS_DAY) : Date.now();
+    const absoluteTime = window.ANCHOR_ALPHA_DYNAMIC ? window.ANCHOR_ALPHA_DYNAMIC + (daysElapsed * window.MS_DAY) : Date.now();
     if (window.getQBlockByTime) {
         let activeBlock = window.getQBlockByTime(absoluteTime);
         if (activeBlock) {
@@ -1472,7 +1475,7 @@ window.getOrbitalData = function(daysElapsed) {
             sect = activeBlock.sect || sect;
             day = activeBlock.day || day;
             
-            if (activeBlock.type === 'PYLON') {
+            if (activeBlock.type === 'ANCHOR') {
                 let progress = (absoluteTime - activeBlock.absoluteStart) / activeBlock.dur;
                 delta = delta * (1 - progress);
                 trueArc = (meanArc + delta) % 360;
@@ -1505,16 +1508,16 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     if (window.Q_Auth && window.Q_Auth.handleAuthRedirect) {
         await window.Q_Auth.handleAuthRedirect();
-        if (window.Q_STATE.persistence.auth_status === 'SOVEREIGN_AUTHENTICATED') {
+        if (window.Q_STATE.persistence.auth_status === 'PRO_AUTHENTICATED') {
             await window.syncGeoLocation();
         }
     }
     
     await window.fetchCloudState();
-    await window.calculatePylonAlpha();
+    await window.calculateAnchorAlpha();
 
     // Trigger Initial Ephemeris Bridge Sync
-    const initYear = new Date(window.PYLON_ALPHA_DYNAMIC || Date.now()).getUTCFullYear();
+    const initYear = new Date(window.ANCHOR_ALPHA_DYNAMIC || Date.now()).getUTCFullYear();
     if (window.Q_EphemerisBridge) window.Q_EphemerisBridge.syncYear(initYear);
 
     if (window.Q_KairosVoice) window.Q_KairosVoice.init(); 
@@ -1526,9 +1529,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
     setTimeout(() => {
-        if (window.innerWidth <= 768 && window.PYLON_ALPHA_DYNAMIC) {
+        if (window.innerWidth <= 768 && window.ANCHOR_ALPHA_DYNAMIC) {
             const state = window.getSimState ? window.getSimState() : { simTime: Date.now(), isLive: true };
-            const oData = window.getOrbitalData((state.simTime - window.PYLON_ALPHA_DYNAMIC)/86400000);
+            const oData = window.getOrbitalData((state.simTime - window.ANCHOR_ALPHA_DYNAMIC)/86400000);
             const initFmt = window.formatLegacyDate(state.simTime);
             window.dispatchEvent(new CustomEvent('q-tick', { detail: { 
                 t: state.simTime, 

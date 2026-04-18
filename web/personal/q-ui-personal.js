@@ -1,6 +1,6 @@
-// THE QUADRATURE: GLOBAL UI MATRIX & RENDERER
+// THE QUADRATURE: PERSONAL UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase III UI Engine. Boot Sequence Purged. Spatial Routing & Sovereign Auth Badge Locked. Master Access Override & Aperture Tab Injected.
+// STATUS: Phase III UI Engine. Boot Sequence Purged. Spatial Routing & Pro User Auth Badge Locked. Master Access Override & System Home Tab Injected.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -24,16 +24,16 @@ window.injectUniversalUI = function() {
     
     // --- DUAL-STATE PATH ROUTER ---
     const path = window.location.pathname.toUpperCase();
-    const isAperture = path.includes("APERTURE") || path === "/" || path === "/INDEX.HTML" || path === "";
+    const isHome = path.includes("HOME") || path === "/" || path === "/INDEX.HTML" || path === "";
     
     const bActive = path.includes("BIO");
     const eActive = path.includes("ENV");
     const mActive = path.includes("MEC");
     const cActive = path.includes("COM");
     
-    const faceActive = (!isAperture && !bActive && !eActive && !mActive && !cActive);
+    const faceActive = (!isHome && !bActive && !eActive && !mActive && !cActive);
     
-    if (faceActive) document.body.classList.add('q-chrono-face');
+    if (faceActive) document.body.classList.add('q-control-center');
     else document.body.classList.add('q-vector-hud');
     
     // Vector Theme Colors
@@ -41,7 +41,7 @@ window.injectUniversalUI = function() {
     let micGlow = "var(--neon-cyan-dim, rgba(0,240,255,0.2))";
     let headerText = "THE QUADRATURE";
 
-    if (!isAperture) {
+    if (!isHome) {
         if (bActive) { micColor = "var(--bio-purple, #b829ff)"; micGlow = "var(--bio-purple-dim, rgba(184, 41, 255, 0.15))"; headerText = "BIOLOGICAL VECTOR"; }
         else if (eActive) { micColor = "var(--env-green, #a7ff83)"; micGlow = "var(--env-green-dim, rgba(167, 255, 131, 0.2))"; headerText = "ENVIRONMENTAL VECTOR"; }
         else if (mActive) { micColor = "var(--sys-cyan, #00f0ff)"; micGlow = "var(--neon-cyan-dim, rgba(0, 240, 255, 0.2))"; headerText = "MECHANICAL VECTOR"; }
@@ -49,16 +49,16 @@ window.injectUniversalUI = function() {
         else { micColor = "var(--chrono-amber, #B97A35)"; micGlow = "var(--chrono-amber-dim, rgba(185, 122, 53, 0.15))"; headerText = "PERSONAL QUAD"; }
     }
 
-    // OS Panel Data Colors dynamically tied to the Vector theme unless it's the Aperture Gateway
-    let osPanelColor = isAperture ? "#00f0ff" : micColor;
-    let osPanelGlow = isAperture ? "rgba(0,240,255,0.2)" : micGlow;
+    // OS Panel Data Colors dynamically tied to the Vector theme unless it's the System Home Gateway
+    let osPanelColor = isHome ? "#00f0ff" : micColor;
+    let osPanelGlow = isHome ? "rgba(0,240,255,0.2)" : micGlow;
     
     // Universal Nav Prefix logic to resolve locally and in production seamlessly
-    let navPrefix = isAperture ? "../personal/" : "";
+    let navPrefix = isHome ? "../personal/" : "";
     
     // Dynamic Corner Panel & OPT Formatting
     let panelColorsCSS = "";
-    if (isAperture) {
+    if (isHome) {
         panelColorsCSS = `.opt-oval { color: #00f0ff; text-shadow: 0 0 5px rgba(0,240,255,0.3); }`;
     } else if (faceActive) {
         panelColorsCSS = `
@@ -76,7 +76,7 @@ window.injectUniversalUI = function() {
     }
 
     // STRICT PERSISTENCE LOGIC: Bypasses state-load race condition by directly querying localStorage
-    const authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
+    const authState = localStorage.getItem('Q_PRO_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
     const authBg = authState === 'ACTIVE' ? '#39ff14' : 'transparent';
     const authColor = authState === 'ACTIVE' ? '#000' : '#ff003c';
     const authBorder = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
@@ -101,11 +101,11 @@ window.injectUniversalUI = function() {
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); --bio-purple: #b829ff; --bio-purple-dim: rgba(184, 41, 255, 0.15); 
             --bio-cobalt: #0055ff; --bio-cobalt-dim: rgba(0, 85, 255, 0.3);
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --center-gap-x: ${isAperture ? '31vh' : '36vh'}; 
-            --corner-gap-y: ${isAperture ? '24vh' : '21vh'}; 
-            --corner-gap-x: ${isAperture ? '23vh' : '32vh'};
-            --panel-w: ${isAperture ? '340px' : '460px'};
-            --panel-h: ${isAperture ? '80px' : '170px'};
+            --center-gap-x: ${isHome ? '31vh' : '36vh'}; 
+            --corner-gap-y: ${isHome ? '24vh' : '21vh'}; 
+            --corner-gap-x: ${isHome ? '23vh' : '32vh'};
+            --panel-w: ${isHome ? '340px' : '460px'};
+            --panel-h: ${isHome ? '80px' : '170px'};
         }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
@@ -116,8 +116,8 @@ window.injectUniversalUI = function() {
             position: absolute; top: 4vh; left: 0; width: 100vw;
             display: flex; justify-content: center; align-items: center; text-align: center;
             font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.8rem; letter-spacing: 16px; padding-left: 16px;
-            color: ${isAperture ? '#ffffff' : osPanelColor}; z-index: 50; pointer-events: none;
-            text-shadow: 0 0 15px ${isAperture ? 'rgba(0, 163, 255, 0.8)' : osPanelGlow}, 0 0 5px rgba(255, 255, 255, 0.5);
+            color: ${isHome ? '#ffffff' : osPanelColor}; z-index: 50; pointer-events: none;
+            text-shadow: 0 0 15px ${isHome ? 'rgba(0, 163, 255, 0.8)' : osPanelGlow}, 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
         .global-footer {
@@ -209,7 +209,7 @@ window.injectUniversalUI = function() {
         /* --- NAVBAR & SCRUBBER INJECTION --- */
         .q-nav-bar { 
             position: fixed; 
-            ${isAperture ? 'display: none !important;' : 'bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
+            ${isHome ? 'display: none !important;' : 'bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
             height: 45px; background: rgba(2, 6, 15, 0.95); 
             display: flex; justify-content: center; align-items: center; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
         }
@@ -230,7 +230,7 @@ window.injectUniversalUI = function() {
         #q-mic-fab-desktop.listening { background: ${micColor}; color: #000; box-shadow: 0 0 20px ${micColor}; animation: pulse-mic-desktop 1.5s infinite; }
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } 50% { transform: scale(1.1); box-shadow: 0 0 25px ${micColor}; } 100% { transform: scale(1); box-shadow: 0 0 10px ${micColor}; } }
         
-        .q-global-controls { position: fixed; ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
+        .q-global-controls { position: fixed; ${isHome ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
         .q-ctrl-btn { background: transparent; border: 1px solid ${osPanelColor}; color: ${osPanelColor}; padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; padding-left: 15px; white-space: nowrap; pointer-events: auto; }
         .q-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .q-ctrl-btn.active { background: ${osPanelColor}; color: #000; }
@@ -313,7 +313,7 @@ window.injectUniversalUI = function() {
                 box-sizing: border-box !important; 
                 padding: 6px 8px !important; 
                 gap: 4px !important;
-                ${isAperture ? 'display: none !important;' : 'bottom: calc(2.5vh + 65px) !important;'}
+                ${isHome ? 'display: none !important;' : 'bottom: calc(2.5vh + 65px) !important;'}
             } 
             
             #q-mic-fab { 
@@ -367,7 +367,7 @@ window.injectUniversalUI = function() {
     
     // Build Corner Panels HTML
     let panelsHTML = "";
-    if (isAperture) {
+    if (isHome) {
         panelsHTML = `
             <div class="corner-panel tl desktop-only" onclick="location.href='../personal/index.html'">
                 <div class="frost-zone"></div>
@@ -379,10 +379,10 @@ window.injectUniversalUI = function() {
                 <div class="panel-bg"></div>
                 <div class="panel-label">COMMERCIAL QUAD</div>
             </div>
-            <div class="corner-panel bl desktop-only" onclick="location.href='../physical/index.html'">
+            <div class="corner-panel bl desktop-only" onclick="if(window.Q_OmniPlanner) window.Q_OmniPlanner.openPlanner()">
                 <div class="frost-zone"></div>
                 <div class="panel-bg"></div>
-                <div class="panel-label">PHYSICAL ASSETS</div>
+                <div class="panel-label">OMNI-PLANNER</div>
             </div>
             <div class="corner-panel br desktop-only" onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()">
                 <div class="frost-zone"></div>
@@ -426,14 +426,14 @@ window.injectUniversalUI = function() {
         <div class="dust-layer-global"></div>
 
         <div class="global-header desktop-only">${headerText}</div>
-        ${isAperture ? `<div class="global-footer desktop-only">BASED IN SCIENCE BATHED IN CULTURE AND BUILT FOR THE DIGITAL AGE</div>` : ``}
+        ${isHome ? `<div class="global-footer desktop-only">BASED IN SCIENCE BATHED IN CULTURE AND BUILT FOR THE DIGITAL AGE</div>` : ``}
 
         <div class="q-nav-bar">
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
-                    <a href="${isAperture ? '#' : '../aperture/index.html'}" class="q-nav-btn" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" onclick="window.location.href=this.href; return false;">APERTURE</a>
+                    <a href="${isHome ? '#' : '../home/index.html'}" class="q-nav-btn" style="border-color: var(--chrono-amber); color: var(--chrono-amber);" onclick="window.location.href=this.href; return false;">SYSTEM HOME</a>
                     <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block; border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="window.triggerDomainShift(event)">${authText}</button>
-                    <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">CHRONO-FACE</a>
+                    <a href="${navPrefix}index.html?v=20.0" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">CONTROL CENTER</a>
                     <a href="${navPrefix}BIOVECHUD.html?v=20.0" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">BIOLOGICAL</a>
                     
                     <a href="${navPrefix}COMVECHUD.html?v=20.0" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">COMMUNAL</a>
@@ -470,7 +470,7 @@ window.injectUniversalUI = function() {
             </a>
             <a href="${navPrefix}index.html?v=20.0" class="strip-btn face-strip ${faceActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                <span class="strip-lbl">CHRONO</span>
+                <span class="strip-lbl">CTRL</span>
             </a>
             <a href="${navPrefix}ENVVECHUD.html?v=20.0" class="strip-btn env-strip ${eActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">
                 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M2 22h20L12 2z"/></svg>
@@ -587,7 +587,7 @@ window.injectUniversalUI = function() {
                 const t = e.detail.t;
                 let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
                 let cCycle = activeBlock ? activeBlock.cycle : 0;
-                let qcStr = (activeBlock && activeBlock.type === 'PYLON') ? 
+                let qcStr = (activeBlock && activeBlock.type === 'ANCHOR') ? 
                     `<span style="color:var(--chrono-amber);">QC</span> <span style="color:#fff;">${cCycle}</span> <span style="color:var(--chrono-amber);">${activeBlock.name}</span>` : 
                     `<span style="color:var(--chrono-amber);">QC</span> <span style="color:#fff;">${cCycle}</span> <span style="color:var(--chrono-amber);">Q</span><span style="color:#fff;">${qData.quad}</span> <span style="color:var(--chrono-amber);">S</span><span style="color:#fff;">${qData.sect}</span> <span style="color:var(--chrono-amber);">DAY</span> <span style="color:#fff;">${qData.day}</span>`;
                 
@@ -624,7 +624,7 @@ window.injectUniversalUI = function() {
         const qCoordWing = document.getElementById('q-coord-wing');
         
         if (qCoordWing) {
-            if (activeBlock && activeBlock.type === 'PYLON') {
+            if (activeBlock && activeBlock.type === 'ANCHOR') {
                 qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:${osPanelColor}; font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
             } else {
                 qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:${osPanelColor}; font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
@@ -639,11 +639,11 @@ window.injectUniversalUI = function() {
 // --- DOMAIN SHIFT PROTOCOL (PERSONAL) ---
 window.triggerDomainShift = function(e) {
     if(e && typeof e.preventDefault === 'function') e.preventDefault();
-    let authState = localStorage.getItem('Q_SOVEREIGN_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
+    let authState = localStorage.getItem('Q_PRO_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
     
     if(authState !== 'ACTIVE') {
         if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth();
-        else alert("OAuth Service Unavailable. Boot from Aperture Gateway.");
+        else alert("OAuth Service Unavailable. Boot from System Home Gateway.");
         return;
     }
 
@@ -651,7 +651,7 @@ window.triggerDomainShift = function(e) {
     let entitlements = [];
     try { entitlements = JSON.parse(rawEnt) || []; } catch(err) {}
 
-    let authUser = localStorage.getItem('Q_SOVEREIGN_USER') || 'GUEST';
+    let authUser = localStorage.getItem('Q_PRO_USER') || 'GUEST';
     let isLocalEnv = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:');
     
     if (isLocalEnv || authUser.toUpperCase().includes('KELBY') || authUser.toUpperCase().includes('MASTER') || localStorage.getItem('Q_ARCHITECT_MODE') === 'TRUE') {
@@ -728,7 +728,7 @@ window.openQuadrantAssignmentModal = function(quadrantId) {
     const html = `
         <div style="display:flex; flex-direction:column; gap:12px;">
             <div style="font-size:0.65rem; color:#aaa; font-family:'JetBrains Mono'; text-align:center;">
-                Assign a distinct telemetry pool to this sector of the Chrono-Face.
+                Assign a distinct telemetry pool to this sector of the Control Center.
             </div>
             <select id="quad-pool-select" style="background: rgba(0,0,0,0.8); border: 1px solid var(--theme-main, #00f0ff); color: #fff; padding: 12px; font-family: 'Orbitron'; font-size: 0.75rem; border-radius: 4px; outline: none; width: 100%;">
                 <option value="BIO">BIOLOGICAL VECTOR</option>
@@ -743,8 +743,8 @@ window.openQuadrantAssignmentModal = function(quadrantId) {
         window.Q_ModalEngine.render('DYNAMIC ROUTING: ASSIGN POOL', html, 'LOCK ASSIGNMENT', () => {
             const selected = document.getElementById('quad-pool-select').value;
             localStorage.setItem('Q_FACE_QUAD_' + quadrantId, selected);
-            if(window.Q_LOG) window.Q_LOG('STATE', 'INTERFACE', 'CHRONO_FACE_QUADRANT_REASSIGNED', { quadrant: quadrantId, pool: selected });
-            if (typeof window.refreshChronoFace === 'function') window.refreshChronoFace();
+            if(window.Q_LOG) window.Q_LOG('STATE', 'INTERFACE', 'CONTROL_CENTER_QUADRANT_REASSIGNED', { quadrant: quadrantId, pool: selected });
+            if (typeof window.refreshControlCenter === 'function') window.refreshControlCenter();
             window.Q_ModalEngine.close();
             if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
         });
@@ -836,14 +836,14 @@ window.bindMasterTickScrubber = function() {
 };
 
 window.scrubTime = function(val) {
-    if(!window.getSimState || !window.PYLON_ALPHA_DYNAMIC) return;
+    if(!window.getSimState || !window.ANCHOR_ALPHA_DYNAMIC) return;
     const saved = window.getSimState();
     const baseTime = saved.isLive ? Date.now() : saved.simTime;
-    const currentDays = (baseTime - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+    const currentDays = (baseTime - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
     const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
     const discreteDays = parseInt(val, 10);
     
-    const targetMs = window.PYLON_ALPHA_DYNAMIC + ((cycleBaseDays + discreteDays) * window.MS_DAY);
+    const targetMs = window.ANCHOR_ALPHA_DYNAMIC + ((cycleBaseDays + discreteDays) * window.MS_DAY);
     const d = new Date(targetMs);
     d.setUTCHours(12, 0, 0, 0);
     
@@ -883,8 +883,8 @@ window.syncScrubberUI = function() {
         liveBtn.innerText = state.isLive ? "LIVE" : "RESYNC";
     }
     
-    if(scrubber && state.isLive === false && window.PYLON_ALPHA_DYNAMIC) {
-        let daysElapsed = (state.simTime - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+    if(scrubber && state.isLive === false && window.ANCHOR_ALPHA_DYNAMIC) {
+        let daysElapsed = (state.simTime - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
         let cycleDay = Math.floor(daysElapsed % 365.24219);
         if (cycleDay < 0) cycleDay += 365;
         scrubber.value = cycleDay;

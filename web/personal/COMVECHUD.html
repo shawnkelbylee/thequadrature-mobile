@@ -7,11 +7,11 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // COMMUNAL VECTOR</title>
-    <script src="./q-ui-global.js?v=22.0"></script>
-    <script src="../q-core.js?v=22.0"></script>
-    <script src="../q-ui-planner.js?v=22.0"></script>
-    <script src="../q-hub.js?v=22.0"></script>
-    <script src="../q-plugin-zodiacal.js?v=22.0"></script>
+    <script src="./q-ui-personal.js?v=22.1"></script>
+    <script src="../q-core.js?v=22.1"></script>
+    <script src="../q-ui-planner.js?v=22.1"></script>
+    <script src="../q-hub.js?v=22.1"></script>
+    <script src="../q-plugin-zodiacal.js?v=22.1"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
@@ -103,7 +103,7 @@
         .node-hol { color: #ff66b2; border-color: rgba(255,102,178,0.3); box-shadow: inset 0 0 10px rgba(255,102,178,0.2); }
         .node-sys { color: #00f0ff; border-color: rgba(0,240,255,0.3); box-shadow: inset 0 0 10px rgba(0,240,255,0.2); }
         .node-cluster { color: #000; background: var(--gold-bright); border-color: var(--gold-bright); box-shadow: 0 0 15px var(--gold-bright); font-weight: 900; font-family:'JetBrains Mono'; }
-        .node-pyl { color: var(--gold-bright); border-color: var(--gold-bright); box-shadow: inset 0 0 10px var(--gold-dim); font-size: 1rem; z-index: 32; }
+        .node-anc { color: var(--gold-bright); border-color: var(--gold-bright); box-shadow: inset 0 0 10px var(--gold-dim); font-size: 1rem; z-index: 32; }
 
         .event-label { position: absolute; font-family: 'JetBrains Mono'; font-size: 0.6rem; width: auto; white-space: nowrap; text-align: center; margin-top: 25px; transition: 0.3s; opacity: 0; font-weight: 700; color: var(--platinum); text-shadow: 0 0 8px #000, 0 0 15px var(--brass); background: rgba(0,0,0,0.8); border: 1px solid rgba(255,215,0,0.3); padding: 4px 8px; border-radius: 4px; pointer-events: none; z-index: 50; }
         .event-node:hover { transform: scale(1.6); border-color: #fff; box-shadow: 0 0 25px #fff; z-index: 60; }
@@ -155,7 +155,7 @@
         let activeZodiac = localStorage.getItem('q_zodiac_visible') !== 'false';
 
         let activeHolidays = true;
-        let activePylons = true;
+        let activeAnchors = true;
         let activeSys = true;
         
         let ISL_DB = [];
@@ -260,13 +260,13 @@
 
         function toggleVisibility(type, btn) {
             if(type === 'hol') { activeHolidays = !activeHolidays; btn.classList.toggle('active', activeHolidays); }
-            if(type === 'pyl') { activePylons = !activePylons; btn.classList.toggle('active', activePylons); }
+            if(type === 'anc') { activeAnchors = !activeAnchors; btn.classList.toggle('active', activeAnchors); }
             if(type === 'sys') { activeSys = !activeSys; btn.classList.toggle('active', activeSys); }
             renderDynamicRing();
         }
 
         function recalculateDynamicHolidays(year) {
-            if (!window.PYLON_ALPHA_DYNAMIC) return;
+            if (!window.ANCHOR_ALPHA_DYNAMIC) return;
             const yearDiff = year - 2026;
             const shiftDays = yearDiff * -10.87; 
             
@@ -281,7 +281,7 @@
             ];
 
             ISL_DB.forEach(ev => {
-                let diff = ev.time - window.PYLON_ALPHA_DYNAMIC;
+                let diff = ev.time - window.ANCHOR_ALPHA_DYNAMIC;
                 let days = diff / window.MS_DAY;
                 ev.coord = window.getOrbitalData(days).meanArc;
             });
@@ -379,7 +379,7 @@
         }
 
         function renderDynamicRing() {
-            if(!window.PYLON_ALPHA_DYNAMIC || !window.Q_REGISTRY) return; 
+            if(!window.ANCHOR_ALPHA_DYNAMIC || !window.Q_REGISTRY) return; 
             const nodeLayer = document.getElementById('node-layer');
             nodeLayer.innerHTML = ''; 
             
@@ -414,7 +414,7 @@
             if(savedDob) {
                 const dobParts = savedDob.split('-');
                 let y = parseInt(dobParts[0]); let m = parseInt(dobParts[1]) - 1; let d = parseInt(dobParts[2]);
-                const dobTimeMs = Date.UTC(y, m, d, 0, 0); let diff = dobTimeMs - window.PYLON_ALPHA_DYNAMIC;
+                const dobTimeMs = Date.UTC(y, m, d, 0, 0); let diff = dobTimeMs - window.ANCHOR_ALPHA_DYNAMIC;
                 let pArc = (((diff / window.MS_DAY) / 365.24219) * 360) % 360;
                 if (pArc < 0) pArc += 360;
                 
@@ -445,10 +445,10 @@
                 renderNodes(fannedOuter, nodeLayer, 42.5);
             }
             
-            if (activePylons) {
-                let visiblePylons = window.Q_REGISTRY.PYLONS.filter(p => p.renderUI !== false);
-                let fannedPylons = applyFanning(visiblePylons);
-                renderNodes(fannedPylons, nodeLayer, 35);
+            if (activeAnchors) {
+                let visibleAnchors = window.Q_REGISTRY.ANCHORS.filter(p => p.renderUI !== false);
+                let fannedAnchors = applyFanning(visibleAnchors);
+                renderNodes(fannedAnchors, nodeLayer, 35);
             }
 
             if (activeIntrospection) {
@@ -518,12 +518,12 @@
                     <label style="font-size:0.6rem; color:rgba(255,255,255,0.6); display:block; margin-bottom:8px; text-align:center;">NODE VISIBILITY TOGGLES</label>
                     <div style="display:flex; justify-content:space-around;">
                         <button class="opt-btn ${activeHolidays ? 'active' : ''}" onclick="toggleVisibility('hol', this)" id="btn-hol">HOLIDAYS</button>
-                        <button class="opt-btn ${activePylons ? 'active' : ''}" onclick="toggleVisibility('pyl', this)" id="btn-pyl">PYLONS</button>
+                        <button class="opt-btn ${activeAnchors ? 'active' : ''}" onclick="toggleVisibility('anc', this)" id="btn-anc">ANCHORS</button>
                         <button class="opt-btn ${activeSys ? 'active' : ''}" onclick="toggleVisibility('sys', this)" id="btn-sys">SYS MARKS</button>
                     </div>
                 </div>`;
             } else if(target === 'int') {
-                title = `SOVEREIGN DIARY`;
+                title = `PRO USER DIARY`;
                 const savedData = localStorage.getItem('q_journal_' + activeTermName) || ""; 
                 const activeTheme = window.Q_REGISTRY.SOLAR_TERMS.find(t => t.name === activeTermName)?.theme || "";
                 html = `<div style="color:var(--gold-bright); font-size:0.7rem; font-family:'Orbitron';">TERM: ${activeTermName.toUpperCase()}</div>
@@ -535,7 +535,7 @@
         }
 
         function openNodeModal(eventObj) {
-            if(!window.PYLON_ALPHA_DYNAMIC) return;
+            if(!window.ANCHOR_ALPHA_DYNAMIC) return;
             currentNodeFocus = eventObj.name;
             currentOptTarget = 'node';
 
@@ -543,11 +543,11 @@
             if (eventObj.time) { pTime = eventObj.time; }
             else {
                 const pDays = (eventObj.coord / 360) * 365.24219;
-                pTime = window.PYLON_ALPHA_DYNAMIC + (pDays * window.MS_DAY);
+                pTime = window.ANCHOR_ALPHA_DYNAMIC + (pDays * window.MS_DAY);
             }
 
             const formatted = window.formatLegacyDate(pTime);
-            const nData = window.getOrbitalData((pTime - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY);
+            const nData = window.getOrbitalData((pTime - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY);
 
             let descType = "Communal integration point.";
             if(eventObj.type.includes('jud')) descType = "Hebrew structural anchor.";
@@ -556,7 +556,7 @@
             if(eventObj.type.includes('civ')) descType = "Static Civil observance matrix.";
             if(eventObj.type.includes('hin') || eventObj.type.includes('bud') || eventObj.type.includes('tao')) descType = "Eastern Traditional alignment node.";
             if(eventObj.type.includes('hol')) descType = "Societal Holiday resonance marker.";
-            if(eventObj.type.includes('pyl')) descType = "Quadrature Physics cardinal anchor.";
+            if(eventObj.type.includes('anc')) descType = "Quadrature Physics cardinal anchor.";
             if(eventObj.type.includes('sys')) descType = "Systematic Civil/Financial checkpoint.";
 
             const savedNote = localStorage.getItem('q_note_' + eventObj.name) || "";
@@ -594,8 +594,10 @@
             if (savedAnchor !== 'NONE') {
                 const signNames = ['CAPRICORN','AQUARIUS','PISCES','ARIES','TAURUS','GEMINI','CANCER','LEO','VIRGO','LIBRA','SCORPIO','SAGITTARIUS'];
                 let natalIndex = signNames.indexOf(savedAnchor);
-                let currentIndex = Math.floor(window.CURRENT_TRUE_ARC / 30);
-                let diff = Math.abs(clickedIndex - natalIndex);
+                
+                // CRITICAL FIX: Base aspect calculations on current global true arc, not just clicked sign index.
+                let currentGlobalIndex = Math.floor(window.CURRENT_TRUE_ARC / 30);
+                let diff = Math.abs(currentGlobalIndex - natalIndex);
                 if (diff > 6) diff = 12 - diff; 
                 
                 let aspect = ""; let aspectDesc = "";
@@ -628,7 +630,7 @@
         }
         
         function syncToPlanner(absoluteTimeMs, prefix, content) {
-            if(!window.PYLON_ALPHA_DYNAMIC || !absoluteTimeMs) return; 
+            if(!window.ANCHOR_ALPHA_DYNAMIC || !absoluteTimeMs) return; 
             const pDate = new Date(absoluteTimeMs);
             const y = pDate.getFullYear();
             const mo = (pDate.getMonth()+1).toString().padStart(2,'0');
@@ -687,10 +689,10 @@
                 if(ev) {
                     let absoluteTimeMs = ev.time;
                     if (!absoluteTimeMs) {
-                        const currentDays = (Date.now() - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+                        const currentDays = (Date.now() - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
                         const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
                         const evDays = cycleBaseDays + (ev.coord / (360 / 365.24219));
-                        absoluteTimeMs = window.PYLON_ALPHA_DYNAMIC + (evDays * window.MS_DAY);
+                        absoluteTimeMs = window.ANCHOR_ALPHA_DYNAMIC + (evDays * window.MS_DAY);
                     }
                     syncToPlanner(absoluteTimeMs, ev.name.toUpperCase(), nText);
                 }
@@ -701,55 +703,6 @@
         window.addEventListener('q-tick', (e) => {
             const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
             
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(tk => { out += `<span style="${/[0-9]/.test(tk) ? numStyle : letterStyle}">${tk}</span>`; });
-                }
-                return out;
-            }
-            
-            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
-            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
-
-            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
-            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-            
-            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
-            if (meanDegEl) { 
-                meanDegEl.innerText = qData.meanArc.toFixed(2) + "°";
-                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-            
-            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
-            if (trueDegEl) { 
-                trueDegEl.innerText = qData.trueArc.toFixed(2) + "°";
-                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
-            
-            let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-            let smNumStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-            
-            if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
-                } else {
-                    let cCycle = activeBlock ? activeBlock.cycle : 0;
-                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
-                }
-            }
-
             if (activeTime.getUTCFullYear() !== currentRenderedYear || document.getElementById('node-layer').children.length === 0) {
                 currentRenderedYear = activeTime.getUTCFullYear();
                 recalculateDynamicHolidays(currentRenderedYear);

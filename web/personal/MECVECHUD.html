@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>THE QUADRATURE // MECHANICAL VECTOR</title>
-    <script src="./q-ui-global.js?v=22.7"></script>
-<script src="../q-core.js?v=22.7"></script>
-<script src="../q-ui-planner.js?v=22.7"></script>
-<script src="../q-hub.js?v=22.7"></script>
+    <script src="./q-ui-personal.js?v=22.8"></script>
+    <script src="../q-core.js?v=22.8"></script>
+    <script src="../q-ui-planner.js?v=22.8"></script>
+    <script src="../q-hub.js?v=22.8"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
 
@@ -148,10 +148,10 @@
         <div class="gear gear-outer">
             <div class="orbital-marker marker-peri" onmouseover="showNeedleHUD('PERIHELION (14.00°): Maximum orbital velocity. True Ellipse acceleration.', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()"></div>
             <div class="orbital-marker marker-aph" onmouseover="showNeedleHUD('APHELION (194.00°): Minimum orbital velocity. True Ellipse deceleration.', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()"></div>
-            <div class="globe silver-globe p-alpha" onmouseover="showNeedleHUD('ALPHA: WINTER SOLSTICE (0.000°)', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()" onclick="openPylonModal('ALPHA')" ontouchstart="event.stopPropagation(); openPylonModal('ALPHA'); event.preventDefault();"></div>
-            <div class="globe gold-globe p-beta" onmouseover="showNeedleHUD('BETA: VERNAL EQUINOX (90.000°)', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()" onclick="openPylonModal('BETA')" ontouchstart="event.stopPropagation(); openPylonModal('BETA'); event.preventDefault();"></div>
-            <div class="globe silver-globe p-gamma" onmouseover="showNeedleHUD('GAMMA: SUMMER SOLSTICE (180.000°)', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()" onclick="openPylonModal('GAMMA')" ontouchstart="event.stopPropagation(); openPylonModal('GAMMA'); event.preventDefault();"></div>
-            <div class="globe gold-globe p-delta" onmouseover="showNeedleHUD('DELTA: AUTUMNAL EQUINOX (270.000°)', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()" onclick="openPylonModal('DELTA')" ontouchstart="event.stopPropagation(); openPylonModal('DELTA'); event.preventDefault();"></div>
+            <div class="globe silver-globe p-alpha" onmouseover="showNeedleHUD('ALPHA: WINTER SOLSTICE (0.000°)', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('ALPHA')" ontouchstart="event.stopPropagation(); openAnchorModal('ALPHA'); event.preventDefault();"></div>
+            <div class="globe gold-globe p-beta" onmouseover="showNeedleHUD('BETA: VERNAL EQUINOX (90.000°)', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('BETA')" ontouchstart="event.stopPropagation(); openAnchorModal('BETA'); event.preventDefault();"></div>
+            <div class="globe silver-globe p-gamma" onmouseover="showNeedleHUD('GAMMA: SUMMER SOLSTICE (180.000°)', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('GAMMA')" ontouchstart="event.stopPropagation(); openAnchorModal('GAMMA'); event.preventDefault();"></div>
+            <div class="globe gold-globe p-delta" onmouseover="showNeedleHUD('DELTA: AUTUMNAL EQUINOX (270.000°)', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('DELTA')" ontouchstart="event.stopPropagation(); openAnchorModal('DELTA'); event.preventDefault();"></div>
         </div>
         <div class="gear gear-mid" id="kepler-ring"></div>
         <div class="gear gear-inner"></div>
@@ -205,9 +205,9 @@
                 quadBIO.innerHTML = `
                     <div class="panel-data-wrapper">
                         <div class="v-head">ORBITAL POSITION</div>
-                        <div class="t-row"><span>NEXT PYLON:</span> <span class="val-sm" id="next-pylon">--</span></div>
-                        <div class="t-row"><span>DRIFT TO PYLON:</span> <span class="val-sm" id="drift-to-pylon">--</span></div>
-                        <div class="t-row"><span>PYLON DURATION:</span> <span class="val-sm" id="pylon-duration">--</span></div>
+                        <div class="t-row"><span>NEXT ANCHOR:</span> <span class="val-sm" id="next-anchor">--</span></div>
+                        <div class="t-row"><span>DRIFT TO ANCHOR:</span> <span class="val-sm" id="drift-to-anchor">--</span></div>
+                        <div class="t-row"><span>ANCHOR DURATION:</span> <span class="val-sm" id="anchor-duration">--</span></div>
                         <div class="t-row"><span>ATOMIC FREQUENCY:</span> <span class="val-sm" id="atomic-sync-val">SYNCED</span></div>
                         <div style="width:100%; height:3px; background:#000; margin-top:2px; border:1px solid var(--core-dim);">
                             <div id="macro-bar" style="height:100%; width:0%; background:var(--cyan-glow); box-shadow:0 0 8px var(--cyan-glow); transition: width 0.3s;"></div>
@@ -254,7 +254,7 @@
                         <div class="v-head">CIVIL TIME LAG</div>
                         <div class="t-row"><span>STANDARDIZED INTERVAL:</span> <span class="val-sm" id="si-lock">ACTIVE</span></div>
                         <div class="val-display" style="padding:2px 8px; margin-bottom:2px;"><div id="nano-counter" style="font-size:0.8rem; text-align:right; color:var(--cyan-glow); font-family:'Orbitron'; font-weight:900;">0.000000000</div></div>
-                        <div class="t-row"><span>GREGORIAN SMEAR (ENTROPY):</span></div>
+                        <div class="t-row"><span>ORBITAL VELOCITY VARIANCE:</span></div>
                         <div class="smear-container">
                             <div class="smear-wave"></div>
                             <div class="smear-val" id="smear-val">+ 0.0000000000</div>
@@ -311,7 +311,7 @@
                 title = "DUAL-STATE TELEMETRY";
                 html = `
                     <div style="text-align: center;">
-                        <div style="font-size: 0.65rem; color: var(--steel); margin-bottom: 15px;">MAPPING THE KEPLERIAN SMEAR</div>
+                        <div style="font-size: 0.65rem; color: var(--steel); margin-bottom: 15px;">MAPPING THE VELOCITY VARIANCE</div>
                         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--titanium); padding-bottom: 15px; margin-bottom: 15px;">
                             <div style="display:flex; flex-direction:column; align-items:center; width: 45%;">
                                 <span style="font-family:'Orbitron'; font-size:0.55rem; color:var(--cyan-glow); margin-bottom: 4px;">MEAN CIRCLE (CIVIL)</span>
@@ -333,7 +333,7 @@
             } else if (target === 'thermo') {
                 let iconStr = "⛨", statusStr = "THERMODYNAMICS STABLE", descStr = "Orbital arc in optimal transit window.";
                 if(currentRadarStatus === 'THERMODYNAMIC FRICTION') {
-                    iconStr = "🌪"; statusStr = "THERMODYNAMIC FRICTION"; descStr = "Approaching Cardinal Node. Thermodynamic friction elevated.";
+                    iconStr = "🌪"; statusStr = "THERMODYNAMIC FRICTION"; descStr = "Approaching Seasonal Node. Thermodynamic friction elevated.";
                 } else if(currentRadarStatus === 'THERMAL SPIKE') {
                     iconStr = "⚡"; statusStr = "THERMAL SPIKE DETECTED"; descStr = "Approaching inter-quadrant threshold.";
                 }
@@ -357,7 +357,7 @@
                         </select>
                     </div>
                     <div style="margin-top: 10px;">
-                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">SMEAR RESOLUTION</label>
+                        <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">VARIANCE RESOLUTION</label>
                         <select id="opt-resolution" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
                             <option value="HIGH" ${smearResolution==='HIGH'?'selected':''}>HIGH (NANOSECONDS)</option>
                             <option value="LOW" ${smearResolution==='LOW'?'selected':''}>LOW (MILLISECONDS)</option>
@@ -382,101 +382,41 @@
             window.Q_ModalEngine.close();
         }
 
-        function openPylonModal(node) {
-            let pylonObj = window.Q_REGISTRY.PYLONS.find(p => p.name.toUpperCase().includes(node));
-            if(!pylonObj) return;
+        function openAnchorModal(node) {
+            let anchorObj = window.Q_REGISTRY.ANCHORS.find(a => a.name.toUpperCase().includes(node));
+            if(!anchorObj) return;
 
-            let pName = pylonObj.name.toUpperCase();
-            let pEvent = pylonObj.event;
-            let pDesc = pylonObj.desc;
-            let pDegree = pylonObj.coord.toFixed(3) + '°';
+            let aName = anchorObj.name.toUpperCase();
+            let aEvent = anchorObj.event;
+            let aDesc = anchorObj.desc;
+            let aDegree = anchorObj.coord.toFixed(3) + '°';
             
-            let pTime = window.PYLON_ALPHA_DYNAMIC;
+            let aTime = window.ANCHOR_ALPHA_DYNAMIC;
             if (node !== 'ALPHA') {
-                const currentDays = (Date.now() - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY;
+                const currentDays = (Date.now() - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
                 const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
-                const targetDays = cycleBaseDays + (pylonObj.coord / (360 / 365.24219));
-                pTime = window.PYLON_ALPHA_DYNAMIC + (targetDays * window.MS_DAY);
+                const targetDays = cycleBaseDays + (anchorObj.coord / (360 / 365.24219));
+                aTime = window.ANCHOR_ALPHA_DYNAMIC + (targetDays * window.MS_DAY);
             }
             
-            const formatted = window.formatLegacyDate(pTime);
-            let durHours = (pylonObj.duration / 3600000).toFixed(4);
+            const formatted = window.formatLegacyDate(aTime);
+            let durHours = (anchorObj.duration / 3600000).toFixed(4);
 
             const html = `
-                <div style="font-family:'Orbitron'; color:var(--cyan-glow); font-size:0.8rem; margin-bottom:5px;">${pEvent}</div>
-                <div style="font-size:0.6rem; color:var(--steel); border-bottom:1px solid var(--cyan-glow); padding-bottom:10px; margin-bottom:10px;">${pDesc}<br><br><span style="color:var(--cyan-glow);">SETTLEMENT GEAR DURATION: ${durHours} HOURS</span></div>
+                <div style="font-family:'Orbitron'; color:var(--cyan-glow); font-size:0.8rem; margin-bottom:5px;">${aEvent}</div>
+                <div style="font-size:0.6rem; color:var(--steel); border-bottom:1px solid var(--cyan-glow); padding-bottom:10px; margin-bottom:10px;">${aDesc}<br><br><span style="color:var(--cyan-glow);">SETTLEMENT GEAR DURATION: ${durHours} HOURS</span></div>
                 <div class="data-grid" style="border-top:none; padding-top:0;">
                     <div class="data-col"><span class="data-lbl">Q COORDINATE</span><span class="data-val data-val-cy">Q${node==='ALPHA'?1:node==='BETA'?2:node==='GAMMA'?3:4} S1 DAY 1</span></div>
-                    <div class="data-col"><span class="data-lbl">TRUE ELLIPSE</span><span class="data-val data-val-cy">${pDegree}</span></div>
+                    <div class="data-col"><span class="data-lbl">TRUE ELLIPSE</span><span class="data-val data-val-cy">${aDegree}</span></div>
                     <div class="data-col"><span class="data-lbl">LEGACY DATE</span><span class="data-val">${formatted.dateStr}</span></div>
                     <div class="data-col"><span class="data-lbl">LEGACY TIME</span><span class="data-val">${formatted.timeStr}</span></div>
                 </div>
             `;
-            window.Q_ModalEngine.render('PYLON PROTOCOL', html, 'CLOSE PROTOCOL');
+            window.Q_ModalEngine.render('SEASONAL ANCHOR PROTOCOL', html, 'CLOSE PROTOCOL');
         }
 
         window.addEventListener('q-tick', (e) => {
             const { t, isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
-            
-            // Utility function to format legacy strings (grey letters/symbols, cyan numbers)
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--steel); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(token => {
-                        if (/[0-9]/.test(token)) {
-                            out += `<span style="${numStyle}">${token}</span>`;
-                        } else {
-                            out += `<span style="${letterStyle}">${token}</span>`;
-                        }
-                    });
-                }
-                return out;
-            }
-
-            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
-            if (legDateEl) {
-                legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
-            }
-
-            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
-            if (legTimeEl) {
-                legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-            }
-
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
-            
-            let smLetterStyle = "color:var(--steel); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-            let smNumStyle = "color:var(--theme-main); font-size:1.1rem; font-weight:bold;";
-            
-            if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--theme-dim);">${activeBlock.name}</span>`;
-                } else {
-                    let cCycle = activeBlock ? activeBlock.cycle : 0;
-                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
-                }
-            }
-
-            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
-            if (meanDegEl) { 
-                meanDegEl.innerText = qData.meanArc.toFixed(4) + "°";
-                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-            
-            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
-            if (trueDegEl) { 
-                trueDegEl.innerText = qData.trueArc.toFixed(4) + "°";
-                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
             
             // --- DYNAMIC Q-DELTA DIAMOND & RING SHIFT ---
             const diamondArm = document.getElementById('transit-diamond-arm');
@@ -491,8 +431,6 @@
             // Interpolate color phase (1 = Perihelion/Red-Magenta, 0 = Aphelion/Blue-Cyan)
             let phase = (Math.cos(radDist) + 1) / 2;
             
-            // Magenta: 255, 0, 60
-            // Cyan: 0, 240, 255
             let r = Math.round(0 + (255 - 0) * phase);
             let g = Math.round(240 + (0 - 240) * phase);
             let b = Math.round(255 + (60 - 255) * phase);
@@ -530,7 +468,6 @@
                 earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
             }
 
-            // MODAL DUAL-STATE DATA HOOK FIX
             const modalTitle = document.getElementById('q-modal-title');
             if (modalTitle && modalTitle.innerText === 'DUAL-STATE TELEMETRY') {
                 const telMean = document.getElementById('tel-mean');
@@ -541,45 +478,45 @@
                 }
             }
 
-            // Asymmetrical Pylon Detection logic including Epsilon Phase
-            let pylonName = "ALPHA";
-            let progressToPylon = 0;
+            // Asymmetrical Anchor Detection logic
+            let anchorName = "ALPHA";
+            let progressToAnchor = 0;
             let driftDeg = 0;
-            let pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.ALPHA : 86400000;
+            let anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.ALPHA : 86400000;
             
             if (qData.trueArc >= 0 && qData.trueArc < 90) { 
-                pylonName = "BETA"; 
+                anchorName = "BETA"; 
                 driftDeg = 90 - qData.trueArc;
-                progressToPylon = (qData.trueArc / 90) * 100; 
-                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.BETA : 84600000;
+                progressToAnchor = (qData.trueArc / 90) * 100; 
+                anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.BETA : 84600000;
             } else if (qData.trueArc >= 90 && qData.trueArc < 180) { 
-                pylonName = "GAMMA"; 
+                anchorName = "GAMMA"; 
                 driftDeg = 180 - qData.trueArc;
-                progressToPylon = ((qData.trueArc - 90) / 90) * 100; 
-                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.GAMMA : 89662680;
+                progressToAnchor = ((qData.trueArc - 90) / 90) * 100; 
+                anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.GAMMA : 89662680;
             } else if (qData.trueArc >= 180 && qData.trueArc < 270) { 
-                pylonName = "DELTA"; 
+                anchorName = "DELTA"; 
                 driftDeg = 270 - qData.trueArc;
-                progressToPylon = ((qData.trueArc - 180) / 90) * 100; 
-                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.DELTA : 102599640;
+                progressToAnchor = ((qData.trueArc - 180) / 90) * 100; 
+                anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.DELTA : 102599640;
             } else { 
-                pylonName = "EPSILON"; 
+                anchorName = "EPSILON"; 
                 driftDeg = 360 - qData.trueArc;
-                progressToPylon = ((qData.trueArc - 270) / 90) * 100; 
-                pylonDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.EPSILON : 89662680;
+                progressToAnchor = ((qData.trueArc - 270) / 90) * 100; 
+                anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.EPSILON : 89662680;
             }
             
-            const nextPylonEl = document.getElementById('next-pylon');
-            if (nextPylonEl) nextPylonEl.innerText = pylonName;
+            const nextAnchorEl = document.getElementById('next-anchor');
+            if (nextAnchorEl) nextAnchorEl.innerText = anchorName;
             
-            const driftEl = document.getElementById('drift-to-pylon');
+            const driftEl = document.getElementById('drift-to-anchor');
             if (driftEl) driftEl.innerText = driftDeg.toFixed(2) + "° REMAINING";
             
-            const durEl = document.getElementById('pylon-duration');
-            if (durEl) durEl.innerText = (pylonDurMs / 3600000).toFixed(4) + "h";
+            const durEl = document.getElementById('anchor-duration');
+            if (durEl) durEl.innerText = (anchorDurMs / 3600000).toFixed(4) + "h";
             
             const macroBar = document.getElementById('macro-bar');
-            if (macroBar) macroBar.style.width = `${progressToPylon}%`;
+            if (macroBar) macroBar.style.width = `${progressToAnchor}%`;
             
             let symLoss = Math.abs(qData.delta) / 180 * 100; 
             let symLossEl = document.getElementById('sym-loss');

@@ -1,9 +1,10 @@
 // THE QUADRATURE: ZODIACAL ENGINE PLUGIN (OPT-IN METAPHYSICAL OVERLAY)
 // Architect: Kelby | Engineer: Kairos
 // PROTOCOL: Swiss Ephemeris Routing, Natal Anchor Matrix, and Autonomous State Persistence
+// REVISION: 1.1.1-AUTONOMOUS - Fixed Handshake Lag & Hydration Sequence
 
 window.Q_Plugin_Zodiacal = {
-    version: "1.1.0-AUTONOMOUS",
+    version: "1.1.1-AUTONOMOUS",
     engineState: "STANDBY",
     ephemerisCache: null,
 
@@ -27,16 +28,17 @@ window.Q_Plugin_Zodiacal = {
         this.engineState = "INITIALIZING";
         if(window.Q_LOG) window.Q_LOG('INFO', 'PLUGIN', 'ZODIACAL_ENGINE_BOOT_SEQUENCE_INITIATED');
         
-        // Verify Entitlements before mounting
+        // 1. Initialize Autonomous Persistence Bridge FIRST to hydrate local memory from Cloud
+        // This resolves the "Handshake Lag" for the Architect on new devices.
+        await this.StateHydrationBridge.mount();
+
+        // 2. Verify Entitlements AFTER hydration is complete
         const ents = localStorage.getItem('Q_ENTITLEMENTS');
-        if (!ents || (!ents.includes('RESONANT') && !ents.includes('SOVEREIGN') && !ents.includes('SYNDICATE'))) {
+        if (!ents || (!ents.includes('RESONANT') && !ents.includes('PRO') && !ents.includes('TEAM'))) {
             if(window.Q_LOG) window.Q_LOG('ERROR', 'PLUGIN', 'ENTITLEMENT_FAILED_ZODIACAL_LOCKED');
             this.engineState = "LOCKED";
             return false;
         }
-
-        // Initialize Autonomous Persistence Bridge
-        await this.StateHydrationBridge.mount();
 
         this.SwissEphemerisBridge.connect();
         this.engineState = "ACTIVE";
@@ -59,13 +61,13 @@ window.Q_Plugin_Zodiacal = {
                 window.Q_STATE.metaphysical_layer.zodiac_visible = localVis;
             }
 
-            // 2. Cloud Hydration Sync
+            // 2. Cloud Hydration Sync (Supabase Handshake)
             if (window.supabaseClient) {
                 const { data: session } = await window.supabaseClient.auth.getSession();
                 if (session?.session?.user) {
                     try {
                         const { data } = await window.supabaseClient
-                            .from('sovereign_identity')
+                            .from('pro_identity')
                             .select('natal_anchor')
                             .eq('user_id', session.session.user.id)
                             .single();
@@ -100,7 +102,7 @@ window.Q_Plugin_Zodiacal = {
                         if (session?.session?.user) {
                             let payload = { user_id: session.session.user.id };
                             payload[key] = value;
-                            const targetTable = key === 'natal_anchor' ? 'sovereign_identity' : 'system_state';
+                            const targetTable = key === 'natal_anchor' ? 'pro_identity' : 'system_state';
                             
                             window.supabaseClient.from(targetTable)
                                 .upsert(payload, { onConflict: 'user_id' })
@@ -118,10 +120,9 @@ window.Q_Plugin_Zodiacal = {
 
     SwissEphemerisBridge: {
         connect: function() {
-            // Simulated connection to Swiss Ephemeris API for high-fidelity planetary coordinates
             if(window.Q_LOG) window.Q_LOG('INFO', 'EPHEMERIS', 'ESTABLISHING_SWISS_EPHEMERIS_DATALINK');
             
-            // Mocking the ingestion of live astronomical positions
+            // Mocking the ingestion of live astronomical positions (Proxy for actual API)
             window.Q_Plugin_Zodiacal.ephemerisCache = {
                 timestamp: Date.now(),
                 transits: {
@@ -149,8 +150,6 @@ window.Q_Plugin_Zodiacal = {
             const sign = window.Q_STATE.metaphysical_layer.natal_anchor;
             if (!sign || sign === "NONE") return null;
             
-            // For precision, a full system would require exact birth time/location to calculate exact degree.
-            // Defaulting to the base degree of the sign for baseline matrix functionality.
             return window.Q_Plugin_Zodiacal.ZODIAC_MAP[sign];
         },
 
@@ -159,6 +158,10 @@ window.Q_Plugin_Zodiacal = {
             if (anchorDegree === null) {
                 if(window.Q_LOG) window.Q_LOG('WARN', 'METAPHYSICS', 'NO_NATAL_ANCHOR_DEFINED');
                 return null;
+            }
+
+            if (!window.Q_Plugin_Zodiacal.ephemerisCache) {
+                window.Q_Plugin_Zodiacal.SwissEphemerisBridge.connect();
             }
 
             const activeAspects = [];
@@ -186,7 +189,6 @@ window.Q_Plugin_Zodiacal = {
 
     ResonanceDiscoveryProtocol: {
         scanP2PNetwork: function(targetDistanceRadius) {
-            // This protocol simulates scanning the Supabase user network for geometric harmonic overlaps.
             if(window.Q_LOG) window.Q_LOG('INFO', 'NETWORK', 'INITIATING_RESONANCE_DISCOVERY_SCAN');
             
             const myAnchor = window.Q_Plugin_Zodiacal.NatalAnchorMatrix.getUserAnchor();
@@ -218,7 +220,6 @@ window.Q_Plugin_Zodiacal = {
         },
 
         initiateHighResonanceSprint: function(nodeId) {
-            // Logic to bridge two users whose Ultradian flows and Zodiacal transits align
             if(window.Q_LOG) window.Q_LOG('EXEC', 'NETWORK', `ESTABLISHING_SPRINT_BRIDGE_WITH_${nodeId}`);
             // Injects into active Q-Core planner as a synchronized event
             return true;
@@ -229,9 +230,9 @@ window.Q_Plugin_Zodiacal = {
 // Auto-initialize if running in an environment where Q_STATE is already mounted
 if (typeof window !== 'undefined') {
     setTimeout(() => {
-        if (window.Q_STATE && window.Q_STATE.persistence.auth_status === 'SOVEREIGN_AUTHENTICATED') {
+        if (window.Q_STATE && window.Q_STATE.persistence.auth_status === 'PRO_AUTHENTICATED') {
             window.Q_Plugin_Zodiacal.init();
         }
     }, 1000);
 }
-// EOF: q-plugin-zodiacal.js
+// EOF: plugin-zodiacal.js

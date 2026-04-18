@@ -7,10 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // ENVIRONMENTAL VECTOR</title>
-    <script src="./q-ui-global.js?v=22.4"></script>
-<script src="../q-core.js?v=22.4"></script>
-<script src="../q-ui-planner.js?v=22.4"></script>
-<script src="../q-hub.js?v=22.4"></script>
+    <script src="./q-ui-personal.js?v=22.5"></script>
+<script src="../q-core.js?v=22.5"></script>
+<script src="../q-ui-planner.js?v=22.5"></script>
+<script src="../q-hub.js?v=22.5"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
@@ -119,9 +119,9 @@
         .perihelion-marker .astro-tooltip { border-color: var(--perihelion-mag); top: 20px; left: 20px; }
         .aphelion-marker .astro-tooltip { border-color: var(--atmos-blue); bottom: 20px; right: 20px; }
 
-        .earth-pylon-container { position: absolute; width: 64px; height: 64px; margin-left: -32px; margin-top: -32px; z-index: 40; }
+        .earth-anchor-container { position: absolute; width: 64px; height: 64px; margin-left: -32px; margin-top: -32px; z-index: 40; }
         .earth-axis { position: absolute; width: 2px; height: 140%; top: -20%; left: 50%; margin-left: -1px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.8) 80%, transparent); z-index: 1; box-shadow: 0 0 5px rgba(255,255,255,0.5); transform: rotate(23.5deg); }
-        .earth-pylon { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; z-index: 2; background-color: #020813; transform: rotate(23.5deg) translateZ(0); -webkit-mask-image: -webkit-radial-gradient(white, black); }
+        .earth-anchor { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; z-index: 2; background-color: #020813; transform: rotate(23.5deg) translateZ(0); -webkit-mask-image: -webkit-radial-gradient(white, black); }
         .globe-surface { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0b2e59; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 128px 64px; background-repeat: repeat-x; animation: pan-surface linear infinite; }
         @keyframes pan-surface { 0% { background-position: 0px center; } 100% { background-position: 128px center; } }
         .speed-fast { animation-duration: 2.0s; } .speed-med { animation-duration: 4.0s; } .speed-slow { animation-duration: 7.0s; }
@@ -142,7 +142,7 @@
     <div class="master-wheel-container q-center-dial">
         <div class="wheel-glass"></div>
         <div class="equator-hub">
-            <div class="ecliptic-axis" onmouseover="showAxisHUD('CARDINAL CROSS: ECLIPTIC EQUATOR (0°/180° - 90°/270°)')" onmouseout="hideAxisHUD()"></div>
+            <div class="ecliptic-axis" onmouseover="showAxisHUD('SEASONAL CROSS: ECLIPTIC EQUATOR (0°/180° - 90°/270°)')" onmouseout="hideAxisHUD()"></div>
             <div class="celestial-equator" onmouseover="showAxisHUD('CELESTIAL EQUATOR: PERPENDICULAR TO AXIS (23.5° TO ECLIPTIC)')" onmouseout="hideAxisHUD()"></div>
             <div class="axial-tilt" onmouseover="showAxisHUD('AXIAL CROSS: 23.5° OBLIQUITY (SEASONAL SHIFT)')" onmouseout="hideAxisHUD()"></div>
             <div class="apsides-line" onmouseover="showAxisHUD('LINE OF APSIDES: 14° PERIHELION TO 194° APHELION')" onmouseout="hideAxisHUD()"></div>
@@ -151,17 +151,17 @@
         
         <div id="seasonal-markers" style="position:absolute; width:100%; height:100%; z-index:50; pointer-events:none;"></div>
         
-        <div class="earth-pylon-container" style="top: 2.5%; left: 50%;" title="ALPHA / WINTER SOLSTICE / PERIHELION PROXIMITY">
-            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-fast"></div></div><div class="earth-shadow alpha-shadow"></div><div class="earth-volumetric"></div>
+        <div class="earth-anchor-container" style="top: 2.5%; left: 50%;" title="ALPHA / WINTER SOLSTICE / PERIHELION PROXIMITY">
+            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-fast"></div></div><div class="earth-shadow alpha-shadow"></div><div class="earth-volumetric"></div>
         </div>
-        <div class="earth-pylon-container" style="top: 50%; left: 97.5%;" title="BETA / VERNAL EQUINOX / NOMINAL VELOCITY">
-            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-med"></div></div><div class="earth-shadow beta-shadow"></div><div class="earth-volumetric"></div>
+        <div class="earth-anchor-container" style="top: 50%; left: 97.5%;" title="BETA / VERNAL EQUINOX / NOMINAL VELOCITY">
+            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-med"></div></div><div class="earth-shadow beta-shadow"></div><div class="earth-volumetric"></div>
         </div>
-        <div class="earth-pylon-container" style="top: 97.5%; left: 50%;" title="GAMMA / SUMMER SOLSTICE / APHELION PROXIMITY">
-            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-slow"></div></div><div class="earth-shadow gamma-shadow"></div><div class="earth-volumetric"></div>
+        <div class="earth-anchor-container" style="top: 97.5%; left: 50%;" title="GAMMA / SUMMER SOLSTICE / APHELION PROXIMITY">
+            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-slow"></div></div><div class="earth-shadow gamma-shadow"></div><div class="earth-volumetric"></div>
         </div>
-        <div class="earth-pylon-container" style="top: 50%; left: 2.5%;" title="DELTA / AUTUMNAL EQUINOX / NOMINAL VELOCITY">
-            <div class="earth-axis"></div><div class="earth-pylon"><div class="globe-surface speed-med"></div></div><div class="earth-shadow delta-shadow"></div><div class="earth-volumetric"></div>
+        <div class="earth-anchor-container" style="top: 50%; left: 2.5%;" title="DELTA / AUTUMNAL EQUINOX / NOMINAL VELOCITY">
+            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-med"></div></div><div class="earth-shadow delta-shadow"></div><div class="earth-volumetric"></div>
         </div>
 
         <div class="wheel-ring r-outer"></div>
@@ -184,7 +184,7 @@
         let iotProtocol = "MANUAL";
         let climateAnchor = "CLW";
         let baroUnit = "hPa";
-        let actionHorizon = "PYLON";
+        let actionHorizon = "ANCHOR";
         let tempUnit = "C";
         let thermoBaseline = 22.0;
         let crossVectorSync = true;
@@ -463,7 +463,7 @@
                     <div style="margin-top: 10px;">
                         <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">ACTION HORIZON</label>
                         <select id="action-horizon" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                            <option value="PYLON" ${actionHorizon==='PYLON'?'selected':''}>NEXT PYLON (CARDINAL)</option>
+                            <option value="ANCHOR" ${actionHorizon==='ANCHOR'?'selected':''}>NEXT ANCHOR (SEASONAL)</option>
                             <option value="SECTOR" ${actionHorizon==='SECTOR'?'selected':''}>NEXT SECTOR (30-DAY)</option>
                         </select>
                     </div>
@@ -515,7 +515,7 @@
         }
         
         function logShieldingIntent() {
-            if(!window.PYLON_ALPHA_DYNAMIC) return;
+            if(!window.ANCHOR_ALPHA_DYNAMIC) return;
             const t = window.getSimState().isLive ? Date.now() : window.getSimState().simTime;
             const pDate = new Date(t);
             const y = pDate.getFullYear();
@@ -591,44 +591,6 @@
 
         window.addEventListener('q-tick', (e) => {
             const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
-
-            // Utility function to format legacy strings (grey letters/symbols, env-green numbers)
-            function formatDualColor(str) {
-                const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-                const numStyle = "color:var(--env-green); font-size:1.1rem; font-weight:bold;";
-                let out = "";
-                let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
-                if (tokens) {
-                    tokens.forEach(token => {
-                        if (/[0-9]/.test(token)) {
-                            out += `<span style="${numStyle}">${token}</span>`;
-                        } else {
-                            out += `<span style="${letterStyle}">${token}</span>`;
-                        }
-                    });
-                }
-                return out;
-            }
-
-            const legDateEl = document.getElementById('ap-leg-date') || document.getElementById('leg-date');
-            if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main); font-weight:bold; text-shadow:0 0 10px var(--theme-dim);">${legacyDateStr.toUpperCase()}</span>`;
-
-            const legTimeEl = document.getElementById('ap-leg-time') || document.getElementById('leg-time');
-            if (legTimeEl) legTimeEl.innerHTML = formatDualColor(legacyTimeStr);
-            
-            const meanDegEl = document.getElementById('ap-mean-deg') || document.getElementById('mean-deg');
-            if (meanDegEl) { 
-                meanDegEl.innerText = qData.meanArc.toFixed(4) + "°";
-                meanDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                meanDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
-            
-            const trueDegEl = document.getElementById('ap-true-deg') || document.getElementById('true-deg');
-            if (trueDegEl) { 
-                trueDegEl.innerText = qData.trueArc.toFixed(4) + "°";
-                trueDegEl.style.setProperty('color', 'var(--theme-main)', 'important');
-                trueDegEl.style.textShadow = '0 0 10px var(--theme-dim)';
-            }
             
             const badge = document.getElementById('iot-status-badge');
             if(badge) badge.innerText = 'IOT: ' + iotProtocol;
@@ -638,24 +600,6 @@
             
             if (Math.abs(qData.delta) > 0.025 && window.Q_PHASE_III) {
                 window.Q_PHASE_III.executeThermicOverride(qData.delta);
-            }
-            
-            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
-            const qCoordWing = document.getElementById('ap-q-coord') || document.getElementById('q-coord-wing');
-            
-            let smLetterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-            let smNumStyle = "color:var(--env-green); font-size:1.1rem; font-weight:bold;";
-            
-            if (qCoordWing) {
-                if (activeBlock && activeBlock.type === 'PYLON') {
-                    qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--env-green); font-family:'Orbitron'; font-weight:bold; text-shadow: 0 0 10px var(--env-green-dim);">${activeBlock.name}</span>`;
-                } else {
-                    let cCycle = activeBlock ? activeBlock.cycle : 0;
-                    qCoordWing.innerHTML = `<span style="${smLetterStyle}">QC</span><span style="${smNumStyle}">${cCycle}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">Q</span><span style="${smNumStyle}">${qData.quad}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">S</span><span style="${smNumStyle}">${qData.sect}</span> ` +
-                                           `<span style="${smLetterStyle} margin-left:6px;">DAY</span><span style="${smNumStyle}">${qData.day}</span>`;
-                }
             }
 
             const continuousMeanDeg = daysElapsed * (360 / 365.24219);
@@ -683,7 +627,7 @@
             if (yieldEl) yieldEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
             if (allocEl) allocEl.onclick = (e) => { e.stopPropagation(); openImpact(); };
             
-            if(riskEl) riskEl.innerText = currentRiskVal + '% (KEPLERIAN DELTA)';
+            if(riskEl) riskEl.innerText = currentRiskVal + '% (ORBITAL VELOCITY VARIANCE)';
             if(currentRiskVal >= alertThreshold) {
                 if(hazardEl) hazardEl.innerText = "IMMINENT THREAT";
                 
@@ -708,7 +652,7 @@
                 bar.style.background = "var(--env-green)";
             });
 
-            if(horizonEl) horizonEl.innerText = actionHorizon === 'SECTOR' ? '+30.00° (SECTOR)' : '+14.00° (CARDINAL)';
+            if(horizonEl) horizonEl.innerText = actionHorizon === 'SECTOR' ? '+30.00° (SECTOR)' : '+14.00° (SEASONAL)';
 
             if (showDelta) {
                 const valPress = document.getElementById('val-pressure');

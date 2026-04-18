@@ -6,12 +6,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>THE QUADRATURE // CHRONO-INTERFACE</title>
+    <title>THE QUAD // CONTROL CENTER</title>
     
-    <script src="./q-ui-global.js?v=20.8"></script>
-    <script src="../q-core.js?v=20.8"></script>
-    <script src="../q-ui-planner.js?v=20.8"></script>
-    <script src="../q-hub.js?v=20.8"></script>
+    <script src="./q-ui-personal.js?v=24.0"></script>
+    <script src="../q-core.js?v=24.0"></script>
+    <script src="../q-ui-planner.js?v=24.0"></script>
+    <script src="../q-hub.js?v=24.0"></script>
     
     <script>
         // IRONCLAD MOBILE BYPASS: Force class if on native device, bypassing buggy WebView viewports
@@ -78,7 +78,7 @@
             pointer-events: none !important;
         }
 
-        /* --- Local Chrono-Face Styling for Internal Data Cells --- */
+        /* --- Local Control Center Styling for Internal Data Cells --- */
         
         /* Headers bound strictly to the 280px text block boundaries */
         .v-head { 
@@ -206,9 +206,9 @@
 
         const VECTOR_METRICS = {
             'BIO': { HRV: 'HRV / Elasticity', PHASE: 'Ultradian Phase', LUNAR: 'Lunar Illumination', TIDE: 'Gravitational Tide', RHR: 'Resting Heart Rate', SLEEP: 'Sleep Stage', NOON: 'Solar Noon Proximity' },
-            'COM': { NEXT: 'Next Civil Anchor', ZODIAC: 'Astrophysical Aspect', LEDGER: 'Sovereign Ledger', TERM: 'Solar Season (Jiéqì)' },
+            'COM': { NEXT: 'Next Civil Anchor', ZODIAC: 'Astrophysical Aspect', LEDGER: 'Pro User Ledger', TERM: 'Solar Season (Jiéqì)' },
             'ENV': { FRICTION: 'Thermodynamic Friction', RISK: 'Probability Index', TENSION: 'Biome Tension', GEO: 'Local Coordinate', IRRADIANCE: 'Solar Irradiance', PRESSURE: 'Atmospheric Pressure' },
-            'MEC': { DRIFT: 'Drift to Pylon', ECCENTRICITY: 'Orbital Eccentricity', SYMMETRY: 'Temporal Symmetry Loss', SMEAR: 'Gregorian Smear', VELOCITY: 'Keplerian Velocity' }
+            'MEC': { DRIFT: 'Drift to Anchor', ECCENTRICITY: 'Orbital Eccentricity', SYMMETRY: 'Temporal Symmetry Loss', SMEAR: 'Variance (Gregorian)', VELOCITY: 'Orbital Velocity' }
         };
 
         const PHILOSOPHY = {
@@ -308,7 +308,7 @@
             document.getElementById('ring-cycle-true').style.transform = `rotate(${continuousTrueDeg}deg)`;
             document.getElementById('ring-sector').style.transform = `rotate(${(daysElapsed / 30) * 360}deg)`;
             document.getElementById('ring-week').style.transform = `rotate(${(daysElapsed / 6) * 360}deg)`;
-            document.getElementById('ring-day').style.transform = `rotate(${((t - window.PYLON_ALPHA_DYNAMIC) / window.MS_DAY) * 360}deg)`;
+            document.getElementById('ring-day').style.transform = `rotate(${((t - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY) * 360}deg)`;
 
             // --- LOCALIZED DATA ROUTING INJECTION ---
             
