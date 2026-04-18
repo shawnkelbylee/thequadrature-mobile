@@ -1,9 +1,9 @@
 // THE QUADRATURE: ZODIACAL ENGINE PLUGIN (OPT-IN METAPHYSICAL OVERLAY)
 // Architect: Kelby | Engineer: Kairos
-// PROTOCOL: Swiss Ephemeris Routing, Natal Anchor Matrix, and Resonance Discovery
+// PROTOCOL: Swiss Ephemeris Routing, Natal Anchor Matrix, and Autonomous State Persistence
 
 window.Q_Plugin_Zodiacal = {
-    version: "1.0.0",
+    version: "1.1.0-AUTONOMOUS",
     engineState: "STANDBY",
     ephemerisCache: null,
 
@@ -23,7 +23,7 @@ window.Q_Plugin_Zodiacal = {
         OPPOSITION:  { angle: 180, tolerance: 8, resonance: "LOW", type: "TENSION" }
     },
 
-    init: function() {
+    init: async function() {
         this.engineState = "INITIALIZING";
         if(window.Q_LOG) window.Q_LOG('INFO', 'PLUGIN', 'ZODIACAL_ENGINE_BOOT_SEQUENCE_INITIATED');
         
@@ -35,9 +35,85 @@ window.Q_Plugin_Zodiacal = {
             return false;
         }
 
+        // Initialize Autonomous Persistence Bridge
+        await this.StateHydrationBridge.mount();
+
         this.SwissEphemerisBridge.connect();
         this.engineState = "ACTIVE";
         return true;
+    },
+
+    /**
+     * STATE HYDRATION BRIDGE
+     * Autonomously manages the lifecycle of unverified astrobiology data,
+     * preventing contamination of the B2B Q-Core state engine.
+     */
+    StateHydrationBridge: {
+        mount: async function() {
+            // 1. Local Memory Injection
+            const localAnchor = localStorage.getItem('q_natal_anchor') || 'NONE';
+            const localVis = localStorage.getItem('q_zodiac_visible') !== 'false';
+
+            if (window.Q_STATE && window.Q_STATE.metaphysical_layer) {
+                window.Q_STATE.metaphysical_layer.natal_anchor = localAnchor;
+                window.Q_STATE.metaphysical_layer.zodiac_visible = localVis;
+            }
+
+            // 2. Cloud Hydration Sync
+            if (window.supabaseClient) {
+                const { data: session } = await window.supabaseClient.auth.getSession();
+                if (session?.session?.user) {
+                    try {
+                        const { data } = await window.supabaseClient
+                            .from('sovereign_identity')
+                            .select('natal_anchor')
+                            .eq('user_id', session.session.user.id)
+                            .single();
+                            
+                        if (data && data.natal_anchor) {
+                            localStorage.setItem('q_natal_anchor', data.natal_anchor);
+                            if (window.Q_STATE) window.Q_STATE.metaphysical_layer.natal_anchor = data.natal_anchor;
+                        }
+                    } catch(e) {
+                        if(window.Q_LOG) window.Q_LOG('WARN', 'PLUGIN', 'CLOUD_HYDRATION_UNAVAILABLE_FOR_ANCHOR');
+                    }
+                }
+            }
+
+            // 3. Q_UpdateState Intercept (Monkey-Patching for Plugin Sync)
+            const originalUpdateState = window.Q_UpdateState;
+            window.Q_UpdateState = async function(category, key, value) {
+                // Allow core to process nominal logic
+                if (originalUpdateState) {
+                    await originalUpdateState(category, key, value);
+                }
+
+                // Plugin Cloud Intercept: Catch Zodiacal parameters dropped by Q-Core
+                if (key === 'natal_anchor' || key === 'zodiac_visible') {
+                    if (window.Q_STATE && window.Q_STATE[category]) {
+                        window.Q_STATE[category][key] = value;
+                        localStorage.setItem(`q_${key}`, value);
+                    }
+                    
+                    if (window.supabaseClient) {
+                        const { data: session } = await window.supabaseClient.auth.getSession();
+                        if (session?.session?.user) {
+                            let payload = { user_id: session.session.user.id };
+                            payload[key] = value;
+                            const targetTable = key === 'natal_anchor' ? 'sovereign_identity' : 'system_state';
+                            
+                            window.supabaseClient.from(targetTable)
+                                .upsert(payload, { onConflict: 'user_id' })
+                                .then(({error}) => {
+                                    if(!error && window.Q_LOG) window.Q_LOG('INFO', 'PLUGIN', `AUTONOMOUS_CLOUD_SYNC_SUCCESS: ${key}`);
+                                });
+                        }
+                    }
+                }
+            };
+
+            if(window.Q_LOG) window.Q_LOG('STATE', 'PLUGIN', 'PERSISTENCE_BRIDGE_MOUNTED');
+        }
     },
 
     SwissEphemerisBridge: {
@@ -158,3 +234,4 @@ if (typeof window !== 'undefined') {
         }
     }, 1000);
 }
+// EOF: q-plugin-zodiacal.js
