@@ -5,8 +5,6 @@
 window.MS_DAY = 86400000;
 
 // --- NOMINAL SETTLEMENT GEARS (DYNAMIC Q-DELTA ABSORPTION) ---
-// These durations represent the baseline operational buffer. Actual settlement dynamically absorbs 
-// the exact mathematical variance accumulated since the previous node.
 window.Q_GEAR_CONSTANTS = {
     ALPHA: 86400000,    // 24.0h (Nominal Base)
     BETA: 84600000,     // 23.5h
@@ -275,7 +273,6 @@ window.Q_STATE = {
     },
     metaphysical_layer: { 
         swiss_ephemeris: 'STANDBY', 
-        patreon_gating: 'STANDBY', 
         access_tier: 0,
         dob: localStorage.getItem('q_dob') || null,
         tob: localStorage.getItem('q_tob') || '12:00',
@@ -1077,7 +1074,7 @@ window.Q_Auth = {
             // --- NATIVE ARCHITECT RECOGNITION & ENTITLEMENT LOCK ---
             const userEmail = (session.session.user.email || "").toUpperCase();
             if (userEmail.includes('SHAWNKELBYLEE@GMAIL.COM') || userEmail.includes('ARCHITECT@THEQUADRATURE.COM') || userEmail.includes('KELBY') || userEmail.includes('SHAWN')) {
-                const masterEntitlements = ["BASIC", "STANDARD", "RESONANT", "PRO", "TEAM", "ENTERPRISE", "PERSONAL", "COMMERCIAL"];
+                const masterEntitlements = ["STANDARD", "PERSONAL", "PRO", "ENTERPRISE", "COMMERCIAL"];
                 localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(masterEntitlements));
                 window.Q_LOG('STATE', 'CORE', 'ARCHITECT_RECOGNIZED_MASTER_ENTITLEMENTS_LOCKED');
             }

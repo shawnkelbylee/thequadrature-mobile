@@ -76,10 +76,10 @@
         .radar-text { font-family: 'Orbitron'; font-size: 0.55rem; font-weight: 900; color: var(--core-plat); z-index: 2; text-shadow: 0 0 5px #000; }
         @keyframes sweep { 0% { left: -100%; } 100% { left: 200%; } }
 
-        .smear-container { width: 100%; height: 2vh; min-height: 16px; background: #000; border: 1px inset var(--titanium); position: relative; overflow: hidden; display: flex; align-items: center; }
-        .smear-wave { position: absolute; height: 100%; width: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0, 240, 255, 0.4) 5px, rgba(0, 240, 255, 0.4) 10px); transition: opacity 0.3s; animation: smear-shift 0.5s linear infinite; }
-        .smear-val { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: #fff; width: 100%; text-align: center; z-index: 2; text-shadow: 0 0 5px #000; font-weight: bold; }
-        @keyframes smear-shift { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
+        .variance-container { width: 100%; height: 2vh; min-height: 16px; background: #000; border: 1px inset var(--titanium); position: relative; overflow: hidden; display: flex; align-items: center; }
+        .variance-wave { position: absolute; height: 100%; width: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0, 240, 255, 0.4) 5px, rgba(0, 240, 255, 0.4) 10px); transition: opacity 0.3s; animation: variance-shift 0.5s linear infinite; }
+        .variance-val { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: #fff; width: 100%; text-align: center; z-index: 2; text-shadow: 0 0 5px #000; font-weight: bold; }
+        @keyframes variance-shift { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
         
         #needle-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); border: 1px solid var(--titanium); padding: 8px 18px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 100; opacity: 0; transition: opacity 0.3s ease, border-color 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 1px; color: #fff; }
 
@@ -182,7 +182,7 @@
         // Modal State Options
         let atomicSync = "MASTER";
         let standardizedInterval = "ACTIVE";
-        let smearResolution = "HIGH";
+        let varianceResolution = "HIGH";
 
         window.injectVectorData = function() {
             // Apply OPT properties globally to corner cutouts
@@ -237,7 +237,7 @@
                         <div class="t-row" style="justify-content:center; margin-bottom:2px;"><span style="color:var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; text-shadow:0 0 8px var(--cyan-dim);" id="solar-float-delta">KEPLERIAN MULTIPLIER: --</span></div>
                         <div style="width: 100%; height: 2.5vh; min-height: 20px; background: rgba(0,0,0,0.8); border: 1px solid var(--titanium); border-radius: 4px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,240,255,0.1); margin-bottom: 2px;">
                             <div class="respiration-wave" id="resp-wave"></div>
-                            <div id="resp-phase-text" style="position: absolute; font-family: 'Orbitron'; font-size: 0.55rem; color: #fff; text-shadow: 0 0 5px #000; font-weight: 900; z-index: 2; letter-spacing: 1px;">CALCULATING SMEAR...</div>
+                            <div id="resp-phase-text" style="position: absolute; font-family: 'Orbitron'; font-size: 0.55rem; color: #fff; text-shadow: 0 0 5px #000; font-weight: 900; z-index: 2; letter-spacing: 1px;">CALCULATING VARIANCE...</div>
                         </div>
                         <div class="radar-box" onclick="openOptions(event, 'thermo')" style="margin-top:0;">
                             <div class="radar-sweep"></div>
@@ -255,9 +255,9 @@
                         <div class="t-row"><span>STANDARDIZED INTERVAL:</span> <span class="val-sm" id="si-lock">ACTIVE</span></div>
                         <div class="val-display" style="padding:2px 8px; margin-bottom:2px;"><div id="nano-counter" style="font-size:0.8rem; text-align:right; color:var(--cyan-glow); font-family:'Orbitron'; font-weight:900;">0.000000000</div></div>
                         <div class="t-row"><span>ORBITAL VELOCITY VARIANCE:</span></div>
-                        <div class="smear-container">
-                            <div class="smear-wave"></div>
-                            <div class="smear-val" id="smear-val">+ 0.0000000000</div>
+                        <div class="variance-container">
+                            <div class="variance-wave"></div>
+                            <div class="variance-val" id="variance-val">+ 0.0000000000</div>
                         </div>
                         <div class="val-display" style="padding:2px 8px; margin-bottom:0; cursor:pointer; margin-top:2px;" onclick="openOptions(event, 'civil')">
                             <div id="civil-tension-readout" style="font-size:0.65rem; color:var(--cyan-glow); text-shadow: 0 0 8px var(--cyan-dim); text-align: center; font-family:'JetBrains Mono'; font-weight:700;">
@@ -359,8 +359,8 @@
                     <div style="margin-top: 10px;">
                         <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">VARIANCE RESOLUTION</label>
                         <select id="opt-resolution" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                            <option value="HIGH" ${smearResolution==='HIGH'?'selected':''}>HIGH (NANOSECONDS)</option>
-                            <option value="LOW" ${smearResolution==='LOW'?'selected':''}>LOW (MILLISECONDS)</option>
+                            <option value="HIGH" ${varianceResolution==='HIGH'?'selected':''}>HIGH (NANOSECONDS)</option>
+                            <option value="LOW" ${varianceResolution==='LOW'?'selected':''}>LOW (MILLISECONDS)</option>
                         </select>
                     </div>
                 `;
@@ -375,7 +375,7 @@
                 if(syncEl) syncEl.innerText = atomicSync === 'MASTER' ? 'SYNCED' : 'FLUID';
             } else if (currentOptTarget === 'civil') {
                 standardizedInterval = document.getElementById('opt-interval').value;
-                smearResolution = document.getElementById('opt-resolution').value;
+                varianceResolution = document.getElementById('opt-resolution').value;
                 const siEl = document.getElementById('si-lock');
                 if(siEl) siEl.innerText = standardizedInterval;
             }
@@ -579,14 +579,14 @@
                 nanoCounter.innerText = `+${nanoString[1]}`;
             }
             
-            const smearValText = document.getElementById('smear-val');
-            if (smearValText) {
+            const varianceValText = document.getElementById('variance-val');
+            if (varianceValText) {
                 const expected = Math.round(t / 1000) * 1000;
-                const smearVal = (t - expected) / 1000;
-                if(smearResolution === 'HIGH') {
-                    smearValText.innerText = `${smearVal > 0 ? '+' : ''} ${smearVal.toFixed(10)}`;
+                const varianceVal = (t - expected) / 1000;
+                if(varianceResolution === 'HIGH') {
+                    varianceValText.innerText = `${varianceVal > 0 ? '+' : ''} ${varianceVal.toFixed(10)}`;
                 } else {
-                    smearValText.innerText = `${smearVal > 0 ? '+' : ''} ${smearVal.toFixed(3)} ms`;
+                    varianceValText.innerText = `${varianceVal > 0 ? '+' : ''} ${varianceVal.toFixed(3)} ms`;
                 }
             }
 
