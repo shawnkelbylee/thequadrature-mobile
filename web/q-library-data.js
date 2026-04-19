@@ -1,7 +1,7 @@
 // /web/library/q-library-data.js
 // MASTER LIBRARY MATRIX - THE QUADRATURE V1
 
-export const Q_LIBRARY_MATRIX = [
+window.Q_LIBRARY_MATRIX = [
   {
     id: "handbook_v1",
     type: "document",

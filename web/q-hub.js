@@ -1,9 +1,7 @@
 // THE QUADRATURE: GLOBAL DASHBOARD & PRO MATRIX
 // Architect: Kelby | Engineer: Kairos
 // PROTOCOL: Account Settings, Calibration Module, Tiered Access Gate & Native Library Reader
-// REVISION: 24.3.0 - Library Matrix Decoupling
-
-import { Q_LIBRARY_MATRIX } from './q-library-data.js';
+// REVISION: 24.3.1 - Hotfix: ES6 Decoupling & Global Scope Attachment
 
 window.Q_LibraryReader = {
     init: function() {
@@ -40,11 +38,8 @@ window.Q_LibraryReader = {
 
         data.sections.forEach(sec => {
             html += `<h3 style="color:var(--theme-main, #ff003c); font-family:'Orbitron'; margin-top:30px; letter-spacing:1px; border-bottom:1px solid rgba(255,0,60,0.2); padding-bottom:5px;">${sec.heading}</h3>`;
-            
-            // Basic formatting for the body text
             let formattedBody = sec.body.replace(/\n\n/g, '</p><p>');
             formattedBody = formattedBody.replace(/\n•/g, '<br>•');
-            
             html += `<p>${formattedBody}</p>`;
         });
         
@@ -81,7 +76,12 @@ window.Q_LibraryReader = {
     open: function(manuscriptId) {
         this.init();
         
-        const data = Q_LIBRARY_MATRIX.find(item => item.id === manuscriptId);
+        if (!window.Q_LIBRARY_MATRIX) {
+            alert("SYSTEM ERROR: Library data matrix not found in global scope. Ensure q-library-data.js is loaded before q-hub.js.");
+            return;
+        }
+
+        const data = window.Q_LIBRARY_MATRIX.find(item => item.id === manuscriptId);
         
         if(!data) {
             if(window.Q_LOG) window.Q_LOG('ERROR', 'CORE', 'MANUSCRIPT_NOT_FOUND', { id: manuscriptId });
@@ -89,7 +89,6 @@ window.Q_LibraryReader = {
         }
 
         document.getElementById('q-lib-title').innerText = data.title;
-        
         const contentBox = document.getElementById('q-lib-content');
         
         if (data.type === "document") {
@@ -183,7 +182,6 @@ window.Q_IntegrationHub = {
         } else {
             alert(`[ THE QUADRATURE: PRO MATRIX ]\nAccess to ${featureKey.toUpperCase()} requires ${tierLevel} verification.\n\nProceeding to gateway simulation...`);
             
-            // Generate Master Entitlement Token
             let tierToken = tierLevel.split(' ')[0].toUpperCase();
             let currentEnts = localStorage.getItem('Q_ENTITLEMENTS');
             let ents = currentEnts ? JSON.parse(currentEnts) : [];
@@ -276,7 +274,12 @@ window.Q_IntegrationHub = {
             </div>
         `;
         
-        Q_LIBRARY_MATRIX.forEach(item => {
+        if (!window.Q_LIBRARY_MATRIX) {
+             html += `<div style="color:#ff003c; text-align:center; padding: 20px; border:1px solid #ff003c;">[ERROR] q-library-data.js not found in global scope.</div>`;
+             return html;
+        }
+
+        window.Q_LIBRARY_MATRIX.forEach(item => {
             let btnAction = `window.Q_LibraryReader.open('${item.id}')`;
             let btnText = "READ";
             let rowStyle = "";
@@ -312,14 +315,13 @@ window.Q_IntegrationHub = {
         dom.className = 'q-hub-overlay';
         dom.id = 'unified-integration-hub';
         
-        const renderBadge = (statusColor, textColor, text) => `<span style="font-size:0.55rem; background:\${statusColor}; color:\${textColor}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px;">\${text}</span>`;
-        const renderUpgradeBtn = (feature, tier, category, color) => `<button onclick="window.Q_IntegrationHub.requestStateGate('\${feature}', '\${tier}', '\${category}')" style="font-size:0.55rem; background:transparent; border:1px solid \${color}; color:\${color}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px; cursor:pointer; transition:0.3s; pointer-events:auto;" onmouseover="this.style.background='\${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='\${color}';">UPGRADE</button>`;
+        const renderBadge = (statusColor, textColor, text) => `<span style="font-size:0.55rem; background:${statusColor}; color:${textColor}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px;">${text}</span>`;
+        const renderUpgradeBtn = (feature, tier, category, color) => `<button onclick="window.Q_IntegrationHub.requestStateGate('${feature}', '${tier}', '${category}')" style="font-size:0.55rem; background:transparent; border:1px solid ${color}; color:${color}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px; cursor:pointer; transition:0.3s; pointer-events:auto;" onmouseover="this.style.background='${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='${color}';">UPGRADE</button>`;
 
         const authState = window.Q_STATE?.persistence?.auth_status === 'PRO_AUTHENTICATED' ? 'ACTIVE' : 'STANDBY';
         const authColor = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
         const authText = authState === 'ACTIVE' ? '[ DISCONNECT MATRIX ]' : '[ AUTHENTICATE ] - LOCAL CACHE ONLY';
 
-        // ENFORCED GHOST-KEY PURGE
         let ents = [];
         if (authState === 'ACTIVE') {
             const entitlementsRaw = localStorage.getItem('Q_ENTITLEMENTS');
@@ -335,13 +337,12 @@ window.Q_IntegrationHub = {
         const isEnterpriseActive = ents.includes('ENTERPRISE');
         const enterpriseStatus = isEnterpriseActive ? renderBadge('#F4D068', '#000', 'ACTIVE') : renderUpgradeBtn('fiat_api', 'ENTERPRISE TIER', 'capital_ledger', '#F4D068');
 
-        // Identity Data Retrieval
         const sDob = window.Q_STATE?.metaphysical_layer?.dob || "";
         const sTob = window.Q_STATE?.metaphysical_layer?.tob || "12:00";
         const sTobUnknown = window.Q_STATE?.metaphysical_layer?.tob_unknown === true;
         const sLoc = window.Q_STATE?.location?.name || "";
         const savedAnchorMins = window.Q_STATE?.metaphysical_layer?.wake_anchor_mins !== null ? window.Q_STATE?.metaphysical_layer?.wake_anchor_mins : (parseInt(localStorage.getItem('q_bio_anchor')) || 0);
-        const sAnchorStr = `\${Math.floor(savedAnchorMins / 60).toString().padStart(2, '0')}:\${(savedAnchorMins % 60).toString().padStart(2, '0')}`;
+        const sAnchorStr = `${Math.floor(savedAnchorMins / 60).toString().padStart(2, '0')}:${(savedAnchorMins % 60).toString().padStart(2, '0')}`;
         
         const sSleep = window.Q_STATE?.metaphysical_layer?.sleep_cycle_duration || 450;
         const sSleepHrs = (sSleep / 60).toFixed(1);
@@ -352,7 +353,6 @@ window.Q_IntegrationHub = {
         const sAi = window.Q_STATE?.logic_layer?.preferred_ai_diplomat || 'DEFAULT';
         const sDeepFlowEnforcement = window.Q_STATE?.logic_layer?.deep_flow_enforcement !== false;
 
-        // Diagnostic Status Retrieval
         const jplStatus = window.EPHEMERIS_LIVE ? '<span style="color:#39ff14; text-shadow:0 0 5px rgba(57,255,20,0.5);">[ CONNECTED / LIVE ]</span>' : '<span style="color:#ff003c; text-shadow:0 0 5px rgba(255,0,60,0.5);">[ DISCONNECTED / FAILOVER ]</span>';
         const swissStatus = isPersonalActive ? '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ API ACTIVE ]</span>' : '<span style="color:#aaa;">[ STANDBY / INACTIVE ]</span>';
 
@@ -360,17 +360,17 @@ window.Q_IntegrationHub = {
             <div class="q-hub-box" onclick="event.stopPropagation()">
                 <div class="hub-header">PRO MATRIX // ACCOUNT</div>
                 
-                <button id="hub-main-auth-btn" style="background:rgba(0,0,0,0.6); border:1px solid \${authColor}; color:\${authColor}; padding: 8px 12px; font-family:'Orbitron'; font-size:0.65rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border-radius:4px; margin-bottom:15px; width:100%; transition:0.3s; box-shadow: inset 0 0 10px rgba(\${authState === 'ACTIVE' ? '57,255,20' : '255,0,60'}, 0.1);" onmouseover="this.style.background='\${authColor}'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.color='\${authColor}';">\${authText}</button>
+                <button id="hub-main-auth-btn" style="background:rgba(0,0,0,0.6); border:1px solid ${authColor}; color:${authColor}; padding: 8px 12px; font-family:'Orbitron'; font-size:0.65rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border-radius:4px; margin-bottom:15px; width:100%; transition:0.3s; box-shadow: inset 0 0 10px rgba(${authState === 'ACTIVE' ? '57,255,20' : '255,0,60'}, 0.1);" onmouseover="this.style.background='${authColor}'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.color='${authColor}';">${authText}</button>
 
                 <div class="hub-tabs">
-                    <button class="hub-tab-btn \${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
-                    <button class="hub-tab-btn \${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
-                    <button class="hub-tab-btn \${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-btn-tiers" onclick="window.Q_IntegrationHub.switchTab('tiers')">TIERS</button>
-                    <button class="hub-tab-btn \${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-btn-prefs" onclick="window.Q_IntegrationHub.switchTab('prefs')">PREFS</button>
-                    <button class="hub-tab-btn \${this.activeTab === 'library' ? 'active' : ''}" id="tab-btn-library" onclick="window.Q_IntegrationHub.switchTab('library')">LIBRARY</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-btn-tiers" onclick="window.Q_IntegrationHub.switchTab('tiers')">TIERS</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-btn-prefs" onclick="window.Q_IntegrationHub.switchTab('prefs')">PREFS</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'library' ? 'active' : ''}" id="tab-btn-library" onclick="window.Q_IntegrationHub.switchTab('library')">LIBRARY</button>
                 </div>
 
-                <div class="hub-tab-content \${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
+                <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
                     <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #ff003c); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(255,0,60,0.3); text-align:center;">WELCOME TO THE QUADRATURE</div>
                     <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px;">
                         For your entire life, your schedule has been dictated by a rigid calendar and a ticking clock. But your body isn't a machine—it's a living system. When you force your natural energy into an artificial 9-to-5 grid, the result is chronic exhaustion and burnout. We call this <span style="color:var(--theme-main, #ff003c); font-weight:bold;">Schedule Friction</span>.
@@ -401,60 +401,60 @@ window.Q_IntegrationHub = {
                     </div>
                 </div>
 
-                <div class="hub-tab-content \${this.activeTab === 'identity' ? 'active' : ''}" id="tab-content-identity">
+                <div class="hub-tab-content ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-content-identity">
                     <div style="font-size:0.65rem; color:#aaa; margin-bottom: 5px; line-height: 1.4;">Define your personal metrological anchors to calibrate the physics engine and Swiss Ephemeris.</div>
                     
                     <div style="display:flex; gap:10px;">
                         <div class="hub-input-group" style="flex:2;">
                             <label class="hub-input-lbl">DATE OF BIRTH</label>
-                            <input type="date" id="cal-dob" class="hub-input" value="\${sDob}">
+                            <input type="date" id="cal-dob" class="hub-input" value="${sDob}">
                         </div>
                         <div class="hub-input-group" style="flex:1;">
                             <label class="hub-input-lbl">TIME OF BIRTH</label>
-                            <input type="time" id="cal-tob" class="hub-input" value="\${sTob}" \${sTobUnknown ? 'disabled' : ''}>
+                            <input type="time" id="cal-tob" class="hub-input" value="${sTob}" ${sTobUnknown ? 'disabled' : ''}>
                         </div>
                     </div>
                     <label class="hub-checkbox-group" style="justify-content: flex-end; margin-top:-10px;">
-                        <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" \${sTobUnknown ? 'checked' : ''}> Exact Time Unknown (Defaults 12:00)
+                        <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown (Defaults 12:00)
                     </label>
 
                     <div class="hub-input-group">
                         <label class="hub-input-lbl">GEOLOCATION (CITY, REGION)</label>
-                        <input type="text" id="cal-loc" class="hub-input" value="\${sLoc}" placeholder="e.g. CLEARWATER, FL">
+                        <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
                     </div>
 
                     <div style="display:flex; gap:10px;">
                         <div class="hub-input-group" style="flex:1;">
                             <label class="hub-input-lbl">WAKE ANCHOR (LOCAL TIME)</label>
-                            <input type="time" id="cal-anchor" class="hub-input" value="\${sAnchorStr}">
+                            <input type="time" id="cal-anchor" class="hub-input" value="${sAnchorStr}">
                         </div>
                         <div class="hub-input-group" style="flex:1;">
                             <label class="hub-input-lbl">TARGET SLEEP (HRS)</label>
-                            <input type="number" id="cal-sleep" class="hub-input" value="\${sSleepHrs}" step="0.5" min="4" max="12">
+                            <input type="number" id="cal-sleep" class="hub-input" value="${sSleepHrs}" step="0.5" min="4" max="12">
                         </div>
                     </div>
 
                     <div style="display:flex; gap:10px;">
                         <div class="hub-input-group" style="flex:1;">
                             <label class="hub-input-lbl">SLEEP INERTIA (MINS)</label>
-                            <input type="number" id="cal-inertia" class="hub-input" value="\${sInertia}" min="0" max="180">
+                            <input type="number" id="cal-inertia" class="hub-input" value="${sInertia}" min="0" max="180">
                         </div>
                         <div class="hub-input-group" style="flex:1;">
                             <label class="hub-input-lbl">DLMO WIND-DOWN (MINS)</label>
-                            <input type="number" id="cal-dlmo" class="hub-input" value="\${sDlmo}" min="0" max="180">
+                            <input type="number" id="cal-dlmo" class="hub-input" value="${sDlmo}" min="0" max="180">
                         </div>
                     </div>
 
                     <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
                 </div>
 
-                <div class="hub-tab-content \${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-content-tiers">
+                <div class="hub-tab-content ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-content-tiers">
                     <div class="hub-tier-row" style="border-color: rgba(255,255,255,0.3);">
                         <div>
                             <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">STANDARD TIER (FREE)</div>
                             <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Omni-Planner & Standard Calendar Sync.</div>
                         </div>
-                        \${renderBadge('#fff', '#000', 'ACTIVE')}
+                        ${renderBadge('#fff', '#000', 'ACTIVE')}
                     </div>
 
                     <div class="hub-tier-row">
@@ -462,7 +462,7 @@ window.Q_IntegrationHub = {
                             <div style="font-family:'Orbitron'; font-size:0.75rem; color:#00f0ff; font-weight: bold;">PERSONAL TIER ($14.99/mo)</div>
                             <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Biometric Bridge, HRV/Sleep tracking, Environmental Vector.</div>
                         </div>
-                        \${personalStatus}
+                        ${personalStatus}
                     </div>
                     
                     <div class="hub-tier-row">
@@ -470,7 +470,7 @@ window.Q_IntegrationHub = {
                             <div style="font-family:'Orbitron'; font-size:0.75rem; color:#b829ff; font-weight: bold;">PRO TIER ($19.00 - $29.99/mo)</div>
                             <div style="font-size:0.55rem; color:#888; margin-top: 4px;">AI Temporal Firewall, P2P Sync, Deep Flow Enforcement.</div>
                         </div>
-                        \${proStatus}
+                        ${proStatus}
                     </div>
 
                     <div class="hub-tier-row" style="background: rgba(244, 208, 104, 0.05);">
@@ -478,11 +478,11 @@ window.Q_IntegrationHub = {
                             <div style="font-family:'Orbitron'; font-size:0.75rem; color:#F4D068; font-weight: bold;">ENTERPRISE TIER (CUSTOM PRICING)</div>
                             <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Macro-Infrastructure, Yield Metrology, IoT Webhooks. [PHASE II DEFERRED]</div>
                         </div>
-                        \${enterpriseStatus}
+                        ${enterpriseStatus}
                     </div>
                 </div>
 
-                <div class="hub-tab-content \${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-content-prefs">
+                <div class="hub-tab-content ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-content-prefs">
                     <div class="hub-input-group">
                         <label class="hub-input-lbl">SYSTEM AUDIO NOTIFICATIONS</label>
                         <select class="hub-input">
@@ -494,15 +494,15 @@ window.Q_IntegrationHub = {
                     <div class="hub-input-group">
                         <label class="hub-input-lbl">AI DIPLOMATIC NEGOTIATOR ENGINE</label>
                         <select class="hub-input" id="pref-ai-diplomat" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'preferred_ai_diplomat', this.value)">
-                            <option value="DEFAULT" \${sAi === 'DEFAULT' ? 'selected' : ''}>DEFAULT ALGORITHM</option>
-                            <option value="KAIROS" \${sAi === 'KAIROS' ? 'selected' : ''}>KAIROS PROTOCOL</option>
+                            <option value="DEFAULT" ${sAi === 'DEFAULT' ? 'selected' : ''}>DEFAULT ALGORITHM</option>
+                            <option value="KAIROS" ${sAi === 'KAIROS' ? 'selected' : ''}>KAIROS PROTOCOL</option>
                         </select>
                     </div>
                     <div class="hub-input-group">
                         <label class="hub-input-lbl">DEEP FLOW ENFORCEMENT (APP LOCKS & SILENCE)</label>
                         <select class="hub-input" id="pref-deep-flow" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'deep_flow_enforcement', this.value === 'true')">
-                            <option value="true" \${sDeepFlowEnforcement ? 'selected' : ''}>ACTIVE (BLOCK NOTIFICATIONS)</option>
-                            <option value="false" \${!sDeepFlowEnforcement ? 'selected' : ''}>STANDBY (BYPASS LOCKS)</option>
+                            <option value="true" ${sDeepFlowEnforcement ? 'selected' : ''}>ACTIVE (BLOCK NOTIFICATIONS)</option>
+                            <option value="false" ${!sDeepFlowEnforcement ? 'selected' : ''}>STANDBY (BYPASS LOCKS)</option>
                         </select>
                     </div>
                     <div class="hub-input-group">
@@ -524,7 +524,7 @@ window.Q_IntegrationHub = {
                             Download and lock the planetary telemetry into your device's local storage. This guarantees 100% physics accuracy and continuous system operation even without an active internet connection.
                         </div>
                         <div class="hub-input-group">
-                            <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline.'); }">CACHE TELEMETRY DATA</button>
+                            <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline.'); }">CACHE TELEMETRY DATA</button>
                         </div>
                     </div>
 
@@ -545,17 +545,17 @@ window.Q_IntegrationHub = {
                         <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">SYSTEM DIAGNOSTICS</div>
                         <div class="hub-input-group" style="margin-bottom: 8px;">
                             <label class="hub-input-lbl">NASA JPL HORIZONS BARYCENTRIC API</label>
-                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">\${jplStatus}</div>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${jplStatus}</div>
                         </div>
                         <div class="hub-input-group">
                             <label class="hub-input-lbl">SWISS EPHEMERIS API</label>
-                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">\${swissStatus}</div>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${swissStatus}</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="hub-tab-content \${this.activeTab === 'library' ? 'active' : ''}" id="tab-content-library">
-                    \${this.generateLibraryDOM()}
+                <div class="hub-tab-content ${this.activeTab === 'library' ? 'active' : ''}" id="tab-content-library">
+                    ${this.generateLibraryDOM()}
                 </div>
 
                 <div class="support-links">
@@ -602,4 +602,9 @@ window.Q_IntegrationHub = {
     }
 };
 
-window.addEventListener('DOMContentLoaded', () => window.Q_IntegrationHub.init());
+// Handle async loading gracefully
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', () => window.Q_IntegrationHub.init());
+} else {
+    window.Q_IntegrationHub.init();
+}
