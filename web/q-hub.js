@@ -6,7 +6,7 @@
 // --- NATIVE IMMERSIVE READER PAYLOADS ---
 window.Q_MANUSCRIPTS = {
     ESSAYS_A: {
-        title: "FOUNDATIONAL ESSAYS (TRACK A)",
+        title: "ESSAYS: ENGINEERING & PHYSICS",
         content: `<h2 style="color:#fff; font-family:'Orbitron'; letter-spacing:2px;">THE QUADRATURE</h2>
 <h4 style="color:var(--theme-main, #ff003c); font-family:'Orbitron'; margin-top:-10px;">AUTHOR: SHAWN K. LEE</h4>
 <div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin-bottom: 20px; padding-bottom: 10px; font-size:0.75rem;">
@@ -294,7 +294,7 @@ window.Q_MANUSCRIPTS = {
 <p>Here and Now are Infinitely One.</p>`
     },
     ESSAYS_B: {
-        title: "FOUNDATIONAL ESSAYS (TRACK B)",
+        title: "ESSAYS PHILOSOPHICAL & METAPHYSICAL",
         content: `<h2 style="color:#fff; font-family:'Orbitron'; letter-spacing:2px;">THE QUADRATURE</h2>
 <h4 style="color:var(--theme-main, #ff003c); font-family:'Orbitron'; margin-top:-10px;">AUTHOR: SHAWN K. LEE</h4>
 <div style="border-bottom: 1px dashed rgba(255,255,255,0.2); margin-bottom: 20px; padding-bottom: 10px; font-size:0.75rem;">
