@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: TranslateZ Frustum Bug Purge & Unconditional Payload Injection
+// REVISION: DOM Encapsulation Restored & Mobile Z-Axis Void Purged
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -22,7 +22,7 @@ window.injectUniversalUI = function() {
     let noCache2 = document.createElement('meta'); noCache2.httpEquiv = "Pragma"; noCache2.content = "no-cache"; document.head.appendChild(noCache2);
     let noCache3 = document.createElement('meta'); noCache3.httpEquiv = "Expires"; noCache3.content = "0"; document.head.appendChild(noCache3);
     
-    // --- PATH DETECTION ---
+    // --- EXACT PATH DETECTION (Desktop/Vercel Safe) ---
     const href = window.location.href.toUpperCase();
     const docTitle = document.title.toUpperCase();
     
@@ -216,9 +216,7 @@ window.injectUniversalUI = function() {
                 pointer-events: none !important;
             }
             
-            /* --- VECTOR HUD MOBILE ACTIVATION MATRIX --- */
-            
-            /* 1. TOP NAVBAR */
+            /* --- PURE 2D VECTOR HUD MOBILE ACTIVATION MATRIX --- */
             body.q-vector-hud .q-nav-bar { 
                 display: flex !important;
                 position: fixed !important;
@@ -226,15 +224,16 @@ window.injectUniversalUI = function() {
                 left: 0px !important; 
                 padding: 0 10px !important; 
                 height: 50px !important; 
-                width: 100vw !important; 
+                width: 100% !important; 
                 background: rgba(2, 6, 15, 0.95) !important; 
                 border-bottom: 1px solid rgba(255,255,255,0.1) !important; 
                 box-shadow: 0 5px 15px rgba(0,0,0,0.9) !important; 
                 z-index: 2147483647 !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                transform: none !important; /* PURGED TRANSLATE Z */
+                transform: none !important; /* NO Z-AXIS VOID */
                 pointer-events: none !important;
+                box-sizing: border-box !important;
             }
             body.q-vector-hud .q-nav-bar * { pointer-events: auto !important; }
             
@@ -262,7 +261,9 @@ window.injectUniversalUI = function() {
             body.q-vector-hud .q-nav-menu .bio-btn,
             body.q-vector-hud .q-nav-menu .com-btn,
             body.q-vector-hud .q-nav-menu .env-btn,
-            body.q-vector-hud .q-nav-menu .mec-btn {
+            body.q-vector-hud .q-nav-menu .mec-btn,
+            body.q-vector-hud .q-nav-menu .omni,
+            body.q-vector-hud .q-nav-menu .special {
                 display: none !important;
             }
 
@@ -274,42 +275,42 @@ window.injectUniversalUI = function() {
             body.q-vector-hud #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; white-space: nowrap; flex-shrink: 0; pointer-events: auto !important; }
             body.q-vector-hud .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
-            /* BOTTOM CONTROL STRIP */
+            /* BOTTOM CONTROL STRIP - FIRMLY ANCHORED LEFT 0, WIDTH 100% */
             body.q-vector-hud .q-control-strip {
                 display: flex !important;
                 position: fixed !important;
-                bottom: env(safe-area-inset-bottom, 10px) !important; 
-                left: 50% !important;
-                transform: translateX(-50%) !important; /* PURGED TRANSLATE Z */
-                width: 95vw !important; 
-                border-radius: 12px !important; 
+                bottom: 0px !important; 
+                left: 0px !important;
+                transform: none !important; /* NO Z-AXIS VOID, NO X-AXIS OFFSET */
+                width: 100% !important; 
                 height: 65px !important;
                 z-index: 2147483647 !important;
                 background: rgba(2, 6, 15, 0.98) !important;
-                border: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
+                border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
                 justify-content: space-around !important;
                 align-items: center !important;
                 box-shadow: 0 -10px 30px rgba(0,0,0,0.9) !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 pointer-events: auto !important;
+                box-sizing: border-box !important;
             }
 
             body.q-vector-hud #q-universal-controls {
                 display: flex !important;
                 position: fixed !important;
-                bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important; 
-                left: 50% !important;
-                transform: translateX(-50%) !important; /* PURGED TRANSLATE Z */
+                bottom: 65px !important; 
+                left: 0px !important;
+                transform: none !important; /* NO Z-AXIS VOID */
                 z-index: 2147483646 !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 pointer-events: auto !important;
                 align-items: center !important; 
                 justify-content: space-between !important;
-                width: 95% !important; 
+                width: 100% !important; 
                 box-sizing: border-box !important; 
-                padding: 6px 8px !important; 
+                padding: 6px 12px !important; 
                 gap: 4px !important;
             }
 
@@ -323,7 +324,7 @@ window.injectUniversalUI = function() {
                 background: rgba(2, 6, 15, 0.98) !important;
                 border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
                 z-index: 2147483645 !important;
-                transform: none !important; /* PURGED TRANSLATE Z */
+                transform: none !important; /* NO Z-AXIS VOID */
                 justify-content: space-between !important;
                 align-items: center !important;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.9) !important;
@@ -379,7 +380,8 @@ window.injectUniversalUI = function() {
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
 
-    // --- UNCONDITIONAL PAYLOAD INJECTION ---
+    // --- ENCAPSULATED UNCONDITIONAL PAYLOAD ---
+    // All UI elements are permanently sealed within the `#q-ui-injected-flag` container to prevent Aperture wipeout.
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
@@ -528,9 +530,9 @@ window.injectUniversalUI = function() {
             </div>
         </div>
     `;
-    
-    const refNode = document.body.firstChild;
-    while (uiContainer.firstChild) document.body.insertBefore(uiContainer.firstChild, refNode);
+
+    // Append the protected container directly to the body.
+    document.body.appendChild(uiContainer);
     
     window.bindMasterTickScrubber();
     window.syncScrubberUI();
