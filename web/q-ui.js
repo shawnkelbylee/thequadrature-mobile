@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Rollback of catastrophic flex override. Implementation of absolute safe-state mobile routing logic.
+// REVISION: Android WebView/Samsung Pathing Fix & Static CSS Decoupling
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -22,20 +22,27 @@ window.injectUniversalUI = function() {
     let noCache2 = document.createElement('meta'); noCache2.httpEquiv = "Pragma"; noCache2.content = "no-cache"; document.head.appendChild(noCache2);
     let noCache3 = document.createElement('meta'); noCache3.httpEquiv = "Expires"; noCache3.content = "0"; document.head.appendChild(noCache3);
     
-    // --- PATH DETECTION & ROUTING LOGIC ---
-    const path = window.location.pathname.toUpperCase();
-    const isHome = path.endsWith("/") || path.endsWith("INDEX.HTML") || path === "";
+    // --- BULLETPROOF PATH DETECTION (Android/Expo Safe) ---
+    // Relying on raw href inclusion rather than fragile pathnames
+    const href = window.location.href.toUpperCase();
     
-    const bActive = path.includes("PHYSIOLOGICAL");
-    const cActive = path.includes("METAPHYSICAL");
-    const eActive = path.includes("METEOROLOGICAL");
-    const mActive = path.includes("ASTROPHYSICAL");
+    const bActive = href.includes("PHYSIOLOGICAL");
+    const cActive = href.includes("METAPHYSICAL");
+    const eActive = href.includes("METEOROLOGICAL");
+    const mActive = href.includes("ASTROPHYSICAL");
     
-    const faceActive = isHome;
+    // If ANY vector is detected, we are on a HUD. Otherwise, default to Aperture Home.
+    const isVector = bActive || cActive || eActive || mActive;
+    const faceActive = !isVector; 
     
-    // Core state flags injected directly into the DOM body
-    if (faceActive) document.body.classList.add('q-aperture-home');
-    else document.body.classList.add('q-vector-hud');
+    // Apply definitive DOM flags for CSS logic
+    if (faceActive) {
+        document.body.classList.add('q-aperture-home');
+        document.body.classList.remove('q-vector-hud');
+    } else {
+        document.body.classList.add('q-vector-hud');
+        document.body.classList.remove('q-aperture-home');
+    }
     
     const authState = localStorage.getItem('Q_PRO_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
     const authBg = authState === 'ACTIVE' ? '#39ff14' : 'transparent';
@@ -43,11 +50,12 @@ window.injectUniversalUI = function() {
     const authBorder = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
     const authText = authState === 'ACTIVE' ? '[ IN THE QUAD ]' : '[ AUTHENTICATE ]';
 
+    // --- STATIC CSS MATRIX (Zero JS Interpolation for visibility rules) ---
     const style = document.createElement('style');
     style.innerHTML = `
         html, body { 
             position: fixed !important; top: 0px !important; left: 0px !important; right: 0px !important; bottom: 0px !important; 
-            width: 100vw !important; height: var(--app-height, 100vh) !important; 
+            width: 100% !important; height: var(--app-height, 100vh) !important; 
             margin: 0px !important; padding: 0px !important; 
             overflow: hidden !important; touch-action: none !important; overscroll-behavior: none !important; transform: none !important; 
             background-color: #010205; 
@@ -60,16 +68,19 @@ window.injectUniversalUI = function() {
             --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --center-gap-x: ${isHome ? '31vh' : '36vh'}; 
-            --corner-gap-y: ${isHome ? '24vh' : '21vh'}; 
-            --corner-gap-x: ${isHome ? '23vh' : '32vh'};
-            --panel-w: ${isHome ? '340px' : '460px'};
-            --panel-h: ${isHome ? '80px' : '170px'};
+            --center-gap-x: 36vh; 
+            --corner-gap-y: 21vh; 
+            --corner-gap-x: 32vh;
+            --panel-w: 460px;
+            --panel-h: 170px;
         }
-
-        /* --- VISIBILITY CLASSES --- */
-        @media (min-width: 951px) {
-            .mobile-only-flex { display: none !important; }
+        
+        body.q-aperture-home {
+            --center-gap-x: 31vh; 
+            --corner-gap-y: 24vh; 
+            --corner-gap-x: 23vh;
+            --panel-w: 340px;
+            --panel-h: 80px;
         }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
@@ -141,13 +152,14 @@ window.injectUniversalUI = function() {
         .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: var(--theme-main, #00f0ff); cursor: pointer; border: 1px solid var(--theme-dim, rgba(0,240,255,0.2)); padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; text-align: center; }
         .fmt-toggle:hover { background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 10px var(--theme-main, #00f0ff); }
 
-        /* --- DESKTOP NAVBAR --- */
+        /* --- GLOBAL DESKTOP NAVBAR --- */
         .q-nav-bar { 
             position: fixed; 
             bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);
             height: 45px; background: rgba(2, 6, 15, 0.95); 
             display: flex; justify-content: center; align-items: center; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
         }
+        
         body.q-aperture-home .q-nav-bar { display: none !important; }
         
         .q-nav-menu { display: flex; align-items: center; gap: 0.8vw; pointer-events: auto !important; width: 100%; justify-content: center; }
@@ -177,23 +189,23 @@ window.injectUniversalUI = function() {
         .q-scrubber::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; background: var(--theme-main, #00f0ff); clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); cursor: grab; pointer-events: auto; }
         .q-scrubber::-webkit-slider-thumb:active { cursor: grabbing; }
 
-        /* --- MOBILE OVERRIDES & EXPLICIT ROUTING --- */
+        .desktop-only { display: flex !important; }
+        .mobile-only-flex { display: none !important; }
+        
+        /* --- GLOBAL MOBILE EXPLICIT ROUTING --- */
         @media (max-width: 950px) {
             :root { --dial-size: min(48vh, 85vw) !important; } 
             .desktop-only { display: none !important; }
+            .mobile-only-flex { display: flex !important; }
             
             body:not(.telemetry-open) .telemetry-node { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
             
-            .q-nav-menu { position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; background: transparent; box-shadow: none; transform: none; width: auto; -webkit-overflow-scrolling: touch; border: none; padding-bottom: 0; gap: 5px; justify-content: flex-start; }
-            .q-nav-menu::-webkit-scrollbar { display: none; }
-            .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; margin-right: 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
-            
             .q-center-dial { margin-top: -3vh !important; }
             
-            /* -- APERTURE SUPPRESSION -- */
+            /* --- APERTURE MOBILE SUPPRESSION MATRIX --- */
             body.q-aperture-home .q-control-strip,
             body.q-aperture-home #mobile-telemetry-ribbon,
             body.q-aperture-home #q-universal-controls,
@@ -204,42 +216,81 @@ window.injectUniversalUI = function() {
                 pointer-events: none !important;
             }
             
-            /* -- VECTOR HUD ACTIVATION (THE FIX) -- */
+            /* --- VECTOR HUD MOBILE ACTIVATION MATRIX --- */
+            
+            /* 1. TOP NAVBAR (Hamburger Menu Container) */
+            body.q-vector-hud .q-nav-bar { 
+                display: flex !important;
+                position: fixed !important;
+                top: 0px !important; 
+                margin-top: 0px !important; 
+                left: 0px !important; 
+                padding: 0 10px !important; 
+                height: 50px !important; 
+                width: 100% !important; 
+                transform: none !important; 
+                border-radius: 0 !important; 
+                background: transparent !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+                pointer-events: none !important; /* Let clicks pass to canvas */
+                z-index: 2147483647 !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            /* 2. THE HAMBURGER MENU BUTTON */
+            body.q-vector-hud .hamburger-btn {
+                display: block !important;
+                pointer-events: auto !important; /* Re-enable clicks for the button */
+                position: absolute !important;
+                right: 15px !important;
+                top: 10px !important;
+                z-index: 2147483647 !important;
+            }
+
+            /* Disable original nav items on mobile vectors so they don't overlay the top */
+            body.q-vector-hud .q-nav-menu { display: none !important; } 
+            
+            /* 3. BOTTOM CONTROL STRIP (Vector Tabs) */
             body.q-vector-hud .q-control-strip {
                 display: flex !important;
                 position: fixed !important;
                 bottom: 0px !important;
                 left: 0px !important;
-                width: 100vw !important;
+                width: 100% !important;
                 height: 65px !important;
+                padding-bottom: env(safe-area-inset-bottom) !important; /* Samsung/iOS Safe Area Fix */
                 z-index: 2147483647 !important;
                 background: rgba(2, 6, 15, 0.98) !important;
                 border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
                 justify-content: space-around !important;
                 align-items: center !important;
-                padding-bottom: 0 !important;
                 box-shadow: 0 -10px 30px rgba(0,0,0,0.9) !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 pointer-events: auto !important;
             }
 
+            /* 4. THE SCRUBBER (Raised above the bottom strip) */
             body.q-vector-hud #q-universal-controls {
                 display: flex !important;
-                bottom: 80px !important;
+                position: fixed !important;
+                bottom: calc(75px + env(safe-area-inset-bottom)) !important; /* Math float above the strip */
                 z-index: 2147483646 !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 pointer-events: auto !important;
                 align-items: center !important; 
                 justify-content: space-between !important;
-                width: 95vw !important; 
+                width: 95% !important; 
                 min-width: unset !important; 
                 box-sizing: border-box !important; 
                 padding: 6px 8px !important; 
                 gap: 4px !important;
             }
 
+            /* 5. THE TELEMETRY RIBBON (Top Info Bar) */
             body.q-vector-hud #mobile-telemetry-ribbon {
                 display: flex !important;
                 position: fixed !important;
@@ -247,7 +298,7 @@ window.injectUniversalUI = function() {
                 margin-top: 0 !important;
                 left: 0px !important;
                 height: 45px !important;
-                width: 100vw !important;
+                width: 100% !important;
                 background: rgba(2, 6, 15, 0.98) !important;
                 border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
                 z-index: 2147483645 !important;
@@ -306,6 +357,7 @@ window.injectUniversalUI = function() {
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
 
+    // The Hamburger button explicitly tagged with "hamburger-btn" class for targeted CSS extraction
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
@@ -326,7 +378,7 @@ window.injectUniversalUI = function() {
                     <button class="q-nav-btn special desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()">[ DASHBOARD ]</button>
                 </div>
             </div>
-            <button class="mobile-only-flex" style="background:transparent; border:none; color:var(--theme-main, #00f0ff); font-size:1.5rem; padding:0; margin:0; position:absolute; right:15px; cursor:pointer;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()">☰</button>
+            <button class="mobile-only-flex hamburger-btn" style="background:transparent; border:none; color:var(--theme-main, #00f0ff); font-size:1.5rem; padding:0; margin:0; cursor:pointer;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()">☰</button>
         </div>
 
         <div id="mobile-telemetry-ribbon" class="mobile-only-flex">
