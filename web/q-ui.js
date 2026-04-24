@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Top Navbar Sub-Node Recovery
+// REVISION: Samsung/Android Viewport Lockdown & Z-Axis Elevation
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -22,7 +22,7 @@ window.injectUniversalUI = function() {
     let noCache2 = document.createElement('meta'); noCache2.httpEquiv = "Pragma"; noCache2.content = "no-cache"; document.head.appendChild(noCache2);
     let noCache3 = document.createElement('meta'); noCache3.httpEquiv = "Expires"; noCache3.content = "0"; document.head.appendChild(noCache3);
     
-    // --- BULLETPROOF PATH DETECTION (Android/Expo Safe) ---
+    // --- PATH DETECTION ---
     const href = window.location.href.toUpperCase();
     
     const bActive = href.includes("PHYSIOLOGICAL");
@@ -153,6 +153,10 @@ window.injectUniversalUI = function() {
         .mobile-only-flex { display: none !important; }
 
         @media (max-width: 950px) {
+            /* ANDROID/SAMSUNG SCALING LOCKDOWN */
+            :root { 
+                --dial-size: min(85vw, 340px) !important; /* Force a hard pixel max so it never bleeds off small Android screens */
+            } 
             .desktop-only { display: none !important; }
             .mobile-only-flex { display: flex !important; }
             
@@ -161,7 +165,8 @@ window.injectUniversalUI = function() {
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
             
-            .q-center-dial { margin-top: -3vh !important; }
+            /* Center the iris slightly higher on mobile to make room for bottom UI */
+            .q-center-dial { margin-top: -4vh !important; }
             
             /* --- APERTURE MOBILE SUPPRESSION MATRIX --- */
             body.q-aperture-home .q-control-strip,
@@ -181,20 +186,18 @@ window.injectUniversalUI = function() {
                 display: flex !important;
                 position: fixed !important;
                 top: 0px !important; 
-                margin-top: 0px !important; 
                 left: 0px !important; 
                 padding: 0 10px !important; 
                 height: 50px !important; 
                 width: 100vw !important; 
-                transform: none !important; 
-                border-radius: 0 !important; 
-                background: rgba(2, 6, 15, 0.95) !important; /* Visible background for Vectors */
+                background: rgba(2, 6, 15, 0.95) !important; 
                 border-bottom: 1px solid rgba(255,255,255,0.1) !important; 
                 box-shadow: 0 5px 15px rgba(0,0,0,0.9) !important; 
-                pointer-events: none !important; 
                 z-index: 2147483647 !important;
                 visibility: visible !important;
                 opacity: 1 !important;
+                transform: translateZ(1000px) !important; /* FORCE COMPOSITOR ELEVATION */
+                pointer-events: none !important;
             }
             body.q-vector-hud .q-nav-bar * { pointer-events: auto !important; }
             
@@ -205,7 +208,6 @@ window.injectUniversalUI = function() {
                 position: absolute !important;
                 right: 15px !important;
                 top: 10px !important;
-                z-index: 2147483647 !important;
             }
 
             /* 2.5 RESTORE MENU CONTENTS (Badge + Aperture) */
@@ -215,17 +217,14 @@ window.injectUniversalUI = function() {
                 flex-direction: row !important;
                 justify-content: flex-start !important;
                 align-items: center !important;
-                width: calc(100% - 50px) !important; /* Make room for the hamburger */
+                width: calc(100% - 50px) !important; 
                 background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
                 overflow-x: auto !important;
-                padding-bottom: 0 !important;
                 gap: 8px !important;
             } 
             body.q-vector-hud .q-nav-menu::-webkit-scrollbar { display: none; }
 
-            /* Strip out the redundant buttons from the top bar so only Auth + Aperture remain */
+            /* Strip out redundant buttons */
             body.q-vector-hud .q-nav-menu .bio-btn,
             body.q-vector-hud .q-nav-menu .com-btn,
             body.q-vector-hud .q-nav-menu .env-btn,
@@ -233,28 +232,27 @@ window.injectUniversalUI = function() {
                 display: none !important;
             }
 
-            /* Ensure Aperture and Badge explicitly render */
             body.q-vector-hud .q-nav-menu .face-btn,
             body.q-vector-hud .q-nav-menu .sim-badge {
                 display: inline-block !important;
             }
 
-            /* Small adjustments for badge fit */
-            body.q-vector-hud #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
-            body.q-vector-hud .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; margin-right: 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
+            body.q-vector-hud #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; white-space: nowrap; flex-shrink: 0; pointer-events: auto !important; }
+            body.q-vector-hud .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
-            /* 3. BOTTOM CONTROL STRIP (Vector Tabs) */
+            /* 3. BOTTOM CONTROL STRIP (Vector Tabs) - ELEVATED OFF BOTTOM EDGE */
             body.q-vector-hud .q-control-strip {
                 display: flex !important;
                 position: fixed !important;
-                bottom: 0px !important;
-                left: 0px !important;
-                width: 100% !important;
+                bottom: 10px !important; /* LIFTED FROM 0 TO CLEAR ANDROID NAV BAR */
+                left: 50% !important;
+                transform: translateX(-50%) translateZ(1000px) !important; /* HARD CENTER & COMPOSITE LIFT */
+                width: 95vw !important; /* PREVENT BLEED */
+                border-radius: 12px !important; /* ROUNDED FLOATING LOOK */
                 height: 65px !important;
-                padding-bottom: env(safe-area-inset-bottom) !important;
                 z-index: 2147483647 !important;
                 background: rgba(2, 6, 15, 0.98) !important;
-                border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
+                border: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
                 justify-content: space-around !important;
                 align-items: center !important;
                 box-shadow: 0 -10px 30px rgba(0,0,0,0.9) !important;
@@ -267,7 +265,9 @@ window.injectUniversalUI = function() {
             body.q-vector-hud #q-universal-controls {
                 display: flex !important;
                 position: fixed !important;
-                bottom: calc(75px + env(safe-area-inset-bottom)) !important;
+                bottom: 85px !important; /* PUSHED ABOVE THE LIFTED STRIP */
+                left: 50% !important;
+                transform: translateX(-50%) translateZ(1000px) !important;
                 z-index: 2147483646 !important;
                 visibility: visible !important;
                 opacity: 1 !important;
@@ -275,7 +275,6 @@ window.injectUniversalUI = function() {
                 align-items: center !important; 
                 justify-content: space-between !important;
                 width: 95% !important; 
-                min-width: unset !important; 
                 box-sizing: border-box !important; 
                 padding: 6px 8px !important; 
                 gap: 4px !important;
@@ -286,13 +285,13 @@ window.injectUniversalUI = function() {
                 display: flex !important;
                 position: fixed !important;
                 top: 50px !important;
-                margin-top: 0 !important;
                 left: 0px !important;
                 height: 45px !important;
                 width: 100% !important;
                 background: rgba(2, 6, 15, 0.98) !important;
                 border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
                 z-index: 2147483645 !important;
+                transform: translateZ(1000px) !important;
                 justify-content: space-between !important;
                 align-items: center !important;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.9) !important;
