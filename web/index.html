@@ -34,6 +34,7 @@
         
         window.addEventListener('DOMContentLoaded', () => {
             purgeObserver.observe(document.body, { childList: true, subtree: true });
+            document.body.classList.add('is-aperture');
         });
     </script>
 
@@ -63,13 +64,14 @@
             background-color: #010205; 
         }
 
-        /* CRITICAL FIX: Aggressive hiding of dynamically injected UI elements from q-ui.js */
-        body > *:not(.home-container):not(#portal-frame):not(#warp-star-field):not(.global-header):not(.global-footer):not(.corner-panel):not(.mobile-routing-grid):not(script):not(style):not(iframe):not(meta):not(title):not(#q-ui-injected-flag):not(.q-hub-overlay):not(.q-planner-overlay):not(.center-axis-btn) {
-            display: none !important; 
-            opacity: 0 !important; 
-            pointer-events: none !important; 
-            visibility: hidden !important;
-            z-index: -9999 !important;
+        /* TARGETED SUPPRESSION: Only hides UI elements when on the Aperture page */
+        body.is-aperture .q-nav-bar, 
+        body.is-aperture #mobile-telemetry-ribbon,
+        body.is-aperture #q-universal-controls,
+        body.is-aperture .q-control-strip {
+            display: none !important;
+            pointer-events: none !important;
+            opacity: 0 !important;
         }
 
         body.sequencing > *:not(.home-container):not(#portal-frame):not(script):not(style):not(.mobile-routing-grid) {
@@ -79,35 +81,19 @@
         .global-header { position: absolute; top: 4vh; left: 0; width: 100vw; display: flex; justify-content: center; align-items: center; text-align: center; font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.8rem; letter-spacing: 16px; padding-left: 16px; color: #ffffff; z-index: 50; pointer-events: none; text-shadow: 0 0 15px rgba(0, 163, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5); }
         .global-footer { position: absolute; bottom: 6vh; left: 0; width: 100vw; display: flex; justify-content: center; align-items: center; text-align: center; font-family: 'Courier New', Courier, monospace; font-weight: 700; font-size: 1.4rem; letter-spacing: 4px; padding-left: 4px; color: rgba(255, 255, 255, 0.85); z-index: 50; pointer-events: none; text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0, 163, 255, 0.3); }
 
-        .panel-label { height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 0.9rem; letter-spacing: 4px; padding-left: 4px; font-weight: 700; color: var(--q-metal); text-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.4); position: relative; z-index: 2; box-sizing: border-box; font-family: 'Orbitron'; pointer-events: none; }
-        .tl .panel-label { padding-left: 59px; } .tr .panel-label { padding-right: 51px; } .bl .panel-label { padding-left: 59px; } .br .panel-label { padding-right: 51px; }
-
         /* --- THE HOME CORE --- */
-        .home-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 52vh; height: 52vh; z-index: 10; display: flex; justify-content: center; align-items: center; }
+        .home-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 52vh; height: 52vh; z-index: 10; display: flex; justify-content: center; align-items: center; pointer-events: none; }
         .iris-ring, .core-void { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; pointer-events: none; transition: transform 0.8s cubic-bezier(0.5, 0, 0.2, 1); }
-        .iris-ring { z-index: 10; filter: drop-shadow(0 0 35px rgba(0,0,0,0.95)); }
+        .iris-ring { z-index: 10; filter: drop-shadow(0 0 35px rgba(0,0,0,0.95)); pointer-events: auto; cursor: pointer; }
         .core-void { width: 68%; height: 68%; background: #000; border-radius: 50%; z-index: 5; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,1); margin: auto; opacity: 1; }
 
         .star-field { position: absolute; inset: 0; z-index: 3; pointer-events: none;}
         .star { position: absolute; background: #fff; border-radius: 50%; }
 
-        .q-core-asset { position: absolute; width: 50%; height: 50%; left: 51.2%; top: 50%; transform: translate(-50%, -50%); background: url('assets/core-q.png') center/contain no-repeat; z-index: 15; filter: drop-shadow(0 0 25px var(--q-blue-glow)); animation: subtle-pulse 4s ease-in-out infinite; transition: all 0.5s ease; }
+        .q-core-asset { position: absolute; width: 50%; height: 50%; left: 51.2%; top: 50%; transform: translate(-50%, -50%); background: url('assets/core-q.png') center/contain no-repeat; z-index: 15; filter: drop-shadow(0 0 25px var(--q-blue-glow)); animation: subtle-pulse 4s ease-in-out infinite; transition: all 0.5s ease; pointer-events: none; }
 
         @keyframes subtle-pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1) drop-shadow(0 0 25px var(--q-blue-glow)); } 50% { transform: translate(-50%, -50%) scale(1.05); filter: brightness(1.2) drop-shadow(0 0 40px var(--q-blue-glow)); } }
         @keyframes hyper-jump { 0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; } 5% { opacity: var(--max-op, 1); } 100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.2); opacity: 0; } }
-
-        /* --- KINETIC ACTUATION STATES --- */
-        #portal-frame { position: fixed; inset: 0; width: 100vw; height: 100vh; border: none; z-index: 100; opacity: 0 !important; pointer-events: none; background-color: #010205; clip-path: circle(5% at 50% 50%); }
-        #iris-blade-group { transform-origin: 50px 50px; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease-in 0.2s; }
-        body.sequencing #iris-blade-group { transform: rotate(90deg) scale(1.6); opacity: 0; }
-        body.sequencing .iris-ring { opacity: 0; transition: opacity 0.4s ease-in 0.5s; }
-        body.sequencing .core-void { opacity: 0; transition: opacity 0.3s ease-in 0.4s; }
-        body.sequencing #portal-frame { opacity: 1 !important; clip-path: circle(150% at 50% 50%); transition: opacity 0.2s ease-in 0.3s, clip-path 1.1s cubic-bezier(0.7, 0, 0.1, 1) 0.3s; }
-        body.sequencing .q-core-asset { animation: q-core-portal 1.1s forwards cubic-bezier(0.7, 0, 0.1, 1) 0.3s; }
-        body.sequencing .mobile-routing-grid { opacity: 0 !important; transition: 0.2s; }
-        body.sequencing .center-axis-btn { opacity: 0 !important; transition: opacity 0.4s ease-out; }
-
-        @keyframes q-core-portal { 0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1) drop-shadow(0 0 25px var(--q-blue-glow)); opacity: 1; } 40% { transform: translate(-50%, -50%) scale(1.5); filter: brightness(3) drop-shadow(0 0 60px var(--white-flash)); opacity: 1; } 70% { transform: translate(-50%, -50%) scale(10); filter: brightness(5) drop-shadow(0 0 100px var(--white-flash)); opacity: 0.5; } 100% { transform: translate(-50%, -50%) scale(40); filter: brightness(8) drop-shadow(0 0 0px var(--white-flash)); opacity: 0; } }
 
         /* --- GEOMETRIC CENTER AXIS BUTTONS --- */
         .center-axis-btn {
@@ -155,19 +141,27 @@
         .axis-omni .axis-label { transform: translateY(-4px); }
         .axis-dash .axis-label { transform: translateY(4px); }
 
-        .axis-omni:hover { transform: translateX(-50%) translateY(-2px); filter: brightness(1.2) drop-shadow(0 0 15px rgba(0, 163, 255, 0.4)); }
-        .axis-dash:hover { transform: translateX(-50%) translateY(2px); filter: brightness(1.2) drop-shadow(0 0 15px rgba(0, 163, 255, 0.4)); }
+        /* --- MOBILE REFINEMENT --- */
+        @media (max-width: 950px) {
+            .desktop-only { display: none !important; }
+            
+            /* KILL INVISIBLE OVERLAY BLOCKS */
+            .corner-panel { display: none !important; pointer-events: none !important; }
+            
+            /* RE-POSITION CENTER AXIS BUTTONS: Omni moved back UP */
+            .center-axis-btn { transform: translateX(-50%) scale(0.7); }
+            .axis-omni { bottom: calc(50% + 28vh); transform-origin: bottom center; }
+            .axis-dash { top: calc(50% + 24vh); transform-origin: top center; }
+        }
 
-        /* --- THE MOBILE HOME PROTOCOL --- */
-        .desktop-only { display: flex !important; }
-        
-        .mobile-routing-grid { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85vw; max-width: 400px; height: auto; flex-direction: column; gap: 16px; z-index: 30; pointer-events: none; }
+        .mobile-routing-grid { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85vw; max-width: 400px; height: auto; flex-direction: column; gap: 16px; z-index: 100; pointer-events: none; }
+        body.mobile-revealed .mobile-routing-grid { display: flex; pointer-events: auto; }
+
         .m-panel { position: relative; border-radius: 8px; cursor: pointer; pointer-events: auto; display: flex; justify-content: center; align-items: center; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); width: 100%; height: 75px; opacity: 0; transform: translateY(30px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .m-frost { position: absolute; inset: 0; background: rgba(15, 20, 35, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 1; }
         .m-bg { position: absolute; inset: 0; background: url('assets/panel-frame.png') center/150% 150% no-repeat; z-index: 2; opacity: 0.5; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
         .m-label { position: relative; z-index: 3; font-family: 'Orbitron'; font-size: 0.9rem; font-weight: 700; color: var(--q-metal); letter-spacing: 4px; text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.3); display: flex; align-items: center; gap: 8px; }
 
-        body.mobile-revealed .mobile-routing-grid { pointer-events: auto; }
         body.mobile-revealed .q-core-asset { opacity: 0.15; filter: blur(8px); }
         body.mobile-revealed .iris-ring { transform: rotate(45deg); filter: drop-shadow(0 0 15px rgba(0,0,0,0.95)); }
         body.mobile-revealed .m-panel { opacity: 1; transform: translateY(0); }
@@ -175,24 +169,6 @@
         body.mobile-revealed .m-panel:nth-child(2) { transition-delay: 0.10s; }
         body.mobile-revealed .m-panel:nth-child(3) { transition-delay: 0.15s; }
         body.mobile-revealed .m-panel:nth-child(4) { transition-delay: 0.20s; }
-
-        /* CRITICAL FIX: MOBILE SCALING AND ISOLATION */
-        @media (max-width: 950px) {
-            .desktop-only { display: none !important; }
-            .mobile-routing-grid { display: flex; }
-            
-            /* KILL INVISIBLE CORNER PANELS ON MOBILE */
-            .corner-panel { display: none !important; pointer-events: none !important; }
-            
-            /* SCALE & REPOSITION CENTER AXIS BUTTONS FOR MOBILE */
-            .center-axis-btn { transform: translateX(-50%) scale(0.75); }
-            .axis-omni { bottom: calc(50% + 24vh); transform-origin: bottom center; }
-            .axis-dash { top: calc(50% + 24vh); transform-origin: top center; }
-            
-            /* Retain scaled transform on active/tap */
-            .axis-omni:active { transform: translateX(-50%) scale(0.75) translateY(-2px); }
-            .axis-dash:active { transform: translateX(-50%) scale(0.75) translateY(2px); }
-        }
     </style>
 </head>
 <body class="mode-q">
@@ -241,27 +217,6 @@
     </div>
 
     <script>
-        window.addEventListener('q-ui-mounted', () => {
-            const routingMap = {
-                'tl': 'PHYSIOLOGICAL',
-                'tr': 'METAPHYSICAL',
-                'bl': 'METEOROLOGICAL',
-                'br': 'ASTROPHYSICAL'
-            };
-
-            for (const [pos, label] of Object.entries(routingMap)) {
-                const panel = document.querySelector(`.corner-panel.${pos}`);
-                if (panel) {
-                    panel.setAttribute('onclick', `window.executeHomeSequence('${label}.html')`);
-                    panel.innerHTML = `
-                        <div class="frost-zone"></div>
-                        <div class="panel-bg"></div>
-                        <div class="panel-label">${label}</div>
-                    `;
-                }
-            }
-        });
-
         function injectPerfectIris() {
             const container = document.querySelector('.iris-ring');
             if(!container || document.getElementById('perfect-iris-svg')) return;
@@ -373,23 +328,25 @@
         };
 
         window.addEventListener('click', (e) => {
-            const el = e.target.closest('.corner-panel, .m-panel');
-            if (!el) return;
-            
-            const target = el.getAttribute('data-target') || el.getAttribute('data-route');
-            if (target) {
-                e.preventDefault();
-                e.stopPropagation();
-                window.executeHomeSequence(target);
+            const el = e.target.closest('.m-panel');
+            if (el) {
+                const target = el.getAttribute('data-route');
+                if (target) {
+                    e.preventDefault(); e.stopPropagation();
+                    window.executeHomeSequence(target);
+                }
             }
         }, true);
 
         let isMobileRevealed = false;
         function initMobileHome() {
             document.addEventListener('click', (e) => {
-                if(window.innerWidth <= 950 && !isMobileRevealed && !e.target.closest('.m-panel') && !e.target.closest('.center-axis-btn')) {
-                    document.body.classList.add('mobile-revealed');
-                    isMobileRevealed = true;
+                if(window.innerWidth <= 950) {
+                   // If tapping anywhere outside the center axis buttons, reveal the 4 vector panels
+                   if (!e.target.closest('.center-axis-btn') && !isMobileRevealed) {
+                        document.body.classList.add('mobile-revealed');
+                        isMobileRevealed = true;
+                   }
                 }
             });
         }
