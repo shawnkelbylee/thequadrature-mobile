@@ -189,12 +189,12 @@
     <div class="global-header desktop-only">THE QUADRATURE</div>
     <div class="global-footer desktop-only">BASED IN SCIENCE BATHED IN CULTURE & BUILT FOR THE DIGITAL AGE</div>
 
-    <div class="center-axis-btn axis-omni" onclick="if(window.Q_OmniPlanner) window.Q_OmniPlanner.openPlanner()">
+    <div class="center-axis-btn axis-omni desktop-only" onclick="if(window.Q_OmniPlanner) window.Q_OmniPlanner.openPlanner()">
         <img class="axis-bg" src="assets/omni-panel.png" alt="omni background" />
         <span class="axis-label">OMNI-PLANNER</span>
     </div>
 
-    <div class="center-axis-btn axis-dash" onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()">
+    <div class="center-axis-btn axis-dash desktop-only" onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()">
         <img class="axis-bg" src="assets/dash-panel.png" alt="dash background" />
         <span class="axis-label">DASHBOARD</span>
     </div>
@@ -216,6 +216,15 @@
             <div class="m-frost"></div><div class="m-bg" style="transform: scale(-1, -1);"></div>
             <div class="m-label">ASTROPHYSICAL</div>
         </div>
+        
+        <div style="display:flex; justify-content:space-between; gap:10px; width:100%; margin-top: 10px;">
+            <button onclick="if(window.Q_OmniPlanner) window.Q_OmniPlanner.openPlanner()" style="flex:1; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); padding: 12px; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: bold; letter-spacing: 1px; cursor: pointer; border-radius: 4px; pointer-events:auto;">
+                OMNI-PLANNER
+            </button>
+            <button onclick="if(window.Q_IntegrationHub) window.Q_IntegrationHub.openHub()" style="flex:1; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); padding: 12px; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: bold; letter-spacing: 1px; cursor: pointer; border-radius: 4px; pointer-events:auto;">
+                DASHBOARD
+            </button>
+        </div>
     </div>
 
     <div class="home-container q-center-dial">
@@ -227,6 +236,28 @@
     </div>
 
     <script>
+        // --- RESTORED: DOM MUTATION TO CONVERT TELEMETRY PANELS TO ROUTING BUTTONS ---
+        window.addEventListener('q-ui-mounted', () => {
+            const routingMap = {
+                'tl': 'PHYSIOLOGICAL',
+                'tr': 'METAPHYSICAL',
+                'bl': 'METEOROLOGICAL',
+                'br': 'ASTROPHYSICAL'
+            };
+
+            for (const [pos, label] of Object.entries(routingMap)) {
+                const panel = document.querySelector(`.corner-panel.${pos}`);
+                if (panel) {
+                    panel.setAttribute('onclick', `window.executeHomeSequence('${label}.html')`);
+                    panel.innerHTML = `
+                        <div class="frost-zone"></div>
+                        <div class="panel-bg"></div>
+                        <div class="panel-label">${label}</div>
+                    `;
+                }
+            }
+        });
+
         function injectPerfectIris() {
             const container = document.querySelector('.iris-ring');
             if(!container || document.getElementById('perfect-iris-svg')) return;
@@ -338,24 +369,23 @@
         };
 
         window.addEventListener('click', (e) => {
-            const el = e.target.closest('.m-panel');
-            if (el) {
-                const target = el.getAttribute('data-route');
-                if (target) {
-                    e.preventDefault(); e.stopPropagation();
-                    window.executeHomeSequence(target);
-                }
+            const el = e.target.closest('.corner-panel, .m-panel');
+            if (!el) return;
+            
+            const target = el.getAttribute('data-target') || el.getAttribute('data-route');
+            if (target) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.executeHomeSequence(target);
             }
         }, true);
 
         let isMobileRevealed = false;
         function initMobileHome() {
             document.addEventListener('click', (e) => {
-                if(window.innerWidth <= 950) {
-                   if (!e.target.closest('.center-axis-btn') && !isMobileRevealed) {
-                        document.body.classList.add('mobile-revealed');
-                        isMobileRevealed = true;
-                   }
+                if(window.innerWidth <= 950 && !isMobileRevealed && !e.target.closest('.m-panel')) {
+                    document.body.classList.add('mobile-revealed');
+                    isMobileRevealed = true;
                 }
             });
         }
