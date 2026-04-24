@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Baseline Restoration, Universal Starfield Injection, Registry Purged, Mobile Navigation Z-Index Alignment
+// REVISION: Absolute Global Mobile Z-Index and Positioning Lock
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -135,12 +135,12 @@ window.injectUniversalUI = function() {
         .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: var(--theme-main, #00f0ff); cursor: pointer; border: 1px solid var(--theme-dim, rgba(0,240,255,0.2)); padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; text-align: center; }
         .fmt-toggle:hover { background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 10px var(--theme-main, #00f0ff); }
 
-        /* --- NAVBAR & SCRUBBER INJECTION --- */
+        /* --- NAVBAR (DESKTOP) --- */
         .q-nav-bar { 
             position: fixed; 
-            ${isHome ? 'display: none !important;' : 'bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
+            ${isHome ? 'display: none !important;' : 'display: flex; bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
             height: 45px; background: rgba(2, 6, 15, 0.95); 
-            display: flex; justify-content: center; align-items: center; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
+            justify-content: center; align-items: center; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
         }
         
         .q-nav-menu { display: flex; align-items: center; gap: 0.8vw; pointer-events: auto !important; width: 100%; justify-content: center; }
@@ -160,7 +160,7 @@ window.injectUniversalUI = function() {
         #q-mic-fab-desktop.listening { animation: pulse-mic-desktop 1.5s infinite; }
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px var(--theme-main, #00f0ff); } 50% { transform: scale(1.1); box-shadow: 0 0 25px var(--theme-main, #00f0ff); } 100% { transform: scale(1); box-shadow: 0 0 10px var(--theme-main, #00f0ff); } }
         
-        .q-global-controls { position: fixed; ${isHome ? 'display: none !important;' : 'bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; display: flex; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
+        .q-global-controls { position: fixed; ${isHome ? 'display: none !important;' : 'display: flex; bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
         .q-ctrl-btn { background: transparent; border: 1px solid var(--theme-main, #00f0ff); color: var(--theme-main, #00f0ff); padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; padding-left: 15px; white-space: nowrap; pointer-events: auto; }
         .q-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .q-ctrl-btn.active { background: var(--theme-main, #00f0ff); color: #000; }
@@ -181,7 +181,8 @@ window.injectUniversalUI = function() {
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
             
-            /* GLOBAL MOBILE NAVBAR ISOLATION */
+            /* --- GLOBAL MOBILE NAVBAR ISOLATION --- */
+            /* We physically detach the original top navbar for mobile, relying entirely on the Control Strip at the bottom */
             .q-nav-bar { 
                 top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; 
                 height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; 
@@ -199,8 +200,24 @@ window.injectUniversalUI = function() {
             
             .q-center-dial { margin-top: -3vh !important; }
             
-            /* CRITICAL FIX: The Vector Navigation Control Strip */
-            .q-control-strip { position: fixed; bottom: 0 !important; left: 0; width: 100%; background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); ${isHome ? 'display: none !important;' : 'display: flex !important;'} justify-content: space-around; align-items: center; z-index: 100000; height: 65px !important; padding-bottom: 0 !important; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; }
+            /* --- CRITICAL FIX: ABSOLUTE VECTOR NAVIGATION CONTROL STRIP --- */
+            /* This strip represents the vector tabs at the bottom. It MUST show on all vectors. */
+            .q-control-strip { 
+                position: fixed !important; 
+                bottom: 0 !important; 
+                left: 0 !important; 
+                width: 100vw !important; 
+                background: rgba(2, 6, 15, 0.98) !important; 
+                border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important; 
+                ${isHome ? 'display: none !important;' : 'display: flex !important;'} 
+                justify-content: space-around !important; 
+                align-items: center !important; 
+                z-index: 100000 !important; 
+                height: 65px !important; 
+                padding-bottom: 0 !important; 
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.9) !important; 
+                pointer-events: auto !important; 
+            }
             
             .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
             .strip-btn svg { transition: 0.3s; }
@@ -235,7 +252,8 @@ window.injectUniversalUI = function() {
             
             body.telemetry-open .q-center-dial { display: none !important; }
 
-            /* CRITICAL FIX: Scrubber properly lifted to float above the control strip */
+            /* --- CRITICAL FIX: SCRUBBER HIERARCHY --- */
+            /* Floats above the 65px tall Control Strip */
             .q-global-controls { 
                 ${isHome ? 'display: none !important;' : 'display: flex !important;'}
                 align-items: center !important; 
