@@ -34,7 +34,6 @@
         
         window.addEventListener('DOMContentLoaded', () => {
             purgeObserver.observe(document.body, { childList: true, subtree: true });
-            // Tag the body specifically to allow targeted UI suppression
             document.body.classList.add('is-aperture');
         });
     </script>
@@ -65,7 +64,7 @@
             background-color: #010205; 
         }
 
-        /* NAVIGATION SUPPRESSION: Only active on this specific page */
+        /* --- NAVIGATION SUPPRESSION (APERTURE ONLY) --- */
         body.is-aperture .q-nav-bar, 
         body.is-aperture #mobile-telemetry-ribbon,
         body.is-aperture #q-universal-controls,
@@ -76,30 +75,25 @@
             pointer-events: none !important;
         }
 
-        /* GLOBAL MOBILE VECTOR HUD NAVIGATION FIX */
-        /* These rules only apply when the .is-aperture class is NOT present */
+        /* --- GLOBAL NAVIGATION RECOVERY (VECTORS ONLY) --- */
         @media (max-width: 950px) {
             body:not(.is-aperture) .q-nav-bar {
                 display: flex !important;
-                z-index: 9999 !important;
+                z-index: 10001 !important;
+                bottom: 0 !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
             }
             body:not(.is-aperture) #q-global-scrubber-container {
                 display: flex !important;
-                bottom: 70px !important;
-                z-index: 9000 !important;
+                bottom: 80px !important;
+                z-index: 10000 !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
             }
         }
 
-        .global-header { position: absolute; top: 4vh; left: 0; width: 100vw; display: flex; justify-content: center; align-items: center; text-align: center; font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.8rem; letter-spacing: 16px; padding-left: 16px; color: #ffffff; z-index: 50; pointer-events: none; text-shadow: 0 0 15px rgba(0, 163, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5); }
-        .global-footer { position: absolute; bottom: 6vh; left: 0; width: 100vw; display: flex; justify-content: center; align-items: center; text-align: center; font-family: 'Courier New', Courier, monospace; font-weight: 700; font-size: 1.4rem; letter-spacing: 4px; padding-left: 4px; color: rgba(255, 255, 255, 0.85); z-index: 50; pointer-events: none; text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0, 163, 255, 0.3); }
-
-        /* --- THE HOME CORE --- */
-        .home-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 52vh; height: 52vh; z-index: 10; display: flex; justify-content: center; align-items: center; pointer-events: none; }
-        .iris-ring { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 10; filter: drop-shadow(0 0 35px rgba(0,0,0,0.95)); pointer-events: auto; cursor: pointer; }
-        .core-void { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; width: 68%; height: 68%; background: #000; border-radius: 50%; z-index: 5; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,1); margin: auto; opacity: 1; pointer-events: none; }
-        .q-core-asset { position: absolute; width: 50%; height: 50%; left: 51.2%; top: 50%; transform: translate(-50%, -50%); background: url('assets/core-q.png') center/contain no-repeat; z-index: 15; filter: drop-shadow(0 0 25px var(--q-blue-glow)); animation: subtle-pulse 4s ease-in-out infinite; transition: all 0.5s ease; pointer-events: none; }
-
-        /* --- GEOMETRIC CENTER AXIS BUTTONS --- */
+        /* --- DESKTOP AXIS BUTTONS --- */
         .center-axis-btn {
             position: absolute;
             left: 50%;
@@ -115,33 +109,10 @@
             text-align: center;
             transition: transform 0.3s ease, filter 0.3s ease;
         }
-
-        .axis-bg {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.85;
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
-        }
-
+        .axis-bg { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 1; opacity: 0.85; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6)); }
         .axis-omni { bottom: calc(50% + 30.5vh); }
         .axis-dash { top: calc(50% + 30.5vh); }
-
-        .axis-label {
-            font-family: 'Orbitron';
-            font-size: 1.0rem;
-            letter-spacing: 4px;
-            padding-left: 4px; 
-            font-weight: 900; 
-            color: var(--q-metal);
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.4);
-            position: relative;
-            z-index: 2;
-            pointer-events: none;
-        }
-
+        .axis-label { font-family: 'Orbitron'; font-size: 1.0rem; letter-spacing: 4px; padding-left: 4px; font-weight: 900; color: var(--q-metal); text-shadow: 0 2px 5px rgba(0,0,0,0.8), 0 0 5px rgba(255,255,255,0.4); position: relative; z-index: 2; pointer-events: none; }
         .axis-omni .axis-label { transform: translateY(-4px); }
         .axis-dash .axis-label { transform: translateY(4px); }
 
@@ -150,14 +121,19 @@
             .desktop-only { display: none !important; }
             .corner-panel { display: none !important; pointer-events: none !important; }
             
-            /* SYMMETRIC AXIS ALIGNMENT: Matching Desktop Spacing (30.5vh) scaled to mobile */
+            /* EQUIDISTANT ALIGNMENT: Both nodes locked to 26vh */
             .center-axis-btn { transform: translateX(-50%) scale(0.7); display: flex !important; }
-            .axis-omni { bottom: calc(50% + 30.5vh); transform-origin: bottom center; }
-            .axis-dash { top: calc(50% + 30.5vh); transform-origin: top center; }
+            .axis-omni { bottom: calc(50% + 26vh); transform-origin: bottom center; }
+            .axis-dash { top: calc(50% + 26vh); transform-origin: top center; }
             
             .mobile-routing-grid { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85vw; max-width: 400px; height: auto; flex-direction: column; gap: 16px; z-index: 110; pointer-events: none; }
             body.mobile-revealed .mobile-routing-grid { display: flex; pointer-events: auto; }
         }
+
+        .home-container { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 52vh; height: 52vh; z-index: 10; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .iris-ring { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; z-index: 10; filter: drop-shadow(0 0 35px rgba(0,0,0,0.95)); pointer-events: auto; cursor: pointer; }
+        .core-void { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; width: 68%; height: 68%; background: #000; border-radius: 50%; z-index: 5; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,1); margin: auto; opacity: 1; pointer-events: none; }
+        .q-core-asset { position: absolute; width: 50%; height: 50%; left: 51.2%; top: 50%; transform: translate(-50%, -50%); background: url('assets/core-q.png') center/contain no-repeat; z-index: 15; filter: drop-shadow(0 0 25px var(--q-blue-glow)); animation: subtle-pulse 4s ease-in-out infinite; transition: all 0.5s ease; pointer-events: none; }
 
         .m-panel { position: relative; border-radius: 8px; cursor: pointer; pointer-events: auto; display: flex; justify-content: center; align-items: center; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); width: 100%; height: 75px; opacity: 0; transform: translateY(30px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .m-frost { position: absolute; inset: 0; background: rgba(15, 20, 35, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 1; }
@@ -344,7 +320,6 @@
         function initMobileHome() {
             document.addEventListener('click', (e) => {
                 if(window.innerWidth <= 950) {
-                   // If tapping anywhere outside the center axis buttons, reveal the 4 vector panels
                    if (!e.target.closest('.center-axis-btn') && !isMobileRevealed) {
                         document.body.classList.add('mobile-revealed');
                         isMobileRevealed = true;
