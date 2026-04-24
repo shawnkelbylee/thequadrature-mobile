@@ -84,7 +84,8 @@
                 opacity: 1 !important;
                 pointer-events: auto !important;
             }
-            body:not(.is-aperture) #q-global-scrubber-container {
+            body:not(.is-aperture) #q-universal-controls,
+            body:not(.is-aperture) .q-control-strip {
                 display: flex !important;
                 bottom: 80px !important;
                 z-index: 10000 !important;
@@ -121,9 +122,9 @@
             .desktop-only { display: none !important; }
             .corner-panel { display: none !important; pointer-events: none !important; }
             
-            /* EQUIDISTANT ALIGNMENT: Both nodes locked to 26vh */
+            /* EQUIDISTANT ALIGNMENT: Counter-weighting the -3vh Iris shift */
             .center-axis-btn { transform: translateX(-50%) scale(0.7); display: flex !important; }
-            .axis-omni { bottom: calc(50% + 26vh); transform-origin: bottom center; }
+            .axis-omni { bottom: calc(50% + 32vh); transform-origin: bottom center; }
             .axis-dash { top: calc(50% + 26vh); transform-origin: top center; }
             
             .mobile-routing-grid { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85vw; max-width: 400px; height: auto; flex-direction: column; gap: 16px; z-index: 110; pointer-events: none; }

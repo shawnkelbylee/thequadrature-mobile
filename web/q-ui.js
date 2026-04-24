@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Baseline Restoration, Universal Starfield Injection, Registry Purged
+// REVISION: Baseline Restoration, Universal Starfield Injection, Registry Purged, Mobile Navigation Z-Index Alignment
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -181,10 +181,12 @@ window.injectUniversalUI = function() {
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
             
+            /* GLOBAL MOBILE NAVBAR ISOLATION */
             .q-nav-bar { 
                 top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; 
                 height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; 
                 background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: none !important; 
+                ${isHome ? 'display: none !important;' : ''}
             }
             .q-nav-bar * { pointer-events: auto !important; }
             .q-nav-menu .vector-link { display: none !important; } 
@@ -197,7 +199,9 @@ window.injectUniversalUI = function() {
             
             .q-center-dial { margin-top: -3vh !important; }
             
-            .q-control-strip { position: fixed; bottom: 0 !important; left: 0; width: 100%; background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); display: flex; justify-content: space-around; align-items: center; z-index: 100000; height: 65px !important; padding-bottom: 0 !important; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; }
+            /* CRITICAL FIX: The Vector Navigation Control Strip */
+            .q-control-strip { position: fixed; bottom: 0 !important; left: 0; width: 100%; background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); ${isHome ? 'display: none !important;' : 'display: flex !important;'} justify-content: space-around; align-items: center; z-index: 100000; height: 65px !important; padding-bottom: 0 !important; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; }
+            
             .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
             .strip-btn svg { transition: 0.3s; }
             
@@ -214,7 +218,7 @@ window.injectUniversalUI = function() {
 
             .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; padding-left: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
             
-            #mobile-telemetry-ribbon { display: flex !important; position: fixed; top: 50px !important; margin-top: 0 !important; left: 0px !important; height: 45px !important; width: 100vw !important; background: rgba(2, 6, 15, 0.98); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); z-index: 99998 !important; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.9); padding: 0 10px !important; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
+            #mobile-telemetry-ribbon { ${isHome ? 'display: none !important;' : 'display: flex !important;'} position: fixed; top: 50px !important; margin-top: 0 !important; left: 0px !important; height: 45px !important; width: 100vw !important; background: rgba(2, 6, 15, 0.98); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); z-index: 99998 !important; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.9); padding: 0 10px !important; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
             #ribbon-leg-date { white-space: nowrap; font-size: 0.6rem !important; }
             #ribbon-leg { white-space: nowrap; font-size: 0.65rem !important; }
 
@@ -231,8 +235,9 @@ window.injectUniversalUI = function() {
             
             body.telemetry-open .q-center-dial { display: none !important; }
 
+            /* CRITICAL FIX: Scrubber properly lifted to float above the control strip */
             .q-global-controls { 
-                display: flex !important; 
+                ${isHome ? 'display: none !important;' : 'display: flex !important;'}
                 align-items: center !important; 
                 justify-content: space-between !important;
                 width: 95vw !important; 
@@ -240,7 +245,8 @@ window.injectUniversalUI = function() {
                 box-sizing: border-box !important; 
                 padding: 6px 8px !important; 
                 gap: 4px !important;
-                ${isHome ? 'display: none !important;' : 'bottom: calc(2.5vh + 65px) !important;'}
+                bottom: 80px !important; 
+                z-index: 99990 !important;
             } 
             
             #q-mic-fab { 
@@ -282,7 +288,6 @@ window.injectUniversalUI = function() {
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
 
-    // THE HOLLOW SHELL: Only injecting empty frames for the local files to target.
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
@@ -517,7 +522,6 @@ window.injectUniversalUI = function() {
     });
 
     // --- DECOUPLED MOUNT EVENT DISPATCH ---
-    // Signals to local HTML files that the hollow frames are ready for data injection.
     window.dispatchEvent(new Event('q-ui-mounted'));
 };
 
@@ -795,7 +799,6 @@ window.syncScrubberUI = function() {
 
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
-    // Fire global star generation now that the universal #stars container is mounted
     if (window.generateStars) window.generateStars('stars');
 
     if (window.innerWidth <= 950) {
