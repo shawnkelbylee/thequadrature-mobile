@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Absolute Global Mobile Z-Index and Positioning Lock
+// REVISION: Rollback of catastrophic flex override. Implementation of absolute safe-state mobile routing logic.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -33,6 +33,7 @@ window.injectUniversalUI = function() {
     
     const faceActive = isHome;
     
+    // Core state flags injected directly into the DOM body
     if (faceActive) document.body.classList.add('q-aperture-home');
     else document.body.classList.add('q-vector-hud');
     
@@ -64,6 +65,11 @@ window.injectUniversalUI = function() {
             --corner-gap-x: ${isHome ? '23vh' : '32vh'};
             --panel-w: ${isHome ? '340px' : '460px'};
             --panel-h: ${isHome ? '80px' : '170px'};
+        }
+
+        /* --- VISIBILITY CLASSES --- */
+        @media (min-width: 951px) {
+            .mobile-only-flex { display: none !important; }
         }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
@@ -135,13 +141,14 @@ window.injectUniversalUI = function() {
         .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: var(--theme-main, #00f0ff); cursor: pointer; border: 1px solid var(--theme-dim, rgba(0,240,255,0.2)); padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; text-align: center; }
         .fmt-toggle:hover { background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 10px var(--theme-main, #00f0ff); }
 
-        /* --- NAVBAR (DESKTOP) --- */
+        /* --- DESKTOP NAVBAR --- */
         .q-nav-bar { 
             position: fixed; 
-            ${isHome ? 'display: none !important;' : 'display: flex; bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
+            bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);
             height: 45px; background: rgba(2, 6, 15, 0.95); 
-            justify-content: center; align-items: center; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
+            display: flex; justify-content: center; align-items: center; box-sizing: border-box; z-index: 100000; font-family: 'Orbitron'; pointer-events: auto !important; 
         }
+        body.q-aperture-home .q-nav-bar { display: none !important; }
         
         .q-nav-menu { display: flex; align-items: center; gap: 0.8vw; pointer-events: auto !important; width: 100%; justify-content: center; }
         .q-nav-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 6px 12px; border-radius: 4px; font-family: 'Orbitron'; font-size: 0.6rem; font-weight: bold; cursor: pointer; transition: 0.3s; letter-spacing: 1px; padding-left: 13px; text-decoration: none; display: inline-block; text-align: center; pointer-events: auto !important; white-space: nowrap; }
@@ -160,7 +167,9 @@ window.injectUniversalUI = function() {
         #q-mic-fab-desktop.listening { animation: pulse-mic-desktop 1.5s infinite; }
         @keyframes pulse-mic-desktop { 0% { transform: scale(1); box-shadow: 0 0 10px var(--theme-main, #00f0ff); } 50% { transform: scale(1.1); box-shadow: 0 0 25px var(--theme-main, #00f0ff); } 100% { transform: scale(1); box-shadow: 0 0 10px var(--theme-main, #00f0ff); } }
         
-        .q-global-controls { position: fixed; ${isHome ? 'display: none !important;' : 'display: flex; bottom: calc(2.5vh + 60px);'} left: 50%; transform: translateX(-50%); z-index: 9995; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; }
+        .q-global-controls { position: fixed; left: 50%; transform: translateX(-50%); z-index: 9995; align-items: center; gap: 12px; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); border-radius: 50px; padding: 10px 25px; justify-content: space-between; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); pointer-events: auto; display: flex; bottom: calc(2.5vh + 60px); }
+        body.q-aperture-home .q-global-controls { display: none !important; }
+        
         .q-ctrl-btn { background: transparent; border: 1px solid var(--theme-main, #00f0ff); color: var(--theme-main, #00f0ff); padding: 8px 14px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; border-radius: 6px; transition: 0.3s; letter-spacing: 1px; padding-left: 15px; white-space: nowrap; pointer-events: auto; }
         .q-ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .q-ctrl-btn.active { background: var(--theme-main, #00f0ff); color: #000; }
@@ -168,31 +177,15 @@ window.injectUniversalUI = function() {
         .q-scrubber::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; background: var(--theme-main, #00f0ff); clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); cursor: grab; pointer-events: auto; }
         .q-scrubber::-webkit-slider-thumb:active { cursor: grabbing; }
 
-        .desktop-only { display: flex !important; }
-        .mobile-only-flex { display: none !important; }
-
+        /* --- MOBILE OVERRIDES & EXPLICIT ROUTING --- */
         @media (max-width: 950px) {
             :root { --dial-size: min(48vh, 85vw) !important; } 
             .desktop-only { display: none !important; }
-            .mobile-only-flex { display: flex !important; }
             
             body:not(.telemetry-open) .telemetry-node { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             body:not(.telemetry-open) .corner-panel { display: none !important; }
-            
-            /* --- GLOBAL MOBILE NAVBAR ISOLATION --- */
-            /* We physically detach the original top navbar for mobile, relying entirely on the Control Strip at the bottom */
-            .q-nav-bar { 
-                top: 0px !important; margin-top: 0px !important; left: 0px !important; padding: 0 10px !important; 
-                height: 50px !important; width: 100vw !important; transform: none !important; border-radius: 0 !important; 
-                background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: none !important; 
-                ${isHome ? 'display: none !important;' : ''}
-            }
-            .q-nav-bar * { pointer-events: auto !important; }
-            .q-nav-menu .vector-link { display: none !important; } 
-            
-            #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
             
             .q-nav-menu { position: static; flex-direction: row; overflow-x: auto; white-space: nowrap; background: transparent; box-shadow: none; transform: none; width: auto; -webkit-overflow-scrolling: touch; border: none; padding-bottom: 0; gap: 5px; justify-content: flex-start; }
             .q-nav-menu::-webkit-scrollbar { display: none; }
@@ -200,28 +193,77 @@ window.injectUniversalUI = function() {
             
             .q-center-dial { margin-top: -3vh !important; }
             
-            /* --- CRITICAL FIX: ABSOLUTE VECTOR NAVIGATION CONTROL STRIP --- */
-            /* This strip represents the vector tabs at the bottom. It MUST show on all vectors. */
-            .q-control-strip { 
-                position: fixed !important; 
-                bottom: 0 !important; 
-                left: 0 !important; 
-                width: 100vw !important; 
-                background: rgba(2, 6, 15, 0.98) !important; 
-                border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important; 
-                ${isHome ? 'display: none !important;' : 'display: flex !important;'} 
-                justify-content: space-around !important; 
+            /* -- APERTURE SUPPRESSION -- */
+            body.q-aperture-home .q-control-strip,
+            body.q-aperture-home #mobile-telemetry-ribbon,
+            body.q-aperture-home #q-universal-controls,
+            body.q-aperture-home .q-nav-bar {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            
+            /* -- VECTOR HUD ACTIVATION (THE FIX) -- */
+            body.q-vector-hud .q-control-strip {
+                display: flex !important;
+                position: fixed !important;
+                bottom: 0px !important;
+                left: 0px !important;
+                width: 100vw !important;
+                height: 65px !important;
+                z-index: 2147483647 !important;
+                background: rgba(2, 6, 15, 0.98) !important;
+                border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
+                justify-content: space-around !important;
+                align-items: center !important;
+                padding-bottom: 0 !important;
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.9) !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            }
+
+            body.q-vector-hud #q-universal-controls {
+                display: flex !important;
+                bottom: 80px !important;
+                z-index: 2147483646 !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
                 align-items: center !important; 
-                z-index: 100000 !important; 
-                height: 65px !important; 
-                padding-bottom: 0 !important; 
-                box-shadow: 0 -10px 30px rgba(0,0,0,0.9) !important; 
-                pointer-events: auto !important; 
+                justify-content: space-between !important;
+                width: 95vw !important; 
+                min-width: unset !important; 
+                box-sizing: border-box !important; 
+                padding: 6px 8px !important; 
+                gap: 4px !important;
+            }
+
+            body.q-vector-hud #mobile-telemetry-ribbon {
+                display: flex !important;
+                position: fixed !important;
+                top: 50px !important;
+                margin-top: 0 !important;
+                left: 0px !important;
+                height: 45px !important;
+                width: 100vw !important;
+                background: rgba(2, 6, 15, 0.98) !important;
+                border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
+                z-index: 2147483645 !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.9) !important;
+                padding: 0 10px !important;
+                box-sizing: border-box !important;
+                white-space: nowrap !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
             }
             
             .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
             .strip-btn svg { transition: 0.3s; }
-            
             .strip-btn.face-strip.active svg { color: var(--chrono-amber) !important; filter: drop-shadow(0 0 8px var(--chrono-amber)) !important; }
             .strip-btn.face-strip.active .strip-lbl { color: var(--chrono-amber) !important; }
             .strip-btn.bio-strip.active svg { color: var(--bio-purple) !important; filter: drop-shadow(0 0 8px var(--bio-purple)) !important; }
@@ -232,17 +274,11 @@ window.injectUniversalUI = function() {
             .strip-btn.env-strip.active .strip-lbl { color: var(--env-green, #a7ff83) !important; }
             .strip-btn.mec-strip.active svg { color: var(--sys-cyan, #00f0ff) !important; filter: drop-shadow(0 0 8px var(--sys-cyan, #00f0ff)) !important; }
             .strip-btn.mec-strip.active .strip-lbl { color: var(--sys-cyan, #00f0ff) !important; }
-
             .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; padding-left: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
-            
-            #mobile-telemetry-ribbon { ${isHome ? 'display: none !important;' : 'display: flex !important;'} position: fixed; top: 50px !important; margin-top: 0 !important; left: 0px !important; height: 45px !important; width: 100vw !important; background: rgba(2, 6, 15, 0.98); border-bottom: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); z-index: 99998 !important; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.9); padding: 0 10px !important; box-sizing: border-box; white-space: nowrap; overflow: hidden; }
-            #ribbon-leg-date { white-space: nowrap; font-size: 0.6rem !important; }
-            #ribbon-leg { white-space: nowrap; font-size: 0.65rem !important; }
 
             #mobile-telemetry-viewport { display: none; position: fixed !important; top: 95px !important; bottom: 65px !important; height: auto !important; left: 0; width: 100vw; background: rgba(5,5,8,0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99900; overflow-y: scroll !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 15px !important; margin-top: 0 !important; padding-bottom: 20px !important; box-sizing: border-box !important; gap: 15px; pointer-events: auto !important; }
             #mobile-telemetry-viewport .telemetry-node { display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important; }
             #mobile-telemetry-viewport .wing-panel { display: none !important; }
-            
             #mobile-telemetry-viewport .corner-panel { height: auto !important; min-height: 120px !important; padding: 20px !important; }
             #mobile-telemetry-viewport .panel-bg { display: none !important; } 
             #mobile-telemetry-viewport .frost-zone { inset: 0 !important; border-radius: 8px !important; border: 1px solid rgba(255,255,255,0.1); }
@@ -252,53 +288,17 @@ window.injectUniversalUI = function() {
             
             body.telemetry-open .q-center-dial { display: none !important; }
 
-            /* --- CRITICAL FIX: SCRUBBER HIERARCHY --- */
-            /* Floats above the 65px tall Control Strip */
-            .q-global-controls { 
-                ${isHome ? 'display: none !important;' : 'display: flex !important;'}
-                align-items: center !important; 
-                justify-content: space-between !important;
-                width: 95vw !important; 
-                min-width: unset !important; 
-                box-sizing: border-box !important; 
-                padding: 6px 8px !important; 
-                gap: 4px !important;
-                bottom: 80px !important; 
-                z-index: 99990 !important;
-            } 
-            
             #q-mic-fab { 
-                position: static !important; 
-                transform: none !important;
-                width: 32px !important; 
-                height: 32px !important; 
-                border-radius: 6px !important; 
-                font-size: 1rem !important; 
-                box-shadow: none !important;
-                order: 1 !important; 
-                flex-shrink: 0 !important;
-                background: rgba(5, 8, 15, 0.9);
-                border: 1px solid var(--theme-main, #00f0ff);
-                color: var(--theme-main, #00f0ff);
-                display: flex; justify-content: center; align-items: center;
-                cursor: pointer; transition: all 0.3s ease; pointer-events: auto !important;
+                position: static !important; transform: none !important;
+                width: 32px !important; height: 32px !important; border-radius: 6px !important; font-size: 1rem !important; box-shadow: none !important; order: 1 !important; flex-shrink: 0 !important;
+                background: rgba(5, 8, 15, 0.9); border: 1px solid var(--theme-main, #00f0ff); color: var(--theme-main, #00f0ff);
+                display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; pointer-events: auto !important;
             }
             #q-mic-fab.listening { animation: pulse-mic 1.5s infinite; background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 25px var(--theme-main, #00f0ff) !important; }
-            
             .q-global-controls > .q-ctrl-btn:nth-child(1) { order: 2 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
             .q-scrubber { order: 3 !important; min-width: 0 !important; width: 100% !important; margin: 0 !important; flex-grow: 1 !important; }
             .q-global-controls > .q-ctrl-btn:nth-child(3) { order: 4 !important; padding: 0 8px !important; height: 32px !important; min-width: 24px !important; flex-shrink: 0; }
-
-            #q-live-toggle {
-                order: 5 !important; 
-                width: auto !important;
-                min-width: 32px !important;
-                height: 32px !important;
-                padding: 0 6px !important;
-                font-size: 0.55rem !important; 
-                flex-shrink: 0 !important;
-                margin: 0 !important;
-            }
+            #q-live-toggle { order: 5 !important; width: auto !important; min-width: 32px !important; height: 32px !important; padding: 0 6px !important; font-size: 0.55rem !important; flex-shrink: 0 !important; margin: 0 !important; }
         }
     `;
     document.head.appendChild(style);
