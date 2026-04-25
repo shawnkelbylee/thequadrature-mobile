@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Desktop Restoration & Mobile Aperture Iris Routing
+// REVISION: DOM Unpacking Restoration & Mobile Iris Visibility Override
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -156,7 +156,6 @@ window.injectUniversalUI = function() {
         .desktop-only { display: flex !important; }
         .mobile-only-flex { display: none !important; }
 
-        /* --- GLOBAL DESKTOP NAVBAR --- */
         .q-nav-bar { 
             position: fixed; 
             ${isHome ? 'display: none !important;' : 'bottom: 2.5vh; left: 50%; transform: translateX(-50%); width: max-content; padding: 0 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.05);'}
@@ -205,6 +204,7 @@ window.injectUniversalUI = function() {
                 pointer-events: none !important;
             }
 
+            /* Fix Telemetry conflict overrides */
             body:not(.telemetry-open) .telemetry-node { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .wing-panel { display: none !important; }
@@ -214,13 +214,15 @@ window.injectUniversalUI = function() {
             body.q-aperture-home:not(.mobile-panels-revealed) .corner-panel { 
                 display: none !important; 
                 opacity: 0 !important;
+                visibility: hidden !important;
                 pointer-events: none !important;
             }
             
-            /* Show panels clustered over the Iris when revealed */
+            /* CRITICAL FIX: Override visibility rules specifically when revealed */
             body.q-aperture-home.mobile-panels-revealed .corner-panel {
                 display: flex !important;
                 opacity: 1 !important;
+                visibility: visible !important; 
                 pointer-events: auto !important;
                 z-index: 100 !important;
                 left: 50% !important;
@@ -339,10 +341,9 @@ window.injectUniversalUI = function() {
     document.head.appendChild(style);
 
     const uiContainer = document.createElement('div');
-    uiContainer.id = 'q-ui-injected-flag';
-    // CRITICAL FIX: Ensure the wrapper doesn't block interactions, while preserving direct child CSS inheritance.
-    uiContainer.style.cssText = "position:absolute; inset:0; pointer-events:none; z-index:20;";
-
+    
+    /* CRITICAL FIX 1: The corner panels are stripped of the 'desktop-only' class. 
+       This prevents them from being completely erased from the DOM on mobile viewports. */
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
@@ -492,8 +493,17 @@ window.injectUniversalUI = function() {
         </div>
     `;
     
-    // CRITICAL FIX: Standard element injection to preserve index.html visibility
-    document.body.appendChild(uiContainer);
+    /* CRITICAL FIX 2: Restoring the Unpacking Protocol.
+       This bypasses index.html's strict child suppression rules, returning visibility to the Desktop. */
+    const flag = document.createElement('div');
+    flag.id = 'q-ui-injected-flag';
+    flag.style.display = 'none';
+    document.body.appendChild(flag);
+    
+    const refNode = document.body.firstChild;
+    while (uiContainer.firstChild) {
+        document.body.insertBefore(uiContainer.firstChild, refNode);
+    }
     
     window.bindMasterTickScrubber();
     window.syncScrubberUI();
