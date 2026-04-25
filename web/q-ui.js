@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Encapsulation Restored & Mobile Iris Routing Enforced
+// REVISION: Mobile Y-Axis Calibration & Native Typography Scaling
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -222,18 +222,22 @@ window.injectUniversalUI = function() {
                 left: 50% !important;
                 transform: translateX(-50%) !important;
                 right: auto !important;
-                width: 240px !important;
-                height: 60px !important;
+                width: 220px !important;
+                height: 50px !important; /* Compressed for Native Viewports */
                 position: fixed !important;
                 background: rgba(10, 15, 25, 0.95) !important;
                 border: 1px solid rgba(255,255,255,0.2) !important;
                 border-radius: 8px !important;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.9) !important;
             }
+            
+            /* Typography Scaling for Native Expo Alignment */
             body.q-aperture-home.mobile-panels-revealed div.corner-panel.telemetry-node .panel-label {
                 padding: 0 !important;
-                font-size: 1rem !important;
+                font-size: 0.75rem !important;
+                letter-spacing: 2px !important;
             }
+            
             /* Hide the visual artifacts that do not fit the mobile panel layout */
             body.q-aperture-home.mobile-panels-revealed div.corner-panel.telemetry-node .frost-zone,
             body.q-aperture-home.mobile-panels-revealed div.corner-panel.telemetry-node .panel-bg,
@@ -241,11 +245,11 @@ window.injectUniversalUI = function() {
                 display: none !important;
             }
             
-            /* Precision Mobile Positioning */
-            body.q-aperture-home.mobile-panels-revealed div.corner-panel.tl { top: 15vh !important; bottom: auto !important; border-color: var(--bio-purple) !important; }
-            body.q-aperture-home.mobile-panels-revealed div.corner-panel.tr { top: 30vh !important; bottom: auto !important; border-color: var(--gold, #F4D068) !important; }
-            body.q-aperture-home.mobile-panels-revealed div.corner-panel.bl { top: 45vh !important; bottom: auto !important; border-color: var(--env-green, #a7ff83) !important; }
-            body.q-aperture-home.mobile-panels-revealed div.corner-panel.br { top: 60vh !important; bottom: auto !important; border-color: var(--sys-cyan, #00f0ff) !important; }
+            /* Precision Mobile Positioning: Centered evenly between Omni-Planner and Dashboard */
+            body.q-aperture-home.mobile-panels-revealed div.corner-panel.tl { top: 27vh !important; bottom: auto !important; border-color: var(--bio-purple) !important; }
+            body.q-aperture-home.mobile-panels-revealed div.corner-panel.tr { top: 40vh !important; bottom: auto !important; border-color: var(--gold, #F4D068) !important; }
+            body.q-aperture-home.mobile-panels-revealed div.corner-panel.bl { top: 53vh !important; bottom: auto !important; border-color: var(--env-green, #a7ff83) !important; }
+            body.q-aperture-home.mobile-panels-revealed div.corner-panel.br { top: 66vh !important; bottom: auto !important; border-color: var(--sys-cyan, #00f0ff) !important; }
 
             /* Dim Iris when panels are active */
             body.q-aperture-home.mobile-panels-revealed .q-center-dial {
@@ -260,7 +264,10 @@ window.injectUniversalUI = function() {
                 background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: none !important; 
             }
             .q-nav-bar * { pointer-events: auto !important; }
-            .q-nav-menu .vector-link { display: none !important; } 
+            
+            /* CRITICAL FIX: Ensure Aperture Nav Button is Visible on Vectors */
+            .q-nav-menu .vector-link:not(.face-btn) { display: none !important; } 
+            body.q-vector-hud .q-nav-menu .face-btn { display: inline-block !important; margin-left: 8px !important; }
             
             #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; margin-left: 0 !important; white-space: nowrap; flex-shrink: 0; position: relative; z-index: 100000; pointer-events: auto !important; }
             
@@ -354,8 +361,8 @@ window.injectUniversalUI = function() {
 
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
+    uiContainer.style.cssText = "position:absolute; inset:0; pointer-events:none; z-index:20;";
     
-    // CRITICAL FIX: The .desktop-only class is completely stripped from the corner panels so they can render on mobile.
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
@@ -505,7 +512,6 @@ window.injectUniversalUI = function() {
         </div>
     `;
     
-    // CRITICAL FIX: The wrapper must be appended to the body to comply with the index.html whitelist.
     document.body.appendChild(uiContainer);
     
     window.bindMasterTickScrubber();
@@ -880,7 +886,6 @@ window.syncScrubberUI = function() {
 
 window.addEventListener('DOMContentLoaded', () => {
     window.injectUniversalUI();
-    // Fire global star generation now that the universal #stars container is mounted
     if (window.generateStars) window.generateStars('stars');
 
     if (window.innerWidth <= 950) {
