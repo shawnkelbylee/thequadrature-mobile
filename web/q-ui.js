@@ -193,40 +193,38 @@ window.injectUniversalUI = function() {
         .q-scrubber::-webkit-slider-thumb:active { cursor: grabbing; }
 
         @media (max-width: 950px) {
-            /* --- SURGICAL OVERRIDE 3: DIAL PRESERVATION --- */
+            /* ANDROID/SAMSUNG SCALING LOCKDOWN */
             :root { 
-                --dial-size: min(90vw, 380px) !important; /* Scaled down slightly to fit mobile width */
+                --dial-size: min(85vw, 340px) !important;
             } 
             .desktop-only { display: none !important; }
             .mobile-only-flex { display: flex !important; }
             
-            /* Dials remain visible by default, positioned near the top of the viewport */
-            .q-center-dial { 
-                margin-top: 15vh !important; /* Push dial down slightly to clear the nav bar */
-                transform: translate(-50%, -50%) scale(0.85) !important; /* Scale down the dial group */
-                z-index: 10 !important; /* Ensure it stays behind active panels */
-            }
-
-            /* --- PANEL VISIBILITY & STACKING --- */
             body:not(.telemetry-open) .telemetry-node { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             
-            /* --- MOBILE APERTURE OVERRIDES --- */
+            .q-center-dial { margin-top: -4vh !important; }
+
+            /* --- SURGICAL OVERRIDE 1: MOBILE APERTURE PANEL FRAMES --- */
+            /* Force panels to display and center on the X-axis for mobile */
             body.q-aperture-home .corner-panel { 
                 display: flex !important; 
                 left: 50% !important; 
                 transform: translateX(-50%) !important; 
                 right: auto !important; 
             }
+            /* Stack the top panels above the iris */
             body.q-aperture-home .corner-panel.tl { top: 5vh !important; bottom: auto !important; }
             body.q-aperture-home .corner-panel.tr { top: 16vh !important; bottom: auto !important; }
+            /* Stack the bottom panels below the iris */
             body.q-aperture-home .corner-panel.bl { bottom: 5vh !important; top: auto !important; }
             body.q-aperture-home .corner-panel.br { bottom: 16vh !important; top: auto !important; }
 
+            /* Hide the raw native black buttons to prevent duplication */
             .m-panel { display: none !important; }
             
-            /* Aperture Home Suppression */
+            /* --- APERTURE MOBILE SUPPRESSION MATRIX --- */
             body.q-aperture-home .q-control-strip,
             body.q-aperture-home #mobile-telemetry-ribbon,
             body.q-aperture-home #q-universal-controls,
@@ -237,7 +235,7 @@ window.injectUniversalUI = function() {
                 pointer-events: none !important;
             }
             
-            /* Vector HUD Navbar */
+            /* --- PURE 2D VECTOR HUD MOBILE ACTIVATION MATRIX --- */
             body.q-vector-hud .q-nav-bar { 
                 display: flex !important;
                 position: fixed !important;
@@ -296,7 +294,8 @@ window.injectUniversalUI = function() {
             body.q-vector-hud #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; white-space: nowrap; flex-shrink: 0; pointer-events: auto !important; }
             body.q-vector-hud .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
-            /* Control Strip */
+            /* --- SURGICAL OVERRIDE 2: CONTROL STRIP GATEWAY BREAKER --- */
+            /* Force the strip to overpower the index.html purge when in a Vector */
             body.q-vector-hud .q-control-strip {
                 display: flex !important;
                 position: fixed !important;
@@ -335,7 +334,6 @@ window.injectUniversalUI = function() {
                 gap: 4px !important;
             }
 
-            /* Telemetry Ribbon */
             body.q-vector-hud #mobile-telemetry-ribbon {
                 display: flex !important;
                 position: fixed !important;
@@ -372,45 +370,17 @@ window.injectUniversalUI = function() {
             .strip-btn.mec-strip.active .strip-lbl { color: var(--sys-cyan, #00f0ff) !important; }
             .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; padding-left: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
 
-            /* Telemetry Viewport (Data Panels) */
-            #mobile-telemetry-viewport { 
-                display: none; 
-                position: fixed !important; 
-                top: 45vh !important; /* Start viewport below the dial */
-                bottom: 65px !important; /* Stop above the control strip */
-                height: auto !important; 
-                left: 0; 
-                width: 100vw; 
-                background: linear-gradient(to bottom, transparent 0%, rgba(5,5,8,0.85) 15%, rgba(5,5,8,0.98) 100%); /* Fade in the background */
-                backdrop-filter: blur(8px); 
-                -webkit-backdrop-filter: blur(8px); 
-                z-index: 50; /* Ensure this is above the dial (z-index 10) */
-                overflow-y: scroll !important; 
-                overflow-x: hidden !important; 
-                -webkit-overflow-scrolling: touch; 
-                overscroll-behavior: contain; 
-                flex-direction: column; 
-                align-items: center; 
-                justify-content: flex-start; 
-                padding-top: 20px !important; 
-                margin-top: 0 !important; 
-                padding-bottom: 40px !important; 
-                box-sizing: border-box !important; 
-                gap: 15px; 
-                pointer-events: auto !important; 
-            }
-
+            #mobile-telemetry-viewport { display: none; position: fixed !important; top: 95px !important; bottom: 65px !important; height: auto !important; left: 0; width: 100vw; background: rgba(5,5,8,0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99900; overflow-y: scroll !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 15px !important; margin-top: 0 !important; padding-bottom: 20px !important; box-sizing: border-box !important; gap: 15px; pointer-events: auto !important; }
             #mobile-telemetry-viewport .telemetry-node { display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important; }
             #mobile-telemetry-viewport .wing-panel { display: none !important; }
             #mobile-telemetry-viewport .corner-panel { height: auto !important; min-height: 120px !important; padding: 20px !important; }
             #mobile-telemetry-viewport .panel-bg { display: none !important; } 
-            #mobile-telemetry-viewport .frost-zone { inset: 0 !important; border-radius: 8px !important; border: 1px solid rgba(255,255,255,0.1); background: rgba(10, 15, 25, 0.85); box-shadow: 0 5px 15px rgba(0,0,0,0.8) !important;}
+            #mobile-telemetry-viewport .frost-zone { inset: 0 !important; border-radius: 8px !important; border: 1px solid rgba(255,255,255,0.1); }
             #mobile-telemetry-viewport .panel-data-container { padding: 0 !important; margin-top: 10px !important; align-items: center !important; text-align: center !important; }
             #mobile-telemetry-viewport .panel-label { padding: 0 !important; position: relative !important; }
             #mobile-telemetry-viewport .opt-oval { position: absolute !important; top: 15px !important; right: 15px !important; left: auto !important; bottom: auto !important; }
             
-            /* DO NOT HIDE THE DIAL WHEN TELEMETRY IS OPEN */
-            /* body.telemetry-open .q-center-dial { display: none !important; } */
+            body.telemetry-open .q-center-dial { display: none !important; }
 
             #q-mic-fab { 
                 position: static !important; transform: none !important;
