@@ -7,16 +7,6 @@ window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
     if (document.getElementById('q-ui-injected-flag')) return;
 
-    // --- MOBILE LOCKDOWN KILL-SWITCH ---
-    if (window.innerWidth <= 950) return;
-
-    if (document.body.classList.contains('boot-active')) {
-        document.body.classList.remove('boot-active');
-    }
-window.injectUniversalUI = function() {
-    if (window.self !== window.top) return;
-    if (document.getElementById('q-ui-injected-flag')) return;
-
     if (document.body.classList.contains('boot-active')) {
         document.body.classList.remove('boot-active');
     }
