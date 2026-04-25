@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Single-Index Purge Override & Aperture Parser Fix
+// REVISION: Single-Index Purge Override, Aperture Parser Fix, & Mobile Panel Geometry
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -204,11 +204,25 @@ window.injectUniversalUI = function() {
             body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .wing-panel { display: none !important; }
             
-            /* Preserving Corner Panels for mobile Aperture (Omni/Dash buttons) */
-            body.q-aperture-home .corner-panel { display: flex !important; }
-            body.q-vector-hud:not(.telemetry-open) .corner-panel { display: none !important; }
-            
             .q-center-dial { margin-top: -4vh !important; }
+
+            /* --- SURGICAL OVERRIDE 1: MOBILE APERTURE PANEL FRAMES --- */
+            /* Force panels to display and center on the X-axis for mobile */
+            body.q-aperture-home .corner-panel { 
+                display: flex !important; 
+                left: 50% !important; 
+                transform: translateX(-50%) !important; 
+                right: auto !important; 
+            }
+            /* Stack the top panels above the iris */
+            body.q-aperture-home .corner-panel.tl { top: 5vh !important; bottom: auto !important; }
+            body.q-aperture-home .corner-panel.tr { top: 16vh !important; bottom: auto !important; }
+            /* Stack the bottom panels below the iris */
+            body.q-aperture-home .corner-panel.bl { bottom: 5vh !important; top: auto !important; }
+            body.q-aperture-home .corner-panel.br { bottom: 16vh !important; top: auto !important; }
+
+            /* Hide the raw native black buttons to prevent duplication */
+            .m-panel { display: none !important; }
             
             /* --- APERTURE MOBILE SUPPRESSION MATRIX --- */
             body.q-aperture-home .q-control-strip,
@@ -280,7 +294,8 @@ window.injectUniversalUI = function() {
             body.q-vector-hud #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; white-space: nowrap; flex-shrink: 0; pointer-events: auto !important; }
             body.q-vector-hud .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
-            /* BOTTOM CONTROL STRIP - FIRMLY ANCHORED & OVERPOWERING GATEWAY PURGE */
+            /* --- SURGICAL OVERRIDE 2: CONTROL STRIP GATEWAY BREAKER --- */
+            /* Force the strip to overpower the index.html purge when in a Vector */
             body.q-vector-hud .q-control-strip {
                 display: flex !important;
                 position: fixed !important;
@@ -386,6 +401,7 @@ window.injectUniversalUI = function() {
     uiContainer.id = 'q-ui-injected-flag';
 
     // --- ENCAPSULATED UNCONDITIONAL PAYLOAD ---
+    // Removed 'desktop-only' from .corner-panel nodes to allow mobile geometry overrides.
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
@@ -458,25 +474,25 @@ window.injectUniversalUI = function() {
         <button id="q-mic-fab" class="mobile-only-flex" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
         <button id="q-mic-fab-desktop" class="desktop-only" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
         
-        <div class="corner-panel tl telemetry-node desktop-only">
+        <div class="corner-panel tl telemetry-node">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-tl">OPT</div>
             <div class="panel-data-container" id="quad-tl"></div>
         </div>
-        <div class="corner-panel tr telemetry-node desktop-only">
+        <div class="corner-panel tr telemetry-node">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-tr">OPT</div>
             <div class="panel-data-container" id="quad-tr"></div>
         </div>
-        <div class="corner-panel bl telemetry-node desktop-only">
+        <div class="corner-panel bl telemetry-node">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-bl">OPT</div>
             <div class="panel-data-container" id="quad-bl"></div>
         </div>
-        <div class="corner-panel br telemetry-node desktop-only">
+        <div class="corner-panel br telemetry-node">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-br">OPT</div>
