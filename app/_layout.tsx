@@ -1,64 +1,78 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
-import React, { useRef } from 'react';
-import { StatusBar, StyleSheet } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+// THE QUADRATURE: SOVEREIGN MOBILE NODE (NATIVE WRAPPER)
+// STATUS: Phase IV Native Engine. Deep-Link Interceptor & Webview Bridge.
+// REVISION: Expo-Linking Auth Bypass
+
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, StatusBar, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+import * as Linking from 'expo-linking';
+import 'react-native-url-polyfill/auto';
+import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase Cloud Infrastructure
+// ARCHITECT NOTE: Inject your live Supabase credentials here
 const supabaseUrl = 'https://wnfpxozpeucrwqmrqpzv.supabase.co';
-const supabaseKey = 'sb_publishable_g6JfCH6FefIwEmXztgkdTw_Md1z4se5';
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+const supabaseAnonKey = 'sb_publishable_g6JfCH6FefIwEmXztgkdTw_Md1z4se5';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export default function RootLayout() {
-  const webViewRef = useRef(null);
+export default function App() {
+    const [session, setSession] = useState(null);
+    const [isReady, setIsReady] = useState(false);
 
-  // Native Bridge: Listens for postMessage events from q-core.js
-  const handleMessage = async (event) => {
-    try {
-      const msg = JSON.parse(event.nativeEvent.data);
-      
-      if (msg.action === 'SECURE_STORE_SET') {
-        console.log(`[NATIVE BRIDGE] Syncing ${msg.key} to cloud...`);
-        // Supabase UPSERT logic will be mapped here
-      }
-      
-      if (msg.action === 'HAPTIC_PULSE') {
-        // Haptic feedback execution will drop here
-      }
-    } catch (error) {
-      console.error('[NATIVE BRIDGE ERROR]:', error);
-    }
-  };
+    useEffect(() => {
+        // 1. Initialize Session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+            setIsReady(true);
+        });
 
-  return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
-        <WebView
-          ref={webViewRef}
-          source={{ uri: 'https://thequadrature.app/personal/index.html' }}
-          style={styles.webview}
-          onMessage={handleMessage}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          allowsInlineMediaPlayback={true}
-          bounces={false}
-          overScrollMode="never"
-        />
-      </SafeAreaView>
-    </SafeAreaProvider>
-  );
+        // 2. Listen for Auth Transitions
+        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+
+        // 3. Deep-Link Interceptor (Bypasses manual "Code/ID" fallback)
+        const handleDeepLink = async (url) => {
+            if (!url) return;
+            if (url.includes('#access_token') || url.includes('?code=')) {
+                const { data, error } = await supabase.auth.getSessionFromUrl(url);
+                if (data?.session) setSession(data.session);
+            }
+        };
+
+        const subscription = Linking.addEventListener('url', (event) => handleDeepLink(event.url));
+        Linking.getInitialURL().then(handleDeepLink);
+
+        return () => {
+            subscription.remove();
+            authListener.subscription.unsubscribe();
+        };
+    }, []);
+
+    if (!isReady) return <View style={{flex:1, backgroundColor:'#010205'}} />;
+
+    // Push native auth state to the Web DOM
+    const INJECTED_JAVASCRIPT = `
+        window.localStorage.setItem('Q_PRO_AUTH', '${session ? 'true' : 'false'}');
+        window.Q_NATIVE_BRIDGE_ACTIVE = true;
+        true;
+    `;
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#010205" />
+            <WebView 
+                source={{ uri: 'https://thequadrature.com' }} 
+                style={styles.webview}
+                injectedJavaScript={INJECTED_JAVASCRIPT}
+                allowsInlineMediaPlayback={true}
+                bounces={false}
+                overScrollMode="never"
+            />
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  webview: { flex: 1, backgroundColor: '#000' }
+    container: { flex: 1, backgroundColor: '#010205' },
+    webview: { flex: 1, backgroundColor: '#010205' }
 });
