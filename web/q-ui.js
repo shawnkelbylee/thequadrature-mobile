@@ -305,7 +305,8 @@ window.injectUniversalUI = function() {
                 left: 0px !important;
                 transform: none !important; 
                 width: 100% !important; 
-                height: 65px !important;
+                height: calc(65px + env(safe-area-inset-bottom, 0px)) !important;
+                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
                 z-index: 2147483647 !important;
                 background: rgba(2, 6, 15, 0.98) !important;
                 border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
@@ -321,7 +322,7 @@ window.injectUniversalUI = function() {
             body.q-vector-hud #q-universal-controls {
                 display: flex !important;
                 position: fixed !important;
-                bottom: 65px !important; 
+                bottom: calc(65px + env(safe-area-inset-bottom, 0px)) !important; 
                 left: 0px !important;
                 transform: none !important; 
                 z-index: 2147483646 !important;
@@ -372,19 +373,19 @@ window.injectUniversalUI = function() {
             .strip-btn.mec-strip.active .strip-lbl { color: var(--sys-cyan, #00f0ff) !important; }
             .strip-lbl { font-family: 'Orbitron'; font-size: 0.4rem; font-weight: 900; letter-spacing: 1px; padding-left: 1px; color: rgba(255,255,255,0.5); transition: 0.3s; }
 
-            /* Telemetry Viewport (Data Panels) - Z-Index updated to float over the 3D dial */
+            /* Telemetry Viewport (Data Panels) */
             #mobile-telemetry-viewport { 
                 display: none; 
                 position: fixed !important; 
-                top: 45vh !important; /* Starts below the center dial */
-                bottom: 65px !important; 
+                top: 45vh !important; 
+                bottom: calc(65px + env(safe-area-inset-bottom, 0px)) !important; 
                 height: auto !important; 
                 left: 0; 
                 width: 100vw; 
                 background: linear-gradient(to bottom, transparent 0%, rgba(5,5,8,0.85) 15%, rgba(5,5,8,0.98) 100%); 
                 backdrop-filter: blur(8px); 
                 -webkit-backdrop-filter: blur(8px); 
-                z-index: 50 !important; /* Forces panels ABOVE the dial */
+                z-index: 50 !important; 
                 overflow-y: scroll !important; 
                 overflow-x: hidden !important; 
                 -webkit-overflow-scrolling: touch; 
@@ -408,8 +409,6 @@ window.injectUniversalUI = function() {
             #mobile-telemetry-viewport .panel-label { padding: 0 !important; position: relative !important; }
             #mobile-telemetry-viewport .opt-oval { position: absolute !important; top: 15px !important; right: 15px !important; left: auto !important; bottom: auto !important; }
 
-            /* NOTE: body.telemetry-open .q-center-dial { display: none !important; } has been permanently purged */
-
             #q-mic-fab { 
                 position: static !important; transform: none !important;
                 width: 32px !important; height: 32px !important; border-radius: 6px !important; font-size: 1rem !important; box-shadow: none !important; order: 1 !important; flex-shrink: 0 !important;
@@ -428,8 +427,6 @@ window.injectUniversalUI = function() {
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
 
-    // --- ENCAPSULATED UNCONDITIONAL PAYLOAD ---
-    // Removed 'desktop-only' from .corner-panel nodes to allow mobile geometry overrides.
     uiContainer.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
