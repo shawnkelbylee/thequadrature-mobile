@@ -1,7 +1,7 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Single-Index Purge Override, Aperture Parser Fix, & Mobile Panel Geometry
+// REVISION: Absolute Desktop Parity for Mobile Viewports & Hardware Bezel Clearance.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -98,7 +98,7 @@ window.injectUniversalUI = function() {
         
         .dust-layer-global { position: fixed; inset: 0; z-index: 2; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise2)' opacity='0.08'/%3E%3C/svg%3E"); mix-blend-mode: screen; pointer-events: none; }
 
-        .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
         .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.03); }
 
         .frost-zone { position: absolute; inset: 6px 12px; background: rgba(15, 20, 35, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; z-index: -2; box-shadow: inset 0 0 20px var(--theme-dim, rgba(0, 163, 255, 0.15)) !important; transition: 0.3s ease; }
@@ -193,39 +193,55 @@ window.injectUniversalUI = function() {
         .q-scrubber::-webkit-slider-thumb:active { cursor: grabbing; }
 
         @media (max-width: 950px) {
-            /* ANDROID/SAMSUNG SCALING LOCKDOWN */
-            :root { 
-                --dial-size: min(85vw, 340px) !important;
-            } 
-            .desktop-only { display: none !important; }
+            /* 1. FORCE DESKTOP PARITY ON MOBILE */
+            /* Eradicate the `.desktop-only` suppression entirely to allow graphical frames to render */
+            .desktop-only { display: flex !important; } 
+            
+            /* Purge the fallback raw HTML buttons from index.html */
+            .mobile-routing-grid { display: none !important; pointer-events: none !important; } 
+            
             .mobile-only-flex { display: flex !important; }
             
+            /* 2. SCALE APERTURE HOME (INDEX.HTML) FOR MOBILE VIEWPORT */
+            body.q-aperture-home {
+                --dial-size: 45vw !important; /* Scale down the Iris */
+                --panel-w: 160px !important; /* Scale down corner panels */
+                --panel-h: 50px !important;
+                --corner-gap-x: 12vw !important; /* Pull panels inward */
+                --corner-gap-y: 18vh !important;
+            }
+            
+            body.q-aperture-home .panel-label { font-size: 0.55rem !important; letter-spacing: 2px !important; }
+            body.q-aperture-home .tl .panel-label { padding-left: 30px !important; }
+            body.q-aperture-home .tr .panel-label { padding-right: 30px !important; }
+            body.q-aperture-home .bl .panel-label { padding-left: 30px !important; }
+            body.q-aperture-home .br .panel-label { padding-right: 30px !important; }
+
+            /* Scale down the graphical Omni-Planner/Dashboard buttons */
+            body.q-aperture-home .center-axis-btn {
+                transform: translateX(-50%) scale(0.65) !important; 
+            }
+            body.q-aperture-home .center-axis-btn:hover {
+                transform: translateX(-50%) scale(0.7) !important;
+            }
+            
+            /* Ensure Aperture Iris stays perfectly centered */
+            body.q-aperture-home .q-center-dial {
+                margin-top: 0 !important;
+                z-index: 10 !important;
+            }
+
+            /* --- VECTOR HUD DIAL POSITIONING (PHY/MET/ENV/AST) --- */
+            body.q-vector-hud .q-center-dial { 
+                margin-top: 5vh !important; /* Push dial slightly down to clear mobile navbar */
+                transform: translate(-50%, -50%) scale(0.8) !important; /* Scale 3D physics dials */
+                z-index: 10 !important; 
+            }
+
+            /* Hide injected q-ui panels on Vector HUDs until Data View is opened */
             body:not(.telemetry-open) .telemetry-node { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .vector-anchor { display: none !important; visibility: hidden !important; }
             body:not(.telemetry-open) .wing-panel { display: none !important; }
-            
-            /* --- SURGICAL ISOLATION: VECTOR HUD VS APERTURE --- */
-            /* Vector HUD: Dials pushed down to clear navbar, locked to z-index 10 */
-            body.q-vector-hud .q-center-dial { 
-                margin-top: 10vh !important; 
-                z-index: 10 !important; 
-            }
-            /* Aperture Home: Original Iris alignment maintained */
-            body.q-aperture-home .q-center-dial {
-                margin-top: -4vh !important; 
-            }
-
-            /* --- MOBILE APERTURE PANEL FRAMES --- */
-            body.q-aperture-home .corner-panel { 
-                display: flex !important; 
-                left: 50% !important; 
-                transform: translateX(-50%) !important; 
-                right: auto !important; 
-            }
-            body.q-aperture-home .corner-panel.tl { top: 5vh !important; bottom: auto !important; }
-            body.q-aperture-home .corner-panel.tr { top: 16vh !important; bottom: auto !important; }
-            body.q-aperture-home .corner-panel.bl { bottom: 5vh !important; top: auto !important; }
-            body.q-aperture-home .corner-panel.br { bottom: 16vh !important; top: auto !important; }
             
             /* --- APERTURE MOBILE SUPPRESSION MATRIX --- */
             body.q-aperture-home .q-control-strip,
@@ -297,7 +313,7 @@ window.injectUniversalUI = function() {
             body.q-vector-hud #q-global-sim-badge { font-size: 0.45rem !important; padding: 2px 4px !important; letter-spacing: 0px !important; white-space: nowrap; flex-shrink: 0; pointer-events: auto !important; }
             body.q-vector-hud .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
-            /* --- CONTROL STRIP GATEWAY --- */
+            /* --- CONTROL STRIP GATEWAY (FIXED VISIBILITY) --- */
             body.q-vector-hud .q-control-strip {
                 display: flex !important;
                 position: fixed !important;
@@ -305,8 +321,8 @@ window.injectUniversalUI = function() {
                 left: 0px !important;
                 transform: none !important; 
                 width: 100% !important; 
-                height: calc(65px + env(safe-area-inset-bottom, 0px)) !important;
-                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+                height: 65px !important;
+                padding-bottom: env(safe-area-inset-bottom, 15px) !important; /* CLEARANCE FOR IOS/ANDROID BOTTOM BAR */
                 z-index: 2147483647 !important;
                 background: rgba(2, 6, 15, 0.98) !important;
                 border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)) !important;
@@ -316,13 +332,13 @@ window.injectUniversalUI = function() {
                 visibility: visible !important;
                 opacity: 1 !important;
                 pointer-events: auto !important;
-                box-sizing: border-box !important;
+                box-sizing: content-box !important; /* Essential to prevent squishing strip icons */
             }
 
             body.q-vector-hud #q-universal-controls {
                 display: flex !important;
                 position: fixed !important;
-                bottom: calc(65px + env(safe-area-inset-bottom, 0px)) !important; 
+                bottom: calc(65px + env(safe-area-inset-bottom, 15px)) !important; 
                 left: 0px !important;
                 transform: none !important; 
                 z-index: 2147483646 !important;
@@ -359,7 +375,7 @@ window.injectUniversalUI = function() {
                 pointer-events: auto !important;
             }
             
-            .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
+            .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; height: 100%; }
             .strip-btn svg { transition: 0.3s; }
             .strip-btn.face-strip.active svg { color: var(--chrono-amber) !important; filter: drop-shadow(0 0 8px var(--chrono-amber)) !important; }
             .strip-btn.face-strip.active .strip-lbl { color: var(--chrono-amber) !important; }
@@ -378,14 +394,14 @@ window.injectUniversalUI = function() {
                 display: none; 
                 position: fixed !important; 
                 top: 45vh !important; 
-                bottom: calc(65px + env(safe-area-inset-bottom, 0px)) !important; 
+                bottom: calc(65px + env(safe-area-inset-bottom, 15px)) !important; 
                 height: auto !important; 
                 left: 0; 
                 width: 100vw; 
                 background: linear-gradient(to bottom, transparent 0%, rgba(5,5,8,0.85) 15%, rgba(5,5,8,0.98) 100%); 
                 backdrop-filter: blur(8px); 
                 -webkit-backdrop-filter: blur(8px); 
-                z-index: 50 !important; 
+                z-index: 50 !important; /* Stacks panels above the dial */
                 overflow-y: scroll !important; 
                 overflow-x: hidden !important; 
                 -webkit-overflow-scrolling: touch; 
@@ -402,7 +418,7 @@ window.injectUniversalUI = function() {
             }
             #mobile-telemetry-viewport .telemetry-node { display: flex !important; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: translateZ(0) !important; margin: 0 !important; width: 95vw !important; max-width: 360px !important; min-height: min-content !important; height: auto !important; box-sizing: border-box !important; backface-visibility: hidden !important; visibility: visible !important; flex-shrink: 0 !important; pointer-events: auto !important; opacity: 1 !important; }
             #mobile-telemetry-viewport .wing-panel { display: none !important; }
-            #mobile-telemetry-viewport .corner-panel { height: auto !important; min-height: 120px !important; padding: 20px !important; }
+            #mobile-telemetry-viewport .corner-panel { height: auto !important; min-height: 120px !important; padding: 20px !important; pointer-events: auto !important; }
             #mobile-telemetry-viewport .panel-bg { display: none !important; } 
             #mobile-telemetry-viewport .frost-zone { inset: 0 !important; border-radius: 8px !important; border: 1px solid rgba(255,255,255,0.1); }
             #mobile-telemetry-viewport .panel-data-container { padding: 0 !important; margin-top: 10px !important; align-items: center !important; text-align: center !important; }
