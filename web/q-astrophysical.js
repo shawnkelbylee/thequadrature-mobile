@@ -306,29 +306,29 @@ window.addEventListener('q-tick', (e) => {
         }
     }
 
-    // Asymmetrical Anchor Detection logic
-    let anchorName = "ALPHA";
+   // Asymmetrical Anchor Detection logic
+    let anchorName = "SOUTHERN SOLSTICE";
     let progressToAnchor = 0;
     let driftDeg = 0;
     let anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.ALPHA : 86400000;
     
     if (qData.trueArc >= 0 && qData.trueArc < 90) { 
-        anchorName = "BETA"; 
+        anchorName = "1ST EQUINOX"; 
         driftDeg = 90 - qData.trueArc;
         progressToAnchor = (qData.trueArc / 90) * 100; 
         anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.BETA : 84600000;
     } else if (qData.trueArc >= 90 && qData.trueArc < 180) { 
-        anchorName = "GAMMA"; 
+        anchorName = "NORTHERN SOLSTICE"; 
         driftDeg = 180 - qData.trueArc;
         progressToAnchor = ((qData.trueArc - 90) / 90) * 100; 
         anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.GAMMA : 89662680;
     } else if (qData.trueArc >= 180 && qData.trueArc < 270) { 
-        anchorName = "DELTA"; 
+        anchorName = "2ND EQUINOX"; 
         driftDeg = 270 - qData.trueArc;
         progressToAnchor = ((qData.trueArc - 180) / 90) * 100; 
         anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.DELTA : 102599640;
     } else { 
-        anchorName = "EPSILON"; 
+        anchorName = "360° THRESHOLD"; 
         driftDeg = 360 - qData.trueArc;
         progressToAnchor = ((qData.trueArc - 270) / 90) * 100; 
         anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.EPSILON : 89662680;

@@ -72,10 +72,10 @@ window.Q_REGISTRY = {
         ]
     },
     ANCHORS: [
-        { name: "Alpha Anchor", coord: 0, type: 'node-anc', glyph: 'A', event: 'WINTER SOLSTICE' },
-        { name: "Beta Anchor", coord: 90, type: 'node-anc', glyph: 'B', event: 'VERNAL EQUINOX' },
-        { name: "Gamma Anchor", coord: 180, type: 'node-anc', glyph: 'G', event: 'SUMMER SOLSTICE' },
-        { name: "Delta Anchor", coord: 270, type: 'node-anc', glyph: 'D', event: 'AUTUMNAL EQUINOX' }
+        { name: "Alpha Anchor", coord: 0, type: 'node-anc', glyph: '◓', event: 'SOUTHERN SOLSTICE' },
+        { name: "Beta Anchor", coord: 90, type: 'node-anc', glyph: '◐', event: '1ST EQUINOX' },
+        { name: "Gamma Anchor", coord: 180, type: 'node-anc', glyph: '◒', event: 'NORTHERN SOLSTICE' },
+        { name: "Delta Anchor", coord: 270, type: 'node-anc', glyph: '◑', event: '2ND EQUINOX' }
     ],
     SOLAR_TERMS: Array.from({length: 24}).map((_,i) => ({ name: `Jiéqì ${i+1}`, start: i*15, theme: "Resonance" }))
 };

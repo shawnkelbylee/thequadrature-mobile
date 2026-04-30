@@ -1,6 +1,6 @@
 // THE QUADRATURE: CORE PHYSICS & METROLOGY ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase III Physics Engine. True Ellipse/Mean Circle Delta active. Q_GEAR_CONSTANTS Restored.
+// STATUS: Phase XII Physics Engine. Pure Spatial Kinematics & Orbital Ledger Arrays.
 
 (function() {
     if (window.Q_CORE_LOADED) return;
@@ -14,14 +14,14 @@
     document.addEventListener('DOMContentLoaded', () => { window.initQCore(); });
 
     window.initQCore = function() {
-        console.log("[Q-CORE] V24 System Initialized...");
+        console.log("[Q-CORE] V25 System Initialized...");
         
-        // CRITICAL FIX: Restored correct Winter Solstice Epoch (Dec 21, 2025 15:03 UTC)
+        // CRITICAL FIX: Restored correct Southern Solstice Epoch (Dec 21, 2025 15:03 UTC)
         window.ANCHOR_ALPHA_DYNAMIC = Date.UTC(2025, 11, 21, 15, 3, 0); 
         window.MS_DAY = 86400000;
         window.TROPICAL_YEAR_MS = 31556925216;
 
-        // CRITICAL FIX: Restored Q_GEAR_CONSTANTS for Omni-Planner Initialization
+        // Legacy constants preserved to prevent breaking legacy HUD renders
         window.Q_GEAR_CONSTANTS = {
             ALPHA: 86400000,
             BETA: 84600000,
@@ -29,6 +29,133 @@
             DELTA: 102599640,
             EPSILON: 89662680
         };
+
+        // STATIC EPHEMERIS ARRAY: Absolute UTC Timestamps for 2025-2030 Anchors
+        window.EPHEMERIS_ANCHORS = [
+            Date.UTC(2025, 11, 21, 15, 3, 0), // Dec 21, 2025
+            Date.UTC(2026, 2, 20, 14, 46, 0), // Mar 20, 2026
+            Date.UTC(2026, 5, 21, 8, 24, 0),  // Jun 21, 2026
+            Date.UTC(2026, 8, 23, 0, 5, 0),   // Sep 23, 2026
+            Date.UTC(2026, 11, 21, 20, 50, 0),// Dec 21, 2026
+            Date.UTC(2027, 2, 20, 20, 25, 0),
+            Date.UTC(2027, 5, 21, 14, 11, 0),
+            Date.UTC(2027, 8, 23, 6, 2, 0),
+            Date.UTC(2027, 11, 21, 2, 43, 0),
+            Date.UTC(2028, 2, 20, 2, 17, 0),
+            Date.UTC(2028, 5, 20, 20, 2, 0),
+            Date.UTC(2028, 8, 22, 11, 45, 0),
+            Date.UTC(2028, 11, 21, 8, 20, 0),
+            Date.UTC(2029, 2, 20, 8, 2, 0),
+            Date.UTC(2029, 5, 21, 1, 48, 0),
+            Date.UTC(2029, 8, 22, 17, 38, 0),
+            Date.UTC(2029, 11, 21, 14, 14, 0),
+            Date.UTC(2030, 2, 20, 13, 52, 0),
+            Date.UTC(2030, 5, 21, 7, 31, 0),
+            Date.UTC(2030, 8, 22, 23, 27, 0),
+            Date.UTC(2030, 11, 21, 20, 9, 0)
+        ];
+
+        // --- KINEMATIC SPATIAL ARRAY INJECTION ---
+        // Replaces the rigid day blocks with exactly 360 spatial degrees.
+        window.initQBlocks = function() {
+            if (!window.TROPICAL_YEAR_MS) return;
+
+            window.Q_BLOCK_DEFS = [];
+            let rawDurs = [];
+            let totalRaw = 0;
+            
+            // Keplerian Integral: Map duration based on actual orbital velocity
+            for(let d=0; d<360; d++) {
+                let v = 1 + 0.0167 * Math.cos((d - 14) * Math.PI / 180); 
+                let dur = 1 / v;
+                rawDurs.push(dur);
+                totalRaw += dur;
+            }
+            
+            let scale = window.TROPICAL_YEAR_MS / totalRaw;
+            
+            for(let d=0; d<360; d++) {
+                let q = Math.floor(d / 90) + 1;
+                let s = Math.floor((d % 90) / 30) + 1;
+                let degInSect = (d % 30) + 1; 
+                
+                let isAnchor = (d === 0 || d === 90 || d === 180 || d === 270);
+                let aName = "";
+                if(d===0) aName = "SOUTHERN SOLSTICE";
+                if(d===90) aName = "1ST EQUINOX";
+                if(d===180) aName = "NORTHERN SOLSTICE";
+                if(d===270) aName = "2ND EQUINOX";
+                
+                window.Q_BLOCK_DEFS.push({
+                    type: 'DEGREE',
+                    quad: q,
+                    sect: s,
+                    deg: degInSect,
+                    absDeg: d,
+                    dur: rawDurs[d] * scale,
+                    isAnchor: isAnchor,
+                    name: aName
+                });
+            }
+            
+            window.Q_BLOCKS = [];
+            let acc = 0;
+            window.Q_BLOCK_DEFS.forEach((b, i) => {
+                window.Q_BLOCKS.push({ ...b, relStart: acc, blockIndex: i });
+                acc += b.dur;
+            });
+
+            window.Q_YEAR_MS = acc;
+        };
+
+        window.getQBlockByTime = function(ts) {
+            if(!window.ANCHOR_ALPHA_DYNAMIC || !window.Q_BLOCKS) return null;
+            let diff = ts - window.ANCHOR_ALPHA_DYNAMIC;
+            let cycleIdx = Math.floor(diff / window.Q_YEAR_MS);
+            let rem = diff % window.Q_YEAR_MS;
+            if(rem < 0) { rem += window.Q_YEAR_MS; cycleIdx -= 1; }
+            
+            for(let i=0; i<window.Q_BLOCKS.length; i++) {
+                let b = window.Q_BLOCKS[i];
+                if(rem >= b.relStart && rem < b.relStart + b.dur) {
+                    return { ...b, cycle: cycleIdx, absoluteStart: window.ANCHOR_ALPHA_DYNAMIC + (cycleIdx * window.Q_YEAR_MS) + b.relStart };
+                }
+            }
+            return null;
+        };
+
+        window.stepQBlock = function(ts, n) {
+            let current = window.getQBlockByTime(ts);
+            if(!current) return ts;
+            let targetIdx = current.blockIndex + n;
+            let targetCycle = current.cycle;
+            
+            while(targetIdx >= window.Q_BLOCKS.length) { targetIdx -= window.Q_BLOCKS.length; targetCycle += 1; }
+            while(targetIdx < 0) { targetIdx += window.Q_BLOCKS.length; targetCycle -= 1; }
+            
+            return window.ANCHOR_ALPHA_DYNAMIC + (targetCycle * window.Q_YEAR_MS) + window.Q_BLOCKS[targetIdx].relStart;
+        };
+
+        window.stepQSector = function(ts, n) {
+            let current = window.getQBlockByTime(ts);
+            if(!current) return ts;
+            let cIdx = current.blockIndex;
+            let cCycle = current.cycle;
+            let steps = Math.abs(n);
+            let dir = n > 0 ? 1 : -1;
+            
+            for(let i=0; i<steps; i++) {
+                do {
+                    cIdx += dir;
+                    if(cIdx >= window.Q_BLOCKS.length) { cIdx -= window.Q_BLOCKS.length; cCycle++; }
+                    if(cIdx < 0) { cIdx += window.Q_BLOCKS.length; cCycle--; }
+                } while (window.Q_BLOCKS[cIdx].deg !== 1);
+            }
+            return window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + window.Q_BLOCKS[cIdx].relStart;
+        };
+
+        // Call the array generator immediately
+        window.initQBlocks();
 
         let lastPulse = 0;
         let scrubSpeed = 0;
@@ -133,7 +260,8 @@
 
             const qQuad = Math.floor(meanArc / 90) + 1;
             const qSect = Math.floor((meanArc % 90) / 30) + 1;
-            const qDay = Math.floor((meanArc % 30) * (365.24219 / 360)) + 1;
+            
+            const qDeg = Math.floor(meanArc % 30) + 1;
 
             return {
                 meanArc: meanArc,
@@ -141,7 +269,7 @@
                 delta: delta,
                 quad: qQuad,
                 sect: qSect,
-                day: qDay,
+                day: qDeg, 
                 cycleDay: cycleDay
             };
         };
@@ -151,6 +279,27 @@
             const daysElapsed = timeDiff / window.MS_DAY;
             
             const orbitalData = window.getOrbitalData(daysElapsed);
+
+            // --- DEEP-TIME KINEMATIC MATH (Southern Solstice Epoch) ---
+            const G_BASE = 277.0; // Kinematic Azimuth (CMB Rest Frame)
+            const S_BASE = 45.0;  // Stellar Orbit (LSR)
+
+            // 1 Galactic Year = ~230,000,000 terrestrial years
+            const STELLAR_DEG_PER_DAY = 360 / (230000000 * 365.24219);
+            // Azimuth drift (Cosmic vector shift representation)
+            const GALACTIC_DEG_PER_DAY = STELLAR_DEG_PER_DAY * 0.4;
+
+            let sOrbit = S_BASE + (daysElapsed * STELLAR_DEG_PER_DAY);
+            if (sOrbit < 0) sOrbit = (sOrbit % 360) + 360;
+            else sOrbit = sOrbit % 360;
+
+            let gAzimuth = G_BASE + (daysElapsed * GALACTIC_DEG_PER_DAY);
+            if (gAzimuth < 0) gAzimuth = (gAzimuth % 360) + 360;
+            else gAzimuth = gAzimuth % 360;
+
+            orbitalData.galactic = gAzimuth;
+            orbitalData.stellar = sOrbit;
+            // ----------------------------------------------------------
 
             const knownNewMoon = Date.UTC(2024, 0, 11, 11, 57);
             const lunarCycle = 29.53058867 * window.MS_DAY;
@@ -163,11 +312,26 @@
 
         window.getGlobalHolidays = function(year) {
             return [
-                { type: 'node-sys', coord: 0, name: "Primary Postulate Shift" },
-                { type: 'node-sys', coord: 90, name: "Q2 Shift (Solstice)" },
-                { type: 'node-sys', coord: 180, name: "Q3 Shift (Equinox)" },
-                { type: 'node-sys', coord: 270, name: "Q4 Shift (Solstice)" }
+                { type: 'node-sys', coord: 0, name: "SOUTHERN SOLSTICE" },
+                { type: 'node-sys', coord: 90, name: "1ST EQUINOX" },
+                { type: 'node-sys', coord: 180, name: "NORTHERN SOLSTICE" },
+                { type: 'node-sys', coord: 270, name: "2ND EQUINOX" }
             ];
+        };
+
+        window.getNextCelestialEvent = function(t) {
+            const anchors = window.EPHEMERIS_ANCHORS;
+            for (let i = 0; i < anchors.length; i++) {
+                if (anchors[i] > t) {
+                    return { timestamp: anchors[i], isPredictive: false };
+                }
+            }
+            // AUTONOMOUS FAILOVER: Mathematical projection if static array is exhausted
+            const lastKnown = anchors[anchors.length - 1];
+            const tropicalQuarter = 7889231304; 
+            const elapsedQs = Math.ceil((t - lastKnown) / tropicalQuarter);
+            const predictedTs = lastKnown + (elapsedQs * tropicalQuarter);
+            return { timestamp: predictedTs, isPredictive: true };
         };
 
         function mainLoop(timestamp) {
@@ -185,6 +349,7 @@
                 let daysElapsed = (now - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
                 
                 let legacy = window.formatLegacyDate(d);
+                let nextEvent = window.getNextCelestialEvent ? window.getNextCelestialEvent(now) : { timestamp: 0, isPredictive: false };
                 
                 window.CURRENT_TRUE_ARC = qData.trueArc;
 
@@ -198,7 +363,9 @@
                         legacyDateStr: legacy.dateStr,
                         legacyTimeStr: legacy.timeStr,
                         lagDays: (qData.delta / 360) * 365.24219,
-                        activePostulate: window.getPostulateByTime ? window.getPostulateByTime(now) : "PENDING"
+                        activePostulate: window.getPostulateByTime ? window.getPostulateByTime(now) : "PENDING",
+                        nextCelestialEvent: nextEvent.timestamp,
+                        isPredictiveEphemeris: nextEvent.isPredictive
                     }
                 });
                 window.dispatchEvent(event);

@@ -1,7 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase IV UI Engine. Hollow Shell Optimization. 
-// REVISION: Stacking Context Reversion & Precision Mobile Spacing
+// STATUS: Phase XII UI Engine. True Ephemeris Sync, Typographic Hierarchy & Infinite Horizon Scrubber.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -134,7 +133,7 @@ window.injectUniversalUI = function() {
         .wing-r { left: calc(50% + var(--center-gap-x)); }
         .wing-r .wing-bg { transform: scaleX(-1); }
         
-        .wing-r .wing-header, .wing-r .wing-data-center, .wing-r .wing-footer { padding-left: 15px; }
+        .wing-r .wing-data-center, .wing-r .wing-footer { padding-left: 15px; }
 
         .wing-header { position: absolute; top: 25px; left: 0; width: 100%; z-index: 10; display: flex; justify-content: center; pointer-events: none;}
         .wing-data-center { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; width: 100%; padding: 40px 0; box-sizing: border-box; position: relative; z-index: 10; pointer-events: none;}
@@ -146,6 +145,10 @@ window.injectUniversalUI = function() {
         .val-sm { font-family: 'Orbitron'; font-size: 0.85rem; font-weight: 700; z-index: 20; text-align: center; }
         .fmt-toggle { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.5rem; color: var(--theme-main, #00f0ff); cursor: pointer; border: 1px solid var(--theme-dim, rgba(0,240,255,0.2)); padding: 2px 8px; border-radius: 4px; background: rgba(0,0,0,0.6); pointer-events: auto; transition: 0.3s; white-space: nowrap; text-align: center; }
         .fmt-toggle:hover { background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 10px var(--theme-main, #00f0ff); }
+
+        /* --- HEX STRING HOVER CLASSES --- */
+        .exp-view { text-align: left; font-family: 'JetBrains Mono'; font-size: 0.45rem; line-height: 1.6; letter-spacing: 0.5px; white-space: nowrap; }
+        .rest-view { text-align: center; font-family: 'Orbitron'; font-size: 0.75rem; letter-spacing: 1px; white-space: nowrap; }
 
         .desktop-only { display: flex !important; }
         .mobile-only-flex { display: none !important; }
@@ -364,12 +367,10 @@ window.injectUniversalUI = function() {
 
     const uiContainer = document.createElement('div');
     uiContainer.id = 'q-ui-injected-flag';
-    // CRITICAL FIX: Empty flag injected safely. No inline styles. No Z-Index flattening.
     document.body.appendChild(uiContainer);
 
     const uiWrapper = document.createElement('div');
     
-    // CRITICAL FIX: The .desktop-only class is RESTORED to the corner panels here so index.html doesn't purge them on Desktop.
     uiWrapper.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
@@ -467,7 +468,7 @@ window.injectUniversalUI = function() {
                 <span class="w-head" style="position:static; transform:none;">LEGACY OS</span>
             </div>
             <div class="wing-data-center">
-                <div style="margin-bottom: 15px;">
+                <div style="margin-bottom: 15px;" id="leg-date-wrapper">
                     <div class="w-lbl">DATE</div>
                     <div class="val-lg" id="leg-date" style="color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
                 </div>
@@ -480,7 +481,7 @@ window.injectUniversalUI = function() {
                 </div>
             </div>
             <div class="wing-footer">
-                <div style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto;">STATUS: CONTINUITY ACTIVE</div>
+                <div id="legacy-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">STATUS: CONTINUITY ACTIVE</div>
             </div>
         </div>
 
@@ -490,42 +491,111 @@ window.injectUniversalUI = function() {
             <div class="wing-header">
                 <span class="w-head" style="position:static; transform:none;">QUAD OS</span>
             </div>
+            
             <div class="wing-data-center">
-                <div style="margin-bottom: 15px;">
+                <div style="margin-bottom: 4px; pointer-events: none;">
                     <div class="w-lbl">Q COORDINATE</div>
-                    <div class="val-lg" id="q-coord-wing" style="margin-top: 4px; color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
+                    <div class="val-lg" id="q-coord-wing" style="margin-top: 2px; color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
                 </div>
-                <div style="display:flex; width: 100%; justify-content: space-around;">
-                    <div style="display:flex; flex-direction:column; align-items:center;">
-                        <div class="w-lbl">MEAN CIRCLE (CIVIL)</div>
-                        <div class="val-sm" id="mean-deg" style="color:var(--theme-main, #00f0ff) !important; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); margin-top: 4px;">--</div>
+                
+                <div id="p-string-node" style="width: 100%; pointer-events: auto; cursor: pointer; padding: 2px 0; border-top: 1px solid rgba(0,240,255,0.1); border-bottom: 1px solid rgba(0,240,255,0.1); margin-bottom: 6px; position:relative;">
+                    <div class="rest-view" id="p-rest" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
+                    <div id="p-exp" style="display:none; position:absolute; top:100%; left:0; width:100%; background:rgba(2,6,15,0.95); z-index:50; padding:6px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2);">--</div>
+                </div>
+
+                <div style="display: flex; width: 100%; justify-content: center; align-items: center; gap: 15px; position: relative; margin-top: 5px;">
+                    
+                    <div style="display: flex; flex-direction: column; gap: 6px; pointer-events: auto; cursor: pointer;" id="deep-time-col">
+                        <div id="g-rest" class="rest-view" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); text-align: left;">--</div>
+                        <div id="s-rest" class="rest-view" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); text-align: left;">--</div>
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:center;">
-                        <div class="w-lbl">TRUE ELLIPSE (PHYSICS)</div>
-                        <div class="val-sm" id="true-deg" style="color:var(--theme-main, #00f0ff) !important; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); margin-top: 4px;">--</div>
+
+                    <div style="display: flex; flex-direction: column; align-items: center; pointer-events: auto; cursor: pointer;" id="radial-index-wrapper">
+                        <div id="radial-index-container" style="position:relative; width: 45px; height: 45px; pointer-events: none;">
+                            <svg viewBox="-30 -30 60 60" style="overflow:visible; width:100%; height:100%;">
+                                <defs>
+                                    <linearGradient id="friction-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#ffffff" />
+                                        <stop offset="100%" stop-color="var(--theme-main, #00f0ff)" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="0" cy="0" r="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
+                                <path id="friction-arc" fill="none" stroke="url(#friction-grad)" stroke-width="2" filter="drop-shadow(0 0 4px var(--theme-main, #00f0ff))" />
+                                <circle id="node-solar" cx="0" cy="-25" r="3" fill="#ffffff" filter="drop-shadow(0 0 5px #ffffff)" />
+                                <circle id="node-sidereal" cx="0" cy="-25" r="3" fill="var(--theme-main, #00f0ff)" filter="drop-shadow(0 0 5px var(--theme-main, #00f0ff))" />
+                            </svg>
+                        </div>
+                        <div class="w-lbl" style="font-size: 0.35rem; margin-top: 4px; color: var(--q-metal);">AXIAL FRICTION</div>
+                    </div>
+
+                    <div id="deep-time-overlay" style="display:none; position:absolute; top:-5px; left:0; width:100%; height:calc(100% + 10px); background:rgba(2,6,15,0.95); backdrop-filter:blur(8px); z-index:50; flex-direction:column; justify-content:center; padding-left: 5px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2);">
+                    </div>
+                    
+                    <div id="radial-overlay" style="display:none; position:absolute; top:-5px; left:0; width:100%; height:calc(100% + 10px); background:rgba(2,6,15,0.95); backdrop-filter:blur(8px); z-index:51; flex-direction:column; justify-content:center; padding: 5px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2); text-align: left;">
+                        <div class="exp-view" style="white-space: normal;">
+                            <span style="color:var(--starlight); font-weight:bold;">[AXIAL FRICTION]</span><br>
+                            <span style="color:var(--theme-main, #00f0ff); font-size: 0.45rem;">Compounding variance between the 24h Solar Day and the 23h 56m Sidereal rotation.</span>
+                        </div>
                     </div>
                 </div>
             </div>
+            
             <div class="wing-footer">
-                <div style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto;">DUAL-STATE ENGINE</div>
+                <div id="quad-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">DUAL-STATE ENGINE</div>
             </div>
         </div>
 
         <div class="q-global-controls" id="q-universal-controls">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
-            <input type="range" min="0" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
+            <input type="range" min="-365" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
             <button class="q-ctrl-btn" id="q-live-toggle" onclick="window.setLiveClock()">LIVE</button>
         </div>
     `;
     
-    // CRITICAL FIX 3: Unpacking directly to body. No wrapper. Global Z-Index maintained.
     while(uiWrapper.firstChild) {
         document.body.appendChild(uiWrapper.firstChild);
+    }
+
+    // --- HEX STRING EVENT BINDING ---
+    const pNode = document.getElementById('p-string-node');
+    const pExp = document.getElementById('p-exp');
+    if(pNode && pExp) {
+        pNode.addEventListener('mouseenter', () => pExp.style.display = 'block');
+        pNode.addEventListener('mouseleave', () => pExp.style.display = 'none');
+        pNode.addEventListener('click', () => { pExp.style.display = pExp.style.display === 'none' ? 'block' : 'none'; });
+    }
+
+    const deepTimeCol = document.getElementById('deep-time-col');
+    const deepTimeOverlay = document.getElementById('deep-time-overlay');
+    if(deepTimeCol && deepTimeOverlay) {
+        deepTimeCol.addEventListener('mouseenter', () => deepTimeOverlay.style.display = 'flex');
+        deepTimeCol.addEventListener('mouseleave', () => deepTimeOverlay.style.display = 'none');
+        deepTimeCol.addEventListener('click', () => { deepTimeOverlay.style.display = deepTimeOverlay.style.display === 'none' ? 'flex' : 'none'; });
+    }
+
+    const radialWrapper = document.getElementById('radial-index-wrapper');
+    const radialOverlay = document.getElementById('radial-overlay');
+    if(radialWrapper && radialOverlay) {
+        radialWrapper.addEventListener('mouseenter', () => radialOverlay.style.display = 'flex');
+        radialWrapper.addEventListener('mouseleave', () => radialOverlay.style.display = 'none');
+        radialWrapper.addEventListener('click', () => { radialOverlay.style.display = radialOverlay.style.display === 'none' ? 'flex' : 'none'; });
     }
     
     window.bindMasterTickScrubber();
     window.syncScrubberUI();
+
+    // --- ANCHOR TRANSLATION FILTER ---
+    function translateAnchor(name) {
+        if (!name) return "";
+        const n = name.toUpperCase();
+        if (n.includes('ALPHA')) return 'SOUTHERN SOLSTICE';
+        if (n.includes('BETA')) return '1ST EQUINOX';
+        if (n.includes('GAMMA')) return 'NORTHERN SOLSTICE';
+        if (n.includes('DELTA')) return '2ND EQUINOX';
+        if (n.includes('EPSILON')) return 'PURGE';
+        return name;
+    }
 
     window.addEventListener('q-tick', (e) => {
         const ribbonLeg = document.getElementById('ribbon-leg');
@@ -557,9 +627,13 @@ window.injectUniversalUI = function() {
                 const t = e.detail.t;
                 let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(t) : null;
                 let cCycle = activeBlock ? activeBlock.cycle : 0;
-                let qcStr = (activeBlock && activeBlock.type === 'ANCHOR') ? 
-                    `<span style="color:var(--chrono-amber);">QC</span> <span style="color:#fff;">${cCycle}</span> <span style="color:var(--chrono-amber);">${activeBlock.name}</span>` : 
-                    `<span style="color:var(--chrono-amber);">QC</span> <span style="color:#fff;">${cCycle}</span> <span style="color:var(--chrono-amber);">Q</span><span style="color:#fff;">${qData.quad}</span> <span style="color:var(--chrono-amber);">S</span><span style="color:#fff;">${qData.sect}</span> <span style="color:var(--chrono-amber);">DAY</span> <span style="color:#fff;">${qData.day}</span>`;
+                let anchorName = (activeBlock && activeBlock.type === 'ANCHOR') ? translateAnchor(activeBlock.name) : "";
+                
+                let qcStr = `<span style="color:var(--chrono-amber);">QC</span> <span style="color:#fff;">${cCycle}</span> <span style="color:var(--chrono-amber);">Q</span><span style="color:#fff;">${qData.quad}</span> <span style="color:var(--chrono-amber);">S</span><span style="color:#fff;">${qData.sect}</span> <span style="color:var(--chrono-amber);">DEG</span> <span style="color:#fff;">${qData.day}</span>`;
+                
+                if (anchorName && anchorName !== 'PURGE') {
+                    qcStr += ` <span style="color:var(--theme-main); margin-left:4px;">[${anchorName}]</span>`;
+                }
                 
                 ribbonLegDate.innerHTML = qcStr;
             } else {
@@ -569,7 +643,7 @@ window.injectUniversalUI = function() {
 
         function formatDualColorWing(str) {
             const letterStyle = "color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-right:2px;";
-            const numStyle = `color:var(--theme-main, #00f0ff); font-size:1.1rem; font-weight:bold;`;
+            const numStyle = `color:var(--theme-main, #00f0ff); font-size:0.95rem; font-weight:bold;`;
             let out = "";
             let tokens = str.match(/([0-9]+)|([^0-9]+)/g);
             if (tokens) {
@@ -579,28 +653,168 @@ window.injectUniversalUI = function() {
         }
 
         const legDateEl = document.getElementById('leg-date');
-        if (legDateEl) legDateEl.innerHTML = `<span style="color:var(--theme-main, #00f0ff); font-weight:bold; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">${e.detail.legacyDateStr.toUpperCase()}</span>`;
+        if (legDateEl && e.detail.legacyDateStr) {
+            const monthMap = { "JAN": "JANUARY", "FEB": "FEBRUARY", "MAR": "MARCH", "APR": "APRIL", "MAY": "MAY", "JUN": "JUNE", "JUL": "JULY", "AUG": "AUGUST", "SEP": "SEPTEMBER", "OCT": "OCTOBER", "NOV": "NOVEMBER", "DEC": "DECEMBER" };
+            let rawDate = e.detail.legacyDateStr.toUpperCase();
+            let parts = rawDate.replace(',', '').split(' ');
+            if (parts.length >= 3) {
+                let fullMonth = monthMap[parts[0]] || parts[0];
+                legDateEl.innerHTML = `
+                    <div style="font-size:1.0rem; color:var(--theme-main, #00f0ff); font-weight:bold; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">${fullMonth} ${parts[1]}</div>
+                    <div style="font-size:0.75rem; color:var(--theme-main, #00f0ff); font-weight:bold; opacity:0.8; margin-top:2px;">${parts[2]}</div>
+                `;
+            } else {
+                legDateEl.innerHTML = `<span style="color:var(--theme-main, #00f0ff); font-weight:bold; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">${rawDate}</span>`;
+            }
+        }
 
         const legTimeEl = document.getElementById('leg-time');
-        if (legTimeEl) legTimeEl.innerHTML = formatDualColorWing(e.detail.legacyTimeStr);
+        if (legTimeEl) {
+            let timeParts = e.detail.legacyTimeStr.match(/([0-9:]+)\s*(.*)/);
+            if (timeParts) {
+                legTimeEl.innerHTML = `
+                    <div style="font-size:0.95rem; color:var(--theme-main, #00f0ff); font-weight:bold; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">${timeParts[1]}</div>
+                    <div style="font-size:0.5rem; color:var(--starlight); font-weight:bold; margin-top:2px; letter-spacing:1px;">${timeParts[2]}</div>
+                `;
+            } else {
+                legTimeEl.innerHTML = formatDualColorWing(e.detail.legacyTimeStr);
+            }
+        }
         
-        const meanDegEl = document.getElementById('mean-deg');
-        if (meanDegEl) meanDegEl.innerText = e.detail.qData.meanArc.toFixed(4) + "°";
-        
-        const trueDegEl = document.getElementById('true-deg');
-        if (trueDegEl) trueDegEl.innerText = e.detail.qData.trueArc.toFixed(4) + "°"; 
-
         let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(e.detail.t) : null;
         const qCoordWing = document.getElementById('q-coord-wing');
         
         if (qCoordWing) {
-            if (activeBlock && activeBlock.type === 'ANCHOR') {
-                qCoordWing.innerHTML = `<span style="font-size:0.9rem; color:var(--theme-main, #00f0ff); font-family:'Orbitron'; font-weight:bold;">${activeBlock.name}</span>`;
+            let anchorName = (activeBlock && activeBlock.type === 'ANCHOR') ? translateAnchor(activeBlock.name) : "";
+            
+            let baseCoord = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.5rem; margin-right:1px;">QC</span><span style="color:var(--theme-main, #00f0ff); font-size:0.95rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span>` +
+                            `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.5rem; margin-left:4px; margin-right:1px;">Q</span><span style="color:var(--theme-main, #00f0ff); font-size:0.95rem; font-weight:bold;">${e.detail.qData.quad}</span>` +
+                            `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.5rem; margin-left:4px; margin-right:1px;">S</span><span style="color:var(--theme-main, #00f0ff); font-size:0.95rem; font-weight:bold;">${e.detail.qData.sect}</span>` +
+                            `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.5rem; margin-left:4px; margin-right:2px;">DEG</span><span style="color:var(--theme-main, #00f0ff); font-size:0.95rem; font-weight:bold;">${e.detail.qData.day}</span>`;
+
+            if (anchorName && anchorName !== 'PURGE') {
+                qCoordWing.innerHTML = `<div style="font-size:0.55rem; color:var(--chrono-amber); font-weight:bold; letter-spacing:1px; margin-bottom:2px;">[ ${anchorName} ]</div>` + baseCoord;
             } else {
-                qCoordWing.innerHTML = `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem;">QC</span><span style="color:var(--theme-main, #00f0ff); font-size:1.1rem; font-weight:bold;">${activeBlock ? activeBlock.cycle : 0}</span> ` +
-                                       `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">Q</span><span style="color:var(--theme-main, #00f0ff); font-size:1.1rem; font-weight:bold;">${e.detail.qData.quad}</span> ` +
-                                       `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">S</span><span style="color:var(--theme-main, #00f0ff); font-size:1.1rem; font-weight:bold;">${e.detail.qData.sect}</span> ` +
-                                       `<span style="color:var(--starlight); font-family:'Orbitron'; font-size:0.8rem; margin-left:6px;">DAY</span><span style="color:var(--theme-main, #00f0ff); font-size:1.1rem; font-weight:bold;">${e.detail.qData.day}</span>`;
+                qCoordWing.innerHTML = baseCoord;
+            }
+        }
+
+        // --- BARYCENTRIC HEX STRING DOM KINETICS ---
+        const pRest = document.getElementById('p-rest');
+        const pExp = document.getElementById('p-exp');
+        if (pRest && pExp && e.detail.qData) {
+            const p = e.detail.qData.trueArc || 0;
+            pRest.innerHTML = `<span style="color:var(--starlight); font-size:0.5rem;">P:</span> <span style="color:var(--theme-main, #00f0ff);">${p.toFixed(6)}°</span>`;
+            pExp.innerHTML = `<div class="exp-view"><div style="color:var(--starlight); margin-bottom: 2px;">[P] PLANETARY ORBIT (TRUE ELLIPSE):</div><div style="color:var(--theme-main, #00f0ff); font-size: 0.6rem;">${p.toFixed(10)}°</div></div>`;
+        }
+
+        const gRest = document.getElementById('g-rest');
+        const sRest = document.getElementById('s-rest');
+        if (gRest && sRest && deepTimeOverlay && e.detail.qData) {
+            const g = e.detail.qData.galactic || 0;
+            const s = e.detail.qData.stellar || 0;
+            gRest.innerHTML = `<span style="color:var(--starlight); font-size:0.5rem;">G:</span> ${Math.floor(g).toString().padStart(3,'0')}°`;
+            sRest.innerHTML = `<span style="color:var(--starlight); font-size:0.5rem;">S:</span> ${Math.floor(s).toString().padStart(3,'0')}°`;
+            
+            deepTimeOverlay.innerHTML = `
+                <div class="exp-view">
+                    <div style="color:var(--starlight); margin-bottom:4px;">[G] KINEMATIC AZIMUTH (CMB):<br><span style="color:var(--theme-main, #00f0ff); font-size: 0.55rem;">${g.toFixed(10)}°</span></div>
+                    <div style="color:var(--starlight);">[S] STELLAR ORBIT (LSR):<br><span style="color:var(--theme-main, #00f0ff); font-size: 0.55rem;">${s.toFixed(10)}°</span></div>
+                </div>
+            `;
+        }
+
+        // --- AXIAL FRICTION KINETICS (RADIAL INDEX) ---
+        const solarNode = document.getElementById('node-solar');
+        const siderealNode = document.getElementById('node-sidereal');
+        const frictionArc = document.getElementById('friction-arc');
+        const fGrad = document.getElementById('friction-grad');
+        
+        if(solarNode && siderealNode && frictionArc && window.ANCHOR_ALPHA_DYNAMIC) {
+            const dObj = new Date(e.detail.t);
+            const msSinceMidnight = (dObj.getUTCHours() * 3600000) + (dObj.getUTCMinutes() * 60000) + (dObj.getUTCSeconds() * 1000) + dObj.getUTCMilliseconds();
+            
+            const solarDeg = (msSinceMidnight / 86400000) * 360;
+
+            const elapsedMs = e.detail.t - window.ANCHOR_ALPHA_DYNAMIC;
+            const driftDeg = (elapsedMs / 31556925216) * 360; 
+            
+            let siderealDeg = (solarDeg + driftDeg) % 360;
+            if (siderealDeg < 0) siderealDeg += 360;
+
+            const radius = 25;
+            function p2c(cx, cy, r, a) {
+                const rad = (a - 90) * Math.PI / 180.0;
+                return { x: cx + (r * Math.cos(rad)), y: cy + (r * Math.sin(rad)) };
+            }
+
+            const solPos = p2c(0, 0, radius, solarDeg);
+            const sidPos = p2c(0, 0, radius, siderealDeg);
+
+            solarNode.setAttribute('cx', solPos.x);
+            solarNode.setAttribute('cy', solPos.y);
+            siderealNode.setAttribute('cx', sidPos.x);
+            siderealNode.setAttribute('cy', sidPos.y);
+
+            let diff = siderealDeg - solarDeg;
+            if (diff < 0) diff += 360;
+            
+            const largeArcFlag = diff <= 180 ? "0" : "1";
+            
+            const arcPath = [
+                "M", solPos.x, solPos.y, 
+                "A", radius, radius, 0, largeArcFlag, 1, sidPos.x, sidPos.y
+            ].join(" ");
+            
+            frictionArc.setAttribute('d', arcPath);
+
+            if (fGrad) {
+                fGrad.setAttribute('x1', (50 + 50 * Math.cos((solarDeg - 90)*Math.PI/180)) + '%');
+                fGrad.setAttribute('y1', (50 + 50 * Math.sin((solarDeg - 90)*Math.PI/180)) + '%');
+                fGrad.setAttribute('x2', (50 + 50 * Math.cos((siderealDeg - 90)*Math.PI/180)) + '%');
+                fGrad.setAttribute('y2', (50 + 50 * Math.sin((siderealDeg - 90)*Math.PI/180)) + '%');
+            }
+        }
+
+        // --- THE ANTICIPATION ODOMETERS ---
+        const legacyFooter = document.getElementById('legacy-footer-text');
+        const quadFooter = document.getElementById('quad-footer-text');
+
+        if (legacyFooter && quadFooter && window.ANCHOR_ALPHA_DYNAMIC && e.detail.qData) {
+            
+            // Quad OS Spatial Horizon
+            const p = e.detail.qData.trueArc || 0;
+            let nextNodeDeg = Math.floor(p / 90) * 90 + 90;
+            let deltaDeg = nextNodeDeg - p;
+            let nextNodeName = (nextNodeDeg === 90) ? '1ST EQUINOX' : (nextNodeDeg === 180) ? 'NORTHERN SOLSTICE' : (nextNodeDeg === 270) ? '2ND EQUINOX' : 'SOUTHERN SOLSTICE';
+            
+            quadFooter.innerHTML = `<span style="color:var(--starlight);">NEXT: ${nextNodeName}</span> <span style="color:var(--theme-main, #00f0ff); font-weight:bold;">[ Δ -${deltaDeg.toFixed(4)}° ]</span>`;
+
+            // Legacy OS Temporal Countdown (Keplerian Sync)
+            const remMs = e.detail.nextCelestialEvent - e.detail.t;
+            if (remMs > 0) {
+                const totalHours = Math.floor(remMs / 3600000);
+                const dRem = Math.floor(remMs / 86400000);
+                const hRem = Math.floor((remMs % 86400000) / 3600000);
+                const mRem = Math.floor((remMs % 3600000) / 60000);
+                const sRem = Math.floor((remMs % 60000) / 1000);
+
+                let timeStr = "";
+                if (totalHours < 48) {
+                    timeStr = totalHours.toString().padStart(2, '0') + ":" + 
+                              mRem.toString().padStart(2, '0') + ":" + 
+                              sRem.toString().padStart(2, '0');
+                } else {
+                    timeStr = dRem + "D " + 
+                              hRem.toString().padStart(2, '0') + ":" + 
+                              mRem.toString().padStart(2, '0') + ":" + 
+                              sRem.toString().padStart(2, '0');
+                }
+
+                let warnTag = e.detail.isPredictiveEphemeris ? `<span style="color:#ff003c; margin-right:4px;">[PRD]</span>` : '';
+                legacyFooter.innerHTML = `${warnTag}<span style="color:var(--starlight);">T-MINUS</span> <span style="color:var(--theme-main, #00f0ff); font-weight:bold;">${timeStr}</span>`;
+            } else {
+                legacyFooter.innerHTML = `<span style="color:var(--starlight);">STATUS:</span> <span style="color:var(--theme-main, #00f0ff); font-weight:bold;">PULSE ACTIVE</span>`;
             }
         }
     });
@@ -840,9 +1054,12 @@ window.bindMasterTickScrubber = function() {
         if (isLive) {
             const scrubber = document.getElementById('q-global-scrubber');
             if (scrubber) {
-                let cycleDay = Math.floor(daysElapsed % 365.24219);
-                if (cycleDay < 0) cycleDay += 365; 
-                scrubber.value = cycleDay;
+                let currentDay = Math.floor(daysElapsed);
+                let sMax = parseInt(scrubber.max);
+                let sMin = parseInt(scrubber.min);
+                if (currentDay >= sMax - 90) scrubber.max = currentDay + 365;
+                if (currentDay <= sMin + 90) scrubber.min = currentDay - 365;
+                scrubber.value = currentDay;
             }
         }
     });
@@ -850,17 +1067,24 @@ window.bindMasterTickScrubber = function() {
 
 window.scrubTime = function(val) {
     if(!window.getSimState || !window.ANCHOR_ALPHA_DYNAMIC) return;
-    const saved = window.getSimState();
-    const baseTime = saved.isLive ? Date.now() : saved.simTime;
-    const currentDays = (baseTime - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-    const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
-    const discreteDays = parseInt(val, 10);
+    const targetDays = parseInt(val, 10);
     
-    const targetMs = window.ANCHOR_ALPHA_DYNAMIC + ((cycleBaseDays + discreteDays) * window.MS_DAY);
-    const d = new Date(targetMs);
-    d.setUTCHours(12, 0, 0, 0);
+    // Get the real-world current time to use as our unbreakable time-of-day anchor
+    const liveDate = new Date();
+    const liveMsSinceMidnight = (liveDate.getUTCHours() * 3600000) + 
+                                (liveDate.getUTCMinutes() * 60000) + 
+                                (liveDate.getUTCSeconds() * 1000) + 
+                                liveDate.getUTCMilliseconds();
     
-    window.updateMasterClock(false, d.getTime());
+    // targetDays is now the absolute offset from the Dynamic Anchor
+    const targetMs = window.ANCHOR_ALPHA_DYNAMIC + (targetDays * 86400000);
+    const dTarget = new Date(targetMs);
+    dTarget.setUTCHours(0, 0, 0, 0);
+    
+    // Add the real-world time of day back in to freeze the Solar Node in place
+    const finalMs = dTarget.getTime() + liveMsSinceMidnight;
+    
+    window.updateMasterClock(false, finalMs);
     if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
 };
 
@@ -898,9 +1122,12 @@ window.syncScrubberUI = function() {
     
     if(scrubber && state.isLive === false && window.ANCHOR_ALPHA_DYNAMIC) {
         let daysElapsed = (state.simTime - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-        let cycleDay = Math.floor(daysElapsed % 365.24219);
-        if (cycleDay < 0) cycleDay += 365;
-        scrubber.value = cycleDay;
+        let currentDay = Math.floor(daysElapsed);
+        let sMax = parseInt(scrubber.max);
+        let sMin = parseInt(scrubber.min);
+        if (currentDay >= sMax - 90) scrubber.max = currentDay + 365;
+        if (currentDay <= sMin + 90) scrubber.min = currentDay - 365;
+        scrubber.value = currentDay;
     }
 };
 

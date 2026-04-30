@@ -1,7 +1,7 @@
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
 // PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
-// REVISION: 24.2.4 - Hotfix: Native Data Utilities & Modal CSS Restored
+// REVISION: Phase XII - Orbital Ledger Integration & Decimal Degree Sub-Routing
 
 // --- DATA PERSISTENCE & UTILITIES ---
 window.qData = window.qData || JSON.parse(localStorage.getItem('q_planner_data_v2') || '{}');
@@ -25,115 +25,36 @@ window.hasDataInDay = function(date) {
     return false;
 };
 
-// --- DUAL-STATE ASYMMETRICAL GEAR ENGINE ---
-
-// Initialize Absolute Block Array (365 Total Blocks per Cycle)
-window.initQBlocks = function() {
-    if (!window.Q_GEAR_CONSTANTS) return;
-
-    window.Q_BLOCK_DEFS = [];
-    window.Q_BLOCK_DEFS.push({ type: 'ANCHOR', name: 'ALPHA ANCHOR', dur: window.Q_GEAR_CONSTANTS.ALPHA, quad: 1, sect: 1 });
-    
-    function buildDays(q, s) {
-        for(let d=1; d<=30; d++) window.Q_BLOCK_DEFS.push({ type: 'DAY', quad: q, sect: s, day: d, dur: 86400000 });
+window.hasDataInBlock = function(cycle, absDeg) {
+    if (!window.qData) return false;
+    for(let m=0; m<10; m++) {
+        let key = `Q-${cycle}-${absDeg}-${m}`;
+        if(window.qData[key] && window.qData[key].text && window.qData[key].text.trim() !== "") return true;
     }
-    
-    buildDays(1, 1); buildDays(1, 2); buildDays(1, 3);
-    window.Q_BLOCK_DEFS.push({ type: 'ANCHOR', name: 'BETA ANCHOR', dur: window.Q_GEAR_CONSTANTS.BETA, quad: 1, sect: 3 });
-    
-    buildDays(2, 1); buildDays(2, 2); buildDays(2, 3);
-    window.Q_BLOCK_DEFS.push({ type: 'ANCHOR', name: 'GAMMA ANCHOR', dur: window.Q_GEAR_CONSTANTS.GAMMA, quad: 2, sect: 3 });
-    
-    buildDays(3, 1); buildDays(3, 2); buildDays(3, 3);
-    window.Q_BLOCK_DEFS.push({ type: 'ANCHOR', name: 'DELTA ANCHOR', dur: window.Q_GEAR_CONSTANTS.DELTA, quad: 3, sect: 3 });
-    
-    buildDays(4, 1); buildDays(4, 2); buildDays(4, 3);
-    window.Q_BLOCK_DEFS.push({ type: 'ANCHOR', name: 'EPSILON ANCHOR', dur: window.Q_GEAR_CONSTANTS.EPSILON, quad: 4, sect: 3 });
-    
-    window.Q_BLOCKS = [];
-    let acc = 0;
-    window.Q_BLOCK_DEFS.forEach((b, i) => {
-        window.Q_BLOCKS.push({ ...b, relStart: acc, blockIndex: i });
-        acc += b.dur;
-    });
-
-    window.Q_YEAR_MS = acc;
-};
-
-window.getQBlockByTime = function(ts) {
-    if(!window.ANCHOR_ALPHA_DYNAMIC || !window.Q_BLOCKS) return null;
-    let diff = ts - window.ANCHOR_ALPHA_DYNAMIC;
-    let cycleIdx = Math.floor(diff / window.Q_YEAR_MS);
-    let rem = diff % window.Q_YEAR_MS;
-    if(rem < 0) { rem += window.Q_YEAR_MS; cycleIdx -= 1; }
-    
-    for(let i=0; i<window.Q_BLOCKS.length; i++) {
-        let b = window.Q_BLOCKS[i];
-        if(rem >= b.relStart && rem < b.relStart + b.dur) {
-            return { ...b, cycle: cycleIdx, absoluteStart: window.ANCHOR_ALPHA_DYNAMIC + (cycleIdx * window.Q_YEAR_MS) + b.relStart };
-        }
-    }
-    return null;
-};
-
-window.stepQBlock = function(ts, n) {
-    let current = window.getQBlockByTime(ts);
-    if(!current) return ts;
-    let targetIdx = current.blockIndex + n;
-    let targetCycle = current.cycle;
-    
-    while(targetIdx >= window.Q_BLOCKS.length) { targetIdx -= window.Q_BLOCKS.length; targetCycle += 1; }
-    while(targetIdx < 0) { targetIdx += window.Q_BLOCKS.length; targetCycle -= 1; }
-    
-    return window.ANCHOR_ALPHA_DYNAMIC + (targetCycle * window.Q_YEAR_MS) + window.Q_BLOCKS[targetIdx].relStart;
-};
-
-window.stepQSector = function(ts, n) {
-    let current = window.getQBlockByTime(ts);
-    if(!current) return ts;
-    let cIdx = current.blockIndex;
-    let cCycle = current.cycle;
-    let steps = Math.abs(n);
-    let dir = n > 0 ? 1 : -1;
-    
-    for(let i=0; i<steps; i++) {
-        do {
-            cIdx += dir;
-            if(cIdx >= window.Q_BLOCKS.length) { cIdx -= window.Q_BLOCKS.length; cCycle++; }
-            if(cIdx < 0) { cIdx += window.Q_BLOCKS.length; cCycle--; }
-        } while (window.Q_BLOCKS[cIdx].type === 'DAY' && window.Q_BLOCKS[cIdx].day !== 1);
-    }
-    return window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + window.Q_BLOCKS[cIdx].relStart;
+    return false;
 };
 
 // DUAL-FORMAT TITLE GENERATOR
 window.getDualTitle = function(ts, isLegacy) {
-    const d = new Date(ts);
-    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-    const legacyStr = `${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}`;
-    
-    const qBlock = window.getQBlockByTime(ts);
-    let qStr = "";
-    if (qBlock) {
-        if (qBlock.type === 'ANCHOR') {
-            qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:#fff;">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">${qBlock.name}</span>`;
-        } else {
-            qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:#fff;">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">Q</span><span style="color:#fff;">${qBlock.quad}</span> <span style="color:var(--gold, #F4D068);">S</span><span style="color:#fff;">${qBlock.sect}</span> <span style="color:var(--gold, #F4D068);">DAY</span> <span style="color:#fff;">${qBlock.day}</span>`;
-        }
+    if (isLegacy) {
+        const d = new Date(ts);
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        return `<div class="cal-title-wrapper show-legacy"><div class="title-leg">${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}</div></div>`;
     } else {
-        qStr = "<span style='color:var(--theme-main, #ff003c);'>Q-SYNC PENDING</span>";
+        const qBlock = window.getQBlockByTime(ts);
+        let qStr = "";
+        if (qBlock) {
+            if (qBlock.isAnchor) {
+                qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:#fff;">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">Q</span><span style="color:#fff;">${qBlock.quad}</span> <span style="color:var(--gold, #F4D068);">S</span><span style="color:#fff;">${qBlock.sect}</span> <span style="color:var(--gold, #F4D068);">DEG</span> <span style="color:#fff;">${qBlock.deg}</span> <span style="color:var(--theme-main, #00f0ff); margin-left:4px;">[${qBlock.name}]</span>`;
+            } else {
+                qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:#fff;">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">Q</span><span style="color:#fff;">${qBlock.quad}</span> <span style="color:var(--gold, #F4D068);">S</span><span style="color:#fff;">${qBlock.sect}</span> <span style="color:var(--gold, #F4D068);">DEG</span> <span style="color:#fff;">${qBlock.deg}</span>`;
+            }
+        } else {
+            qStr = "<span style='color:var(--theme-main, #ff003c);'>Q-SYNC PENDING</span>";
+        }
+        return `<div class="cal-title-wrapper show-quad"><div class="title-q">${qStr}</div></div>`;
     }
-    
-    const wrapperClass = isLegacy ? 'show-legacy' : 'show-quad';
-    return `
-        <div class="cal-title-wrapper ${wrapperClass}">
-            <div class="title-leg">${legacyStr}</div>
-            <div class="title-divider">|</div>
-            <div class="title-q">${qStr}</div>
-        </div>
-    `;
 };
-
 // --- UNIVERSAL MODAL ENGINE ---
 window.Q_ModalEngine = {
     init: function() {
@@ -203,13 +124,7 @@ window.Q_OmniPlanner = {
 
     setViewMode: function(mode) {
         if (mode === 'day') {
-            let activeBlock = window.getQBlockByTime(this.selectedDate);
-            if (!this.isLegacy && activeBlock && activeBlock.type === 'ANCHOR') {
-                this.selectedAnchor = { name: activeBlock.name, startMs: this.selectedDate, dur: activeBlock.dur };
-                this.viewState = 'anchor';
-            } else {
-                this.viewState = 'day';
-            }
+            this.viewState = 'day';
         } else {
             this.viewState = 'planner';
             this.plannerMacroMode = mode;
@@ -231,14 +146,8 @@ window.Q_OmniPlanner = {
             this.plannerBase = nextTs; 
         }
         
-        if (!this.isLegacy && (this.viewState === 'day' || this.viewState === 'anchor')) {
-            let activeBlock = window.getQBlockByTime(this.selectedDate);
-            if (activeBlock.type === 'ANCHOR') {
-                this.selectedAnchor = { name: activeBlock.name, startMs: this.selectedDate, dur: activeBlock.dur };
-                this.viewState = 'anchor';
-            } else {
-                this.viewState = 'day';
-            }
+        if (!this.isLegacy && this.viewState === 'day') {
+            this.viewState = 'day';
         }
         sessionStorage.setItem('Q_PLANNER_TIME', this.plannerBase);
         sessionStorage.setItem('Q_PLANNER_SELECTED_DATE', this.selectedDate);
@@ -257,7 +166,7 @@ window.Q_OmniPlanner = {
             this.selectedDate = nextTs; 
         }
         
-        if (!this.isLegacy && (this.viewState === 'day' || this.viewState === 'anchor')) {
+        if (!this.isLegacy && this.viewState === 'day') {
             this.viewState = 'day';
         }
         sessionStorage.setItem('Q_PLANNER_TIME', this.plannerBase);
@@ -350,7 +259,7 @@ window.Q_OmniPlanner = {
             .macro-month-title { font-family: 'Orbitron'; font-size: 0.75rem; margin-bottom: 8px; text-align: center; letter-spacing: 2px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
             
             .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid rgba(255,255,255,0.08); border-left: 1px solid rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
-            .q-sector-grid { display: grid; grid-template-columns: repeat(6, 1fr); border-top: 1px solid rgba(255,255,255,0.08); border-left: 1px solid rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+            .q-sector-grid { display: grid; border-top: 1px solid rgba(255,255,255,0.08); border-left: 1px solid rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
             .mini-day { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-family: 'JetBrains Mono'; font-size: 0.55rem; background: rgba(0,0,0,0.2); cursor: pointer; transition: 0.2s; border-right: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); color: #fff; box-sizing: border-box; }
             
             .mini-day:hover { background: rgba(255,255,255,0.1); border-color: var(--theme-main, #ff003c); }
@@ -361,10 +270,6 @@ window.Q_OmniPlanner = {
             .macro-quad-box { background: rgba(0,0,0,0.4); border-width: 1px; border-style: solid; border-radius: 8px; padding: 15px; box-sizing: border-box; }
             .macro-quad-title { font-family: 'Orbitron'; font-size: 0.85rem; margin-bottom: 10px; text-align: center; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid var(--theme-dim); padding-bottom: 6px; }
             
-            .macro-anchor-bar { width: 100%; background: rgba(244, 208, 104, 0.1); border: 1px solid var(--gold, #F4D068); color: var(--gold, #F4D068); text-align: center; padding: 10px; margin: 10px 0; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; letter-spacing: 4px; border-radius: 4px; cursor: pointer; transition: 0.3s; box-shadow: inset 0 0 15px rgba(244, 208, 104, 0.1); }
-            .macro-anchor-bar:hover { background: rgba(244, 208, 104, 0.2); box-shadow: inset 0 0 20px rgba(244, 208, 104, 0.4); }
-            .macro-anchor-bar.selected { background: var(--gold, #F4D068); color: #000; box-shadow: 0 0 20px var(--gold, #F4D068); border-color: var(--gold, #F4D068) !important; }
-
             .nav-btn { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: var(--theme-main, #ff003c); padding: 6px 10px; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s; }
             .nav-btn:hover { border-color: var(--theme-main, #ff003c); box-shadow: 0 0 10px rgba(255, 0, 60, 0.2); }
 
@@ -458,8 +363,8 @@ window.Q_OmniPlanner = {
                         </div>
                         <div class="step-nav-group">
                             <button class="nav-btn" id="btn-step-sect-back" onclick="window.Q_OmniPlanner.stepSector(-1)">&#171; MONTH</button>
-                            <button class="nav-btn" onclick="window.Q_OmniPlanner.stepDay(-1)">&#8249; DAY</button>
-                            <button class="nav-btn" onclick="window.Q_OmniPlanner.stepDay(1)">DAY &#8250;</button>
+                            <button class="nav-btn" id="btn-step-day-back" onclick="window.Q_OmniPlanner.stepDay(-1)">&#8249; DAY</button>
+                            <button class="nav-btn" id="btn-step-day-fwd" onclick="window.Q_OmniPlanner.stepDay(1)">DAY &#8250;</button>
                             <button class="nav-btn" id="btn-step-sect-fwd" onclick="window.Q_OmniPlanner.stepSector(1)">MONTH &#187;</button>
                             <input type="date" class="q-cal-jump" id="planner-jump-input" onchange="window.Q_OmniPlanner.jumpToDate(this.value)">
                         </div>
@@ -540,7 +445,7 @@ window.Q_OmniPlanner = {
             cTitle = ""; cDesc = "";
         } else {
             let activeBlock = window.getQBlockByTime(this.selectedDate);
-            if(activeBlock && activeBlock.type === 'ANCHOR') {
+            if(activeBlock && activeBlock.isAnchor) {
                 cTitle = `[ SETTLEMENT NODE: ${activeBlock.name} ]`;
                 cDesc = `OPERATIONAL BUFFER. Actively resolving accumulated physical drift. Q-Delta interpolating to 0.0000° across ${(activeBlock.dur / 3600000).toFixed(4)} hours.`;
                 contextDiv.style.borderColor = 'var(--gold)';
@@ -582,6 +487,14 @@ window.Q_OmniPlanner = {
             btnFwd.innerHTML = this.isLegacy ? "MONTH &#187;" : "SECT &#187;";
         }
 
+        const btnDayBack = document.getElementById('btn-step-day-back');
+        const btnDayFwd = document.getElementById('btn-step-day-fwd');
+        if (btnDayBack) btnDayBack.innerHTML = this.isLegacy ? "&#8249; DAY" : "&#8249; DEG";
+        if (btnDayFwd) btnDayFwd.innerHTML = this.isLegacy ? "DAY &#8250;" : "DEG &#8250;";
+
+        const btnViewDay = document.getElementById('btn-view-day');
+        if (btnViewDay) btnViewDay.innerText = this.isLegacy ? "DAY" : "DEG";
+
         if (!this.isLegacy && this.viewState !== 'closed') {
             document.body.classList.add('planner-quad-active');
         } else {
@@ -591,7 +504,7 @@ window.Q_OmniPlanner = {
         ['day', 'sect', 'quad', 'cycle'].forEach(mode => {
             const btn = document.getElementById(`btn-view-${mode}`);
             if(btn) {
-                if(this.viewState === 'day' || this.viewState === 'anchor' || this.viewState === 'hour' || this.viewState === 'anchor-hour') {
+                if(this.viewState === 'day' || this.viewState === 'hour') {
                     btn.classList.toggle('active', mode === 'day');
                 } else {
                     btn.classList.toggle('active', mode === this.plannerMacroMode);
@@ -608,7 +521,7 @@ window.Q_OmniPlanner = {
 
         const fmtBtn = document.createElement('button'); 
         fmtBtn.className = 'back-btn'; 
-        fmtBtn.innerText = this.isLegacy ? "QUAD" : "LEGACY";
+        fmtBtn.innerText = this.isLegacy ? "ORBITAL" : "LEGACY";
         fmtBtn.onclick = () => this.toggleFormat(); 
 
         if (actionContainer) {
@@ -619,8 +532,8 @@ window.Q_OmniPlanner = {
                 hardBackBtn.className = 'back-btn';
                 hardBackBtn.innerText = 'BACK';
                 hardBackBtn.onclick = () => {
-                    if(this.viewState === 'hour' || this.viewState === 'anchor-hour') { this.viewState = this.viewState === 'hour' ? 'day' : 'anchor'; }
-                    else if(this.viewState === 'day' || this.viewState === 'anchor') { this.viewState = 'planner'; }
+                    if(this.viewState === 'hour') { this.viewState = 'day'; }
+                    else if(this.viewState === 'day') { this.viewState = 'planner'; }
                     sessionStorage.setItem('Q_PLANNER_STATE', this.viewState);
                     this.refreshView();
                 };
@@ -642,7 +555,6 @@ window.Q_OmniPlanner = {
             else this.renderCycle(body, title);
         } 
         else if(this.viewState === 'day') this.renderDay(body, title); 
-        else if (this.viewState === 'anchor') this.renderAnchor(body, title); 
         else this.renderHour(body, title); 
     },
 
@@ -711,49 +623,38 @@ window.Q_OmniPlanner = {
                 matrix.appendChild(d);
             }
         } else {
-            matrix.style.gridTemplateColumns = 'repeat(6, 1fr)'; 
+            matrix.style.gridTemplateColumns = 'repeat(5, 1fr)'; 
             let activeBlock = window.getQBlockByTime(this.plannerBase);
             if(!activeBlock) return;
             
             let aQuad = activeBlock.quad || 1;
             let aSect = activeBlock.sect || 1;
             let cCycle = activeBlock.cycle;
-            let d1Index = window.Q_BLOCKS.findIndex(b => b.type === 'DAY' && b.quad === aQuad && b.sect === aSect && b.day === 1);
             
-            let gridItems = [];
-            if (aQuad === 1 && aSect === 1 && d1Index > 0 && window.Q_BLOCKS[d1Index - 1].type === 'ANCHOR') {
-                gridItems.push(window.Q_BLOCKS[d1Index - 1]);
-            }
-            for(let i=0; i<30; i++) {
-                if (window.Q_BLOCKS[d1Index + i]) {
-                    gridItems.push(window.Q_BLOCKS[d1Index + i]);
-                }
-            }
-            
-            let lastDayIdx = d1Index + 29;
-            if (aSect === 3 && lastDayIdx + 1 < window.Q_BLOCKS.length && window.Q_BLOCKS[lastDayIdx + 1].type === 'ANCHOR') {
-                gridItems.push(window.Q_BLOCKS[lastDayIdx + 1]);
-            }
+            let gridItems = window.Q_BLOCKS.filter(b => b.quad === aQuad && b.sect === aSect);
 
             gridItems.forEach(item => {
                 const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
                 const d = document.createElement('div');
                 const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
                 
-                if (item.type === 'ANCHOR') {
+                if (item.isAnchor) {
                     d.className = 'p-day anchor-block';
-                    if (isToday) d.classList.add('status-today');
-                    if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--gold, #F4D068); font-size:0.75rem;">${item.name}</div><div style="font-size:0.5rem; color:#aaa; margin-top:4px;">SETTLEMENT NODE</div>`;
                 } else {
                     d.className = 'p-day';
-                    if (isToday) d.classList.add('status-today');
-                    if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    if (window.hasDataInDay(new Date(absStart))) d.classList.add('status-red');
-                    d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--theme-main, #ff003c);">DAY ${item.day}</div>`;
-                    this.injectHolidays(d, new Date(absStart));
                 }
                 
+                if (isToday) d.classList.add('status-today');
+                if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
+                if (window.hasDataInBlock && window.hasDataInBlock(cCycle, item.absDeg)) d.classList.add('status-red');
+                
+                if (item.isAnchor) {
+                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--gold, #F4D068); font-size:0.75rem; text-align:center;">${item.name}</div><div style="font-size:0.55rem; color:#aaa; margin-top:4px; font-weight:bold;">DEG ${item.deg}</div>`;
+                } else {
+                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--theme-main, #ff003c); text-align:center;">DEG ${item.deg}</div>`;
+                }
+                
+                this.injectHolidays(d, new Date(absStart));
                 d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                 matrix.appendChild(d);
             });
@@ -766,9 +667,8 @@ window.Q_OmniPlanner = {
         const todayDateNum = new Date(nowMs).setHours(0,0,0,0);
         const selectedDateNum = new Date(this.selectedDate).setHours(0,0,0,0);
 
-        title.innerHTML = `<div class="cal-title-wrapper ${this.isLegacy ? 'show-legacy' : 'show-quad'}"><div class="title-leg">LEGACY OS: QUARTER VIEW</div><div class="title-divider">|</div><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">QUADRANT VIEW</span></div></div>`;
-        
         if (this.isLegacy) {
+            title.innerHTML = `<div class="cal-title-wrapper show-legacy"><div class="title-leg">LEGACY OS: QUARTER VIEW</div></div>`;
             const baseDate = new Date(this.plannerBase);
             const year = baseDate.getFullYear();
             const currentMonth = baseDate.getMonth();
@@ -818,12 +718,14 @@ window.Q_OmniPlanner = {
                 matrix.appendChild(monthBox);
             }
             container.appendChild(matrix);
-        } else {
+       } else {
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">ORBITAL LEDGER</span></div></div>`;
+            const qColors = ['', '#00f0ff', '#a7ff83', '#F4D068', '#ff003c'];
+            
             let activeBlock = window.getQBlockByTime(this.plannerBase);
             if(!activeBlock) return;
             let aQuad = activeBlock.quad || 1;
             let cCycle = activeBlock.cycle;
-            const qColors = ['', '#00f0ff', '#a7ff83', '#F4D068', '#ff003c'];
             
             const matrix = document.createElement('div');
             matrix.className = 'macro-grid-q';
@@ -832,19 +734,6 @@ window.Q_OmniPlanner = {
             quadBox.className = 'macro-quad-box';
             quadBox.style.borderColor = qColors[aQuad];
             quadBox.innerHTML = `<div class="macro-quad-title" style="color:${qColors[aQuad]}">QUADRANT ${aQuad}</div>`;
-            
-            let d1Index = window.Q_BLOCKS.findIndex(b => b.type === 'DAY' && b.quad === aQuad && b.sect === 1 && b.day === 1);
-            
-            if (aQuad === 1 && d1Index > 0 && window.Q_BLOCKS[d1Index - 1].type === 'ANCHOR') {
-                const item = window.Q_BLOCKS[d1Index - 1];
-                const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                const pb = document.createElement('div');
-                pb.className = 'macro-anchor-bar';
-                if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
-                pb.innerText = `${item.name} // OPERATIONAL BUFFER // Q-DELTA SETTLEMENT`;
-                pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                quadBox.appendChild(pb);
-            }
             
             const sectorsWrapper = document.createElement('div');
             sectorsWrapper.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center;';
@@ -857,24 +746,21 @@ window.Q_OmniPlanner = {
                 
                 const qGrid = document.createElement('div');
                 qGrid.className = 'q-sector-grid';
-                for(let d=1; d<=6; d++) {
-                    const header = document.createElement('div');
-                    header.className = 'mini-day';
-                    header.style.color = qColors[aQuad];
-                    header.style.background = 'rgba(0,0,0,0.4)';
-                    header.style.pointerEvents = 'none';
-                    header.style.fontWeight = 'bold';
-                    header.innerText = 'DAY ' + d;
-                    qGrid.appendChild(header);
-                }
+                qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                 
-                let dayBlocks = window.Q_BLOCKS.filter(b => b.type === 'DAY' && b.quad === aQuad && b.sect === s);
+                let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === aQuad && b.sect === s);
                 dayBlocks.forEach(item => {
                     const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
                     const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
                     const d = document.createElement('div'); 
                     d.className = 'mini-day'; 
-                    d.innerText = item.day;
+                    if (item.isAnchor) {
+                        d.style.background = 'rgba(244, 208, 104, 0.2)';
+                        d.style.color = '#F4D068';
+                        d.innerText = "A";
+                    } else {
+                        d.innerText = item.deg;
+                    }
                     if(isToday) d.classList.add('status-today');
                     if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
                     d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
@@ -884,19 +770,6 @@ window.Q_OmniPlanner = {
                 sectorsWrapper.appendChild(sectorBox);
             }
             quadBox.appendChild(sectorsWrapper);
-            
-            let lastDayIdx = window.Q_BLOCKS.findIndex(b => b.type === 'DAY' && b.quad === aQuad && b.sect === 3 && b.day === 30);
-            if (lastDayIdx + 1 < window.Q_BLOCKS.length && window.Q_BLOCKS[lastDayIdx + 1].type === 'ANCHOR') {
-                const item = window.Q_BLOCKS[lastDayIdx + 1];
-                const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                const pb = document.createElement('div');
-                pb.className = 'macro-anchor-bar';
-                if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
-                pb.innerText = `${item.name} // OPERATIONAL BUFFER // Q-DELTA SETTLEMENT`;
-                pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                quadBox.appendChild(pb);
-            }
-            
             matrix.appendChild(quadBox);
             container.appendChild(matrix);
         }
@@ -908,7 +781,7 @@ window.Q_OmniPlanner = {
         const selectedDateNum = new Date(this.selectedDate).setHours(0,0,0,0);
 
         if (this.isLegacy) {
-            title.innerHTML = `<div class="cal-title-wrapper ${this.isLegacy ? 'show-legacy' : 'show-quad'}"><div class="title-leg">LEGACY OS: ANNUAL CYCLE</div><div class="title-divider">|</div><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">ANNUAL CYCLE</span></div></div>`;
+            title.innerHTML = `<div class="cal-title-wrapper show-legacy"><div class="title-leg">LEGACY OS: ANNUAL CYCLE</div></div>`;
             const baseDate = new Date(this.plannerBase);
             const year = baseDate.getFullYear();
             const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
@@ -960,7 +833,7 @@ window.Q_OmniPlanner = {
             let activeBlock = window.getQBlockByTime(this.plannerBase);
             if(!activeBlock) return;
             let cCycle = activeBlock.cycle;
-            title.innerHTML = `<div class="cal-title-wrapper ${this.isLegacy ? 'show-legacy' : 'show-quad'}"><div class="title-leg">LEGACY OS: ANNUAL CYCLE</div><div class="title-divider">|</div><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">CYCLE ${cCycle}</span></div></div>`;
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">CYCLE ${cCycle}</span></div></div>`;
             const qColors = ['', '#00f0ff', '#a7ff83', '#F4D068', '#ff003c'];
             
             const matrix = document.createElement('div');
@@ -971,19 +844,6 @@ window.Q_OmniPlanner = {
                 quadBox.className = 'macro-quad-box';
                 quadBox.style.borderColor = qColors[q];
                 quadBox.innerHTML = `<div class="macro-quad-title" style="color:${qColors[q]}">QUADRANT ${q}</div>`;
-                
-                let d1Index = window.Q_BLOCKS.findIndex(b => b.type === 'DAY' && b.quad === q && b.sect === 1 && b.day === 1);
-                
-                if (q === 1 && d1Index > 0 && window.Q_BLOCKS[d1Index - 1].type === 'ANCHOR') {
-                    const item = window.Q_BLOCKS[d1Index - 1];
-                    const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                    const pb = document.createElement('div');
-                    pb.className = 'macro-anchor-bar';
-                    if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
-                    pb.innerText = `${item.name} // OPERATIONAL BUFFER // Q-DELTA SETTLEMENT`;
-                    pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                    quadBox.appendChild(pb);
-                }
                 
                 const sectorsWrapper = document.createElement('div');
                 sectorsWrapper.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center;';
@@ -996,24 +856,21 @@ window.Q_OmniPlanner = {
                     
                     const qGrid = document.createElement('div');
                     qGrid.className = 'q-sector-grid';
-                    for(let d=1; d<=6; d++) {
-                        const header = document.createElement('div');
-                        header.className = 'mini-day';
-                        header.style.color = qColors[q];
-                        header.style.background = 'rgba(0,0,0,0.4)';
-                        header.style.pointerEvents = 'none';
-                        header.style.fontWeight = 'bold';
-                        header.innerText = 'DAY ' + d;
-                        qGrid.appendChild(header);
-                    }
+                    qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                     
-                    let dayBlocks = window.Q_BLOCKS.filter(b => b.type === 'DAY' && b.quad === q && b.sect === s);
+                    let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === q && b.sect === s);
                     dayBlocks.forEach(item => {
                         const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
                         const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
                         const d = document.createElement('div'); 
                         d.className = 'mini-day'; 
-                        d.innerText = item.day;
+                        if (item.isAnchor) {
+                            d.style.background = 'rgba(244, 208, 104, 0.2)';
+                            d.style.color = '#F4D068';
+                            d.innerText = "A";
+                        } else {
+                            d.innerText = item.deg;
+                        }
                         if(isToday) d.classList.add('status-today');
                         if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
                         d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
@@ -1023,18 +880,6 @@ window.Q_OmniPlanner = {
                     sectorsWrapper.appendChild(sectorBox);
                 }
                 quadBox.appendChild(sectorsWrapper);
-                
-                let lastDayIdx = window.Q_BLOCKS.findIndex(b => b.type === 'DAY' && b.quad === q && b.sect === 3 && b.day === 30);
-                if (lastDayIdx + 1 < window.Q_BLOCKS.length && window.Q_BLOCKS[lastDayIdx + 1].type === 'ANCHOR') {
-                    const item = window.Q_BLOCKS[lastDayIdx + 1];
-                    const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                    const pb = document.createElement('div');
-                    pb.className = 'macro-anchor-bar';
-                    if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) pb.classList.add('selected');
-                    pb.innerText = `${item.name} // OPERATIONAL BUFFER // Q-DELTA SETTLEMENT`;
-                    pb.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                    quadBox.appendChild(pb);
-                }
                 matrix.appendChild(quadBox);
             }
             container.appendChild(matrix);
@@ -1043,166 +888,170 @@ window.Q_OmniPlanner = {
 
     renderDay: function(container, title) {
         title.innerHTML = window.getDualTitle(this.selectedDate, this.isLegacy);
-        const list = document.createElement('div'); 
-        list.style.overflowY = "auto"; list.style.flexGrow = "1";
-
-        let dailyBlocksData = [];
+        
         let savedAnchor = localStorage.getItem('q_bio_anchor');
         let anchorMins = (savedAnchor === null || savedAnchor === "") ? 0 : parseInt(savedAnchor); 
         let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
         let wakingDurationMins = 1440 - sleepDuration;
-        
         let inertiaMins = 45;
         let dlmoMins = 90;
 
-        const selectedDateObj = new Date(this.selectedDate);
-        
-        for(let h=0; h<24; h++) {
-            const blockMs = new Date(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate(), h, 0, 0).getTime();
-            const key = window.getDataKey(selectedDateObj, h, 0);
-            const data = window.qData[key] || { text: "" };
+        if (this.isLegacy) {
+            const list = document.createElement('div'); 
+            list.style.overflowY = "auto"; list.style.flexGrow = "1";
+            let dailyBlocksData = [];
+            const selectedDateObj = new Date(this.selectedDate);
             
-            let d = new Date(blockMs);
-            let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
-            let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
-            
-            let currentBioState;
-
-            if (minsSinceWake >= wakingDurationMins) {
-                currentBioState = "SLEEP / RECOVERY";
-            } else if (minsSinceWake < inertiaMins) {
-                currentBioState = "SLEEP INERTIA";
-            } else if (minsSinceWake >= wakingDurationMins - dlmoMins) {
-                currentBioState = "DLMO WIND-DOWN";
-            } else {
-                let coreMins = minsSinceWake - inertiaMins;
-                let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
-                currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            for(let h=0; h<24; h++) {
+                const blockMs = new Date(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate(), h, 0, 0).getTime();
+                const key = window.getDataKey(selectedDateObj, h, 0);
+                const data = window.qData[key] || { text: "" };
+                
+                let d = new Date(blockMs);
+                let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
+                let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
+                
+                let currentBioState;
+                if (minsSinceWake >= wakingDurationMins) currentBioState = "SLEEP / RECOVERY";
+                else if (minsSinceWake < inertiaMins) currentBioState = "SLEEP INERTIA";
+                else if (minsSinceWake >= wakingDurationMins - dlmoMins) currentBioState = "DLMO WIND-DOWN";
+                else {
+                    let coreMins = minsSinceWake - inertiaMins;
+                    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+                    currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+                }
+                dailyBlocksData.push({ hour: h, text: data.text, bioState: currentBioState, key: key, ms: blockMs });
             }
             
-            dailyBlocksData.push({ hour: h, text: data.text, bioState: currentBioState, key: key, ms: blockMs });
-        }
-        
-        const tensionData = this.calculateCivilTension(dailyBlocksData);
-        
-        const dashboard = document.createElement('div');
-        dashboard.innerHTML = `
-            <div class="tension-dashboard">
-                <div style="display:flex; flex-direction:column;">
-                    <span style="font-family:'Orbitron'; font-size:0.6rem; color:#aaa;">CIVIL TENSION SCORE</span>
-                    <span class="tension-score">${tensionData.score}%</span>
-                </div>
-                <div class="consultant-advice">${tensionData.advice}</div>
-            </div>
-        `;
-        list.appendChild(dashboard);
-
-        dailyBlocksData.forEach(b => {
-            const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
-            let blockClass = '';
-            if (b.bioState === 'DEEP FLOW') blockClass = 'flow-state';
-            else if (b.bioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
-            else if (b.bioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
-            else if (b.bioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
-            else blockClass = 'vent-state';
-            
-            if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
-            
-            const block = document.createElement('div');
-            block.className = `time-block ${blockClass}`;
-            
-            let timeHeaderHtml = "";
-            if (this.isLegacy) {
-                let civilFmt = window.formatLegacyDate(b.ms);
-                timeHeaderHtml = `<div class="time-header" style="font-size:0.9rem; color:var(--theme-main, #00f0ff); font-family:'Orbitron'; font-weight:bold;">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
-            } else {
-                let civilFmt = window.formatLegacyDate(b.ms);
-                timeHeaderHtml = `<div class="time-header" style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:var(--theme-main, #00f0ff); font-family:'Orbitron'; font-weight:bold;">Q:${b.hour.toString().padStart(2,'0')}</span><span style="font-size:0.55rem; color:#aaa; font-weight:bold;">(${civilFmt.timeStr.split(' ')[0]})</span></div>`;
-            }
-            
-            let badgeHtml = '';
-            if (b.bioState === 'DEEP FLOW') {
-                badgeHtml = `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>`;
-            } else if (b.bioState === 'SLEEP / RECOVERY') {
-                badgeHtml = `<span style="color:var(--bio-purple, #b829ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP / RECOVERY</span>`;
-            } else if (b.bioState === 'SLEEP INERTIA') {
-                badgeHtml = `<span style="color:var(--chrono-amber, #B97A35); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP INERTIA (CAR RAMP)</span>`;
-            } else if (b.bioState === 'DLMO WIND-DOWN') {
-                badgeHtml = `<span style="color:var(--bio-cobalt, #0055ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DLMO WIND-DOWN</span>`;
-            } else {
-                badgeHtml = `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
-            }
-
-            if (isCivilConstraint) {
-                badgeHtml += ` <span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
-            }
-
-            block.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
-                    ${timeHeaderHtml}
-                    <div>${badgeHtml}</div>
-                </div>
-                <div style="font-size:0.6rem; color:#aaa; font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8;">
-                    ${b.text ? b.text : "..."}
+            const tensionData = this.calculateCivilTension(dailyBlocksData);
+            const dashboard = document.createElement('div');
+            dashboard.innerHTML = `
+                <div class="tension-dashboard">
+                    <div style="display:flex; flex-direction:column;">
+                        <span style="font-family:'Orbitron'; font-size:0.6rem; color:#aaa;">CIVIL TENSION SCORE</span>
+                        <span class="tension-score">${tensionData.score}%</span>
+                    </div>
+                    <div class="consultant-advice">${tensionData.advice}</div>
                 </div>
             `;
-            
-            block.onclick = () => { 
-                this.selectedHour = b.hour; 
-                this.selectedHourDur = 3600000; 
-                this.viewState = 'hour'; 
-                this.refreshView(); 
-            };
-            
-            list.appendChild(block);
-        });
+            list.appendChild(dashboard);
 
-        container.appendChild(list);
-    },
+            dailyBlocksData.forEach(b => {
+                const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
+                let blockClass = '';
+                if (b.bioState === 'DEEP FLOW') blockClass = 'flow-state';
+                else if (b.bioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
+                else if (b.bioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
+                else if (b.bioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
+                else blockClass = 'vent-state';
+                
+                if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
+                const block = document.createElement('div');
+                block.className = `time-block ${blockClass}`;
+                
+                let civilFmt = window.formatLegacyDate(b.ms);
+                let timeHeaderHtml = `<div class="time-header" style="font-size:0.9rem; color:var(--theme-main, #00f0ff); font-family:'Orbitron'; font-weight:bold;">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
+                
+                let badgeHtml = '';
+                if (b.bioState === 'DEEP FLOW') badgeHtml = `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>`;
+                else if (b.bioState === 'SLEEP / RECOVERY') badgeHtml = `<span style="color:var(--bio-purple, #b829ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP / RECOVERY</span>`;
+                else if (b.bioState === 'SLEEP INERTIA') badgeHtml = `<span style="color:var(--chrono-amber, #B97A35); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP INERTIA (CAR RAMP)</span>`;
+                else if (b.bioState === 'DLMO WIND-DOWN') badgeHtml = `<span style="color:var(--bio-cobalt, #0055ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DLMO WIND-DOWN</span>`;
+                else badgeHtml = `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
 
-    renderAnchor: function(container, title) {
-        let dualTitleHtml = window.getDualTitle(this.selectedAnchor.startMs, this.isLegacy);
-        title.innerHTML = dualTitleHtml;
-        
-        let totalHours = Math.ceil(this.selectedAnchor.dur / 3600000);
-        const list = document.createElement('div'); list.style.overflowY = "auto"; list.style.flexGrow = "1";
-        
-        for(let h=0; h<totalHours; h++) {
-            const row = document.createElement('div'); 
-            row.style.padding = "15px 20px"; row.style.borderBottom = "1px solid rgba(255,255,255,0.05)"; 
-            row.style.cursor = "pointer"; row.style.fontFamily = "JetBrains Mono"; row.style.color = "#fff"; 
+                if (isCivilConstraint) badgeHtml += ` <span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
+
+                block.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
+                        ${timeHeaderHtml}
+                        <div>${badgeHtml}</div>
+                    </div>
+                    <div style="font-size:0.6rem; color:#aaa; font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8;">
+                        ${b.text ? b.text : "..."}
+                    </div>
+                `;
+                block.onclick = () => { 
+                    this.selectedHour = b.hour; 
+                    this.selectedHourDur = 3600000; 
+                    this.viewState = 'hour'; 
+                    this.refreshView(); 
+                };
+                list.appendChild(block);
+            });
+            container.appendChild(list);
+        } else {
+            let activeBlock = window.getQBlockByTime(this.selectedDate);
+            if (!activeBlock) return;
+            let cCycle = activeBlock.cycle;
+            let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + activeBlock.relStart;
+            let subDur = activeBlock.dur / 10;
             
-            let isFractional = (h === totalHours - 1) && (this.selectedAnchor.dur % 3600000 !== 0);
-            let minSpan = isFractional ? Math.round((this.selectedAnchor.dur % 3600000) / 60000) : 60;
-            
-            row.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="color:var(--gold, #F4D068); font-weight:bold; font-family:'Orbitron';">GEAR HOUR ${h.toString().padStart(2,'0')}</span>
-                    <span style="color:#aaa; font-size:0.6rem;">[ SPAN: ${minSpan} MINS ]</span>
-                </div>
-            `;
-            row.onclick = () => { 
-                this.selectedHour = h; 
-                this.selectedHourDur = isFractional ? (this.selectedAnchor.dur % 3600000) : 3600000;
-                this.viewState = 'anchor-hour'; 
-                this.refreshView(); 
-            }; 
-            list.appendChild(row);
+            const matrix = document.createElement('div'); 
+            matrix.className = 'editor-matrix';
+
+            for(let m=0; m<10; m++) {
+                let targetMs = baseMs + (m * subDur);
+                const key = `Q-${cCycle}-${activeBlock.absDeg}-${m}`;
+                const data = window.qData[key] || { text: "", link: "" };
+                
+                let d = new Date(targetMs);
+                let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
+                let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
+                
+                let currentBioState;
+                if (minsSinceWake >= wakingDurationMins) currentBioState = "SLEEP / RECOVERY";
+                else if (minsSinceWake < inertiaMins) currentBioState = "SLEEP INERTIA";
+                else if (minsSinceWake >= wakingDurationMins - dlmoMins) currentBioState = "DLMO WIND-DOWN";
+                else {
+                    let coreMins = minsSinceWake - inertiaMins;
+                    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+                    currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+                }
+                
+                const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
+                let blockClass = '';
+                if (currentBioState === 'DEEP FLOW') blockClass = 'flow-state';
+                else if (currentBioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
+                else if (currentBioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
+                else if (currentBioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
+                else blockClass = 'vent-state';
+                
+                if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
+                
+                const block = document.createElement('div'); 
+                block.className = `slot-block time-block ${blockClass}`;
+                
+                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:var(--theme-main, #00f0ff); font-family:'Orbitron'; font-weight:bold;">DEG ${activeBlock.absDeg}.${m}</span><span style="font-size:0.55rem; color:#aaa; font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+
+                let badgeHtml = '';
+                if (currentBioState === 'DEEP FLOW') badgeHtml = `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>`;
+                else if (currentBioState === 'SLEEP / RECOVERY') badgeHtml = `<span style="color:var(--bio-purple, #b829ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP / RECOVERY</span>`;
+                else if (currentBioState === 'SLEEP INERTIA') badgeHtml = `<span style="color:var(--chrono-amber, #B97A35); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP INERTIA</span>`;
+                else if (currentBioState === 'DLMO WIND-DOWN') badgeHtml = `<span style="color:var(--bio-cobalt, #0055ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DLMO WIND-DOWN</span>`;
+                else badgeHtml = `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
+
+                if (isCivilConstraint) badgeHtml += ` <span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
+
+                block.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
+                        ${timeHeaderHtml}
+                        <div>${badgeHtml}</div>
+                    </div>
+                    <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? '#ff003c' : '#fff'}; border:none; border-bottom:1px solid rgba(255,255,255,0.2); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none;" placeholder="Enter quadrature intent..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
+                
+                if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
+                matrix.appendChild(block);
+            }
+            container.appendChild(matrix);
         }
-        container.appendChild(list);
     },
 
     renderHour: function(container, title) {
-        const isAnchor = (this.viewState === 'anchor-hour');
-        let baseMs = isAnchor ? this.selectedAnchor.startMs : this.selectedDate;
+        let baseMs = this.selectedDate;
         let dualTitleHtml = window.getDualTitle(baseMs, this.isLegacy);
         
-        if (isAnchor) {
-            title.innerHTML = `${dualTitleHtml} <div style="font-size:0.75rem; color:var(--gold, #F4D068); font-family:'Orbitron'; margin-top:6px; text-align:center;">@ HR ${this.selectedHour.toString().padStart(2,'0')}</div>`;
-        } else {
-            title.innerHTML = `${dualTitleHtml} <div style="font-size:0.75rem; color:#aaa; font-family:'Orbitron'; margin-top:6px; text-align:center;">@ ${this.isLegacy ? 'LOCAL' : 'Q-HR'} ${this.selectedHour.toString().padStart(2,'0')}${this.isLegacy ? ':00' : ''}</div>`;
-        }
+        title.innerHTML = `${dualTitleHtml} <div style="font-size:0.75rem; color:#aaa; font-family:'Orbitron'; margin-top:6px; text-align:center;">@ LOCAL ${this.selectedHour.toString().padStart(2,'0')}:00</div>`;
 
         const matrix = document.createElement('div'); matrix.className = 'editor-matrix';
         let totalMins = Math.ceil(this.selectedHourDur / 60000);
@@ -1254,15 +1103,7 @@ window.Q_OmniPlanner = {
             const block = document.createElement('div'); 
             block.className = `slot-block time-block ${blockClass}`;
             
-            let timeHeaderHtml = "";
-            if (isAnchor) {
-                timeHeaderHtml = `<div style="font-size:0.8rem; color:var(--gold, #F4D068); font-family:'Orbitron'; font-weight:bold;">GEAR MIN:${m.toString().padStart(2,'0')}</div>`;
-            } else if (this.isLegacy) {
-                timeHeaderHtml = `<div style="font-size:0.8rem; color:var(--theme-main, #ff003c); font-family:'Orbitron'; font-weight:bold;">:${m.toString().padStart(2,'0')} LOCAL</div>`;
-            } else {
-                let civilFmt = window.formatLegacyDate(targetMs);
-                timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.8rem; color:var(--theme-main, #ff003c); font-family:'Orbitron'; font-weight:bold;">Q:${m.toString().padStart(2,'0')}</span><span style="font-size:0.55rem; color:#aaa; font-weight:bold;">(${civilFmt.timeStr.split(' ')[0]})</span></div>`;
-            }
+            let timeHeaderHtml = `<div style="font-size:0.8rem; color:var(--theme-main, #ff003c); font-family:'Orbitron'; font-weight:bold;">:${m.toString().padStart(2,'0')} LOCAL</div>`;
 
             block.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
