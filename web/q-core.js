@@ -15,13 +15,6 @@
 
     window.initQCore = function() {
         console.log("[Q-CORE] V25 System Initialized...");
-
-        // INJECT GOOGLE IDENTITY SERVICES API FOR NATIVE OAUTH
-        const gsiScript = document.createElement('script');
-        gsiScript.src = 'https://accounts.google.com/gsi/client';
-        gsiScript.async = true;
-        gsiScript.defer = true;
-        document.head.appendChild(gsiScript);
         
         window.ANCHOR_ALPHA_DYNAMIC = Date.UTC(2025, 11, 21, 15, 3, 0); 
         window.MS_DAY = 86400000;
@@ -152,55 +145,51 @@
             }
         };
 
-        // --- NATIVE GOOGLE IDENTITY OAUTH BRIDGE ---
+        // --- NATIVE GOOGLE IDENTITY OAUTH BRIDGE (STANDARD REDIRECT FLOW) ---
         window.Q_Auth = {
             CLIENT_ID: "295194884701-td2lcfbtote5j98gbaluvt4ajjv6rv0u.apps.googleusercontent.com",
             
             triggerOAuth: function() {
-                if (typeof google === 'undefined' || !google.accounts) {
-                    window.Q_LOG('ERROR', 'AUTH', 'Google Identity Services not loaded.');
-                    alert("[ CONNECTION FAILED ]\\nGoogle Identity API unreachable. Check network or ad-blockers.");
-                    return;
-                }
-
-                if (this.CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com") {
-                    window.Q_LOG('ERROR', 'AUTH', 'Client ID not populated.');
-                    alert("[ ARCHITECTURE ERROR ]\\nOAuth requires a registered Client ID. Populate Q_Auth.CLIENT_ID in q-core.js.");
-                    return;
-                }
-
-                const tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: this.CLIENT_ID,
-                    scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-                    callback: (tokenResponse) => {
-                        if (tokenResponse && tokenResponse.access_token) {
-                            window.Q_LOG('STATE', 'AUTH', 'OAuth Token Granted via Google GSI');
-                            localStorage.setItem('Q_PRO_AUTH', 'true');
-                            localStorage.setItem('Q_AUTH_TOKEN', tokenResponse.access_token);
-                            
-                            let ents = JSON.parse(localStorage.getItem('Q_ENTITLEMENTS') || '[]');
-                            if(!ents.includes('PRO')) ents.push('PRO');
-                            localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
-                            
-                            window.location.reload();
-                        }
-                    }
-                });
-                tokenClient.requestAccessToken();
+                window.Q_LOG('INFO', 'AUTH', 'Initiating Standard OAuth 2.0 Redirect Flow');
+                
+                const redirectUri = window.location.origin + window.location.pathname;
+                const scope = 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+                const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}`;
+                
+                window.location.href = authUrl;
             },
             
             signOut: function() {
                 window.Q_LOG('STATE', 'AUTH', 'OAuth Token Revoked');
-                if (typeof google !== 'undefined' && google.accounts) {
-                    const token = localStorage.getItem('Q_AUTH_TOKEN');
-                    if (token) google.accounts.oauth2.revoke(token, () => { console.log('Token revoked.'); });
-                }
                 localStorage.setItem('Q_PRO_AUTH', 'false');
                 localStorage.removeItem('Q_AUTH_TOKEN');
                 localStorage.removeItem('Q_ENTITLEMENTS');
                 window.location.reload();
+            },
+
+            handleRedirectReturn: function() {
+                const hash = window.location.hash;
+                if (hash && hash.includes('access_token=')) {
+                    const params = new URLSearchParams(hash.substring(1));
+                    const token = params.get('access_token');
+                    
+                    if (token) {
+                        window.Q_LOG('STATE', 'AUTH', 'OAuth Token Captured via Redirect');
+                        localStorage.setItem('Q_PRO_AUTH', 'true');
+                        localStorage.setItem('Q_AUTH_TOKEN', token);
+                        
+                        let ents = JSON.parse(localStorage.getItem('Q_ENTITLEMENTS') || '[]');
+                        if(!ents.includes('PRO')) ents.push('PRO');
+                        localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
+                        
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                }
             }
         };
+
+        // Process returning OAuth tokens immediately
+        window.Q_Auth.handleRedirectReturn();
 
         window.getSimState = () => window.Q_STATE;
 
