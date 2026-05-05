@@ -705,7 +705,7 @@ window.injectUniversalUI = function() {
         if (pRest && pExp && e.detail.qData) {
             const p = e.detail.qData.trueArc || 0;
             pRest.innerHTML = `<span style="color:var(--starlight); font-size:0.5rem;">P:</span> <span style="color:var(--theme-main, #00f0ff);">${p.toFixed(6)}°</span>`;
-            pExp.innerHTML = `<div class="exp-view"><div style="color:var(--starlight); margin-bottom: 2px;">[P] PLANETARY ORBIT (TRUE ELLIPSE):</div><div style="color:var(--theme-main, #00f0ff); font-size: 0.6rem;">${p.toFixed(10)}°</div></div>`;
+            pExp.innerHTML = `<div class="exp-view"><div style="color:var(--starlight); margin-bottom: 2px;">[P] PLANETARY ORBIT (TRUE ELLIPSE):</div><div style="color:var(--theme-main, #00f0ff); font-size: 0.6rem;">${p.toFixed(15)}°</div></div>`;
         }
 
         const gRest = document.getElementById('g-rest');
@@ -713,13 +713,16 @@ window.injectUniversalUI = function() {
         if (gRest && sRest && deepTimeOverlay && e.detail.qData) {
             const g = e.detail.qData.galactic || 0;
             const s = e.detail.qData.stellar || 0;
+            
+            // Constrain resting UI display to exactly 3 digits
             gRest.innerHTML = `<span style="color:var(--starlight); font-size:0.5rem;">G:</span> ${Math.floor(g).toString().padStart(3,'0')}°`;
             sRest.innerHTML = `<span style="color:var(--starlight); font-size:0.5rem;">S:</span> ${Math.floor(s).toString().padStart(3,'0')}°`;
             
+            // Render 15-decimal high-precision float upon hover expansion
             deepTimeOverlay.innerHTML = `
                 <div class="exp-view">
-                    <div style="color:var(--starlight); margin-bottom:4px;">[G] KINEMATIC AZIMUTH (CMB):<br><span style="color:var(--theme-main, #00f0ff); font-size: 0.55rem;">${g.toFixed(10)}°</span></div>
-                    <div style="color:var(--starlight);">[S] STELLAR ORBIT (LSR):<br><span style="color:var(--theme-main, #00f0ff); font-size: 0.55rem;">${s.toFixed(10)}°</span></div>
+                    <div style="color:var(--starlight); margin-bottom:4px;">[G] KINEMATIC AZIMUTH (CMB):<br><span style="color:var(--theme-main, #00f0ff); font-size: 0.55rem;">${g.toFixed(15)}°</span></div>
+                    <div style="color:var(--starlight);">[S] STELLAR ORBIT (LSR):<br><span style="color:var(--theme-main, #00f0ff); font-size: 0.55rem;">${s.toFixed(15)}°</span></div>
                 </div>
             `;
         }
@@ -952,7 +955,6 @@ window.toggleTelemetry = function() {
     if(icon) icon.innerHTML = isOpen ? "✖" : `<path d="M18 20V10M12 20V4M6 20v-6"/>`;
     let viewport = document.getElementById('mobile-telemetry-viewport');
     
-    // CRITICAL FIX 4: Telemetry Viewport injected into safe wrapper flag, dodging index.html purge
     const container = document.getElementById('q-ui-injected-flag') || document.body;
     
     if (isOpen) {
@@ -1069,19 +1071,16 @@ window.scrubTime = function(val) {
     if(!window.getSimState || !window.ANCHOR_ALPHA_DYNAMIC) return;
     const targetDays = parseInt(val, 10);
     
-    // Get the real-world current time to use as our unbreakable time-of-day anchor
     const liveDate = new Date();
     const liveMsSinceMidnight = (liveDate.getUTCHours() * 3600000) + 
                                 (liveDate.getUTCMinutes() * 60000) + 
                                 (liveDate.getUTCSeconds() * 1000) + 
                                 liveDate.getUTCMilliseconds();
     
-    // targetDays is now the absolute offset from the Dynamic Anchor
     const targetMs = window.ANCHOR_ALPHA_DYNAMIC + (targetDays * 86400000);
     const dTarget = new Date(targetMs);
     dTarget.setUTCHours(0, 0, 0, 0);
     
-    // Add the real-world time of day back in to freeze the Solar Node in place
     const finalMs = dTarget.getTime() + liveMsSinceMidnight;
     
     window.updateMasterClock(false, finalMs);
