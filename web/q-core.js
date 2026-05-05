@@ -15,6 +15,13 @@
 
     window.initQCore = function() {
         console.log("[Q-CORE] V25 System Initialized...");
+
+        // INJECT GOOGLE IDENTITY SERVICES API FOR NATIVE OAUTH
+        const gsiScript = document.createElement('script');
+        gsiScript.src = 'https://accounts.google.com/gsi/client';
+        gsiScript.async = true;
+        gsiScript.defer = true;
+        document.head.appendChild(gsiScript);
         
         window.ANCHOR_ALPHA_DYNAMIC = Date.UTC(2025, 11, 21, 15, 3, 0); 
         window.MS_DAY = 86400000;
@@ -141,22 +148,55 @@
             location: {
                 lat: localStorage.getItem('Q_LAT') || 34.0522,
                 lon: localStorage.getItem('Q_LON') || -118.2437,
-                name: localStorage.getItem('Q_LOC_NAME') || 'LOS ANGELES, CA'
+                name: localStorage.getItem('Q_LOC_NAME') || 'CLEARWATER, FL'
             }
         };
 
+        // --- NATIVE GOOGLE IDENTITY OAUTH BRIDGE ---
         window.Q_Auth = {
+            CLIENT_ID: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", // MUST BE REPLACED WITH VERCEL REGISTRATION ID
+            
             triggerOAuth: function() {
-                window.Q_LOG('STATE', 'AUTH', 'OAuth Token Granted via Mock Bridge');
-                localStorage.setItem('Q_PRO_AUTH', 'true');
-                let ents = JSON.parse(localStorage.getItem('Q_ENTITLEMENTS') || '[]');
-                if(!ents.includes('PRO')) ents.push('PRO');
-                localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
-                window.location.reload();
+                if (typeof google === 'undefined' || !google.accounts) {
+                    window.Q_LOG('ERROR', 'AUTH', 'Google Identity Services not loaded.');
+                    alert("[ CONNECTION FAILED ]\nGoogle Identity API unreachable. Check network or ad-blockers.");
+                    return;
+                }
+
+                if (this.CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com") {
+                    window.Q_LOG('ERROR', 'AUTH', 'Client ID not populated.');
+                    alert("[ ARCHITECTURE ERROR ]\nOAuth requires a registered Client ID. Populate Q_Auth.CLIENT_ID in q-core.js.");
+                    return;
+                }
+
+                const tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: this.CLIENT_ID,
+                    scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+                    callback: (tokenResponse) => {
+                        if (tokenResponse && tokenResponse.access_token) {
+                            window.Q_LOG('STATE', 'AUTH', 'OAuth Token Granted via Google GSI');
+                            localStorage.setItem('Q_PRO_AUTH', 'true');
+                            localStorage.setItem('Q_AUTH_TOKEN', tokenResponse.access_token);
+                            
+                            let ents = JSON.parse(localStorage.getItem('Q_ENTITLEMENTS') || '[]');
+                            if(!ents.includes('PRO')) ents.push('PRO');
+                            localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
+                            
+                            window.location.reload();
+                        }
+                    }
+                });
+                tokenClient.requestAccessToken();
             },
+            
             signOut: function() {
                 window.Q_LOG('STATE', 'AUTH', 'OAuth Token Revoked');
+                if (typeof google !== 'undefined' && google.accounts) {
+                    const token = localStorage.getItem('Q_AUTH_TOKEN');
+                    if (token) google.accounts.oauth2.revoke(token, () => { console.log('Token revoked.'); });
+                }
                 localStorage.setItem('Q_PRO_AUTH', 'false');
+                localStorage.removeItem('Q_AUTH_TOKEN');
                 localStorage.removeItem('Q_ENTITLEMENTS');
                 window.location.reload();
             }
