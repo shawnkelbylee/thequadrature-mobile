@@ -141,58 +141,9 @@
             location: {
                 lat: localStorage.getItem('Q_LAT') || 34.0522,
                 lon: localStorage.getItem('Q_LON') || -118.2437,
-                name: localStorage.getItem('Q_LOC_NAME') || 'CLEARWATER, FL'
+                name: localStorage.getItem('Q_LOC_NAME') || 'LOS ANGELES, CA'
             }
         };
-
-        // --- NATIVE SUPABASE OAUTH BRIDGE ---
-        window.Q_Auth = {
-            triggerOAuth: async function() {
-                window.Q_LOG('INFO', 'AUTH', 'Initiating Supabase Google OAuth Flow');
-                if (typeof window.supabaseClient === 'undefined') {
-                    alert("[ ARCHITECTURE ERROR ]\nSupabase client not detected in global scope. Ensure Supabase SDK is loaded.");
-                    return;
-                }
-                const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin + window.location.pathname
-                    }
-                });
-                if (error) {
-                    window.Q_LOG('ERROR', 'AUTH', 'Supabase OAuth routing failed.', error);
-                }
-            },
-            
-            signOut: async function() {
-                window.Q_LOG('STATE', 'AUTH', 'OAuth Token Revoked');
-                if (typeof window.supabaseClient !== 'undefined') {
-                    await window.supabaseClient.auth.signOut();
-                }
-                localStorage.setItem('Q_PRO_AUTH', 'false');
-                localStorage.removeItem('Q_AUTH_TOKEN');
-                localStorage.removeItem('Q_ENTITLEMENTS');
-                window.location.reload();
-            },
-
-            handleRedirectReturn: async function() {
-                if (typeof window.supabaseClient !== 'undefined') {
-                    const { data: { session } } = await window.supabaseClient.auth.getSession();
-                    if (session) {
-                        window.Q_LOG('STATE', 'AUTH', 'OAuth Session Captured via Supabase');
-                        localStorage.setItem('Q_PRO_AUTH', 'true');
-                        localStorage.setItem('Q_AUTH_TOKEN', session.access_token);
-                        
-                        let ents = JSON.parse(localStorage.getItem('Q_ENTITLEMENTS') || '[]');
-                        if(!ents.includes('PRO')) ents.push('PRO');
-                        localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
-                    }
-                }
-            }
-        };
-
-        // Ensure session validation fires upon boot
-        setTimeout(() => { window.Q_Auth.handleRedirectReturn(); }, 500);
 
         window.getSimState = () => window.Q_STATE;
 
