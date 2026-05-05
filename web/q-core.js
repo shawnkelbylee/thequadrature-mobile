@@ -145,6 +145,23 @@
             }
         };
 
+        window.Q_Auth = {
+            triggerOAuth: function() {
+                window.Q_LOG('STATE', 'AUTH', 'OAuth Token Granted via Mock Bridge');
+                localStorage.setItem('Q_PRO_AUTH', 'true');
+                let ents = JSON.parse(localStorage.getItem('Q_ENTITLEMENTS') || '[]');
+                if(!ents.includes('PRO')) ents.push('PRO');
+                localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
+                window.location.reload();
+            },
+            signOut: function() {
+                window.Q_LOG('STATE', 'AUTH', 'OAuth Token Revoked');
+                localStorage.setItem('Q_PRO_AUTH', 'false');
+                localStorage.removeItem('Q_ENTITLEMENTS');
+                window.location.reload();
+            }
+        };
+
         window.getSimState = () => window.Q_STATE;
 
         window.addEventListener('storage', (e) => {
