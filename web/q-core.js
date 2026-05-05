@@ -145,51 +145,54 @@
             }
         };
 
-        // --- NATIVE GOOGLE IDENTITY OAUTH BRIDGE (STANDARD REDIRECT FLOW) ---
+        // --- NATIVE SUPABASE OAUTH BRIDGE ---
         window.Q_Auth = {
-            CLIENT_ID: "295194884701-td2lcfbtote5j98gbaluvt4ajjv6rv0u.apps.googleusercontent.com",
-            
-            triggerOAuth: function() {
-                window.Q_LOG('INFO', 'AUTH', 'Initiating Standard OAuth 2.0 Redirect Flow');
-                
-                const redirectUri = window.location.origin + window.location.pathname;
-                const scope = 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
-                const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=${encodeURIComponent(scope)}`;
-                
-                window.location.href = authUrl;
+            triggerOAuth: async function() {
+                window.Q_LOG('INFO', 'AUTH', 'Initiating Supabase Google OAuth Flow');
+                if (typeof window.supabaseClient === 'undefined') {
+                    alert("[ ARCHITECTURE ERROR ]\nSupabase client not detected in global scope. Ensure Supabase SDK is loaded.");
+                    return;
+                }
+                const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + window.location.pathname
+                    }
+                });
+                if (error) {
+                    window.Q_LOG('ERROR', 'AUTH', 'Supabase OAuth routing failed.', error);
+                }
             },
             
-            signOut: function() {
+            signOut: async function() {
                 window.Q_LOG('STATE', 'AUTH', 'OAuth Token Revoked');
+                if (typeof window.supabaseClient !== 'undefined') {
+                    await window.supabaseClient.auth.signOut();
+                }
                 localStorage.setItem('Q_PRO_AUTH', 'false');
                 localStorage.removeItem('Q_AUTH_TOKEN');
                 localStorage.removeItem('Q_ENTITLEMENTS');
                 window.location.reload();
             },
 
-            handleRedirectReturn: function() {
-                const hash = window.location.hash;
-                if (hash && hash.includes('access_token=')) {
-                    const params = new URLSearchParams(hash.substring(1));
-                    const token = params.get('access_token');
-                    
-                    if (token) {
-                        window.Q_LOG('STATE', 'AUTH', 'OAuth Token Captured via Redirect');
+            handleRedirectReturn: async function() {
+                if (typeof window.supabaseClient !== 'undefined') {
+                    const { data: { session } } = await window.supabaseClient.auth.getSession();
+                    if (session) {
+                        window.Q_LOG('STATE', 'AUTH', 'OAuth Session Captured via Supabase');
                         localStorage.setItem('Q_PRO_AUTH', 'true');
-                        localStorage.setItem('Q_AUTH_TOKEN', token);
+                        localStorage.setItem('Q_AUTH_TOKEN', session.access_token);
                         
                         let ents = JSON.parse(localStorage.getItem('Q_ENTITLEMENTS') || '[]');
                         if(!ents.includes('PRO')) ents.push('PRO');
                         localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
-                        
-                        window.history.replaceState({}, document.title, window.location.pathname);
                     }
                 }
             }
         };
 
-        // Process returning OAuth tokens immediately
-        window.Q_Auth.handleRedirectReturn();
+        // Ensure session validation fires upon boot
+        setTimeout(() => { window.Q_Auth.handleRedirectReturn(); }, 500);
 
         window.getSimState = () => window.Q_STATE;
 
