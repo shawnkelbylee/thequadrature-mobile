@@ -154,18 +154,18 @@
 
         // --- NATIVE GOOGLE IDENTITY OAUTH BRIDGE ---
         window.Q_Auth = {
-            CLIENT_ID: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", // MUST BE REPLACED WITH VERCEL REGISTRATION ID
+            CLIENT_ID: "295194884701-td2lcfbtote5j98gbaluvt4ajjv6rv0u.apps.googleusercontent.com",
             
             triggerOAuth: function() {
                 if (typeof google === 'undefined' || !google.accounts) {
                     window.Q_LOG('ERROR', 'AUTH', 'Google Identity Services not loaded.');
-                    alert("[ CONNECTION FAILED ]\nGoogle Identity API unreachable. Check network or ad-blockers.");
+                    alert("[ CONNECTION FAILED ]\\nGoogle Identity API unreachable. Check network or ad-blockers.");
                     return;
                 }
 
                 if (this.CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com") {
                     window.Q_LOG('ERROR', 'AUTH', 'Client ID not populated.');
-                    alert("[ ARCHITECTURE ERROR ]\nOAuth requires a registered Client ID. Populate Q_Auth.CLIENT_ID in q-core.js.");
+                    alert("[ ARCHITECTURE ERROR ]\\nOAuth requires a registered Client ID. Populate Q_Auth.CLIENT_ID in q-core.js.");
                     return;
                 }
 
