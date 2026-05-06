@@ -65,14 +65,14 @@ window.injectUniversalUI = function() {
         #mobile-telemetry-btn { display: none !important; pointer-events: none !important; }
 
         :root { 
-            --wing-w: clamp(200px, 18vw, 240px); --mod-w: clamp(280px, 25vw, 320px); --dial-size: 60vh; --wing-offset: calc((var(--dial-size) / 2) + 4vw); 
+            --wing-w: clamp(200px, 18vw, 240px); --mod-w: clamp(280px, 25vw, 320px); --dial-size: 60vmin; --wing-offset: calc((var(--dial-size) / 2) + 4vw); 
             --glass-med: rgba(2, 12, 25, 0.65); --blur-med: blur(16px); --white-pure: #ffffff; 
             --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --center-gap-x: ${isHome ? '31vh' : '36vh'}; 
+            --center-gap-x: ${isHome ? '28vw' : '32vw'}; 
             --corner-gap-y: ${isHome ? '28vh' : '21vh'}; 
-            --corner-gap-x: ${isHome ? '28vh' : '32vh'};
+            --corner-gap-x: ${isHome ? '28vw' : '32vw'};
             --panel-w: ${isHome ? 'clamp(260px, 20vw, 340px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
         }
