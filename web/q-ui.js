@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XVIII UI Engine. Invariant Radial Scaffolding & Aspect-Ratio Coupling.
+// STATUS: Phase XIX UI Engine. Invariant Radial Scaffolding & CSS Whitelist Decoupling.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -75,6 +75,18 @@ window.injectUniversalUI = function() {
             --scaffold-size: 88vh;
             --panel-w: ${isHome ? 'clamp(240px, 22vh, 320px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
+        }
+
+        body > *:not(.q-radial-scaffold):not(.home-container):not(#portal-frame):not(.space-bg):not(#warp-star-field):not(.nebula-left):not(.nebula-right):not(.dust-layer-global):not(.global-header):not(.global-footer):not(.corner-panel):not(.mobile-routing-grid):not(.wing-panel):not(script):not(style):not(iframe):not(meta):not(title):not(#q-ui-injected-flag):not(.q-hub-overlay):not(.q-planner-overlay):not(#q-library-reader-overlay):not(.q-nav-bar):not(.q-control-strip):not(#mobile-telemetry-ribbon):not(#q-universal-controls):not(#q-mic-fab):not(#q-mic-fab-desktop):not(.desktop-only):not(.center-axis-btn) {
+            display: none !important; 
+            opacity: 0 !important; 
+            pointer-events: none !important; 
+            visibility: hidden !important;
+            z-index: -9999 !important;
+        }
+
+        body.sequencing > *:not(.q-radial-scaffold):not(.home-container):not(#portal-frame):not(script):not(style):not(.mobile-routing-grid) {
+            opacity: 0 !important; transition: opacity 0.4s ease-out; pointer-events: none;
         }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
