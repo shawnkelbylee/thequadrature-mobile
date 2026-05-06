@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XV UI Engine. Edge Binding Protocol, True Ephemeris Sync & Absolute Perimeter Anchoring (Corrected).
+// STATUS: Phase XVI UI Engine. Edge Binding Protocol, True Ephemeris Sync & Lateral Displacement Tuning.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -70,7 +70,7 @@ window.injectUniversalUI = function() {
             --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --edge-inset-x: 4vw;
+            --edge-inset-x: 8vw;
             --edge-inset-y: 12vh;
             --panel-w: ${isHome ? 'clamp(260px, 20vw, 340px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
