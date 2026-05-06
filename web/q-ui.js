@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XVI UI Engine. Edge Binding Protocol, True Ephemeris Sync & Lateral Displacement Tuning.
+// STATUS: Phase XVII UI Engine. X/Y Segregation, Center-Binding Wing Protocol & Asymmetrical Y-Clearance.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -65,13 +65,14 @@ window.injectUniversalUI = function() {
         #mobile-telemetry-btn { display: none !important; pointer-events: none !important; }
 
         :root { 
-            --wing-w: clamp(200px, 18vw, 240px); --mod-w: clamp(280px, 25vw, 320px); --dial-size: 60vh; 
+            --wing-w: clamp(200px, 18vw, 240px); --mod-w: clamp(280px, 25vw, 320px); --dial-size: 60vmin; 
             --glass-med: rgba(2, 12, 25, 0.65); --blur-med: blur(16px); --white-pure: #ffffff; 
             --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --edge-inset-x: 8vw;
-            --edge-inset-y: 12vh;
+            --corner-inset-x: 3vw;
+            --corner-inset-y-top: 8vh;
+            --corner-inset-y-bot: 20vh;
             --panel-w: ${isHome ? 'clamp(260px, 20vw, 340px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
         }
@@ -91,21 +92,21 @@ window.injectUniversalUI = function() {
         
         .dust-layer-global { position: fixed; inset: 0; z-index: 2; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise2)' opacity='0.08'/%3E%3C/svg%3E"); mix-blend-mode: screen; pointer-events: none; }
 
-        /* --- EDGE BINDING GEOMETRY --- */
+        /* --- SEGREGATED GEOMETRY MATRIX --- */
         .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
         .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.03); }
 
-        .tl { top: var(--edge-inset-y); left: var(--edge-inset-x); --tx-hover: -2px; --ty-hover: -2px;}
-        .tr { top: var(--edge-inset-y); right: var(--edge-inset-x); --tx-hover: 2px; --ty-hover: -2px;}
+        .tl { top: var(--corner-inset-y-top); left: var(--corner-inset-x); --tx-hover: -2px; --ty-hover: -2px;}
+        .tr { top: var(--corner-inset-y-top); right: var(--corner-inset-x); --tx-hover: 2px; --ty-hover: -2px;}
         .tr .panel-bg { transform: scaleX(-1); }
-        .bl { bottom: var(--edge-inset-y); left: var(--edge-inset-x); --tx-hover: -2px; --ty-hover: 2px;}
+        .bl { bottom: var(--corner-inset-y-bot); left: var(--corner-inset-x); --tx-hover: -2px; --ty-hover: 2px;}
         .bl .panel-bg { transform: scaleY(-1); }
-        .br { bottom: var(--edge-inset-y); right: var(--edge-inset-x); --tx-hover: 2px; --ty-hover: 2px;}
+        .br { bottom: var(--corner-inset-y-bot); right: var(--corner-inset-x); --tx-hover: 2px; --ty-hover: 2px;}
         .br .panel-bg { transform: scale(-1, -1); }
 
         .wing-panel { position: absolute; width: var(--wing-w); height: 250px; z-index: 15; box-sizing: border-box; text-align: center; pointer-events: none; top: 50%; transform: translateY(-50%); }
-        .wing-l { left: var(--edge-inset-x); }
-        .wing-r { right: var(--edge-inset-x); }
+        .wing-l { right: calc(50% + 33vmin); left: auto; }
+        .wing-r { left: calc(50% + 33vmin); right: auto; }
 
         .frost-zone { position: absolute; inset: 6px 12px; background: rgba(15, 20, 35, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; z-index: -2; box-shadow: inset 0 0 20px var(--theme-dim, rgba(0, 163, 255, 0.15)) !important; transition: 0.3s ease; }
         .corner-panel:hover .frost-zone { background: rgba(20, 25, 45, 0.65); box-shadow: 0 0 20px var(--theme-dim, rgba(0, 240, 255, 0.4)), inset 0 0 25px rgba(255, 255, 255, 0.1) !important; }
