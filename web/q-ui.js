@@ -65,15 +65,15 @@ window.injectUniversalUI = function() {
         #mobile-telemetry-btn { display: none !important; pointer-events: none !important; }
 
         :root { 
-            --wing-w: 240px; --mod-w: 320px; --dial-size: 60vh; --wing-offset: calc((var(--dial-size) / 2) + 4vw); 
+            --wing-w: clamp(200px, 18vw, 240px); --mod-w: clamp(280px, 25vw, 320px); --dial-size: 60vh; --wing-offset: calc((var(--dial-size) / 2) + 4vw); 
             --glass-med: rgba(2, 12, 25, 0.65); --blur-med: blur(16px); --white-pure: #ffffff; 
             --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
             --center-gap-x: ${isHome ? '31vh' : '36vh'}; 
-            --corner-gap-y: ${isHome ? '24vh' : '21vh'}; 
-            --corner-gap-x: ${isHome ? '23vh' : '32vh'};
-            --panel-w: ${isHome ? '340px' : '460px'};
+            --corner-gap-y: ${isHome ? '28vh' : '21vh'}; 
+            --corner-gap-x: ${isHome ? '28vh' : '32vh'};
+            --panel-w: ${isHome ? 'clamp(260px, 20vw, 340px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
         }
         
@@ -125,7 +125,7 @@ window.injectUniversalUI = function() {
         .bl .opt-oval { bottom: 36px; left: 45px; }
         .br .opt-oval { bottom: 36px; right: 45px; }
 
-        .wing-panel { position: absolute; width: 240px; height: 250px; z-index: 15; box-sizing: border-box; top: 50%; transform: translateY(-50%); text-align: center; pointer-events: none; }
+        .wing-panel { position: absolute; width: var(--wing-w); height: 250px; z-index: 15; box-sizing: border-box; top: 50%; transform: translateY(-50%); text-align: center; pointer-events: none; }
         .wing-frost { position: absolute; inset: 12px; background: rgba(10, 15, 25, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 8px; z-index: -2; box-shadow: inset 0 0 30px var(--theme-dim, rgba(0, 163, 255, 0.2)); }
         .wing-bg { position: absolute; inset: 0; background: url('assets/wing-panel.png') center/100% 100% no-repeat; z-index: -1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); }
 
