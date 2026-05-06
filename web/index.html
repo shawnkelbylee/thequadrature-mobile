@@ -53,6 +53,10 @@
             --q-metal: #e2e8f0;
             --q-blue-glow: rgba(0, 163, 255, 0.5);
             --white-flash: #ffffff;
+            --edge-inset-x: 4vw;
+            --edge-inset-y: 4vh;
+            --panel-w: clamp(260px, 20vw, 340px);
+            --panel-h: 80px;
         }
 
         html, body { 
@@ -137,8 +141,8 @@
             filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
         }
 
-        .axis-omni { bottom: calc(50% + 30.5vh); }
-        .axis-dash { top: calc(50% + 30.5vh); }
+        .axis-omni { bottom: calc(50% + 28vh); }
+        .axis-dash { top: calc(50% + 28vh); }
 
         .axis-label {
             font-family: 'Orbitron';
@@ -158,6 +162,18 @@
 
         .axis-omni:hover { transform: translateX(-50%) translateY(-2px); filter: brightness(1.2) drop-shadow(0 0 15px rgba(0, 163, 255, 0.4)); }
         .axis-dash:hover { transform: translateX(-50%) translateY(2px); filter: brightness(1.2) drop-shadow(0 0 15px rgba(0, 163, 255, 0.4)); }
+
+        /* --- EDGE BINDING GEOMETRY --- */
+        .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
+        .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.03); }
+
+        .tl { top: var(--edge-inset-y); left: var(--edge-inset-x); --tx-hover: -2px; --ty-hover: -2px;}
+        .tr { top: var(--edge-inset-y); right: var(--edge-inset-x); --tx-hover: 2px; --ty-hover: -2px;}
+        .tr .panel-bg { transform: scaleX(-1); }
+        .bl { bottom: var(--edge-inset-y); left: var(--edge-inset-x); --tx-hover: -2px; --ty-hover: 2px;}
+        .bl .panel-bg { transform: scaleY(-1); }
+        .br { bottom: var(--edge-inset-y); right: var(--edge-inset-x); --tx-hover: 2px; --ty-hover: 2px;}
+        .br .panel-bg { transform: scale(-1, -1); }
 
         /* --- THE MOBILE HOME PROTOCOL --- */
         .desktop-only { display: flex !important; }

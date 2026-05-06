@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XIII UI Engine. Grid Matrix Decoupling, True Ephemeris Sync & DOM Relocation Tracking.
+// STATUS: Phase XIV UI Engine. Edge Binding Protocol, True Ephemeris Sync & Absolute Perimeter Anchoring.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -65,14 +65,13 @@ window.injectUniversalUI = function() {
         #mobile-telemetry-btn { display: none !important; pointer-events: none !important; }
 
         :root { 
-            --wing-w: clamp(200px, 18vw, 240px); --mod-w: clamp(280px, 25vw, 320px); --dial-size: 60vmin; --wing-offset: calc((var(--dial-size) / 2) + 4vw); 
+            --wing-w: clamp(200px, 18vw, 240px); --mod-w: clamp(280px, 25vw, 320px); --dial-size: 60vh; 
             --glass-med: rgba(2, 12, 25, 0.65); --blur-med: blur(16px); --white-pure: #ffffff; 
             --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --center-gap-x: ${isHome ? '28vw' : '32vw'}; 
-            --corner-gap-y: ${isHome ? '28vh' : '21vh'}; 
-            --corner-gap-x: ${isHome ? '28vw' : '32vw'};
+            --edge-inset-x: 4vw;
+            --edge-inset-y: 4vh;
             --panel-w: ${isHome ? 'clamp(260px, 20vw, 340px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
         }
@@ -92,33 +91,21 @@ window.injectUniversalUI = function() {
         
         .dust-layer-global { position: fixed; inset: 0; z-index: 2; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise2)' opacity='0.08'/%3E%3C/svg%3E"); mix-blend-mode: screen; pointer-events: none; }
 
-        /* --- RELATIVE GRID GEOMETRY (APERTURE) --- */
-        .corner-panel { position: relative; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
+        /* --- EDGE BINDING GEOMETRY --- */
+        .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
         .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.03); }
 
-        .tl { --tx-hover: -2px; --ty-hover: -2px;}
-        .tr { --tx-hover: 2px; --ty-hover: -2px;}
+        .tl { top: var(--edge-inset-y); left: var(--edge-inset-x); --tx-hover: -2px; --ty-hover: -2px;}
+        .tr { top: var(--edge-inset-y); right: var(--edge-inset-x); --tx-hover: 2px; --ty-hover: -2px;}
         .tr .panel-bg { transform: scaleX(-1); }
-        .bl { --tx-hover: -2px; --ty-hover: 2px;}
+        .bl { bottom: var(--edge-inset-y); left: var(--edge-inset-x); --tx-hover: -2px; --ty-hover: 2px;}
         .bl .panel-bg { transform: scaleY(-1); }
-        .br { --tx-hover: 2px; --ty-hover: 2px;}
+        .br { bottom: var(--edge-inset-y); right: var(--edge-inset-x); --tx-hover: 2px; --ty-hover: 2px;}
         .br .panel-bg { transform: scale(-1, -1); }
 
-        .wing-panel { position: relative; width: var(--wing-w); height: 250px; z-index: 15; box-sizing: border-box; text-align: center; pointer-events: none; }
-        .wing-r .wing-bg { transform: scaleX(-1); }
-        .wing-r .wing-data-center, .wing-r .wing-footer { padding-left: 15px; }
-
-        /* --- ABSOLUTE FALLBACK GEOMETRY (VECTOR HUDS WITHOUT GRID) --- */
-        body.q-vector-hud .corner-panel { position: absolute; }
-        body.q-vector-hud .tl { bottom: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); }
-        body.q-vector-hud .tr { bottom: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); }
-        body.q-vector-hud .bl { top: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); }
-        body.q-vector-hud .br { top: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); }
-
-        body.q-vector-hud .wing-panel { position: absolute; top: 50%; transform: translateY(-50%); }
-        body.q-vector-hud .wing-l { right: calc(50% + var(--center-gap-x)); }
-        body.q-vector-hud .wing-r { left: calc(50% + var(--center-gap-x)); }
-
+        .wing-panel { position: absolute; width: var(--wing-w); height: 250px; z-index: 15; box-sizing: border-box; text-align: center; pointer-events: none; top: 50%; transform: translateY(-50%); }
+        .wing-l { right: var(--edge-inset-x); }
+        .wing-r { left: var(--edge-inset-x); }
 
         .frost-zone { position: absolute; inset: 6px 12px; background: rgba(15, 20, 35, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; z-index: -2; box-shadow: inset 0 0 20px var(--theme-dim, rgba(0, 163, 255, 0.15)) !important; transition: 0.3s ease; }
         .corner-panel:hover .frost-zone { background: rgba(20, 25, 45, 0.65); box-shadow: 0 0 20px var(--theme-dim, rgba(0, 240, 255, 0.4)), inset 0 0 25px rgba(255, 255, 255, 0.1) !important; }
@@ -141,6 +128,9 @@ window.injectUniversalUI = function() {
         .tr .opt-oval { top: 36px; right: 45px; }
         .bl .opt-oval { bottom: 36px; left: 45px; }
         .br .opt-oval { bottom: 36px; right: 45px; }
+
+        .wing-r .wing-bg { transform: scaleX(-1); }
+        .wing-r .wing-data-center, .wing-r .wing-footer { padding-left: 15px; }
 
         .wing-frost { position: absolute; inset: 12px; background: rgba(10, 15, 25, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 8px; z-index: -2; box-shadow: inset 0 0 30px var(--theme-dim, rgba(0, 163, 255, 0.2)); }
         .wing-bg { position: absolute; inset: 0; background: url('assets/wing-panel.png') center/100% 100% no-repeat; z-index: -1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); }
@@ -291,6 +281,8 @@ window.injectUniversalUI = function() {
             .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; margin-right: 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
             .q-center-dial { margin-top: -3vh !important; z-index: 10 !important;}
+            .axis-omni { bottom: calc(50% + 33.5vh) !important; }
+            .axis-dash { top: calc(50% + 27.5vh) !important; }
             .q-control-strip { position: fixed; bottom: 0 !important; left: 0; width: 100%; background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); display: flex; justify-content: space-around; align-items: center; z-index: 100000; height: 65px !important; padding-bottom: env(safe-area-inset-bottom, 15px) !important; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; box-sizing: content-box !important; }
             .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
             .strip-btn svg { transition: 0.3s; }
@@ -377,9 +369,9 @@ window.injectUniversalUI = function() {
     uiContainer.id = 'q-ui-injected-flag';
     document.body.appendChild(uiContainer);
 
-    // INJECTION: Global Background & Controls
-    const globalWrapper = document.createElement('div');
-    globalWrapper.innerHTML = `
+    const uiWrapper = document.createElement('div');
+    
+    uiWrapper.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
         <div class="nebula-left"></div>
@@ -444,68 +436,31 @@ window.injectUniversalUI = function() {
         <button id="q-mic-fab" class="mobile-only-flex" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
         <button id="q-mic-fab-desktop" class="desktop-only" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
 
-        <div class="q-global-controls" id="q-universal-controls">
-            <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
-            <input type="range" min="-365" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
-            <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
-            <button class="q-ctrl-btn" id="q-live-toggle" onclick="window.setLiveClock()">LIVE</button>
-        </div>
-    `;
-    
-    while(globalWrapper.firstChild) {
-        document.body.appendChild(globalWrapper.firstChild);
-    }
-
-    // INJECTION: DOM Matrix Relocation Hooks vs. Fallback Body Append
-    function injectPanel(hookId, htmlStr) {
-        const hook = document.getElementById(hookId);
-        if (hook) {
-            hook.innerHTML = htmlStr;
-        } else {
-            const temp = document.createElement('div');
-            temp.innerHTML = htmlStr;
-            const el = temp.firstElementChild;
-            document.body.appendChild(el);
-        }
-    }
-
-    injectPanel('hook-tl', `
-        <div class="corner-panel tl telemetry-node desktop-only" id="q-panel-tl">
+        <div class="corner-panel tl telemetry-node desktop-only">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-tl">OPT</div>
             <div class="panel-data-container" id="quad-tl"></div>
         </div>
-    `);
-
-    injectPanel('hook-tr', `
-        <div class="corner-panel tr telemetry-node desktop-only" id="q-panel-tr">
+        <div class="corner-panel tr telemetry-node desktop-only">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-tr">OPT</div>
             <div class="panel-data-container" id="quad-tr"></div>
         </div>
-    `);
-
-    injectPanel('hook-bl', `
-        <div class="corner-panel bl telemetry-node desktop-only" id="q-panel-bl">
+        <div class="corner-panel bl telemetry-node desktop-only">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-bl">OPT</div>
             <div class="panel-data-container" id="quad-bl"></div>
         </div>
-    `);
-
-    injectPanel('hook-br', `
-        <div class="corner-panel br telemetry-node desktop-only" id="q-panel-br">
+        <div class="corner-panel br telemetry-node desktop-only">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-br">OPT</div>
             <div class="panel-data-container" id="quad-br"></div>
         </div>
-    `);
 
-    injectPanel('hook-wl', `
         <div class="wing-panel wing-l telemetry-node" id="q-wing-left">
             <div class="wing-frost"></div>
             <div class="wing-bg"></div>
@@ -529,9 +484,7 @@ window.injectUniversalUI = function() {
                 <div id="legacy-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">STATUS: CONTINUITY ACTIVE</div>
             </div>
         </div>
-    `);
 
-    injectPanel('hook-wr', `
         <div class="wing-panel wing-r telemetry-node" id="q-wing-right">
             <div class="wing-frost"></div>
             <div class="wing-bg"></div>
@@ -591,7 +544,18 @@ window.injectUniversalUI = function() {
                 <div id="quad-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">DUAL-STATE ENGINE</div>
             </div>
         </div>
-    `);
+
+        <div class="q-global-controls" id="q-universal-controls">
+            <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
+            <input type="range" min="-365" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
+            <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
+            <button class="q-ctrl-btn" id="q-live-toggle" onclick="window.setLiveClock()">LIVE</button>
+        </div>
+    `;
+    
+    while(uiWrapper.firstChild) {
+        document.body.appendChild(uiWrapper.firstChild);
+    }
 
     // --- HEX STRING EVENT BINDING ---
     const pNode = document.getElementById('p-string-node');
@@ -990,26 +954,24 @@ window.toggleTelemetry = function() {
     const icon = document.getElementById('tele-icon');
     if(icon) icon.innerHTML = isOpen ? "✖" : `<path d="M18 20V10M12 20V4M6 20v-6"/>`;
     let viewport = document.getElementById('mobile-telemetry-viewport');
+    const container = document.getElementById('q-ui-injected-flag') || document.body;
     
     if (isOpen) {
         if (!viewport) { 
             viewport = document.createElement('div'); 
             viewport.id = 'mobile-telemetry-viewport'; 
-            document.body.appendChild(viewport); 
+            container.appendChild(viewport); 
         }
         viewport.style.display = 'flex';
         document.querySelectorAll('.telemetry-node').forEach(node => {
             if (!node.classList.contains('q-control-strip') && !node.classList.contains('q-nav-bar') && !node.classList.contains('wing-panel')) {
-                node.setAttribute('data-original-parent', node.parentElement.id || '');
                 viewport.appendChild(node);
             }
         });
     } else {
         if (viewport) { 
             Array.from(viewport.childNodes).forEach(node => {
-                const parentId = node.getAttribute('data-original-parent');
-                const parent = parentId ? document.getElementById(parentId) : document.body;
-                if(parent) parent.appendChild(node);
+                document.body.appendChild(node);
             }); 
             viewport.style.display = 'none'; 
         }
