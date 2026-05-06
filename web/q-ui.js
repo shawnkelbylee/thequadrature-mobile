@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XIX UI Engine. Invariant Radial Scaffolding & CSS Whitelist Decoupling.
+// STATUS: Phase XX UI Engine. Invariant Radial Scaffolding & Strict DOM Encapsulation.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -582,7 +582,7 @@ window.injectUniversalUI = function() {
     `;
     
     while(globalWrapper.firstChild) {
-        document.body.appendChild(globalWrapper.firstChild);
+        uiContainer.appendChild(globalWrapper.firstChild);
     }
 
     // --- HEX STRING EVENT BINDING ---
@@ -983,14 +983,13 @@ window.toggleTelemetry = function() {
     if(icon) icon.innerHTML = isOpen ? "✖" : `<path d="M18 20V10M12 20V4M6 20v-6"/>`;
     let viewport = document.getElementById('mobile-telemetry-viewport');
     
-    // Fallback: If not using scaffold, default to injected flag container
     const container = document.getElementById('q-radial-scaffold') || document.getElementById('q-ui-injected-flag') || document.body;
     
     if (isOpen) {
         if (!viewport) { 
             viewport = document.createElement('div'); 
             viewport.id = 'mobile-telemetry-viewport'; 
-            document.body.appendChild(viewport); // Must overlay everything
+            document.body.appendChild(viewport); 
         }
         viewport.style.display = 'flex';
         document.querySelectorAll('.telemetry-node').forEach(node => {
