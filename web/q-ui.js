@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XII UI Engine. True Ephemeris Sync, Typographic Hierarchy & Infinite Horizon Scrubber.
+// STATUS: Phase XX UI Engine. Invariant Radial Scaffolding & Strict DOM Encapsulation.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -65,16 +65,28 @@ window.injectUniversalUI = function() {
         #mobile-telemetry-btn { display: none !important; pointer-events: none !important; }
 
         :root { 
-            --wing-w: 240px; --mod-w: 320px; --dial-size: 60vh; --wing-offset: calc((var(--dial-size) / 2) + 4vw); 
+            --wing-w: clamp(180px, 18vh, 230px); 
+            --mod-w: clamp(280px, 25vw, 320px); 
+            --dial-size: 60vh; 
             --glass-med: rgba(2, 12, 25, 0.65); --blur-med: blur(16px); --white-pure: #ffffff; 
             --starlight: rgba(255, 255, 255, 0.7); --platinum: #E5E4E2; --chrono-amber: #B97A35; 
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
-            --center-gap-x: ${isHome ? '31vh' : '36vh'}; 
-            --corner-gap-y: ${isHome ? '24vh' : '21vh'}; 
-            --corner-gap-x: ${isHome ? '23vh' : '32vh'};
-            --panel-w: ${isHome ? '340px' : '460px'};
+            --scaffold-size: 88vh;
+            --panel-w: ${isHome ? 'clamp(240px, 22vh, 320px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
+        }
+
+        body > *:not(.q-radial-scaffold):not(.home-container):not(#portal-frame):not(.space-bg):not(#warp-star-field):not(.nebula-left):not(.nebula-right):not(.dust-layer-global):not(.global-header):not(.global-footer):not(.corner-panel):not(.mobile-routing-grid):not(.wing-panel):not(script):not(style):not(iframe):not(meta):not(title):not(#q-ui-injected-flag):not(.q-hub-overlay):not(.q-planner-overlay):not(#q-library-reader-overlay):not(.q-nav-bar):not(.q-control-strip):not(#mobile-telemetry-ribbon):not(#q-universal-controls):not(#q-mic-fab):not(#q-mic-fab-desktop):not(.desktop-only):not(.center-axis-btn) {
+            display: none !important; 
+            opacity: 0 !important; 
+            pointer-events: none !important; 
+            visibility: hidden !important;
+            z-index: -9999 !important;
+        }
+
+        body.sequencing > *:not(.q-radial-scaffold):not(.home-container):not(#portal-frame):not(script):not(style):not(.mobile-routing-grid) {
+            opacity: 0 !important; transition: opacity 0.4s ease-out; pointer-events: none;
         }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; justify-content: center; align-items: center; cursor: pointer; }
@@ -92,21 +104,42 @@ window.injectUniversalUI = function() {
         
         .dust-layer-global { position: fixed; inset: 0; z-index: 2; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise2)' opacity='0.08'/%3E%3C/svg%3E"); mix-blend-mode: screen; pointer-events: none; }
 
-        .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; }
+        /* --- INVARIANT RADIAL SCAFFOLDING --- */
+        .q-radial-scaffold {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: var(--scaffold-size);
+            height: var(--scaffold-size);
+            aspect-ratio: 1 / 1;
+            z-index: 15;
+            pointer-events: none;
+            max-width: 98vw;
+        }
+
+        .q-radial-scaffold > * { pointer-events: auto; }
+
+        .corner-panel { position: absolute; width: var(--panel-w); height: var(--panel-h); z-index: 20; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .corner-panel:hover { transform: translate(var(--tx-hover), var(--ty-hover)) scale(1.03); }
+
+        .tl { top: 0; left: 0; --tx-hover: -2px; --ty-hover: -2px;}
+        .tr { top: 0; right: 0; --tx-hover: 2px; --ty-hover: -2px;}
+        .tr .panel-bg { transform: scaleX(-1); }
+        .bl { bottom: 0; left: 0; --tx-hover: -2px; --ty-hover: 2px;}
+        .bl .panel-bg { transform: scaleY(-1); }
+        .br { bottom: 0; right: 0; --tx-hover: 2px; --ty-hover: 2px;}
+        .br .panel-bg { transform: scale(-1, -1); }
+
+        .wing-panel { position: absolute; width: var(--wing-w); height: 250px; z-index: 15; box-sizing: border-box; text-align: center; pointer-events: none; top: 50%; transform: translateY(-50%); }
+        .wing-l { left: 0; }
+        .wing-r { right: 0; }
+        .wing-r .wing-bg { transform: scaleX(-1); }
 
         .frost-zone { position: absolute; inset: 6px 12px; background: rgba(15, 20, 35, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; z-index: -2; box-shadow: inset 0 0 20px var(--theme-dim, rgba(0, 163, 255, 0.15)) !important; transition: 0.3s ease; }
         .corner-panel:hover .frost-zone { background: rgba(20, 25, 45, 0.65); box-shadow: 0 0 20px var(--theme-dim, rgba(0, 240, 255, 0.4)), inset 0 0 25px rgba(255, 255, 255, 0.1) !important; }
 
         .panel-bg { position: absolute; inset: 0; background: url('assets/panel-frame.png') center/100% 100% no-repeat; z-index: -1; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6)); pointer-events: none; }
-
-        .tl { bottom: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); --tx-hover: -2px; --ty-hover: -2px;}
-        .tr { bottom: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); --tx-hover: 2px; --ty-hover: -2px;}
-        .tr .panel-bg { transform: scaleX(-1); }
-        .bl { top: calc(50% + var(--corner-gap-y)); right: calc(50% + var(--corner-gap-x)); --tx-hover: -2px; --ty-hover: 2px;}
-        .bl .panel-bg { transform: scaleY(-1); }
-        .br { top: calc(50% + var(--corner-gap-y)); left: calc(50% + var(--corner-gap-x)); --tx-hover: 2px; --ty-hover: 2px;}
-        .br .panel-bg { transform: scale(-1, -1); }
 
         .panel-data-container {
             height: 100%; width: 100%; display: flex; flex-direction: column; align-items: stretch; justify-content: center; text-align: left;
@@ -125,15 +158,10 @@ window.injectUniversalUI = function() {
         .bl .opt-oval { bottom: 36px; left: 45px; }
         .br .opt-oval { bottom: 36px; right: 45px; }
 
-        .wing-panel { position: absolute; width: 240px; height: 250px; z-index: 15; box-sizing: border-box; top: 50%; transform: translateY(-50%); text-align: center; pointer-events: none; }
+        .wing-r .wing-data-center, .wing-r .wing-footer { padding-left: 15px; }
+
         .wing-frost { position: absolute; inset: 12px; background: rgba(10, 15, 25, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 8px; z-index: -2; box-shadow: inset 0 0 30px var(--theme-dim, rgba(0, 163, 255, 0.2)); }
         .wing-bg { position: absolute; inset: 0; background: url('assets/wing-panel.png') center/100% 100% no-repeat; z-index: -1; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); }
-
-        .wing-l { right: calc(50% + var(--center-gap-x)); }
-        .wing-r { left: calc(50% + var(--center-gap-x)); }
-        .wing-r .wing-bg { transform: scaleX(-1); }
-        
-        .wing-r .wing-data-center, .wing-r .wing-footer { padding-left: 15px; }
 
         .wing-header { position: absolute; top: 25px; left: 0; width: 100%; z-index: 10; display: flex; justify-content: center; pointer-events: none;}
         .wing-data-center { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; width: 100%; padding: 40px 0; box-sizing: border-box; position: relative; z-index: 10; pointer-events: none;}
@@ -281,8 +309,6 @@ window.injectUniversalUI = function() {
             .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; margin-right: 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
             .q-center-dial { margin-top: -3vh !important; z-index: 10 !important;}
-            .axis-omni { bottom: calc(50% + 33.5vh) !important; }
-            .axis-dash { top: calc(50% + 27.5vh) !important; }
             .q-control-strip { position: fixed; bottom: 0 !important; left: 0; width: 100%; background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); display: flex; justify-content: space-around; align-items: center; z-index: 100000; height: 65px !important; padding-bottom: env(safe-area-inset-bottom, 15px) !important; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; box-sizing: content-box !important; }
             .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
             .strip-btn svg { transition: 0.3s; }
@@ -369,14 +395,125 @@ window.injectUniversalUI = function() {
     uiContainer.id = 'q-ui-injected-flag';
     document.body.appendChild(uiContainer);
 
-    const uiWrapper = document.createElement('div');
-    
-    uiWrapper.innerHTML = `
+    // INJECTION: Global Background & Radial Scaffolding
+    const globalWrapper = document.createElement('div');
+    globalWrapper.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
         <div class="nebula-left"></div>
         <div class="nebula-right"></div>
         <div class="dust-layer-global"></div>
+
+        <div id="q-radial-scaffold" class="q-radial-scaffold">
+            <div class="corner-panel tl telemetry-node desktop-only" id="q-panel-tl">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" id="opt-tl">OPT</div>
+                <div class="panel-data-container" id="quad-tl"></div>
+            </div>
+            <div class="corner-panel tr telemetry-node desktop-only" id="q-panel-tr">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" id="opt-tr">OPT</div>
+                <div class="panel-data-container" id="quad-tr"></div>
+            </div>
+            <div class="corner-panel bl telemetry-node desktop-only" id="q-panel-bl">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" id="opt-bl">OPT</div>
+                <div class="panel-data-container" id="quad-bl"></div>
+            </div>
+            <div class="corner-panel br telemetry-node desktop-only" id="q-panel-br">
+                <div class="frost-zone"></div>
+                <div class="panel-bg"></div>
+                <div class="opt-oval" id="opt-br">OPT</div>
+                <div class="panel-data-container" id="quad-br"></div>
+            </div>
+
+            <div class="wing-panel wing-l telemetry-node" id="q-wing-left">
+                <div class="wing-frost"></div>
+                <div class="wing-bg"></div>
+                <div class="wing-header">
+                    <span class="w-head" style="position:static; transform:none;">LEGACY OS</span>
+                </div>
+                <div class="wing-data-center">
+                    <div style="margin-bottom: 15px;" id="leg-date-wrapper">
+                        <div class="w-lbl">DATE</div>
+                        <div class="val-lg" id="leg-date" style="color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
+                    </div>
+                    <div>
+                        <div style="display:flex; align-items:center; justify-content:center; gap: 5px;">
+                            <div class="w-lbl" style="margin:0;">TIME</div>
+                            <div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')" id="fmt-btn">UTC</div>
+                        </div>
+                        <div class="val-lg" id="leg-time" style="color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
+                    </div>
+                </div>
+                <div class="wing-footer">
+                    <div id="legacy-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">STATUS: CONTINUITY ACTIVE</div>
+                </div>
+            </div>
+
+            <div class="wing-panel wing-r telemetry-node" id="q-wing-right">
+                <div class="wing-frost"></div>
+                <div class="wing-bg"></div>
+                <div class="wing-header">
+                    <span class="w-head" style="position:static; transform:none;">QUAD OS</span>
+                </div>
+                
+                <div class="wing-data-center">
+                    <div style="margin-bottom: 4px; pointer-events: none;">
+                        <div class="w-lbl">Q COORDINATE</div>
+                        <div class="val-lg" id="q-coord-wing" style="margin-top: 2px; color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
+                    </div>
+                    
+                    <div id="p-string-node" style="width: 100%; pointer-events: auto; cursor: pointer; padding: 2px 0; border-top: 1px solid rgba(0,240,255,0.1); border-bottom: 1px solid rgba(0,240,255,0.1); margin-bottom: 6px; position:relative;">
+                        <div class="rest-view" id="p-rest" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
+                        <div id="p-exp" style="display:none; position:absolute; top:100%; left:0; width:100%; background:rgba(2,6,15,0.95); z-index:50; padding:6px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2);">--</div>
+                    </div>
+
+                    <div style="display: flex; width: 100%; justify-content: center; align-items: center; gap: 15px; position: relative; margin-top: 5px;">
+                        
+                        <div style="display: flex; flex-direction: column; gap: 6px; pointer-events: auto; cursor: pointer;" id="deep-time-col">
+                            <div id="g-rest" class="rest-view" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); text-align: left;">--</div>
+                            <div id="s-rest" class="rest-view" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); text-align: left;">--</div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; align-items: center; pointer-events: auto; cursor: pointer;" id="radial-index-wrapper">
+                            <div id="radial-index-container" style="position:relative; width: 45px; height: 45px; pointer-events: none;">
+                                <svg viewBox="-30 -30 60 60" style="overflow:visible; width:100%; height:100%;">
+                                    <defs>
+                                        <linearGradient id="friction-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#ffffff" />
+                                            <stop offset="100%" stop-color="var(--theme-main, #00f0ff)" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="0" cy="0" r="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
+                                    <path id="friction-arc" fill="none" stroke="url(#friction-grad)" stroke-width="2" filter="drop-shadow(0 0 4px var(--theme-main, #00f0ff))" />
+                                    <circle id="node-solar" cx="0" cy="-25" r="3" fill="#ffffff" filter="drop-shadow(0 0 5px #ffffff)" />
+                                    <circle id="node-sidereal" cx="0" cy="-25" r="3" fill="var(--theme-main, #00f0ff)" filter="drop-shadow(0 0 5px var(--theme-main, #00f0ff))" />
+                                </svg>
+                            </div>
+                            <div class="w-lbl" style="font-size: 0.35rem; margin-top: 4px; color: var(--q-metal);">AXIAL FRICTION</div>
+                        </div>
+
+                        <div id="deep-time-overlay" style="display:none; position:absolute; top:-5px; left:0; width:100%; height:calc(100% + 10px); background:rgba(2,6,15,0.95); backdrop-filter:blur(8px); z-index:50; flex-direction:column; justify-content:center; padding-left: 5px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2);">
+                        </div>
+                        
+                        <div id="radial-overlay" style="display:none; position:absolute; top:-5px; left:0; width:100%; height:calc(100% + 10px); background:rgba(2,6,15,0.95); backdrop-filter:blur(8px); z-index:51; flex-direction:column; justify-content:center; padding: 5px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2); text-align: left;">
+                            <div class="exp-view" style="white-space: normal;">
+                                <span style="color:var(--starlight); font-weight:bold;">[AXIAL FRICTION]</span><br>
+                                <span style="color:var(--theme-main, #00f0ff); font-size: 0.45rem;">Compounding variance between the 24h Solar Day and the 23h 56m Sidereal rotation.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="wing-footer">
+                    <div id="quad-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">DUAL-STATE ENGINE</div>
+                </div>
+            </div>
+        </div>
 
         <div class="q-nav-bar">
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
@@ -436,115 +573,6 @@ window.injectUniversalUI = function() {
         <button id="q-mic-fab" class="mobile-only-flex" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
         <button id="q-mic-fab-desktop" class="desktop-only" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
 
-        <div class="corner-panel tl telemetry-node desktop-only">
-            <div class="frost-zone"></div>
-            <div class="panel-bg"></div>
-            <div class="opt-oval" id="opt-tl">OPT</div>
-            <div class="panel-data-container" id="quad-tl"></div>
-        </div>
-        <div class="corner-panel tr telemetry-node desktop-only">
-            <div class="frost-zone"></div>
-            <div class="panel-bg"></div>
-            <div class="opt-oval" id="opt-tr">OPT</div>
-            <div class="panel-data-container" id="quad-tr"></div>
-        </div>
-        <div class="corner-panel bl telemetry-node desktop-only">
-            <div class="frost-zone"></div>
-            <div class="panel-bg"></div>
-            <div class="opt-oval" id="opt-bl">OPT</div>
-            <div class="panel-data-container" id="quad-bl"></div>
-        </div>
-        <div class="corner-panel br telemetry-node desktop-only">
-            <div class="frost-zone"></div>
-            <div class="panel-bg"></div>
-            <div class="opt-oval" id="opt-br">OPT</div>
-            <div class="panel-data-container" id="quad-br"></div>
-        </div>
-
-        <div class="wing-panel wing-l telemetry-node" id="q-wing-left">
-            <div class="wing-frost"></div>
-            <div class="wing-bg"></div>
-            <div class="wing-header">
-                <span class="w-head" style="position:static; transform:none;">LEGACY OS</span>
-            </div>
-            <div class="wing-data-center">
-                <div style="margin-bottom: 15px;" id="leg-date-wrapper">
-                    <div class="w-lbl">DATE</div>
-                    <div class="val-lg" id="leg-date" style="color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
-                </div>
-                <div>
-                    <div style="display:flex; align-items:center; justify-content:center; gap: 5px;">
-                        <div class="w-lbl" style="margin:0;">TIME</div>
-                        <div class="fmt-toggle" onclick="window.toggleTimeFmt('fmt-btn')" id="fmt-btn">UTC</div>
-                    </div>
-                    <div class="val-lg" id="leg-time" style="color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
-                </div>
-            </div>
-            <div class="wing-footer">
-                <div id="legacy-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">STATUS: CONTINUITY ACTIVE</div>
-            </div>
-        </div>
-
-        <div class="wing-panel wing-r telemetry-node" id="q-wing-right">
-            <div class="wing-frost"></div>
-            <div class="wing-bg"></div>
-            <div class="wing-header">
-                <span class="w-head" style="position:static; transform:none;">QUAD OS</span>
-            </div>
-            
-            <div class="wing-data-center">
-                <div style="margin-bottom: 4px; pointer-events: none;">
-                    <div class="w-lbl">Q COORDINATE</div>
-                    <div class="val-lg" id="q-coord-wing" style="margin-top: 2px; color: var(--theme-main, #00f0ff); text-shadow: 0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
-                </div>
-                
-                <div id="p-string-node" style="width: 100%; pointer-events: auto; cursor: pointer; padding: 2px 0; border-top: 1px solid rgba(0,240,255,0.1); border-bottom: 1px solid rgba(0,240,255,0.1); margin-bottom: 6px; position:relative;">
-                    <div class="rest-view" id="p-rest" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">--</div>
-                    <div id="p-exp" style="display:none; position:absolute; top:100%; left:0; width:100%; background:rgba(2,6,15,0.95); z-index:50; padding:6px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2);">--</div>
-                </div>
-
-                <div style="display: flex; width: 100%; justify-content: center; align-items: center; gap: 15px; position: relative; margin-top: 5px;">
-                    
-                    <div style="display: flex; flex-direction: column; gap: 6px; pointer-events: auto; cursor: pointer;" id="deep-time-col">
-                        <div id="g-rest" class="rest-view" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); text-align: left;">--</div>
-                        <div id="s-rest" class="rest-view" style="color:var(--theme-main, #00f0ff); text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2)); text-align: left;">--</div>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; align-items: center; pointer-events: auto; cursor: pointer;" id="radial-index-wrapper">
-                        <div id="radial-index-container" style="position:relative; width: 45px; height: 45px; pointer-events: none;">
-                            <svg viewBox="-30 -30 60 60" style="overflow:visible; width:100%; height:100%;">
-                                <defs>
-                                    <linearGradient id="friction-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#ffffff" />
-                                        <stop offset="100%" stop-color="var(--theme-main, #00f0ff)" />
-                                    </linearGradient>
-                                </defs>
-                                <circle cx="0" cy="0" r="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
-                                <path id="friction-arc" fill="none" stroke="url(#friction-grad)" stroke-width="2" filter="drop-shadow(0 0 4px var(--theme-main, #00f0ff))" />
-                                <circle id="node-solar" cx="0" cy="-25" r="3" fill="#ffffff" filter="drop-shadow(0 0 5px #ffffff)" />
-                                <circle id="node-sidereal" cx="0" cy="-25" r="3" fill="var(--theme-main, #00f0ff)" filter="drop-shadow(0 0 5px var(--theme-main, #00f0ff))" />
-                            </svg>
-                        </div>
-                        <div class="w-lbl" style="font-size: 0.35rem; margin-top: 4px; color: var(--q-metal);">AXIAL FRICTION</div>
-                    </div>
-
-                    <div id="deep-time-overlay" style="display:none; position:absolute; top:-5px; left:0; width:100%; height:calc(100% + 10px); background:rgba(2,6,15,0.95); backdrop-filter:blur(8px); z-index:50; flex-direction:column; justify-content:center; padding-left: 5px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2);">
-                    </div>
-                    
-                    <div id="radial-overlay" style="display:none; position:absolute; top:-5px; left:0; width:100%; height:calc(100% + 10px); background:rgba(2,6,15,0.95); backdrop-filter:blur(8px); z-index:51; flex-direction:column; justify-content:center; padding: 5px; box-sizing:border-box; border-radius:4px; border: 1px solid rgba(0,240,255,0.2); text-align: left;">
-                        <div class="exp-view" style="white-space: normal;">
-                            <span style="color:var(--starlight); font-weight:bold;">[AXIAL FRICTION]</span><br>
-                            <span style="color:var(--theme-main, #00f0ff); font-size: 0.45rem;">Compounding variance between the 24h Solar Day and the 23h 56m Sidereal rotation.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="wing-footer">
-                <div id="quad-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">DUAL-STATE ENGINE</div>
-            </div>
-        </div>
-
         <div class="q-global-controls" id="q-universal-controls">
             <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
             <input type="range" min="-365" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
@@ -553,8 +581,8 @@ window.injectUniversalUI = function() {
         </div>
     `;
     
-    while(uiWrapper.firstChild) {
-        document.body.appendChild(uiWrapper.firstChild);
+    while(globalWrapper.firstChild) {
+        uiContainer.appendChild(globalWrapper.firstChild);
     }
 
     // --- HEX STRING EVENT BINDING ---
@@ -955,24 +983,27 @@ window.toggleTelemetry = function() {
     if(icon) icon.innerHTML = isOpen ? "✖" : `<path d="M18 20V10M12 20V4M6 20v-6"/>`;
     let viewport = document.getElementById('mobile-telemetry-viewport');
     
-    const container = document.getElementById('q-ui-injected-flag') || document.body;
+    const container = document.getElementById('q-radial-scaffold') || document.getElementById('q-ui-injected-flag') || document.body;
     
     if (isOpen) {
         if (!viewport) { 
             viewport = document.createElement('div'); 
             viewport.id = 'mobile-telemetry-viewport'; 
-            container.appendChild(viewport); 
+            document.body.appendChild(viewport); 
         }
         viewport.style.display = 'flex';
         document.querySelectorAll('.telemetry-node').forEach(node => {
-            if (!node.classList.contains('q-control-strip') && !node.classList.contains('q-nav-bar') && !node.classList.contains('wing-panel')) {
+            if (!node.classList.contains('q-control-strip') && !node.classList.contains('q-nav-bar')) {
+                node.setAttribute('data-original-parent', node.parentElement.id || '');
                 viewport.appendChild(node);
             }
         });
     } else {
         if (viewport) { 
             Array.from(viewport.childNodes).forEach(node => {
-                document.body.appendChild(node);
+                const parentId = node.getAttribute('data-original-parent');
+                const parent = parentId ? document.getElementById(parentId) : container;
+                if(parent) parent.appendChild(node);
             }); 
             viewport.style.display = 'none'; 
         }
