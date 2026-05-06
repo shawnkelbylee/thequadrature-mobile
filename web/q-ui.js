@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XIV UI Engine. Edge Binding Protocol, True Ephemeris Sync & Absolute Perimeter Anchoring.
+// STATUS: Phase XV UI Engine. Edge Binding Protocol, True Ephemeris Sync & Absolute Perimeter Anchoring (Corrected).
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -71,7 +71,7 @@ window.injectUniversalUI = function() {
             --chrono-amber-dim: rgba(185, 122, 53, 0.2); 
             --q-blue-glow: rgba(0, 163, 255, 0.3); --q-metal: #e2e8f0;
             --edge-inset-x: 4vw;
-            --edge-inset-y: 4vh;
+            --edge-inset-y: 12vh;
             --panel-w: ${isHome ? 'clamp(260px, 20vw, 340px)' : 'clamp(380px, 28vw, 460px)'};
             --panel-h: ${isHome ? '80px' : '170px'};
         }
@@ -104,8 +104,8 @@ window.injectUniversalUI = function() {
         .br .panel-bg { transform: scale(-1, -1); }
 
         .wing-panel { position: absolute; width: var(--wing-w); height: 250px; z-index: 15; box-sizing: border-box; text-align: center; pointer-events: none; top: 50%; transform: translateY(-50%); }
-        .wing-l { right: var(--edge-inset-x); }
-        .wing-r { left: var(--edge-inset-x); }
+        .wing-l { left: var(--edge-inset-x); }
+        .wing-r { right: var(--edge-inset-x); }
 
         .frost-zone { position: absolute; inset: 6px 12px; background: rgba(15, 20, 35, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; z-index: -2; box-shadow: inset 0 0 20px var(--theme-dim, rgba(0, 163, 255, 0.15)) !important; transition: 0.3s ease; }
         .corner-panel:hover .frost-zone { background: rgba(20, 25, 45, 0.65); box-shadow: 0 0 20px var(--theme-dim, rgba(0, 240, 255, 0.4)), inset 0 0 25px rgba(255, 255, 255, 0.1) !important; }
@@ -281,8 +281,6 @@ window.injectUniversalUI = function() {
             .q-nav-btn { padding: 4px 8px; font-size: 0.55rem; margin-right: 0; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2) !important; }
             
             .q-center-dial { margin-top: -3vh !important; z-index: 10 !important;}
-            .axis-omni { bottom: calc(50% + 33.5vh) !important; }
-            .axis-dash { top: calc(50% + 27.5vh) !important; }
             .q-control-strip { position: fixed; bottom: 0 !important; left: 0; width: 100%; background: rgba(2, 6, 15, 0.98); border-top: 1px solid var(--theme-dim, rgba(0, 240, 255, 0.2)); display: flex; justify-content: space-around; align-items: center; z-index: 100000; height: 65px !important; padding-bottom: env(safe-area-inset-bottom, 15px) !important; box-shadow: 0 -10px 30px rgba(0,0,0,0.9); pointer-events: auto !important; box-sizing: content-box !important; }
             .strip-btn { background: transparent; border: none; color: var(--platinum); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-decoration: none; padding: 5px; pointer-events: auto !important; }
             .strip-btn svg { transition: 0.3s; }
@@ -369,9 +367,9 @@ window.injectUniversalUI = function() {
     uiContainer.id = 'q-ui-injected-flag';
     document.body.appendChild(uiContainer);
 
-    const uiWrapper = document.createElement('div');
-    
-    uiWrapper.innerHTML = `
+    // INJECTION: Global Background & Controls
+    const globalWrapper = document.createElement('div');
+    globalWrapper.innerHTML = `
         <div class="space-bg"></div>
         <div class="star-container" id="stars"></div>
         <div class="nebula-left"></div>
@@ -436,31 +434,68 @@ window.injectUniversalUI = function() {
         <button id="q-mic-fab" class="mobile-only-flex" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
         <button id="q-mic-fab-desktop" class="desktop-only" onclick="if(window.Q_KairosVoice) window.Q_KairosVoice.toggle()">🎙</button>
 
-        <div class="corner-panel tl telemetry-node desktop-only">
+        <div class="q-global-controls" id="q-universal-controls">
+            <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
+            <input type="range" min="-365" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
+            <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
+            <button class="q-ctrl-btn" id="q-live-toggle" onclick="window.setLiveClock()">LIVE</button>
+        </div>
+    `;
+    
+    while(globalWrapper.firstChild) {
+        document.body.appendChild(globalWrapper.firstChild);
+    }
+
+    // INJECTION: DOM Matrix Relocation Hooks vs. Fallback Body Append
+    function injectPanel(hookId, htmlStr) {
+        const hook = document.getElementById(hookId);
+        if (hook) {
+            hook.innerHTML = htmlStr;
+        } else {
+            const temp = document.createElement('div');
+            temp.innerHTML = htmlStr;
+            const el = temp.firstElementChild;
+            document.body.appendChild(el);
+        }
+    }
+
+    injectPanel('hook-tl', `
+        <div class="corner-panel tl telemetry-node desktop-only" id="q-panel-tl">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-tl">OPT</div>
             <div class="panel-data-container" id="quad-tl"></div>
         </div>
-        <div class="corner-panel tr telemetry-node desktop-only">
+    `);
+
+    injectPanel('hook-tr', `
+        <div class="corner-panel tr telemetry-node desktop-only" id="q-panel-tr">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-tr">OPT</div>
             <div class="panel-data-container" id="quad-tr"></div>
         </div>
-        <div class="corner-panel bl telemetry-node desktop-only">
+    `);
+
+    injectPanel('hook-bl', `
+        <div class="corner-panel bl telemetry-node desktop-only" id="q-panel-bl">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-bl">OPT</div>
             <div class="panel-data-container" id="quad-bl"></div>
         </div>
-        <div class="corner-panel br telemetry-node desktop-only">
+    `);
+
+    injectPanel('hook-br', `
+        <div class="corner-panel br telemetry-node desktop-only" id="q-panel-br">
             <div class="frost-zone"></div>
             <div class="panel-bg"></div>
             <div class="opt-oval" id="opt-br">OPT</div>
             <div class="panel-data-container" id="quad-br"></div>
         </div>
+    `);
 
+    injectPanel('hook-wl', `
         <div class="wing-panel wing-l telemetry-node" id="q-wing-left">
             <div class="wing-frost"></div>
             <div class="wing-bg"></div>
@@ -484,7 +519,9 @@ window.injectUniversalUI = function() {
                 <div id="legacy-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">STATUS: CONTINUITY ACTIVE</div>
             </div>
         </div>
+    `);
 
+    injectPanel('hook-wr', `
         <div class="wing-panel wing-r telemetry-node" id="q-wing-right">
             <div class="wing-frost"></div>
             <div class="wing-bg"></div>
@@ -544,18 +581,7 @@ window.injectUniversalUI = function() {
                 <div id="quad-footer-text" style="font-size:0.5rem; color:var(--starlight); border-top: 1px dashed var(--theme-dim, rgba(0,240,255,0.2)); padding-top: 8px; width: 85%; margin: 0 auto; font-family: 'JetBrains Mono';">DUAL-STATE ENGINE</div>
             </div>
         </div>
-
-        <div class="q-global-controls" id="q-universal-controls">
-            <button class="q-ctrl-btn" onclick="window.stepScrubber(-1)">&lt;</button>
-            <input type="range" min="-365" max="365" step="1" value="0" class="q-scrubber" id="q-global-scrubber" oninput="window.scrubTime(this.value)">
-            <button class="q-ctrl-btn" onclick="window.stepScrubber(1)">&gt;</button>
-            <button class="q-ctrl-btn" id="q-live-toggle" onclick="window.setLiveClock()">LIVE</button>
-        </div>
-    `;
-    
-    while(uiWrapper.firstChild) {
-        document.body.appendChild(uiWrapper.firstChild);
-    }
+    `);
 
     // --- HEX STRING EVENT BINDING ---
     const pNode = document.getElementById('p-string-node');
@@ -971,7 +997,9 @@ window.toggleTelemetry = function() {
     } else {
         if (viewport) { 
             Array.from(viewport.childNodes).forEach(node => {
-                document.body.appendChild(node);
+                const parentId = node.getAttribute('data-original-parent');
+                const parent = parentId ? document.getElementById(parentId) : document.body;
+                if(parent) parent.appendChild(node);
             }); 
             viewport.style.display = 'none'; 
         }
