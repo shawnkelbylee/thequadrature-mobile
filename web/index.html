@@ -85,13 +85,7 @@
         body.sequencing .iris-ring, body.sequencing-internal .iris-ring { opacity: 0; transition: opacity 0.4s ease-in 0.5s; }
         body.sequencing .core-void, body.sequencing-internal .core-void { opacity: 0; transition: opacity 0.3s ease-in 0.4s; }
         
-        body.sequencing #portal-frame { opacity: 1 !important; clip-path: circle(150% at 50% 50%); transition: opacity 0.2s ease-in 0.3s, clip-path 1.1s cubic-bezier(0.7, 0, 0.1, 1) 0.3s; }
-        body.sequencing .q-core-asset { animation: q-core-portal 1.1s forwards cubic-bezier(0.7, 0, 0.1, 1) 0.3s; }
-        body.sequencing .mobile-routing-grid { opacity: 0 !important; transition: 0.2s; }
-        body.sequencing .center-axis-btn { opacity: 0 !important; transition: opacity 0.4s ease-out; }
-
-        @keyframes q-core-portal { 0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1) drop-shadow(0 0 25px var(--q-blue-glow)); opacity: 1; } 40% { transform: translate(-50%, -50%) scale(1.5); filter: brightness(3) drop-shadow(0 0 60px var(--white-flash)); opacity: 1; } 70% { transform: translate(-50%, -50%) scale(10); filter: brightness(5) drop-shadow(0 0 100px var(--white-flash)); opacity: 0.5; } 100% { transform: translate(-50%, -50%) scale(40); filter: brightness(8) drop-shadow(0 0 0px var(--white-flash)); opacity: 0; } }
-
+        
         /* --- THE CENTER AXIS BUTTONS --- */
         .center-axis-btn {
             position: absolute;
