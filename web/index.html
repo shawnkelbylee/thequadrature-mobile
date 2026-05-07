@@ -85,7 +85,28 @@
         body.sequencing .iris-ring, body.sequencing-internal .iris-ring { opacity: 0; transition: opacity 0.4s ease-in 0.5s; }
         body.sequencing .core-void, body.sequencing-internal .core-void { opacity: 0; transition: opacity 0.3s ease-in 0.4s; }
         
-        
+        window.actuateInternalIris = function(callback) {
+            if (document.body.classList.contains('sequencing') || document.body.classList.contains('sequencing-internal')) return;
+            
+            // Apply the safe internal class to rotate the Iris blades closed
+            document.body.classList.add('sequencing-internal');
+            
+            // Wait 600ms for the blades to fully close before injecting the HUD
+            setTimeout(() => { 
+                if (callback) {
+                    Promise.resolve(callback()).then(() => {
+                        requestAnimationFrame(() => {
+                            // Hold the blades for a moment, then retract them to reveal the HUD
+                            setTimeout(() => { document.body.classList.remove('sequencing-internal'); }, 600);
+                        });
+                    });
+                } else {
+                    requestAnimationFrame(() => {
+                        setTimeout(() => { document.body.classList.remove('sequencing-internal'); }, 600);
+                    });
+                }
+            }, 600); 
+        };
 
         /* --- THE CENTER AXIS BUTTONS --- */
         .center-axis-btn {
