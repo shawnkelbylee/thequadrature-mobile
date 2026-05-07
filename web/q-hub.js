@@ -219,10 +219,9 @@ window.Q_IntegrationHub = {
         const sAi = window.Q_STATE?.logic_layer?.preferred_ai_diplomat || 'DEFAULT';
         const sDeepFlowEnforcement = window.Q_STATE?.logic_layer?.deep_flow_enforcement !== false;
 
-        // Ephemeris Diagnostic API Override Fix
-        const isEphCached = localStorage.getItem('HORIZONS_CACHE_ACTIVE') === 'true';
-        const jplStatus = (window.EPHEMERIS_LIVE || isEphCached) ? '<span style="color:#39ff14; text-shadow:0 0 5px rgba(57,255,20,0.5);">[ CONNECTED / LIVE OR CACHED ]</span>' : '<span style="color:#ff003c; text-shadow:0 0 5px rgba(255,0,60,0.5);">[ OFFLINE / CACHE PENDING ]</span>';
-        const swissStatus = isPersonalActive ? '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ API ACTIVE ]</span>' : '<span style="color:#aaa;">[ STANDBY / INACTIVE ]</span>';
+        // Ephemeris Diagnostic: Reporting Native Edge-Computed State
+        const jplStatus = '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ EDGE-COMPUTED / SYNCED ]</span>';
+        const swissStatus = isPersonalActive ? '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ ACTIVE ]</span>' : '<span style="color:#aaa;">[ STANDBY ]</span>';
 
         dom.innerHTML = `
             <div class="q-hub-box" onclick="event.stopPropagation()">
