@@ -131,29 +131,30 @@ window.Q_IntegrationHub = {
         localStorage.setItem('q_loc_name', loc.toUpperCase());
         localStorage.setItem('q_sleep_hrs', sleepHrs);
 
+        // 1. Calculate derived time values unconditionally
+        const parts = anchor.split(':');
+        const mins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
+        const sleepMins = Math.floor(parseFloat(sleepHrs) * 60);
+
+        // 2. PERSISTENCE FIX: Write directly to browser memory immediately
+        localStorage.setItem('q_bio_anchor', mins);
+        localStorage.setItem('q_sleep_cycle_duration', sleepMins);
+        localStorage.setItem('q_sleep_inertia_mins', inertia);
+        localStorage.setItem('q_dlmo_offset_mins', dlmo);
+
+        // 3. Update dynamic state matrix only if the module is active
         if (window.Q_UpdateState) {
             window.Q_UpdateState('metaphysical_layer', 'dob', dob);
             window.Q_UpdateState('metaphysical_layer', 'tob', isUnknown ? '12:00' : tob);
             window.Q_UpdateState('metaphysical_layer', 'tob_unknown', isUnknown);
             window.Q_UpdateState('location', 'name', loc.toUpperCase());
-
-            const parts = anchor.split(':');
-            const mins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
             window.Q_UpdateState('metaphysical_layer', 'wake_anchor_mins', mins);
-            localStorage.setItem('q_bio_anchor', mins);
-            
-            const sleepMins = Math.floor(parseFloat(sleepHrs) * 60);
             window.Q_UpdateState('metaphysical_layer', 'sleep_cycle_duration', sleepMins);
-            localStorage.setItem('q_sleep_cycle_duration', sleepMins);
-            
             window.Q_UpdateState('metaphysical_layer', 'sleep_inertia_mins', inertia);
-            localStorage.setItem('q_sleep_inertia_mins', inertia);
-            
             window.Q_UpdateState('metaphysical_layer', 'dlmo_offset_mins', dlmo);
-            localStorage.setItem('q_dlmo_offset_mins', dlmo);
         }
 
-        // BROADCAST STATE FIX: Force immediate re-render across all active vectors
+        // 4. BROADCAST: Force immediate re-render across all active vectors
         window.dispatchEvent(new Event('storage'));
 
         if(window.Q_LOG) window.Q_LOG('STATE', 'CORE', 'IDENTITY_PARAMETERS_UPDATED');
