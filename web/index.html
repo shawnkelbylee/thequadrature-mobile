@@ -85,20 +85,7 @@
         body.sequencing .iris-ring, body.sequencing-internal .iris-ring { opacity: 0; transition: opacity 0.4s ease-in 0.5s; }
         body.sequencing .core-void, body.sequencing-internal .core-void { opacity: 0; transition: opacity 0.3s ease-in 0.4s; }
         
-        window.actuateInternalIris = function(callback) {
-            if (document.body.classList.contains('sequencing') || document.body.classList.contains('sequencing-internal')) return;
-            
-            // Apply the exact same class used by the 4 corner panels
-            document.body.classList.add('sequencing');
-            
-            setTimeout(() => { 
-                // Execute the HUD injection (Dashboard or Planner)
-                if (callback) callback(); 
-                
-                // Reset the sequence class so the Aperture is stable when the user closes the HUD
-                document.body.classList.remove('sequencing'); 
-            }, 1300); 
-        };
+        
 
         /* --- THE CENTER AXIS BUTTONS --- */
         .center-axis-btn {
