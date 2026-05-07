@@ -17,25 +17,7 @@
         window.initBoot = function() { return; };
         window.triggerBoot = function() { return; };
 
-        const purgeObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) { 
-                        const text = node.textContent || node.innerText || "";
-                        if (text.toLowerCase().includes('aknowledge') || text.toLowerCase().includes('acknowledge')) {
-                            node.style.display = 'none !important';
-                            node.style.opacity = '0 !important';
-                            node.remove();
-                        }
-                    }
-                });
-            });
-        });
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            purgeObserver.observe(document.body, { childList: true, subtree: true });
-        });
-    </script>
+            </script>
 
     <script src="q-ui.js"></script>
     <script src="q-core.js"></script>
@@ -216,9 +198,19 @@
         window.actuateInternalIris = function(callback) {
             if (document.body.classList.contains('sequencing') || document.body.classList.contains('sequencing-internal')) return;
             document.body.classList.add('sequencing-internal');
+            
             setTimeout(() => { 
-                if(callback) callback(); 
-                setTimeout(() => { document.body.classList.remove('sequencing-internal'); }, 800); 
+                if (callback) {
+                    Promise.resolve(callback()).then(() => {
+                        requestAnimationFrame(() => {
+                            setTimeout(() => { document.body.classList.remove('sequencing-internal'); }, 600);
+                        });
+                    });
+                } else {
+                    requestAnimationFrame(() => {
+                        setTimeout(() => { document.body.classList.remove('sequencing-internal'); }, 600);
+                    });
+                }
             }, 600); 
         };
 
