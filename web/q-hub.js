@@ -434,20 +434,30 @@ window.Q_IntegrationHub = {
         if (authBtn) {
             authBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                
                 if (authState === 'ACTIVE') {
                     try {
-                        if (window.Q_Auth && typeof window.Q_Auth.signOut === 'function') window.Q_Auth.signOut();
-                        else { localStorage.setItem('Q_PRO_AUTH', 'false'); window.location.reload(); }
+                        if (window.Q_Auth && typeof window.Q_Auth.signOut === 'function') {
+                            window.Q_Auth.signOut();
+                        } else {
+                            // Provider missing: Manually reset state and reload to clear the UI "lie"
+                            localStorage.setItem('Q_PRO_AUTH', 'false');
+                            window.location.reload();
+                        }
                     } catch(err) { console.error('OAuth Disconnect Error:', err); }
                 } else {
                     try {
-                        if (window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth();
-                        else { localStorage.setItem('Q_PRO_AUTH', 'true'); window.location.reload(); }
+                        if (window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') {
+                            window.Q_Auth.triggerOAuth();
+                        } else {
+                            // Prevent the "fake login" by throwing a clear error instead of setting storage
+                            console.error('CRITICAL: window.Q_Auth module not detected in the current environment.');
+                            alert('[ AUTH ERROR ] Authentication provider not found. Check bridge configuration.');
+                        }
                     } catch(err) { console.error('OAuth Connect Error:', err); }
                 }
             });
         }
-    },
 
     openHub: function() { 
         this.injectDOM(); 
