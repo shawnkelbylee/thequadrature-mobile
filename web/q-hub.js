@@ -1,7 +1,7 @@
 // THE QUADRATURE: GLOBAL DASHBOARD & PRO MATRIX
 // Architect: Kelby | Engineer: Kairos
 // PROTOCOL: Account Settings, Calibration Module, Tiered Access Gate & Native Library Reader
-// REVISION: 24.2.5 - Postulate Correction & Geolocation State Override
+// REVISION: 24.2.6 - Persistence Fix & Syntax Stabilization
 
 window.Q_IntegrationHub = {
     viewState: 'closed',
@@ -124,19 +124,17 @@ window.Q_IntegrationHub = {
             return;
         }
 
-        // Exact Persistence Fix: Explicit Local Storage Overrides
-        localStorage.setItem('q_dob', dob);
-        localStorage.setItem('q_tob', isUnknown ? '12:00' : tob);
-        localStorage.setItem('q_tob_unknown', isUnknown);
-        localStorage.setItem('q_loc_name', loc.toUpperCase());
-        localStorage.setItem('q_sleep_hrs', sleepHrs);
-
         // 1. Calculate derived time values unconditionally
         const parts = anchor.split(':');
         const mins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
         const sleepMins = Math.floor(parseFloat(sleepHrs) * 60);
 
         // 2. PERSISTENCE FIX: Write directly to browser memory immediately
+        localStorage.setItem('q_dob', dob);
+        localStorage.setItem('q_tob', isUnknown ? '12:00' : tob);
+        localStorage.setItem('q_tob_unknown', isUnknown);
+        localStorage.setItem('q_loc_name', loc.toUpperCase());
+        localStorage.setItem('q_sleep_hrs', sleepHrs);
         localStorage.setItem('q_bio_anchor', mins);
         localStorage.setItem('q_sleep_cycle_duration', sleepMins);
         localStorage.setItem('q_sleep_inertia_mins', inertia);
@@ -185,7 +183,7 @@ window.Q_IntegrationHub = {
 
         const authState = localStorage.getItem('Q_PRO_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
         const authColor = authState === 'ACTIVE' ? '#39ff14' : '#00f0ff';
-        const authText = authState === 'ACTIVE' ? '[ DISCONNECT MATRIX ]' : '[ AUTHENTICATE ] - LOCAL CACHE ONLY';
+        const authText = authState === 'ACTIVE' ? '[ DISCONNECT MATRIX ]' : '[ AUTHENTICATE ]';
 
         let ents = [];
         if (authState === 'ACTIVE') {
@@ -440,7 +438,6 @@ window.Q_IntegrationHub = {
                         if (window.Q_Auth && typeof window.Q_Auth.signOut === 'function') {
                             window.Q_Auth.signOut();
                         } else {
-                            // Provider missing: Manually reset state and reload to clear the UI "lie"
                             localStorage.setItem('Q_PRO_AUTH', 'false');
                             window.location.reload();
                         }
@@ -450,14 +447,14 @@ window.Q_IntegrationHub = {
                         if (window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') {
                             window.Q_Auth.triggerOAuth();
                         } else {
-                            // Prevent the "fake login" by throwing a clear error instead of setting storage
-                            console.error('CRITICAL: window.Q_Auth module not detected in the current environment.');
+                            console.error('CRITICAL: window.Q_Auth module not detected.');
                             alert('[ AUTH ERROR ] Authentication provider not found. Check bridge configuration.');
                         }
                     } catch(err) { console.error('OAuth Connect Error:', err); }
                 }
             });
         }
+    },
 
     openHub: function() { 
         this.injectDOM(); 
