@@ -153,6 +153,9 @@ window.Q_IntegrationHub = {
             localStorage.setItem('q_dlmo_offset_mins', dlmo);
         }
 
+        // BROADCAST STATE FIX: Force immediate re-render across all active vectors
+        window.dispatchEvent(new Event('storage'));
+
         if(window.Q_LOG) window.Q_LOG('STATE', 'CORE', 'IDENTITY_PARAMETERS_UPDATED');
         
         const saveBtn = document.getElementById('btn-save-identity');
