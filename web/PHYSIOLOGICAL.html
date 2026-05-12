@@ -22,73 +22,92 @@
             --bio-purple: #b829ff; 
             --bio-purple-dim: rgba(184, 41, 255, 0.2);
             --bio-cobalt: #0055ff;
+            --bio-cobalt-dim: rgba(0, 85, 255, 0.3);
+            --sys-cyan: #00f0ff;
+            --env-green: #a7ff83;
+            --warn-orange: #ffaa00; 
             --chrono-amber: #B97A35;
             --friction-red: #ff3333;
+            --theme-main: var(--bio-purple); 
+            --theme-dim: var(--bio-purple-dim);
+            --gold: #F4D068;
+            --platinum: #E5E4E2;
+            --starlight: rgba(255, 255, 255, 0.6);
         }
 
-        /* --- THE PROPRIOCEPTIVE EYE (CENTER DIAL) --- */
-        .astrolabe-root { 
-            position: absolute; 
-            width: 400px; 
-            height: 400px; 
-            max-width: 550px; 
-            max-height: 550px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 5; 
-            pointer-events: none; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-        }
-        
-        .sclera-boundary { 
-            position: absolute; 
-            width: 100%; 
-            height: 100%; 
-            border-radius: 50%; 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            transition: border-color 0.3s ease, box-shadow 0.3s ease; 
-        }
-        
-        .sclera-boundary.tension-high { 
-            border-color: var(--friction-red); 
-            box-shadow: 0 0 30px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.2); 
-            animation: err-pulse 0.5s infinite alternate; 
-        }
-
-        .iris-band { 
-            position: absolute; 
-            width: 70%; 
-            height: 70%; 
-            border-radius: 50%; 
-            transition: background 1s ease, box-shadow 1s ease; 
-            opacity: 0.6; 
-            z-index: 10; 
-        }
-
-        .pupil-void { 
-            position: absolute; 
-            width: 35%; 
-            height: 35%; 
+        body { 
+            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; 
             background-color: var(--void); 
-            border-radius: 50%; 
-            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8); 
-            transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1); 
-            z-index: 15; 
-            border: 1px solid rgba(184, 41, 255, 0.2); 
+            background: radial-gradient(circle at center, #0f0a1c 0%, var(--void) 90%); 
+            color: #fff; font-family: 'JetBrains Mono', monospace; display: flex; 
+            justify-content: center; align-items: center; user-select: none; 
+            color-scheme: dark; perspective: 1500px; transform-style: preserve-3d; 
+            touch-action: manipulation;
         }
 
-        /* --- IRIS THERMAL STATES --- */
-        .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); animation: aura-pulse 3s infinite; }
-        .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse-slow 6s infinite; }
+        .global-header {
+            position: absolute; top: 4vh; left: 0; width: 100vw;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.8rem; letter-spacing: 16px; padding-left: 16px;
+            color: var(--theme-main); z-index: 50; pointer-events: none;
+            text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Headers bound strictly to the 280px text wrapper edge, shifted outwards by 1 character (8px) */
+        .v-head { 
+            position: absolute; white-space: nowrap;
+            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
+            margin: 0; padding: 0; z-index: 25; border: none;
+            color: var(--theme-main);
+            text-shadow: 0 0 10px var(--theme-dim);
+        }
+        
+        /* Top Panels: Headers tight BELOW the frame */
+        #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(-8px); }
+        #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(8px); }
+        
+        /* Bottom Panels: Headers tight ABOVE the frame */
+        #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(-8px); }
+        #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(8px); }
+
+        /* Override global OPT positioning for the Pro User Tags to center them in the frame rings */
+        .tl .opt-oval { left: 35px !important; top: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
+        .tr .opt-oval { right: 35px !important; top: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
+        .bl .opt-oval { left: 35px !important; bottom: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
+        .br .opt-oval { right: 35px !important; bottom: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
+        
+        .opt-oval::after { content: "PRO USER"; position: absolute; white-space: nowrap; }
+        .opt-oval { color: transparent !important; text-shadow: none !important; }
+
+        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
+        .t-row span:first-child { color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.4); text-align: left; flex-shrink: 0; text-transform: uppercase; }
+        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); text-transform: uppercase; }
+
+        .bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+        .bar-fill { height: 100%; background: var(--theme-main); width: 0%; box-shadow: 0 0 10px var(--theme-main); transition: width 0.1s linear; }
+
+        .astrolabe-root { position: absolute; width: var(--dial-size); height: var(--dial-size); max-width: 550px; max-height: 550px; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .ls-ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .ls-outer { width: 100%; height: 100%; border: 1px dashed var(--bio-cobalt-dim); }
+        .ls-inner { width: 50%; height: 50%; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 30px rgba(0,0,0,0.8); }
+        
+        .ls-center-hud { position: absolute; width: 35%; height: 35%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+        
+        .bio-earth-core { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background-color: #020204; overflow: hidden; box-shadow: 0 0 20px var(--bio-cobalt-dim), 0 0 40px var(--bio-purple-dim), inset -10px -10px 20px rgba(0,0,0,0.9); pointer-events: none; }
+        .bio-earth-surface { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 200% 100%; filter: grayscale(80%) sepia(50%) hue-rotate(240deg) saturate(200%) brightness(0.65) contrast(1.2); opacity: 0.8; }
+        .night-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 2; background: radial-gradient(circle at 70% 30%, rgba(0, 85, 255, 0.25) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.8) 100%); pointer-events: none; box-shadow: inset 0 0 30px rgba(0,0,0,0.7); }
+
+        .aura-glow { position: absolute; width: 100%; height: 100%; border-radius: 50%; transition: all 1s ease; opacity: 0.4; z-index: -1; }
+        .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); }
+        .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse 3s infinite; }
+        .sleep-aura { background: radial-gradient(circle, var(--bio-purple) 0%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); opacity: 0.15; }
         .inertia-aura { background: radial-gradient(circle, var(--chrono-amber) 0%, transparent 75%); box-shadow: 0 0 60px var(--chrono-amber); animation: aura-pulse 4s infinite; }
         .dlmo-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, transparent 75%); box-shadow: 0 0 60px var(--bio-cobalt); animation: aura-pulse 4s infinite; }
         
-        @keyframes aura-pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.8; } }
-        @keyframes aura-pulse-slow { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.02); opacity: 0.5; } }
-        @keyframes err-pulse { 0% { transform: scale(1); } 100% { transform: scale(1.02); } }
+        @keyframes aura-pulse { 0%, 100% { transform: scale(1); opacity: 0.25; } 50% { transform: scale(1.15); opacity: 0.45; } }
+        
+        #lunar-nodes-container { position: absolute; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
+        .lunar-phase-icon { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease; }
     </style>
 </head>
 <body class="mode-q">
@@ -96,9 +115,19 @@
     <div class="global-header desktop-only">PHYSIOLOGICAL</div>
 
     <div class="astrolabe-root q-center-dial">
-        <div class="sclera-boundary" id="tension-sclera"></div>
-        <div class="iris-band flow-aura" id="thermal-iris"></div>
-        <div class="pupil-void" id="ultradian-pupil"></div>
+        <div class="ls-ring ls-outer"></div>
+        <div class="ls-ring ls-inner"></div>
+        
+        <div id="lunar-nodes-container"></div>
+        
+        <div class="ls-center-hud">
+            <div id="bio-aura" class="aura-glow"></div>
+            
+            <div class="bio-earth-core">
+                <div class="bio-earth-surface"></div>
+                <div class="night-overlay"></div>
+            </div>
+        </div>
     </div>
 
 </body>
