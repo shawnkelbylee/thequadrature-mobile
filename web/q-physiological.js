@@ -19,7 +19,7 @@ window.addEventListener('q-ui-mounted', () => {
     const quadTL = document.getElementById('quad-tl');
     if (quadTL) {
         quadTL.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
+            <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px;">
                 <div class="v-head">CIRCADIAN DRIFT</div>
                 <div class="t-row"><span>τ-OFFSET INFERENCE:</span> <span id="tau-offset" class="val-sm">--</span></div>
                 <div class="t-row"><span>METROLOGICAL DEBT:</span> <span id="metro-debt" class="val-sm">--</span></div>
@@ -30,7 +30,7 @@ window.addEventListener('q-ui-mounted', () => {
     const quadTR = document.getElementById('quad-tr');
     if (quadTR) {
         quadTR.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
+            <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px;">
                 <div class="v-head">ULTRADIAN FLOW</div>
                 <div class="t-row"><span>BRAC STATE:</span> <span id="brac-state" class="val-sm">--</span></div>
                 <div class="t-row"><span>PHASE HORIZON:</span> <span id="phase-horizon" class="val-sm">--</span></div>
@@ -42,7 +42,7 @@ window.addEventListener('q-ui-mounted', () => {
     const quadBL = document.getElementById('quad-bl');
     if (quadBL) {
         quadBL.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
+            <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px;">
                 <div class="v-head">SLEEP ARCHITECTURE</div>
                 <div class="t-row"><span>DLMO THRESHOLD:</span> <span id="dlmo-target" class="val-sm">--</span></div>
                 <div class="t-row"><span>RECOVERY VECTOR:</span> <span id="recovery-vec" class="val-sm">--</span></div>
@@ -53,7 +53,7 @@ window.addEventListener('q-ui-mounted', () => {
     const quadBR = document.getElementById('quad-br');
     if (quadBR) {
         quadBR.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
+            <div style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px;">
                 <div class="v-head">Q LOGIC DIAGNOSTICS</div>
                 <div class="t-row"><span>PREDICTIVE TENSION:</span> <span id="tension-score" class="val-sm">--</span></div>
                 <div class="t-row"><span>ALIGNMENT STATUS:</span> <span id="align-status" class="val-sm">--</span></div>
@@ -164,13 +164,12 @@ window.addEventListener('q-tick', (e) => {
     const sclera = document.getElementById('tension-sclera');
 
     if (pupil) {
-        // Dilation logic based on flow vs recovery
         const scaleVal = isDeepFlow ? "scale(1.2)" : "scale(0.8)";
         pupil.style.transform = scaleVal;
     }
 
     if (iris && currentBioState !== lastBioState) {
-        iris.className = "iris-band"; // Reset
+        iris.className = "iris-band"; 
         if (currentBioState === "DEEP FLOW") iris.classList.add('flow-aura');
         else if (currentBioState === "VENT / RECOVERY") iris.classList.add('vent-aura');
         else if (currentBioState === "SLEEP / RECOVERY") iris.classList.add('sleep-aura');

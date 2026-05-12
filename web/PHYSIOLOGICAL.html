@@ -54,7 +54,21 @@
             text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
-        /* Headers bound strictly to the 280px text wrapper edge, shifted outwards by 1 character (8px) */
+        /* --- CORNER PANEL POSITIONING (RESTORED) --- */
+        .corner-panel {
+            position: absolute;
+            width: 280px;
+            height: 120px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        #quad-tl { top: 40px; left: 40px; }
+        #quad-tr { top: 40px; right: 40px; text-align: right; }
+        #quad-bl { bottom: 40px; left: 40px; }
+        #quad-br { bottom: 40px; right: 40px; text-align: right; }
+
         .v-head { 
             position: absolute; white-space: nowrap;
             font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
@@ -63,26 +77,13 @@
             text-shadow: 0 0 10px var(--theme-dim);
         }
         
-        /* Top Panels: Headers tight BELOW the frame */
         #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(-8px); }
         #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(8px); }
-        
-        /* Bottom Panels: Headers tight ABOVE the frame */
         #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(-8px); }
         #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(8px); }
 
-        /* Override global OPT positioning for the Pro User Tags to center them in the frame rings */
-        .tl .opt-oval { left: 35px !important; top: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
-        .tr .opt-oval { right: 35px !important; top: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
-        .bl .opt-oval { left: 35px !important; bottom: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
-        .br .opt-oval { right: 35px !important; bottom: 42px !important; font-size: 0.45rem !important; pointer-events: none !important; letter-spacing: 1px !important; color: var(--theme-main) !important; text-shadow: 0 0 8px var(--theme-dim) !important; }
-        
-        .opt-oval::after { content: "PRO USER"; position: absolute; white-space: nowrap; }
-        .opt-oval { color: transparent !important; text-shadow: none !important; }
-
         .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
         
-        /* Typographic Constraint: Map static descriptive labels to OS Grey */
         .t-row span:first-child { color: var(--os-grey); text-shadow: 0 0 5px rgba(0,0,0,0.8); text-align: left; flex-shrink: 0; text-transform: uppercase; }
         
         .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); text-transform: uppercase; }
@@ -90,8 +91,8 @@
         .bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 4px; }
         .bar-fill { height: 100%; background: var(--theme-main); width: 0%; box-shadow: 0 0 10px var(--theme-main); transition: width 0.1s linear; }
 
-        /* THE PROPRIOCEPTIVE EYE (CENTER DIAL) */
-        .astrolabe-root { position: absolute; width: var(--dial-size); height: var(--dial-size); max-width: 550px; max-height: 550px; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        /* --- THE PROPRIOCEPTIVE EYE (CENTER DIAL) --- */
+        .astrolabe-root { position: absolute; width: var(--dial-size, 400px); height: var(--dial-size, 400px); max-width: 550px; max-height: 550px; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         
         .sclera-boundary { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.05); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
         .sclera-boundary.tension-high { border-color: var(--friction-red); box-shadow: 0 0 30px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.2); animation: err-pulse 0.5s infinite alternate; }
