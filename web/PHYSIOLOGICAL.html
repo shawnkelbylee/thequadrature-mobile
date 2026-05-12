@@ -33,6 +33,7 @@
             --gold: #F4D068;
             --platinum: #E5E4E2;
             --starlight: rgba(255, 255, 255, 0.6);
+            --os-grey: #888888;
         }
 
         body { 
@@ -80,34 +81,34 @@
         .opt-oval { color: transparent !important; text-shadow: none !important; }
 
         .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
-        .t-row span:first-child { color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.4); text-align: left; flex-shrink: 0; text-transform: uppercase; }
+        
+        /* Typographic Constraint: Map static descriptive labels to OS Grey */
+        .t-row span:first-child { color: var(--os-grey); text-shadow: 0 0 5px rgba(0,0,0,0.8); text-align: left; flex-shrink: 0; text-transform: uppercase; }
+        
         .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); text-transform: uppercase; }
 
         .bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 4px; }
         .bar-fill { height: 100%; background: var(--theme-main); width: 0%; box-shadow: 0 0 10px var(--theme-main); transition: width 0.1s linear; }
 
+        /* THE PROPRIOCEPTIVE EYE (CENTER DIAL) */
         .astrolabe-root { position: absolute; width: var(--dial-size); height: var(--dial-size); max-width: 550px; max-height: 550px; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .ls-ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
-        .ls-outer { width: 100%; height: 100%; border: 1px dashed var(--bio-cobalt-dim); }
-        .ls-inner { width: 50%; height: 50%; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 0 30px rgba(0,0,0,0.8); }
         
-        .ls-center-hud { position: absolute; width: 35%; height: 35%; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
-        
-        .bio-earth-core { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; background-color: #020204; overflow: hidden; box-shadow: 0 0 20px var(--bio-cobalt-dim), 0 0 40px var(--bio-purple-dim), inset -10px -10px 20px rgba(0,0,0,0.9); pointer-events: none; }
-        .bio-earth-surface { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 200% 100%; filter: grayscale(80%) sepia(50%) hue-rotate(240deg) saturate(200%) brightness(0.65) contrast(1.2); opacity: 0.8; }
-        .night-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 2; background: radial-gradient(circle at 70% 30%, rgba(0, 85, 255, 0.25) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.8) 100%); pointer-events: none; box-shadow: inset 0 0 30px rgba(0,0,0,0.7); }
+        .sclera-boundary { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.05); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .sclera-boundary.tension-high { border-color: var(--friction-red); box-shadow: 0 0 30px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.2); animation: err-pulse 0.5s infinite alternate; }
 
-        .aura-glow { position: absolute; width: 100%; height: 100%; border-radius: 50%; transition: all 1s ease; opacity: 0.4; z-index: -1; }
-        .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); }
-        .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse 3s infinite; }
-        .sleep-aura { background: radial-gradient(circle, var(--bio-purple) 0%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); opacity: 0.15; }
+        .iris-band { position: absolute; width: 70%; height: 70%; border-radius: 50%; transition: background 1s ease, box-shadow 1s ease; opacity: 0.6; z-index: 10; }
+
+        .pupil-void { position: absolute; width: 35%; height: 35%; background-color: var(--void); border-radius: 50%; box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8); transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1); z-index: 15; border: 1px solid rgba(184, 41, 255, 0.2); }
+
+        .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); animation: aura-pulse 3s infinite; }
+        .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse-slow 6s infinite; }
         .inertia-aura { background: radial-gradient(circle, var(--chrono-amber) 0%, transparent 75%); box-shadow: 0 0 60px var(--chrono-amber); animation: aura-pulse 4s infinite; }
         .dlmo-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, transparent 75%); box-shadow: 0 0 60px var(--bio-cobalt); animation: aura-pulse 4s infinite; }
         
-        @keyframes aura-pulse { 0%, 100% { transform: scale(1); opacity: 0.25; } 50% { transform: scale(1.15); opacity: 0.45; } }
-        
-        #lunar-nodes-container { position: absolute; width: 100%; height: 100%; z-index: 6; pointer-events: none; }
-        .lunar-phase-icon { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease; }
+        @keyframes aura-pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.8; } }
+        @keyframes aura-pulse-slow { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.02); opacity: 0.5; } }
+        @keyframes err-pulse { 0% { transform: scale(1); } 100% { transform: scale(1.02); } }
+
     </style>
 </head>
 <body class="mode-q">
@@ -115,20 +116,15 @@
     <div class="global-header desktop-only">PHYSIOLOGICAL</div>
 
     <div class="astrolabe-root q-center-dial">
-        <div class="ls-ring ls-outer"></div>
-        <div class="ls-ring ls-inner"></div>
-        
-        <div id="lunar-nodes-container"></div>
-        
-        <div class="ls-center-hud">
-            <div id="bio-aura" class="aura-glow"></div>
-            
-            <div class="bio-earth-core">
-                <div class="bio-earth-surface"></div>
-                <div class="night-overlay"></div>
-            </div>
-        </div>
+        <div class="sclera-boundary" id="tension-sclera"></div>
+        <div class="iris-band flow-aura" id="thermal-iris"></div>
+        <div class="pupil-void" id="ultradian-pupil"></div>
     </div>
+
+    <div id="quad-tl" class="corner-panel"></div>
+    <div id="quad-tr" class="corner-panel"></div>
+    <div id="quad-bl" class="corner-panel"></div>
+    <div id="quad-br" class="corner-panel"></div>
 
 </body>
 </html>
