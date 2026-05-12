@@ -22,85 +22,65 @@
             --bio-purple: #b829ff; 
             --bio-purple-dim: rgba(184, 41, 255, 0.2);
             --bio-cobalt: #0055ff;
-            --bio-cobalt-dim: rgba(0, 85, 255, 0.3);
-            --sys-cyan: #00f0ff;
-            --env-green: #a7ff83;
-            --warn-orange: #ffaa00; 
             --chrono-amber: #B97A35;
             --friction-red: #ff3333;
-            --theme-main: var(--bio-purple); 
-            --theme-dim: var(--bio-purple-dim);
-            --gold: #F4D068;
-            --platinum: #E5E4E2;
-            --starlight: rgba(255, 255, 255, 0.6);
-            --os-grey: #888888;
         }
-
-        body { 
-            margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; 
-            background-color: var(--void); 
-            background: radial-gradient(circle at center, #0f0a1c 0%, var(--void) 90%); 
-            color: #fff; font-family: 'JetBrains Mono', monospace; display: flex; 
-            justify-content: center; align-items: center; user-select: none; 
-            color-scheme: dark; perspective: 1500px; transform-style: preserve-3d; 
-            touch-action: manipulation;
-        }
-
-        .global-header {
-            position: absolute; top: 4vh; left: 0; width: 100vw;
-            display: flex; justify-content: center; align-items: center; text-align: center;
-            font-family: 'Courier New', Courier, monospace; font-weight: 900; font-size: 2.8rem; letter-spacing: 16px; padding-left: 16px;
-            color: var(--theme-main); z-index: 50; pointer-events: none;
-            text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
-        }
-
-        /* --- CORNER PANEL POSITIONING (RESTORED) --- */
-        .corner-panel {
-            position: absolute;
-            width: 280px;
-            height: 120px;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        #quad-tl { top: 40px; left: 40px; }
-        #quad-tr { top: 40px; right: 40px; text-align: right; }
-        #quad-bl { bottom: 40px; left: 40px; }
-        #quad-br { bottom: 40px; right: 40px; text-align: right; }
-
-        .v-head { 
-            position: absolute; white-space: nowrap;
-            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
-            margin: 0; padding: 0; z-index: 25; border: none;
-            color: var(--theme-main);
-            text-shadow: 0 0 10px var(--theme-dim);
-        }
-        
-        #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(-8px); }
-        #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(8px); }
-        #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(-8px); }
-        #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(8px); }
-
-        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
-        
-        .t-row span:first-child { color: var(--os-grey); text-shadow: 0 0 5px rgba(0,0,0,0.8); text-align: left; flex-shrink: 0; text-transform: uppercase; }
-        
-        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); text-transform: uppercase; }
-
-        .bar-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 4px; }
-        .bar-fill { height: 100%; background: var(--theme-main); width: 0%; box-shadow: 0 0 10px var(--theme-main); transition: width 0.1s linear; }
 
         /* --- THE PROPRIOCEPTIVE EYE (CENTER DIAL) --- */
-        .astrolabe-root { position: absolute; width: var(--dial-size, 400px); height: var(--dial-size, 400px); max-width: 550px; max-height: 550px; display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .astrolabe-root { 
+            position: absolute; 
+            width: 400px; 
+            height: 400px; 
+            max-width: 550px; 
+            max-height: 550px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 5; 
+            pointer-events: none; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+        }
         
-        .sclera-boundary { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.05); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
-        .sclera-boundary.tension-high { border-color: var(--friction-red); box-shadow: 0 0 30px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.2); animation: err-pulse 0.5s infinite alternate; }
+        .sclera-boundary { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            transition: border-color 0.3s ease, box-shadow 0.3s ease; 
+        }
+        
+        .sclera-boundary.tension-high { 
+            border-color: var(--friction-red); 
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.4), inset 0 0 20px rgba(255, 51, 51, 0.2); 
+            animation: err-pulse 0.5s infinite alternate; 
+        }
 
-        .iris-band { position: absolute; width: 70%; height: 70%; border-radius: 50%; transition: background 1s ease, box-shadow 1s ease; opacity: 0.6; z-index: 10; }
+        .iris-band { 
+            position: absolute; 
+            width: 70%; 
+            height: 70%; 
+            border-radius: 50%; 
+            transition: background 1s ease, box-shadow 1s ease; 
+            opacity: 0.6; 
+            z-index: 10; 
+        }
 
-        .pupil-void { position: absolute; width: 35%; height: 35%; background-color: var(--void); border-radius: 50%; box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8); transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1); z-index: 15; border: 1px solid rgba(184, 41, 255, 0.2); }
+        .pupil-void { 
+            position: absolute; 
+            width: 35%; 
+            height: 35%; 
+            background-color: var(--void); 
+            border-radius: 50%; 
+            box-shadow: inset 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8); 
+            transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1); 
+            z-index: 15; 
+            border: 1px solid rgba(184, 41, 255, 0.2); 
+        }
 
+        /* --- IRIS THERMAL STATES --- */
         .flow-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple) 45%, transparent 75%); box-shadow: 0 0 80px var(--bio-cobalt), inset 0 0 40px var(--bio-purple); animation: aura-pulse 3s infinite; }
         .vent-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, var(--bio-purple-dim) 50%, transparent 75%); box-shadow: 0 0 60px var(--bio-purple); animation: aura-pulse-slow 6s infinite; }
         .inertia-aura { background: radial-gradient(circle, var(--chrono-amber) 0%, transparent 75%); box-shadow: 0 0 60px var(--chrono-amber); animation: aura-pulse 4s infinite; }
@@ -109,7 +89,6 @@
         @keyframes aura-pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.8; } }
         @keyframes aura-pulse-slow { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.02); opacity: 0.5; } }
         @keyframes err-pulse { 0% { transform: scale(1); } 100% { transform: scale(1.02); } }
-
     </style>
 </head>
 <body class="mode-q">
@@ -121,11 +100,6 @@
         <div class="iris-band flow-aura" id="thermal-iris"></div>
         <div class="pupil-void" id="ultradian-pupil"></div>
     </div>
-
-    <div id="quad-tl" class="corner-panel"></div>
-    <div id="quad-tr" class="corner-panel"></div>
-    <div id="quad-bl" class="corner-panel"></div>
-    <div id="quad-br" class="corner-panel"></div>
 
 </body>
 </html>
