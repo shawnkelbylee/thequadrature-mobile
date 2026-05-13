@@ -31,10 +31,10 @@ window.injectVectorData = function() {
         quadTL.innerHTML = `
             <div class="panel-data-wrapper">
                 <div class="v-head">ORBITAL POSITION</div>
-                <div class="t-row"><span>NEXT ANCHOR:</span> <span class="val-sm" id="next-anchor">--</span></div>
-                <div class="t-row"><span>DRIFT TO ANCHOR:</span> <span class="val-sm" id="drift-to-anchor">--</span></div>
-                <div class="t-row"><span>ANCHOR DURATION:</span> <span class="val-sm" id="anchor-duration">--</span></div>
-                <div class="t-row"><span>ATOMIC FREQUENCY:</span> <span class="val-sm" id="atomic-sync-val">SYNCED</span></div>
+                <div class="t-row"><span class="w-lbl">NEXT ANCHOR:</span> <span class="val-sm" id="next-anchor">--</span></div>
+                <div class="t-row"><span class="w-lbl">DRIFT TO ANCHOR:</span> <span class="val-sm" id="drift-to-anchor">--</span></div>
+                <div class="t-row"><span class="w-lbl">ANCHOR DURATION:</span> <span class="val-sm" id="anchor-duration">--</span></div>
+                <div class="t-row"><span class="w-lbl">ATOMIC FREQUENCY:</span> <span class="val-sm" id="atomic-sync-val">SYNCED</span></div>
                 <div style="width:100%; height:3px; background:#000; margin-top:2px; border:1px solid var(--core-dim);">
                     <div id="macro-bar" style="height:100%; width:0%; background:var(--cyan-glow); box-shadow:0 0 8px var(--cyan-glow); transition: width 0.3s;"></div>
                 </div>
@@ -47,9 +47,9 @@ window.injectVectorData = function() {
         quadTR.innerHTML = `
             <div class="panel-data-wrapper" onclick="window.openOptions(event, 'telemetry')" style="cursor: pointer;">
                 <div class="v-head">TIME DRIFT / Q-DELTA</div>
-                <div class="t-row"><span>ORBITAL ECCENTRICITY:</span> <span class="val-sm">0.0167</span></div>
-                <div class="t-row"><span>SYMMETRY LOSS:</span> <span class="val-sm" id="sym-loss">--%</span></div>
-                <div class="t-row"><span>EQUATION OF TIME (Q-DELTA):</span></div>
+                <div class="t-row"><span class="w-lbl">ORBITAL ECCENTRICITY:</span> <span class="val-sm">0.0167</span></div>
+                <div class="t-row"><span class="w-lbl">SYMMETRY LOSS:</span> <span class="val-sm" id="sym-loss">--%</span></div>
+                <div class="t-row"><span class="w-lbl">EQUATION OF TIME (Q-DELTA):</span></div>
                 <div style="font-size:0.8rem; padding:4px; text-align:center; border: 1px solid var(--cyan-glow); background: rgba(0, 240, 255, 0.1); color: var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px;" id="rt-delta">--</div>
             </div>
         `;
@@ -78,9 +78,9 @@ window.injectVectorData = function() {
         quadBR.innerHTML = `
             <div class="panel-data-wrapper">
                 <div class="v-head">CIVIL TIME LAG</div>
-                <div class="t-row"><span>STANDARDIZED INTERVAL:</span> <span class="val-sm" id="si-lock">ACTIVE</span></div>
+                <div class="t-row"><span class="w-lbl">STANDARDIZED INTERVAL:</span> <span class="val-sm" id="si-lock">ACTIVE</span></div>
                 <div class="val-display" style="padding:2px 8px; margin-bottom:2px;"><div id="nano-counter" style="font-size:0.8rem; text-align:right; color:var(--cyan-glow); font-family:'Orbitron'; font-weight:900;">0.000000000</div></div>
-                <div class="t-row"><span>ORBITAL DELTA:</span></div>
+                <div class="t-row"><span class="w-lbl">ORBITAL DELTA:</span></div>
                 <div class="variance-container">
                     <div class="variance-wave"></div>
                     <div class="variance-val" id="variance-val">+ 0.0000000000</div>

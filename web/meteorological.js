@@ -37,10 +37,10 @@ window.injectVectorData = function() {
         quadTL.innerHTML = `
             <div class="panel-data-wrapper">
                 <div class="v-head">RISK ASSESSMENT</div>
-                <div class="t-row"><span>SYSTEM HOOK:</span> <span id="iot-status-badge" class="val-sm val-highlight">IOT: ACTIVE</span></div>
-                <div class="t-row"><span>PROBABILITY INDEX:</span> <span class="val-sm val-highlight" id="risk-index">EPHEMERIS SYNCED</span></div>
+                <div class="t-row"><span class="w-lbl">SYSTEM HOOK:</span> <span id="iot-status-badge" class="val-sm val-highlight">IOT: ACTIVE</span></div>
+                <div class="t-row"><span class="w-lbl">PROBABILITY INDEX:</span> <span class="val-sm val-highlight" id="risk-index">EPHEMERIS SYNCED</span></div>
                 <div class="sparkline-container" id="risk-sparkline"></div>
-                <div class="t-row"><span>ADVERSE CONDITION:</span> <span class="val-sm val-highlight" id="hazard-status" style="cursor:pointer;" onclick="window.openImpact()">MONITORED</span></div>
+                <div class="t-row"><span class="w-lbl">ADVERSE CONDITION:</span> <span class="val-sm val-highlight" id="hazard-status" style="cursor:pointer;" onclick="window.openImpact()">MONITORED</span></div>
             </div>
         `;
     }
@@ -50,7 +50,7 @@ window.injectVectorData = function() {
         quadTR.innerHTML = `
             <div class="panel-data-wrapper" style="cursor: pointer;" onclick="window.toggleDeltaView()">
                 <div class="v-head">METEOROLOGICAL</div>
-                <div class="t-row"><span>DATA STREAM:</span> <span id="meteo-badge" class="val-sm val-highlight">ATMOS DELTA: LIVE</span></div>
+                <div class="t-row"><span class="w-lbl">DATA STREAM:</span> <span id="meteo-badge" class="val-sm val-highlight">ATMOS DELTA: LIVE</span></div>
                 <div class="t-row"><span id="lbl-pressure">ATMOSPHERIC PRESSURE:</span> <span class="val-sm val-highlight" id="val-pressure">1013 hPa</span></div>
                 <div class="t-row"><span id="lbl-irradiance">SOLAR IRRADIANCE:</span> <span class="val-sm val-highlight" id="val-irradiance">ACTIVE</span></div>
                 <div class="t-row"><span id="lbl-precip">VOLUME / TREND:</span> <span class="val-sm val-highlight" id="val-precip">0.0mm / STABLE</span></div>
@@ -65,7 +65,7 @@ window.injectVectorData = function() {
                 <div class="v-head" id="strat-header">EXPOSURE MODELING</div>
                 <div class="t-row"><span id="lbl-yield">YIELD PROJECTION:</span> <span class="val-sm val-highlight" id="strat-yield" style="cursor:pointer;" onclick="window.openImpact()">OPTIMAL</span></div>
                 <div class="t-row"><span id="lbl-alloc">RESOURCE ALLOC:</span> <span class="val-sm val-highlight" id="strat-alloc" style="cursor:pointer;" onclick="window.openImpact()">PHASE 2 (GROWTH)</span></div>
-                <div class="t-row"><span>ACTION HORIZON:</span> <span class="val-sm val-highlight" id="strat-horizon">+14.00°</span></div>
+                <div class="t-row"><span class="w-lbl">ACTION HORIZON:</span> <span class="val-sm val-highlight" id="strat-horizon">+14.00°</span></div>
             </div>
         `;
     }
@@ -75,9 +75,9 @@ window.injectVectorData = function() {
         quadBR.innerHTML = `
             <div class="panel-data-wrapper">
                 <div class="v-head">ENVIRONMENTAL</div>
-                <div class="t-row"><span>AMBIENT TEMP:</span> <span class="val-sm val-highlight" id="val-temp">-- °C</span></div>
-                <div class="t-row"><span>BIOME TENSION:</span> <span class="val-sm val-highlight" id="agri-tension">DORMANT / GATHER</span></div>
-                <div class="t-row"><span>THERMODYNAMIC FRICTION:</span> <span class="val-sm val-highlight" id="thermo-friction">--</span></div>
+                <div class="t-row"><span class="w-lbl">AMBIENT TEMP:</span> <span class="val-sm val-highlight" id="val-temp">-- °C</span></div>
+                <div class="t-row"><span class="w-lbl">BIOME TENSION:</span> <span class="val-sm val-highlight" id="agri-tension">DORMANT / GATHER</span></div>
+                <div class="t-row"><span class="w-lbl">THERMODYNAMIC FRICTION:</span> <span class="val-sm val-highlight" id="thermo-friction">--</span></div>
             </div>
         `;
     }

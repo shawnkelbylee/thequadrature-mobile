@@ -114,8 +114,8 @@ window.injectVectorData = function() {
         quadTL.innerHTML = `
             <div id="wrapper-rel" class="panel-data-wrapper" onclick="setMode('rel')">
                 <div class="v-head">RELIGIOUS OVERLAY</div>
-                <div class="t-row"><span>SUB-SET:</span> <span id="rel-active" class="val-sm">MULTI-FAITH</span></div>
-                <div class="t-row"><span>NEXT:</span> <span id="rel-next" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">SUB-SET:</span> <span id="rel-active" class="val-sm">MULTI-FAITH</span></div>
+                <div class="t-row"><span class="w-lbl">NEXT:</span> <span id="rel-next" class="val-sm">--</span></div>
             </div>
         `;
     }
@@ -125,8 +125,8 @@ window.injectVectorData = function() {
         quadTR.innerHTML = `
             <div id="wrapper-zod" class="panel-data-wrapper" onclick="setMode('zod')">
                 <div class="v-head">ZODIACAL TRANSIT</div>
-                <div class="t-row"><span>HOUSE:</span> <span id="zod-house" class="val-sm">--</span></div>
-                <div class="t-row"><span>PHASE:</span> <span id="zod-phase" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">HOUSE:</span> <span id="zod-house" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">PHASE:</span> <span id="zod-phase" class="val-sm">--</span></div>
             </div>
         `;
     }
@@ -136,8 +136,8 @@ window.injectVectorData = function() {
         quadBL.innerHTML = `
             <div id="wrapper-civ" class="panel-data-wrapper" onclick="setMode('civ')">
                 <div class="v-head">CIVIL ANCHOR</div>
-                <div class="t-row"><span>LOCALE:</span> <span id="civ-active" class="val-sm">US (STATIC)</span></div>
-                <div class="t-row"><span>NEXT:</span> <span id="civ-next" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">LOCALE:</span> <span id="civ-active" class="val-sm">US (STATIC)</span></div>
+                <div class="t-row"><span class="w-lbl">NEXT:</span> <span id="civ-next" class="val-sm">--</span></div>
             </div>
         `;
     }
@@ -147,8 +147,8 @@ window.injectVectorData = function() {
         quadBR.innerHTML = `
             <div id="wrapper-int" class="panel-data-wrapper" onclick="setMode('int')">
                 <div class="v-head">INTROSPECTION</div>
-                <div class="t-row"><span>JIÉQÌ:</span> <span id="int-term" class="val-sm">--</span></div>
-                <div class="t-row"><span>GROWTH ARC:</span> <span id="int-pct" class="val-sm">--%</span></div>
+                <div class="t-row"><span class="w-lbl">JIÉQÌ:</span> <span id="int-term" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">GROWTH ARC:</span> <span id="int-pct" class="val-sm">--%</span></div>
             </div>
         `;
     }

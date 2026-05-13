@@ -17,9 +17,9 @@ window.addEventListener('q-ui-mounted', () => {
         quadTL.innerHTML = `
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
                 <div class="v-head">SUNLIGHT EXPOSURE</div>
-                <div class="t-row"><span>SOLAR LUX TARGET:</span> <span id="lux-avail" class="val-sm">--</span></div>
-                <div class="t-row"><span>UV INDEX EXPOSURE:</span> <span id="uv-index" class="val-sm">--</span></div>
-                <div class="t-row"><span>SOLAR NOON (ZENITH):</span> <span id="solar-noon" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">SOLAR LUX TARGET:</span> <span id="lux-avail" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">UV INDEX EXPOSURE:</span> <span id="uv-index" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">SOLAR NOON (ZENITH):</span> <span id="solar-noon" class="val-sm">--</span></div>
             </div>
         `;
     }
@@ -29,9 +29,9 @@ window.addEventListener('q-ui-mounted', () => {
         quadTR.innerHTML = `
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
                 <div class="v-head">LUNAR/TIDE IMPACT</div>
-                <div class="t-row"><span>LUNAR ILLUMINATION:</span> <span id="lunar-illum" class="val-sm">--</span></div>
-                <div class="t-row"><span>TIDAL GRAV (SLEEP):</span> <span id="tidal-impact" class="val-sm">NOMINAL</span></div>
-                <div class="t-row"><span>LUNAR PHASE:</span> <span id="lunar-phase-name" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">LUNAR ILLUMINATION:</span> <span id="lunar-illum" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">TIDAL GRAV (SLEEP):</span> <span id="tidal-impact" class="val-sm">NOMINAL</span></div>
+                <div class="t-row"><span class="w-lbl">LUNAR PHASE:</span> <span id="lunar-phase-name" class="val-sm">--</span></div>
             </div>
         `;
     }
@@ -41,10 +41,10 @@ window.addEventListener('q-ui-mounted', () => {
         quadBL.innerHTML = `
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
                 <div class="v-head">INTERNAL CLOCK</div>
-                <div class="t-row"><span>RESTING HR (RHR):</span> <span id="bio-rhr" class="val-sm">-- BPM</span></div>
-                <div class="t-row"><span>HRV ELASTICITY:</span> <span id="bio-hrv" class="val-sm">-- MS</span></div>
-                <div class="t-row"><span>SLEEP STAGE:</span> <span id="mat-sleep" class="val-sm">DEEP</span></div>
-                <div class="t-row"><span>PHYSIOLOGICAL SYNC:</span> <span id="bio-sync-pct" class="val-sm">--%</span></div>
+                <div class="t-row"><span class="w-lbl">RESTING HR (RHR):</span> <span id="bio-rhr" class="val-sm">-- BPM</span></div>
+                <div class="t-row"><span class="w-lbl">HRV ELASTICITY:</span> <span id="bio-hrv" class="val-sm">-- MS</span></div>
+                <div class="t-row"><span class="w-lbl">SLEEP STAGE:</span> <span id="mat-sleep" class="val-sm">DEEP</span></div>
+                <div class="t-row"><span class="w-lbl">PHYSIOLOGICAL SYNC:</span> <span id="bio-sync-pct" class="val-sm">--%</span></div>
             </div>
         `;
     }
@@ -54,9 +54,9 @@ window.addEventListener('q-ui-mounted', () => {
         quadBR.innerHTML = `
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
                 <div class="v-head">FOCUS CYCLE</div>
-                <div class="t-row"><span>STATE:</span> <span id="bio-state" class="val-sm">--</span></div>
-                <div class="t-row"><span>ELAPSED:</span> <span id="bio-timer" class="val-sm">-- / 90 MIN</span></div>
-                <div class="t-row"><span>PHASE COMPLETION:</span> <span id="phase-completion-q" class="val-sm" style="cursor:pointer; border-bottom:1px dashed var(--theme-dim); transition:0.3s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='var(--theme-main)';">--</span></div>
+                <div class="t-row"><span class="w-lbl">STATE:</span> <span id="bio-state" class="val-sm">--</span></div>
+                <div class="t-row"><span class="w-lbl">ELAPSED:</span> <span id="bio-timer" class="val-sm">-- / 90 MIN</span></div>
+                <div class="t-row"><span class="w-lbl">PHASE COMPLETION:</span> <span id="phase-completion-q" class="val-sm" style="cursor:pointer; border-bottom:1px dashed var(--theme-dim); transition:0.3s;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='var(--theme-main)';">--</span></div>
                 <div class="bar-bg"><div class="bar-fill" id="bio-bar"></div></div>
             </div>
         `;
