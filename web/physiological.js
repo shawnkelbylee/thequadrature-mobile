@@ -1,7 +1,7 @@
 // THE QUADRATURE: PHYSIOLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Localized Calibration Modals & Persistence Logic.
-// REVISION: DOM Targeting Fix & Opt-Node Binding
+// REVISION: Absolute Anatomy Headers & Static Flex Descriptors
 
 let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
 let savedAnchor = localStorage.getItem('q_bio_anchor');
@@ -153,10 +153,11 @@ window.addEventListener('q-ui-mounted', () => {
     const quadTL = document.getElementById('quad-tl');
     if (quadTL) {
         quadTL.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
-                <div class="v-head">INTERNAL CLOCK</div>
+            <div class="v-head">[ IRIS ]</div>
+            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
                 <div class="t-row"><span class="w-lbl">SCHEDULE DRIFT:</span> <span id="tau-offset" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">BIOMETRIC SENSOR:</span> <span id="bio-sensor" class="val-sm" style="color: var(--os-grey);">[ PENDING PAIRING ]</span></div>
+                <div style="font-family:'Orbitron'; font-size:0.55rem; color:#888; text-align:right; font-weight:700; letter-spacing:1px; border-top:1px solid rgba(255,255,255,0.1); margin-top:4px; padding-top:4px;">INTERNAL CLOCK</div>
             </div>
         `;
     }
@@ -164,11 +165,12 @@ window.addEventListener('q-ui-mounted', () => {
     const quadTR = document.getElementById('quad-tr');
     if (quadTR) {
         quadTR.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
-                <div class="v-head">ENERGY CYCLE</div>
+            <div class="v-head">[ PUPIL ]</div>
+            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
                 <div class="t-row"><span class="w-lbl">CURRENT STATE:</span> <span id="brac-state" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">CYCLE REMAINING:</span> <span id="phase-horizon" class="val-sm">--</span></div>
                 <div class="bar-bg"><div class="bar-fill" id="bio-bar"></div></div>
+                <div style="font-family:'Orbitron'; font-size:0.55rem; color:#888; text-align:left; font-weight:700; letter-spacing:1px; border-top:1px solid rgba(255,255,255,0.1); margin-top:4px; padding-top:4px;">ENERGY CYCLE</div>
             </div>
         `;
     }
@@ -176,8 +178,9 @@ window.addEventListener('q-ui-mounted', () => {
     const quadBL = document.getElementById('quad-bl');
     if (quadBL) {
         quadBL.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
-                <div class="v-head">SLEEP TARGETS</div>
+            <div class="v-head">[ EYELID ]</div>
+            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
+                <div style="font-family:'Orbitron'; font-size:0.55rem; color:#888; text-align:right; font-weight:700; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:4px; padding-bottom:4px;">SLEEP TARGETS</div>
                 <div class="t-row"><span class="w-lbl">OPTIMAL BEDTIME:</span> <span id="dlmo-target" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">RECOVERY STATUS:</span> <span id="recovery-vec" class="val-sm">--</span></div>
             </div>
@@ -187,8 +190,9 @@ window.addEventListener('q-ui-mounted', () => {
     const quadBR = document.getElementById('quad-br');
     if (quadBR) {
         quadBR.innerHTML = `
-            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
-                <div class="v-head">CIVIL ALIGNMENT</div>
+            <div class="v-head">[ SCLERA ]</div>
+            <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
+                <div style="font-family:'Orbitron'; font-size:0.55rem; color:#888; text-align:left; font-weight:700; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:4px; padding-bottom:4px;">SCHEDULE ALIGNMENT</div>
                 <div class="t-row"><span class="w-lbl">CALENDAR FRICTION:</span> <span id="tension-score" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">DAY STATUS:</span> <span id="align-status" class="val-sm">--</span></div>
             </div>
@@ -314,6 +318,7 @@ window.addEventListener('q-tick', (e) => {
     const pupil = document.getElementById('ultradian-pupil');
     const iris = document.getElementById('thermal-iris');
     const sclera = document.getElementById('tension-sclera');
+    const eyelid = document.getElementById('readiness-eyelid');
 
     if (pupil) {
         const scaleVal = isDeepFlow ? "scale(1.2)" : "scale(0.8)";
@@ -321,7 +326,7 @@ window.addEventListener('q-tick', (e) => {
     }
 
     if (iris && currentBioState !== lastBioState) {
-        iris.className = "iris-band"; 
+        iris.className = "ring iris-band"; 
         if (currentBioState === "DEEP FLOW") iris.classList.add('flow-aura');
         else if (currentBioState === "VENT / RECOVERY") iris.classList.add('vent-aura');
         else if (currentBioState === "SLEEP / RECOVERY") iris.classList.add('sleep-aura');
@@ -333,5 +338,11 @@ window.addEventListener('q-tick', (e) => {
     if (sclera) {
         if (tensionScore > 70) sclera.classList.add('tension-high');
         else sclera.classList.remove('tension-high');
+    }
+
+    if (eyelid) {
+        if (currentBioState === "SLEEP / RECOVERY") eyelid.className = "ring eyelid-closed";
+        else if (currentBioState === "DLMO WIND-DOWN") eyelid.className = "ring eyelid-half";
+        else eyelid.className = "ring eyelid-open";
     }
 });
