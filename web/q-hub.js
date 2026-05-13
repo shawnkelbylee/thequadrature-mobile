@@ -1,7 +1,7 @@
 // THE QUADRATURE: GLOBAL DASHBOARD & PRO MATRIX
 // Architect: Kelby | Engineer: Kairos
 // PROTOCOL: Account Settings, Calibration Module, Tiered Access Gate & Native Library Reader
-// REVISION: 24.2.6 - Persistence Fix & Physiological Variable Relocation
+// REVISION: 24.2.6 - Persistence Fix & Syntax Stabilization
 
 window.Q_IntegrationHub = {
     viewState: 'closed',
@@ -21,62 +21,87 @@ window.Q_IntegrationHub = {
         style.innerHTML = `
             .q-hub-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10010; display: none; justify-content: center; align-items: center; pointer-events: auto; }
             .q-hub-overlay.active { display: flex; }
-            .q-hub-box { width: 90vw; max-width: 550px; max-height: 85vh; background: #05080f; border: 1px solid var(--theme-dim, rgba(184,41,255,0.3)); border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,1); font-family: 'JetBrains Mono', monospace; }
+            .q-hub-box { width: 90vw; max-width: 550px; max-height: 85vh; overflow-y: auto; background: rgba(5, 8, 15, 0.95); border: 1px solid var(--theme-main, #00f0ff) !important; border-radius: 8px; padding: 25px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; gap: 15px; color: #fff; font-family: 'JetBrains Mono', monospace; pointer-events: auto; }
             
-            .q-hub-header { padding: 15px 20px; background: #0a0f1a; border-bottom: 1px solid #1a2235; display: flex; justify-content: space-between; align-items: center; }
-            .q-hub-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--theme-main, #b829ff); font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 10px var(--theme-dim); }
-            .q-hub-close { background: transparent; border: none; color: #888; font-family: 'Orbitron'; font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
-            .q-hub-close:hover { color: #fff; }
-            
-            .q-hub-nav { display: flex; border-bottom: 1px solid #1a2235; background: #0a0f1a; overflow-x: auto; scrollbar-width: none; }
-            .q-hub-nav::-webkit-scrollbar { display: none; }
-            .hub-tab-btn { flex: 1; min-width: 100px; padding: 12px 10px; background: transparent; border: none; color: #666; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: 0.3s; border-bottom: 2px solid transparent; white-space: nowrap; }
-            .hub-tab-btn:hover { color: #aaa; }
-            .hub-tab-btn.active { color: var(--theme-main); border-bottom: 2px solid var(--theme-main); text-shadow: 0 0 8px var(--theme-dim); background: rgba(255,255,255,0.02); }
-            
-            .q-hub-body { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
-            .hub-tab-content { display: none; animation: hubFadeIn 0.3s ease; }
-            .hub-tab-content.active { display: block; }
-            
-            @keyframes hubFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+            .q-hub-box::-webkit-scrollbar { width: 6px; }
+            .q-hub-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+            .q-hub-box::-webkit-scrollbar-thumb { background: var(--theme-main, #00f0ff) !important; border-radius: 3px; }
 
-            .hub-input-group { margin-bottom: 15px; }
-            .hub-input-lbl { display: block; font-family: 'Orbitron'; font-size: 0.55rem; color: #888; letter-spacing: 1px; margin-bottom: 5px; font-weight: 700; text-transform: uppercase; }
-            .hub-input { width: 100%; background: #0a0f1a; border: 1px solid #1a2235; color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; box-sizing: border-box; transition: border-color 0.2s; outline: none; }
-            .hub-input:focus { border-color: var(--theme-main); }
+            .hub-header { font-family:'Orbitron'; text-align:center; padding-bottom:15px; font-size: 1.1rem; color: var(--theme-main, #00f0ff); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,240,255,0.2); border-bottom: 1px dashed rgba(255,255,255,0.2); }
+            
+            .hub-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; gap: 5px; flex-wrap: wrap; }
+            .hub-tab-btn { flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 700; padding: 10px 5px; cursor: pointer; transition: 0.3s; letter-spacing: 1px; border-bottom: 2px solid transparent; min-width: 70px; }
+            .hub-tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+            .hub-tab-btn.active { color: var(--theme-main, #00f0ff); border-bottom-color: var(--theme-main, #00f0ff); background: rgba(0,240,255,0.05); }
+
+            .hub-tab-content { display: none; flex-direction: column; gap: 15px; animation: fadeIn 0.3s ease; }
+            .hub-tab-content.active { display: flex; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+            .hub-tier-row { background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); padding:12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; transition: 0.3s; pointer-events: auto; }
+            .hub-tier-row:hover { border-color: var(--theme-main, #00f0ff) !important; box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1); }
+            
+            .hub-input-group { display: flex; flex-direction: column; gap: 4px; }
+            .hub-input-lbl { font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px; }
+            .hub-input { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; transition: 0.3s; width: 100%; box-sizing: border-box; }
+            .hub-input:focus { border-color: var(--theme-main, #00f0ff); box-shadow: 0 0 10px rgba(0,240,255,0.2); }
             .hub-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+            .hub-checkbox-group { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: rgba(255,255,255,0.6); cursor: pointer; }
+            .hub-checkbox-group input[type="checkbox"] { accent-color: var(--theme-main, #00f0ff); width: 14px; height: 14px; cursor: pointer; }
+
+            .hub-action-btn { background: rgba(0,0,0,0.8); border: 1px solid var(--theme-main, #00f0ff); color: var(--theme-main, #00f0ff); font-family: 'Orbitron'; font-weight: 900; padding: 12px; cursor: pointer; letter-spacing: 2px; border-radius: 4px; transition: 0.3s; width: 100%; text-transform: uppercase; }
+            .hub-action-btn:hover { background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 15px var(--theme-main, #00f0ff); }
             
-            .hub-checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 0.7rem; color: #aaa; cursor: pointer; }
-            .hub-checkbox-group input { cursor: pointer; }
+            .hub-close-btn { background: transparent; border: 1px solid rgba(255,255,255,0.6); color: rgba(255,255,255,0.6); font-family: 'Orbitron'; font-weight: 700; padding: 10px; cursor: pointer; letter-spacing: 1px; border-radius: 4px; transition: 0.3s; width: 100%; margin-top: 10px; }
+            .hub-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: #fff; }
 
-            .hub-action-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--theme-main); color: var(--theme-main); font-family: 'Orbitron'; font-size: 0.8rem; font-weight: 900; letter-spacing: 2px; cursor: pointer; border-radius: 4px; transition: all 0.3s; text-transform: uppercase; }
-            .hub-action-btn:hover { background: var(--theme-dim); box-shadow: 0 0 15px var(--theme-dim); }
-
-            .hub-tier-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
-            .tier-card { border: 1px solid #1a2235; background: #0a0f1a; padding: 15px; border-radius: 4px; position: relative; overflow: hidden; }
-            .tier-card.locked { opacity: 0.7; }
-            .tier-card.locked::after { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px); pointer-events: none; }
-            .tier-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #1a2235; padding-bottom: 10px; }
-            .tier-title { font-family: 'Orbitron'; font-size: 0.9rem; font-weight: 900; letter-spacing: 2px; }
-            .tier-price { font-size: 0.7rem; color: #888; font-weight: 700; }
-            .tier-list { list-style: none; padding: 0; margin: 0; font-size: 0.65rem; color: #aaa; line-height: 1.6; }
-            .tier-list li::before { content: '>'; color: var(--theme-main); margin-right: 8px; font-weight: bold; }
-            .tier-btn { margin-top: 15px; width: 100%; padding: 8px; font-size: 0.7rem; }
-
-            /* Mobile scaling for modal */
-            @media (max-width: 600px) {
-                .q-hub-box { width: 95vw; max-height: 90vh; }
-                .q-hub-nav { flex-wrap: wrap; }
-                .hub-tab-btn { flex-basis: 33%; min-width: auto; padding: 10px 5px; font-size: 0.55rem; }
-            }
+            .support-links { border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; font-size: 0.6rem; font-family: 'Orbitron'; font-weight: 700; }
+            .support-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; letter-spacing: 1px; }
+            .support-links a:hover { color: var(--theme-main, #00f0ff); text-shadow: 0 0 8px rgba(0,240,255,0.5); }
         `;
         document.head.appendChild(style);
+    },
+
+    requestStateGate: function(featureKey, tierLevel, categoryKey) {
+        if(window.Q_LOG) window.Q_LOG('WARN', 'CAPITAL', 'TIER_UPGRADE_REQUIRED', { feature: featureKey, required_tier: tierLevel });
+        
+        if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ action: 'TRIGGER_PAYWALL', tier: tierLevel, feature: featureKey }));
+        } else {
+            alert(`[ THE QUAD: PRO MATRIX ]\nAccess to ${featureKey.toUpperCase()} requires ${tierLevel} verification.\n\nProceeding to gateway simulation...`);
+            
+            let tierToken = tierLevel.split(' ')[0].toUpperCase();
+            let currentEnts = localStorage.getItem('Q_ENTITLEMENTS');
+            let ents = currentEnts ? JSON.parse(currentEnts) : [];
+            if(!ents.includes(tierToken)) {
+                ents.push(tierToken);
+                localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
+                if(window.Q_LOG) window.Q_LOG('STATE', 'CORE', 'ENTITLEMENT_GRANTED', { tier: tierToken });
+            }
+
+            if(categoryKey && window.Q_STATE && window.Q_STATE[categoryKey]) {
+                window.Q_UpdateState(categoryKey, featureKey, 'ACTIVE');
+            }
+            this.injectDOM(); 
+        }
+    },
+
+    switchTab: function(tabId) {
+        this.activeTab = tabId;
+        document.querySelectorAll('.hub-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.hub-tab-content').forEach(content => content.classList.remove('active'));
+        
+        const btn = document.getElementById(`tab-btn-${tabId}`);
+        const content = document.getElementById(`tab-content-${tabId}`);
+        if(btn) btn.classList.add('active');
+        if(content) content.classList.add('active');
     },
 
     toggleTOB: function() {
         const isUnknown = document.getElementById('cal-tob-unknown').checked;
         const tobInput = document.getElementById('cal-tob');
-        if(isUnknown) {
+        if (isUnknown) {
             tobInput.disabled = true;
             tobInput.value = "12:00";
         } else {
@@ -89,18 +114,31 @@ window.Q_IntegrationHub = {
         const tob = document.getElementById('cal-tob').value;
         const isUnknown = document.getElementById('cal-tob-unknown').checked;
         const loc = document.getElementById('cal-loc').value;
+        const anchor = document.getElementById('cal-anchor').value;
+        const sleepHrs = document.getElementById('cal-sleep').value;
+        const inertia = parseInt(document.getElementById('cal-inertia').value) || 45;
+        const dlmo = parseInt(document.getElementById('cal-dlmo').value) || 90;
 
-        if (!dob || !loc) {
-            alert("DOB AND GEOLOCATION ARE REQUIRED.");
+        if (!dob || !loc || !anchor || !sleepHrs) {
+            alert("DOB, GEOLOCATION, WAKE ANCHOR, AND TARGET SLEEP ARE REQUIRED.");
             return;
         }
+
+        // 1. Calculate derived time values unconditionally
+        const parts = anchor.split(':');
+        const mins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
+        const sleepMins = Math.floor(parseFloat(sleepHrs) * 60);
 
         // 2. PERSISTENCE FIX: Write directly to browser memory immediately
         localStorage.setItem('q_dob', dob);
         localStorage.setItem('q_tob', isUnknown ? '12:00' : tob);
         localStorage.setItem('q_tob_unknown', isUnknown);
         localStorage.setItem('q_loc_name', loc.toUpperCase());
-
+        localStorage.setItem('q_sleep_hrs', sleepHrs);
+        localStorage.setItem('q_bio_anchor', mins);
+        localStorage.setItem('q_sleep_cycle_duration', sleepMins);
+        localStorage.setItem('q_sleep_inertia_mins', inertia);
+        localStorage.setItem('q_dlmo_offset_mins', dlmo);
 
         // 3. Update dynamic state matrix only if the module is active
         if (window.Q_UpdateState) {
@@ -108,7 +146,10 @@ window.Q_IntegrationHub = {
             window.Q_UpdateState('metaphysical_layer', 'tob', isUnknown ? '12:00' : tob);
             window.Q_UpdateState('metaphysical_layer', 'tob_unknown', isUnknown);
             window.Q_UpdateState('location', 'name', loc.toUpperCase());
-
+            window.Q_UpdateState('metaphysical_layer', 'wake_anchor_mins', mins);
+            window.Q_UpdateState('metaphysical_layer', 'sleep_cycle_duration', sleepMins);
+            window.Q_UpdateState('metaphysical_layer', 'sleep_inertia_mins', inertia);
+            window.Q_UpdateState('metaphysical_layer', 'dlmo_offset_mins', dlmo);
         }
 
         // 4. BROADCAST: Force immediate re-render across all active vectors
@@ -124,36 +165,19 @@ window.Q_IntegrationHub = {
         
         setTimeout(() => {
             saveBtn.innerText = ogText;
-            saveBtn.style.background = "transparent";
+            saveBtn.style.background = "rgba(0,0,0,0.8)";
             saveBtn.style.color = "var(--theme-main, #00f0ff)";
         }, 2000);
     },
 
-    requestStateGate: function(featureId, requiredTier, category) {
-        if(window.Q_LOG) window.Q_LOG('WARN', 'AUTH', `ACCESS_DENIED [${featureId}] REQ: ${requiredTier}`);
-        this.switchTab('pro');
-        const proTab = document.getElementById('tab-content-pro');
-        if(proTab) {
-            const alertBox = document.createElement('div');
-            alertBox.style.background = 'rgba(255, 0, 60, 0.1)';
-            alertBox.style.border = '1px solid #ff003c';
-            alertBox.style.color = '#ff003c';
-            alertBox.style.padding = '10px';
-            alertBox.style.fontSize = '0.65rem';
-            alertBox.style.marginBottom = '15px';
-            alertBox.style.borderRadius = '4px';
-            alertBox.style.fontFamily = 'Orbitron';
-            alertBox.innerHTML = `[ STATE GATE ] ACCESS TO '${featureId.toUpperCase()}' REQUIRES ${requiredTier} ENTITLEMENT.`;
-            proTab.insertBefore(alertBox, proTab.firstChild);
-            setTimeout(() => alertBox.remove(), 4000);
-        }
-    },
-
     injectDOM: function() {
-        if (document.getElementById('unified-integration-hub')) {
-            document.getElementById('unified-integration-hub').remove();
-        }
+        const existing = document.getElementById('unified-integration-hub');
+        if (existing) existing.remove();
 
+        const dom = document.createElement('div');
+        dom.className = 'q-hub-overlay';
+        dom.id = 'unified-integration-hub';
+        
         const renderBadge = (statusColor, textColor, text) => `<span style="font-size:0.55rem; background:${statusColor}; color:${textColor}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px;">${text}</span>`;
         const renderUpgradeBtn = (feature, tier, category, color) => `<button onclick="window.Q_IntegrationHub.requestStateGate('${feature}', '${tier}', '${category}')" style="font-size:0.55rem; background:transparent; border:1px solid ${color}; color:${color}; padding:4px 8px; border-radius:4px; font-weight:900; letter-spacing: 1px; cursor:pointer; transition:0.3s; pointer-events:auto;" onmouseover="this.style.background='${color}'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='${color}';">UPGRADE</button>`;
 
@@ -181,194 +205,234 @@ window.Q_IntegrationHub = {
         let sLoc = window.Q_STATE?.location?.name || localStorage.getItem('q_loc_name') || "CLEARWATER, FL";
         if (sLoc.toUpperCase().includes('LOS ANGELES')) sLoc = "CLEARWATER, FL";
 
+        const savedAnchorMins = window.Q_STATE?.metaphysical_layer?.wake_anchor_mins !== undefined ? window.Q_STATE?.metaphysical_layer?.wake_anchor_mins : (parseInt(localStorage.getItem('q_bio_anchor')) || 0);
+        const sAnchorStr = `${Math.floor(savedAnchorMins / 60).toString().padStart(2, '0')}:${(savedAnchorMins % 60).toString().padStart(2, '0')}`;
+        
+        const savedSleepMins = window.Q_STATE?.metaphysical_layer?.sleep_cycle_duration !== undefined ? window.Q_STATE?.metaphysical_layer?.sleep_cycle_duration : (parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450);
+        const sSleepHrs = (savedSleepMins / 60).toFixed(1);
+
+        const sInertia = window.Q_STATE?.metaphysical_layer?.sleep_inertia_mins !== undefined ? window.Q_STATE?.metaphysical_layer?.sleep_inertia_mins : (parseInt(localStorage.getItem('q_sleep_inertia_mins')) || 45);
+        const sDlmo = window.Q_STATE?.metaphysical_layer?.dlmo_offset_mins !== undefined ? window.Q_STATE?.metaphysical_layer?.dlmo_offset_mins : (parseInt(localStorage.getItem('q_dlmo_offset_mins')) || 90);
+        
         const sAi = window.Q_STATE?.logic_layer?.preferred_ai_diplomat || 'DEFAULT';
         const sDeepFlowEnforcement = window.Q_STATE?.logic_layer?.deep_flow_enforcement !== false;
 
         // Ephemeris Diagnostic: Reporting Native Edge-Computed State
-        const isEphemerisActive = typeof swisseph !== 'undefined';
-        const ephemerisBadge = isEphemerisActive ? renderBadge('#a7ff83', '#000', 'EDGE COMPUTE ACTIVE') : renderBadge('#ff3333', '#fff', 'OFFLINE / FALLBACK');
+        const jplStatus = '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ EDGE-COMPUTED / SYNCED ]</span>';
+        const swissStatus = isPersonalActive ? '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ ACTIVE ]</span>' : '<span style="color:#aaa;">[ STANDBY ]</span>';
 
-        const hubHTML = `
-            <div id="unified-integration-hub" class="q-hub-overlay">
-                <div class="q-hub-box">
-                    <div class="q-hub-header">
-                        <div class="q-hub-title">Q_HUB // SYSTEM_MATRIX</div>
-                        <button class="q-hub-close" onclick="window.Q_IntegrationHub.closeHub()">&#x2715;</button>
+        dom.innerHTML = `
+            <div class="q-hub-box" onclick="event.stopPropagation()">
+                <div class="hub-header">PRO MATRIX // ACCOUNT</div>
+                
+                <button id="hub-main-auth-btn" style="background:rgba(0,0,0,0.6); border:1px solid ${authColor}; color:${authColor}; padding: 8px 12px; font-family:'Orbitron'; font-size:0.65rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border-radius:4px; margin-bottom:15px; width:100%; transition:0.3s; box-shadow: inset 0 0 10px rgba(${authState === 'ACTIVE' ? '57,255,20' : '0,240,255'}, 0.1);" onmouseover="this.style.background='${authColor}'; this.style.color='#000';" onmouseout="this.style.background='rgba(0,0,0,0.6)'; this.style.color='${authColor}';">${authText}</button>
+
+                <div class="hub-tabs">
+                    <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-btn-tiers" onclick="window.Q_IntegrationHub.switchTab('tiers')">TIERS</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-btn-prefs" onclick="window.Q_IntegrationHub.switchTab('prefs')">PREFS</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'library' ? 'active' : ''}" id="tab-btn-library" onclick="window.Q_IntegrationHub.switchTab('library')">LIBRARY</button>
+                </div>
+
+                <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
+                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">WELCOME TO THE QUAD</div>
+                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px;">
+                        We are living biological lives on a mechanical grid. By continually forcing our bodies and minds to conform to an unnatural, static timeline, we have created a global epidemic of chronic fatigue. The Quad exists to dismantle the mechanical cage, allowing you to synchronize your workflow directly to the scientifically verified momentum of your own biology.
                     </div>
-                    
-                    <div class="q-hub-nav">
-                        <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
-                        <button class="hub-tab-btn ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
-                        <button class="hub-tab-btn ${this.activeTab === 'pro' ? 'active' : ''}" id="tab-btn-pro" onclick="window.Q_IntegrationHub.switchTab('pro')">PRO MATRIX</button>
-                        <button class="hub-tab-btn ${this.activeTab === 'system' ? 'active' : ''}" id="tab-btn-system" onclick="window.Q_IntegrationHub.switchTab('system')">SYSTEM</button>
+
+                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">THE 4 VECTORS</div>
+                    <div style="font-size:0.6rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; display:flex; flex-direction:column; gap:8px;">
+                        <div><span style="color:#b829ff; font-weight:bold; font-family:'Orbitron';">PHYSIOLOGICAL:</span> The Biological Resonance bridge. Synchronizes the human organism against the true kinematic wave.</div>
+                        <div><span style="color:#a7ff83; font-weight:bold; font-family:'Orbitron';">METEOROLOGICAL:</span> Environmental Almanac. Tracks atmospheric delta and thermodynamic tension.</div>
+                        <div><span style="color:#F4D068; font-weight:bold; font-family:'Orbitron';">METAPHYSICAL:</span> Communal Metadata. Neutralizes cultural drift into objective coordinates via the ICRF.</div>
+                        <div><span style="color:#00f0ff; font-weight:bold; font-family:'Orbitron';">ASTROPHYSICAL:</span> The Mechanical Root. Quantifies the Q-Delta and manages the Continuous Respiration algorithm.</div>
                     </div>
 
-                    <div class="q-hub-body">
-                        
-                        <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:var(--theme-main); font-weight:bold; margin-bottom:15px; letter-spacing:1px;">INITIALIZATION PROTOCOL</div>
-                            <div style="font-size:0.65rem; color:#aaa; line-height: 1.6; margin-bottom: 20px;">
-                                Welcome to <span style="color:#fff; font-weight:bold;">The Quadrature</span>. This interface is a biometric and planetary metrology engine designed to re-anchor human physiology to the True Ellipse (the actual physical orbit of the Earth) rather than the artificial 24-hour legacy grid.<br><br>
-                                To achieve true synchronization, you must calibrate the engine to your exact physical coordinates.
-                            </div>
-
-                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-                                <div style="color: #fff; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: bold; margin-bottom: 8px;">STEP 1: CALIBRATE IDENTITY</div>
-                                <div style="font-size: 0.6rem; color: #888; margin-bottom: 10px;">Navigate to the <b>IDENTITY</b> tab. Input your Geolocation and Birth coordinates. This arms the Swiss Ephemeris and calculates your precise $\\tau$-offset and baseline friction.</div>
-                            </div>
-
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">MASTERING THE OMNI-PLANNER</div>
-                            <div style="font-size:0.6rem; color:#aaa; line-height: 1.5; margin-bottom: 15px;">
-                                <span style="color:#fff; font-weight:bold;">Primary Postulate:</span> Here and Now are Infinitely One!<br><br>
-                                <span style="color:#fff; font-weight:bold;">Visual Routing:</span> The Omni-Planner acts as a transparent overlay, mapping your 90-to-120 minute ultradian rhythms over legacy 24-hour integers.<br><br>
-                                <span style="color:#fff; font-weight:bold;">Friction Mapping:</span><br>
-                                <span style="color:#a7ff83;">&#x25A0; Green (Deep Flow):</span> Prime window for high-stakes, focused intent.<br>
-                                <span style="color:#00f0ff;">&#x25A0; Blue (DLMO Wind-Down):</span> Mandatory window to step back, rest, and discharge tension.<br>
-                                <span style="color:#b829ff;">&#x25A0; Violet (Sleep Recovery):</span> Core biological restoration phase.<br>
-                                <span style="color:#B97A35;">&#x25A0; Amber (Sleep Inertia):</span> Wake transition and cortisol stabilization.
-                            </div>
-                        </div>
-
-                        <div class="hub-tab-content ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-content-identity">
-                            <div style="font-size:0.65rem; color:#aaa; margin-bottom: 5px; line-height: 1.4;">Define your personal metrological anchors to calibrate the physics engine and Swiss Ephemeris.</div>
-                            
-                            <div style="display:flex; gap:10px;">
-                                <div class="hub-input-group" style="flex:2;">
-                                    <label class="hub-input-lbl">DATE OF BIRTH</label>
-                                    <input type="date" id="cal-dob" class="hub-input" value="${sDob}">
-                                </div>
-                                <div class="hub-input-group" style="flex:1;">
-                                    <label class="hub-input-lbl">TIME OF BIRTH</label>
-                                    <input type="time" id="cal-tob" class="hub-input" value="${sTob}" ${sTobUnknown ? 'disabled' : ''}>
-                                </div>
-                            </div>
-                            <label class="hub-checkbox-group" style="justify-content: flex-end; margin-top:-10px;">
-                                <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown (Defaults 12:00)
-                            </label>
-
-                            <div class="hub-input-group">
-                                <label class="hub-input-lbl">GEOLOCATION (CITY, REGION)</label>
-                                <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
-                            </div>
-
-                            <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
-                        </div>
-
-                        <div class="hub-tab-content ${this.activeTab === 'pro' ? 'active' : ''}" id="tab-content-pro">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1a2235; padding-bottom:15px;">
-                                <div>
-                                    <div style="font-family:'Orbitron'; font-size:0.8rem; font-weight:900; color:#fff;">Q_AUTH HANDSHAKE</div>
-                                    <div style="font-size:0.6rem; color:#888; margin-top:4px;">STATUS: <span style="color:${authColor}; font-weight:bold;">${authState}</span></div>
-                                </div>
-                                <button id="btn-trigger-auth" style="background:transparent; border:1px solid ${authColor}; color:${authColor}; padding:8px 15px; border-radius:4px; font-family:'Orbitron'; font-size:0.65rem; font-weight:900; cursor:pointer; transition:0.3s;">${authText}</button>
-                            </div>
-
-                            <div style="font-size:0.65rem; color:#aaa; line-height:1.5;">The Quadrature is a decentralized operating system. Upgrading to a licensed tier unlocks direct API bridging to your biological and schedule hardware.</div>
-                            
-                            <div class="hub-tier-grid">
-                                <div class="tier-card ${isPersonalActive ? '' : 'locked'}" style="border-color: ${isPersonalActive ? '#00f0ff' : '#1a2235'}; box-shadow: ${isPersonalActive ? '0 0 20px rgba(0,240,255,0.1)' : 'none'};">
-                                    <div class="tier-head">
-                                        <div>
-                                            <div class="tier-title" style="color:#00f0ff;">PERSONAL TIER</div>
-                                            <div class="tier-price">$12.00 / MONTH</div>
-                                        </div>
-                                        <div>${personalStatus}</div>
-                                    </div>
-                                    <ul class="tier-list">
-                                        <li>Biometric Hardware API (Oura, Apple, Whoop)</li>
-                                        <li>Live Weather / Irradiance Integration</li>
-                                        <li>Cloud State Sync across devices</li>
-                                    </ul>
-                                </div>
-
-                                <div class="tier-card ${isProActive ? '' : 'locked'}" style="border-color: ${isProActive ? '#b829ff' : '#1a2235'}; box-shadow: ${isProActive ? '0 0 20px rgba(184,41,255,0.1)' : 'none'};">
-                                    <div class="tier-head">
-                                        <div>
-                                            <div class="tier-title" style="color:#b829ff;">PRO TIER</div>
-                                            <div class="tier-price">$45.00 / MONTH</div>
-                                        </div>
-                                        <div>${proStatus}</div>
-                                    </div>
-                                    <ul class="tier-list">
-                                        <li>Enterprise Calendar APIs (Google, Outlook 365)</li>
-                                        <li>AI Diplomat (Automated Meeting Rescheduling)</li>
-                                        <li>Predictive Tension Scoring</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="hub-tab-content ${this.activeTab === 'system' ? 'active' : ''}" id="tab-content-system">
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #1a2235; padding-bottom:8px;">SYSTEM DIAGNOSTICS</div>
-                            
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.65rem;">
-                                <span style="color:#888;">SWISS EPHEMERIS (C_WASM):</span>
-                                ${ephemerisBadge}
-                            </div>
-                            
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.65rem;">
-                                <span style="color:#888;">RENDER PIPELINE:</span>
-                                <span style="color:#fff; font-weight:bold;">WEBGL / CANVAS 2D</span>
-                            </div>
-
-                            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:0.65rem;">
-                                <span style="color:#888;">LOGIC ENGINE:</span>
-                                <span style="color:#fff; font-weight:bold;">v24.2.6 // KELBY ARCHITECTURE</span>
-                            </div>
-
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #1a2235; padding-bottom:8px;">LOGIC_LAYER PREFERENCES</div>
-
-                            <div class="hub-input-group">
-                                <label class="hub-input-lbl">PREFERRED AI DIPLOMAT TONE (PRO)</label>
-                                <select id="sys-ai-tone" class="hub-input" disabled>
-                                    <option value="DEFAULT" ${sAi==='DEFAULT'?'selected':''}>DEFAULT (NEUTRAL)</option>
-                                    <option value="ASSERTIVE" ${sAi==='ASSERTIVE'?'selected':''}>ASSERTIVE (STRICT BOUNDARIES)</option>
-                                    <option value="ACCOMMODATING" ${sAi==='ACCOMMODATING'?'selected':''}>ACCOMMODATING (FLEXIBLE)</option>
-                                </select>
-                            </div>
-
-                            <label class="hub-checkbox-group">
-                                <input type="checkbox" id="sys-flow-enforce" ${sDeepFlowEnforcement ? 'checked' : ''} disabled> Hard Enforce Deep Flow Boundaries (Auto-Decline Conflicts)
-                            </label>
-                            
-                            <div style="margin-top: 30px; border-top: 1px solid #1a2235; padding-top: 15px; text-align: center;">
-                                <button onclick="window.Q_IntegrationHub.hardReset()" style="background:transparent; border:1px solid #ff3333; color:#ff3333; padding:8px 15px; border-radius:4px; font-family:'Orbitron'; font-size:0.6rem; font-weight:900; cursor:pointer; transition:0.3s;" onmouseover="this.style.background='#ff3333'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='#ff3333';">PURGE LOCAL STATE (HARD RESET)</button>
-                            </div>
-                        </div>
-
+                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">MASTERING THE OMNI-PLANNER</div>
+                    <div style="font-size:0.6rem; color:#aaa; line-height: 1.5; margin-bottom: 15px;">
+                        <span style="color:#fff; font-weight:bold;">Primary Postulate:</span> Here and Now are Infinitely One!<br><br>
+                        <span style="color:#fff; font-weight:bold;">Visual Routing:</span> The Omni-Planner acts as a transparent overlay, mapping your 90-to-120 minute ultradian rhythms over legacy 24-hour integers.<br><br>
+                        <span style="color:#fff; font-weight:bold;">Friction Mapping:</span><br>
+                        <span style="color:#a7ff83;">&#x25A0; Green (Deep Flow):</span> Prime window for high-stakes, focused intent.<br>
+                        <span style="color:#00f0ff;">&#x25A0; Blue (DLMO Wind-Down):</span> Mandatory window to step back, rest, and discharge tension.<br>
+                        <span style="color:#b829ff;">&#x25A0; Violet (Sleep Recovery):</span> Core biological restoration phase.<br>
+                        <span style="color:#B97A35;">&#x25A0; Amber (Sleep Inertia):</span> Wake transition and cortisol stabilization.
                     </div>
                 </div>
+
+                <div class="hub-tab-content ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-content-identity">
+                    <div style="font-size:0.65rem; color:#aaa; margin-bottom: 5px; line-height: 1.4;">Define your personal metrological anchors to calibrate the physics engine and Swiss Ephemeris.</div>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <div class="hub-input-group" style="flex:2;">
+                            <label class="hub-input-lbl">DATE OF BIRTH</label>
+                            <input type="date" id="cal-dob" class="hub-input" value="${sDob}">
+                        </div>
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">TIME OF BIRTH</label>
+                            <input type="time" id="cal-tob" class="hub-input" value="${sTob}" ${sTobUnknown ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                    <label class="hub-checkbox-group" style="justify-content: flex-end; margin-top:-10px;">
+                        <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown (Defaults 12:00)
+                    </label>
+
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">GEOLOCATION (CITY, REGION)</label>
+                        <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
+                    </div>
+
+                    <div style="display:flex; gap:10px;">
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">WAKE ANCHOR (LOCAL TIME)</label>
+                            <input type="time" id="cal-anchor" class="hub-input" value="${sAnchorStr}">
+                        </div>
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">TARGET SLEEP (HRS)</label>
+                            <input type="number" id="cal-sleep" class="hub-input" value="${sSleepHrs}" step="0.5" min="4" max="12">
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:10px;">
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">SLEEP INERTIA (MINS)</label>
+                            <input type="number" id="cal-inertia" class="hub-input" value="${sInertia}" min="0" max="180">
+                        </div>
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">DLMO WIND-DOWN (MINS)</label>
+                            <input type="number" id="cal-dlmo" class="hub-input" value="${sDlmo}" min="0" max="180">
+                        </div>
+                    </div>
+
+                    <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
+                </div>
+
+                <div class="hub-tab-content ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-content-tiers">
+                    <div class="hub-tier-row" style="border-color: rgba(255,255,255,0.3);">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">STANDARD TIER (FREE)</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Omni-Planner & Standard Civil Calendar Sync.</div>
+                        </div>
+                        ${renderBadge('#fff', '#000', 'ACTIVE')}
+                    </div>
+
+                    <div class="hub-tier-row">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#00f0ff; font-weight: bold;">PERSONAL TIER ($14.99/mo)</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Biometric Bridge, HRV/Sleep tracking, Environmental Vector.</div>
+                        </div>
+                        ${personalStatus}
+                    </div>
+                    
+                    <div class="hub-tier-row">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#b829ff; font-weight: bold;">PRO TIER ($19.00 - $29.99/mo)</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">AI Temporal Firewall, Q Logic Synchronization, Deep Flow Enforcement.</div>
+                        </div>
+                        ${proStatus}
+                    </div>
+                </div>
+
+                <div class="hub-tab-content ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-content-prefs">
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">SYSTEM AUDIO NOTIFICATIONS</label>
+                        <select class="hub-input">
+                            <option value="ALL">ALL ALERTS & CUES</option>
+                            <option value="CRITICAL">CRITICAL THERMODYNAMIC ONLY</option>
+                            <option value="NONE">SILENT OPERATION</option>
+                        </select>
+                    </div>
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">AI DIPLOMATIC NEGOTIATOR ENGINE</label>
+                        <select class="hub-input" id="pref-ai-diplomat" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'preferred_ai_diplomat', this.value)">
+                            <option value="DEFAULT" ${sAi === 'DEFAULT' ? 'selected' : ''}>DEFAULT ALGORITHM</option>
+                            <option value="KAIROS" ${sAi === 'KAIROS' ? 'selected' : ''}>KAIROS PROTOCOL</option>
+                        </select>
+                    </div>
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">DEEP FLOW ENFORCEMENT (APP LOCKS & SILENCE)</label>
+                        <select class="hub-input" id="pref-deep-flow" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'deep_flow_enforcement', this.value === 'true')">
+                            <option value="true" ${sDeepFlowEnforcement ? 'selected' : ''}>ACTIVE (BLOCK NOTIFICATIONS)</option>
+                            <option value="false" ${!sDeepFlowEnforcement ? 'selected' : ''}>STANDBY (BYPASS LOCKS)</option>
+                        </select>
+                    </div>
+
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">UNIVERSAL PAYLOAD SYNC</div>
+                        <div class="hub-input-group">
+                            <button class="hub-action-btn" style="background:rgba(0, 240, 255, 0.1); border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_Auth) window.Q_Auth.triggerGoogleCalendarSync()">SYNC GOOGLE CALENDAR</button>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.55rem; color:#aaa; text-align:center; margin-top:4px;">Imports legacy events as [FIXED] civil constraints.</div>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">OFFLINE EPHEMERIS CACHE</div>
+                        <div style="font-size:0.6rem; color:#aaa; line-height: 1.4; margin-bottom: 10px;">
+                            Download and lock planetary telemetry into local storage. Guarantees 100% invariant physics accuracy regardless of network conditions.
+                        </div>
+                        <div class="hub-input-group">
+                            <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline.'); }">CACHE TELEMETRY DATA</button>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">BIOMETRIC HARDWARE SYNC</div>
+                        <div style="font-size:0.6rem; color:#aaa; line-height: 1.4; margin-bottom: 10px;">
+                            Background polling is DEPRECATED. Execute explicit ON-DEMAND synchronization or utilize manual data entry fallbacks.
+                        </div>
+                        <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:center; flex-wrap:wrap;">
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura', 'ON_DEMAND')">ON-DEMAND: OURA</button>
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#fff; color:#fff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('whoop', 'ON_DEMAND')">ON-DEMAND: WHOOP</button>
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('health_connect', 'ON_DEMAND')">ON-DEMAND: HEALTH</button>
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#aaa; color:#aaa;" onclick="alert('[ MANUAL FALLBACK ] Routing to manual biometric entry UI...')">MANUAL ENTRY</button>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">SYSTEM DIAGNOSTICS</div>
+                        <div class="hub-input-group" style="margin-bottom: 8px;">
+                            <label class="hub-input-lbl">NASA JPL HORIZONS BARYCENTRIC API</label>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${jplStatus}</div>
+                        </div>
+                        <div class="hub-input-group">
+                            <label class="hub-input-lbl">SWISS EPHEMERIS API</label>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${swissStatus}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hub-tab-content ${this.activeTab === 'library' ? 'active' : ''}" id="tab-content-library">
+                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">Q LOGIC ARCHIVE</div>
+                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; text-align:center;">
+                        Library data migrated. Execute external bridge to access The Quadrature manuscripts and initialize Quadification.
+                    </div>
+
+                    <div class="hub-tier-row">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">Q LOGIC LIBRARY</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">External Manuscript Payload</div>
+                        </div>
+                        <button class="hub-action-btn" onclick="if(typeof window.executeHomeSequence === 'function') window.executeHomeSequence('q-library-data.html'); else window.location.href='q-library-data.html';" style="width:auto; padding:6px 12px; font-size:0.55rem; color:var(--theme-main, #00f0ff); border-color:var(--theme-main, #00f0ff);">ACCESS ARCHIVE</button>
+                    </div>
+                </div>
+
+                <div class="support-links">
+                    <a href="#">[ HELP ]</a>
+                    <a href="#">[ CONTACT US ]</a>
+                    <a href="#">[ TECH SUPPORT ]</a>
+                </div>
+
+                <button class="hub-close-btn" onclick="window.Q_IntegrationHub.closeHub()">DISMISS MATRIX</button>
             </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', hubHTML);
+        document.body.appendChild(dom);
 
-        this.bindEvents(authState);
-    },
-
-    hardReset: function() {
-        if(confirm("CRITICAL WARNING: This will purge all local identity data, coordinates, and system preferences. The UI will reload. Proceed?")) {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.reload();
-        }
-    },
-
-    switchTab: function(tabId) {
-        this.activeTab = tabId;
-        document.querySelectorAll('.hub-tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.hub-tab-content').forEach(c => c.classList.remove('active'));
-        
-        const btn = document.getElementById(`tab-btn-${tabId}`);
-        const content = document.getElementById(`tab-content-${tabId}`);
-        
-        if (btn) btn.classList.add('active');
-        if (content) content.classList.add('active');
-    },
-
-    bindEvents: function(authState) {
-        const authBtn = document.getElementById('btn-trigger-auth');
+        const authBtn = document.getElementById('hub-main-auth-btn');
         if (authBtn) {
-            authBtn.addEventListener('click', () => {
+            authBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
                 if (authState === 'ACTIVE') {
                     try {
                         if (window.Q_Auth && typeof window.Q_Auth.signOut === 'function') {
