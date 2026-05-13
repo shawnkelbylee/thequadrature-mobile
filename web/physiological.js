@@ -89,7 +89,7 @@ window.openPhysioModal = function(target) {
             <div class="physio-row"><span class="physio-label">DLMO OFFSET (MIN):</span><input type="number" id="m-dlmo" class="physio-input" value="${currentDlmo}"></div>
         `;
     } else if (target === 'br') {
-        title.innerText = 'CIVIL ALIGNMENT';
+        title.innerText = 'SCHEDULE ALIGNMENT';
         const start = localStorage.getItem('q_civil_start') || '09:00';
         const end = localStorage.getItem('q_civil_end') || '17:00';
         html = `
@@ -188,7 +188,7 @@ window.addEventListener('q-ui-mounted', () => {
     if (quadBR) {
         quadBR.innerHTML = `
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 2px; margin: 0 auto;">
-                <div class="v-head">SCHEDULE ALIGNMENT</div>
+                <div class="v-head">CIVIL ALIGNMENT</div>
                 <div class="t-row"><span class="w-lbl">CALENDAR FRICTION:</span> <span id="tension-score" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">DAY STATUS:</span> <span id="align-status" class="val-sm">--</span></div>
             </div>
