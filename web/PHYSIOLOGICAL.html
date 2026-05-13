@@ -76,13 +76,23 @@
         
         .ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.5s ease; pointer-events: auto; cursor: crosshair; }
         
-        /* 1. The Sclera (Outer Boundary & Base Plate) */
-        #tension-sclera { width: 100%; height: 100%; z-index: 2; background: var(--void); border: 1px solid rgba(255,255,255,0.05); }
-        #tension-sclera.tension-high { border-color: var(--friction-red); box-shadow: 0 0 30px var(--friction-red), inset 0 0 30px var(--friction-red); animation: friction-pulse 1.5s infinite alternate; }
+        /* 1. The Sclera (Outer Boundary & Base Plate - Biological White) */
+        #tension-sclera { 
+            width: 100%; height: 100%; z-index: 2; 
+            background-color: #e0e0e0; 
+            border: 1px solid rgba(255,255,255,0.8); 
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.3);
+            transition: background-color 1s ease, border-color 1s ease;
+        }
+        #tension-sclera.tension-high { 
+            background-color: #ffcccc; 
+            border-color: var(--friction-red); 
+            animation: friction-pulse 1.5s infinite alternate; 
+        }
 
         @keyframes friction-pulse {
-            from { box-shadow: 0 0 10px var(--friction-red), inset 0 0 10px var(--friction-red); }
-            to { box-shadow: 0 0 40px var(--friction-red), inset 0 0 40px var(--friction-red); }
+            from { box-shadow: inset 0 0 40px rgba(0,0,0,0.3), 0 0 20px var(--friction-red), inset 0 0 20px var(--friction-red); }
+            to { box-shadow: inset 0 0 40px rgba(0,0,0,0.3), 0 0 50px var(--friction-red), inset 0 0 60px var(--friction-red); }
         }
 
         /* 2. The Iris (Thermal Band / Internal Clock) */
