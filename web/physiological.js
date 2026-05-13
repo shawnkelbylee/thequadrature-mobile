@@ -1,7 +1,7 @@
 // THE QUADRATURE: PHYSIOLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Localized Calibration Modals & Persistence Logic.
-// REVISION: Opt-Node Binding & Civil Cage Math
+// REVISION: DOM Targeting Fix & Opt-Node Binding
 
 let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
 let savedAnchor = localStorage.getItem('q_bio_anchor');
@@ -131,6 +131,19 @@ window.savePhysioModal = function() {
     closePhysioModal();
 };
 
+window.injectVectorData = function() {
+    // Exact match for the Quad architecture global UI overlay targeting
+    const optTL = document.getElementById('opt-tl') || document.querySelectorAll('.opt-oval')[0];
+    const optTR = document.getElementById('opt-tr') || document.querySelectorAll('.opt-oval')[1];
+    const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
+    const optBR = document.getElementById('opt-br') || document.querySelectorAll('.opt-oval')[3];
+
+    if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('tl'); }; optTL.style.pointerEvents = 'auto'; optTL.style.cursor = 'pointer'; }
+    if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('tr'); }; optTR.style.pointerEvents = 'auto'; optTR.style.cursor = 'pointer'; }
+    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('bl'); }; optBL.style.pointerEvents = 'auto'; optBL.style.cursor = 'pointer'; }
+    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('br'); }; optBR.style.pointerEvents = 'auto'; optBR.style.cursor = 'pointer'; }
+};
+
 window.addEventListener('q-ui-mounted', () => {
     if(isBooted) return;
     isBooted = true;
@@ -182,19 +195,7 @@ window.addEventListener('q-ui-mounted', () => {
         `;
     }
 
-    // Bind Modals to Opt Nodes
-    setTimeout(() => {
-        const optTL = document.querySelector('#quad-tl .opt-oval');
-        const optTR = document.querySelector('#quad-tr .opt-oval');
-        const optBL = document.querySelector('#quad-bl .opt-oval');
-        const optBR = document.querySelector('#quad-br .opt-oval');
-        
-        if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('tl'); }; optTL.style.pointerEvents = 'auto'; optTL.style.cursor = 'pointer'; }
-        if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('tr'); }; optTR.style.pointerEvents = 'auto'; optTR.style.cursor = 'pointer'; }
-        if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('bl'); }; optBL.style.pointerEvents = 'auto'; optBL.style.cursor = 'pointer'; }
-        if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openPhysioModal('br'); }; optBR.style.pointerEvents = 'auto'; optBR.style.cursor = 'pointer'; }
-    }, 500);
-
+    window.injectVectorData();
     engageBiometricVector();
 });
 
