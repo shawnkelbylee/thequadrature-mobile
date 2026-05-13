@@ -26,8 +26,8 @@
             --warn-orange: #ffaa00; 
             --chrono-amber: #B97A35;
             --friction-red: #ff3333;
-            --theme-main: var(--bio-purple); 
-            --theme-dim: var(--bio-purple-dim);
+            --theme-main: var(--sys-cyan); 
+            --theme-dim: rgba(0, 240, 255, 0.2);
             --os-grey: #888888;
         }
 
@@ -71,13 +71,13 @@
         /* PROPRIOCEPTIVE EYE ARCHITECTURE */
         .q-physio-dial { position: absolute; width: 450px; height: 450px; display: flex; justify-content: center; align-items: center; z-index: 5; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
         
-        /* The Base Plate: Blocks the Starfield */
-        .eye-base { position: absolute; width: 100%; height: 100%; background: var(--void); border-radius: 50% !important; z-index: 1; pointer-events: auto; border: 1px solid rgba(255,255,255,0.05); }
+        .eye-mask { position: absolute; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; z-index: 3; pointer-events: auto; }
+        .eye-base { position: absolute; width: 100%; height: 100%; background: var(--void); z-index: 1; }
 
-        .ring { position: absolute; border-radius: 50% !important; display: flex; justify-content: center; align-items: center; transition: all 0.5s ease; pointer-events: auto; cursor: help; }
+        .ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.5s ease; pointer-events: auto; cursor: crosshair; }
         
-        /* 1. The Sclera (Outer Boundary / Tension) */
-        #tension-sclera { width: 100%; height: 100%; z-index: 2; }
+        /* 1. The Sclera (Outer Boundary / Tension - Placed OUTSIDE mask so glow is not clipped) */
+        #tension-sclera { width: 100%; height: 100%; z-index: 2; border: 1px solid rgba(255,255,255,0.05); }
         #tension-sclera.tension-high { border-color: var(--friction-red); box-shadow: 0 0 30px var(--friction-red), inset 0 0 30px var(--friction-red); animation: friction-pulse 1.5s infinite alternate; }
 
         @keyframes friction-pulse {
@@ -86,9 +86,9 @@
         }
 
         /* 2. The Iris (Thermal Band / Internal Clock) */
-        #thermal-iris { width: 65%; height: 65%; z-index: 3; opacity: 0.8; }
+        #thermal-iris { width: 65%; height: 65%; z-index: 4; opacity: 0.8; top: 17.5%; left: 17.5%; }
         
-        .flow-aura { background: radial-gradient(circle, var(--theme-main) 0%, transparent 70%); box-shadow: 0 0 60px var(--theme-main); }
+        .flow-aura { background: radial-gradient(circle, var(--sys-cyan) 0%, transparent 70%); box-shadow: 0 0 60px var(--sys-cyan); }
         .vent-aura { background: radial-gradient(circle, var(--os-grey) 0%, transparent 70%); box-shadow: 0 0 60px var(--os-grey); animation: breath 4s infinite ease-in-out; }
         .sleep-aura { background: radial-gradient(circle, var(--bio-purple) 0%, transparent 70%); box-shadow: 0 0 30px var(--bio-purple); opacity: 0.3; }
         .inertia-aura { background: radial-gradient(circle, var(--chrono-amber) 0%, transparent 70%); box-shadow: 0 0 60px var(--chrono-amber); }
@@ -100,10 +100,16 @@
         }
 
         /* 3. The Pupil (Ultradian Energy Aperture) */
-        #ultradian-pupil { width: 30%; height: 30%; background: #000; box-shadow: inset 0 0 20px rgba(255,255,255,0.1), 0 0 20px #000; z-index: 10; border: 2px solid rgba(255,255,255,0.05); }
+        #ultradian-pupil { width: 30%; height: 30%; background: #000; box-shadow: inset 0 0 20px rgba(255,255,255,0.1), 0 0 20px #000; z-index: 10; border: 2px solid rgba(255,255,255,0.05); top: 35%; left: 35%; }
+
+        /* 4. The Eyelid (Z-Axis Occlusion Shutter) */
+        #readiness-eyelid { position: absolute; top: 0; left: 0; width: 100%; background: var(--void); z-index: 20; transition: height 0.8s ease-in-out; pointer-events: auto; border-bottom: 2px solid transparent; border-radius: 0 !important; cursor: crosshair; }
+        .eyelid-open { height: 0%; border-bottom-color: transparent; }
+        .eyelid-half { height: 50%; border-bottom-color: rgba(255,255,255,0.1); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
+        .eyelid-closed { height: 100%; border-bottom-color: transparent; }
         
-        /* Custom Tooltip Styling */
-        .ring:hover::after {
+        /* Native Hardware Tooltips */
+        #tension-sclera:hover::after, #thermal-iris:hover::after, #ultradian-pupil:hover::after, #readiness-eyelid:hover::after {
             content: attr(data-desc);
             position: absolute;
             bottom: -40px;
@@ -123,6 +129,9 @@
             box-shadow: 0 0 15px rgba(0,0,0,1);
         }
 
+        /* Override Tooltip position for the downward moving Eyelid */
+        #readiness-eyelid:hover::after { bottom: 10px; }
+
     </style>
 </head>
 <body class="mode-q">
@@ -130,13 +139,17 @@
     <div class="global-header desktop-only">PHYSIOLOGICAL</div>
 
     <div class="q-physio-dial">
-        <div class="eye-base"></div>
-
-        <div id="tension-sclera" class="ring" data-desc="SCLERA: Measures friction between biologic rhythm and civil schedule"></div>
+        <div id="tension-sclera" class="ring" data-desc="SCLERA: Calendar Friction vs Biologic Rhythm"></div>
         
-        <div id="thermal-iris" class="ring iris-band" data-desc="IRIS: Core body temperature proxy and current metabolic state"></div>
-        
-        <div id="ultradian-pupil" class="ring" data-desc="PUPIL: Cognitive bandwidth aperture. Dilates during Deep Flow"></div>
+        <div class="eye-mask">
+            <div class="eye-base"></div>
+            
+            <div id="thermal-iris" class="ring iris-band" data-desc="IRIS: Metabolic State & Thermal Proxy"></div>
+            
+            <div id="ultradian-pupil" class="ring" data-desc="PUPIL: Cognitive Bandwidth Aperture"></div>
+            
+            <div id="readiness-eyelid" class="eyelid-open" data-desc="EYELID: Readiness State & Sleep Guard"></div>
+        </div>
     </div>
 
 </body>
