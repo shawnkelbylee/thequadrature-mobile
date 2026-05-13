@@ -118,12 +118,12 @@ window.injectUniversalUI = function() {
         .bl .panel-data-container { padding: 12px 30px 12px 75px; }
         .br .panel-data-container { padding: 12px 75px 12px 30px; }
 
-        .opt-oval { position: absolute; font-family: 'JetBrains Mono'; font-size: 0.55rem; font-weight: 700; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 30; transition: 0.3s; pointer-events: auto !important; color: var(--theme-main, #00f0ff); text-shadow: 0 0 5px var(--theme-dim, rgba(0,240,255,0.2)); }
+        .opt-oval { position: absolute; font-family: 'JetBrains Mono'; font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 30; transition: 0.3s; pointer-events: auto !important; color: var(--theme-main, #00f0ff); text-shadow: 0 0 5px var(--theme-dim, rgba(0,240,255,0.2)); }
         .opt-oval:hover { color: #fff !important; text-shadow: 0 0 8px #fff !important; }
-        .tl .opt-oval { top: 36px; left: 45px; }
-        .tr .opt-oval { top: 36px; right: 45px; }
-        .bl .opt-oval { bottom: 36px; left: 45px; }
-        .br .opt-oval { bottom: 36px; right: 45px; }
+        .tl .opt-oval { top: 42px; left: 48px; transform: translate(-50%, -50%); }
+        .tr .opt-oval { top: 42px; right: 48px; transform: translate(50%, -50%); }
+        .bl .opt-oval { bottom: 42px; left: 48px; transform: translate(-50%, 50%); }
+        .br .opt-oval { bottom: 42px; right: 48px; transform: translate(50%, 50%); }
 
         .wing-panel { position: absolute; width: 240px; height: 250px; z-index: 15; box-sizing: border-box; top: 50%; transform: translateY(-50%); text-align: center; pointer-events: none; }
         .wing-frost { position: absolute; inset: 12px; background: rgba(10, 15, 25, 0.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 8px; z-index: -2; box-shadow: inset 0 0 30px var(--theme-dim, rgba(0, 163, 255, 0.2)); }
