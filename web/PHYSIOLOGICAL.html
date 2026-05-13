@@ -19,15 +19,16 @@
 
         :root {
             --void: #05080f; 
-            --bio-purple: #b829ff; 
-            --bio-purple-dim: rgba(184, 41, 255, 0.2);
-            --bio-cobalt: #0055ff;
-            --sys-cyan: #00f0ff;
-            --warn-orange: #ffaa00; 
-            --chrono-amber: #B97A35;
-            --friction-red: #ff3333;
-            --theme-main: var(--bio-purple); /* Restored OS baseline */
-            --theme-dim: var(--bio-purple-dim);
+            
+            /* Thermodynamic Spectral Palette */
+            --sys-cyan: #00f0ff;       /* Deep Flow */
+            --silver-vent: #e0e0e0;    /* Vent / Recovery */
+            --mag-inertia: #ff00ff;    /* Sleep Inertia */
+            --gold-dlmo: #ffd700;      /* DLMO Wind-Down */
+            --friction-red: #ff3333;   /* Calendar Friction */
+            
+            --theme-main: var(--sys-cyan); 
+            --theme-dim: rgba(0, 240, 255, 0.2);
             --os-grey: #888888;
         }
 
@@ -73,7 +74,7 @@
         
         .ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.5s ease; pointer-events: auto; cursor: crosshair; }
         
-        /* 1. The Sclera (Outer Boundary & Base Plate - Blocks Stars, Catches Hover) */
+        /* 1. The Sclera (Outer Boundary & Base Plate) */
         #tension-sclera { width: 100%; height: 100%; z-index: 2; background: var(--void); border: 1px solid rgba(255,255,255,0.05); }
         #tension-sclera.tension-high { border-color: var(--friction-red); box-shadow: 0 0 30px var(--friction-red), inset 0 0 30px var(--friction-red); animation: friction-pulse 1.5s infinite alternate; }
 
@@ -85,12 +86,11 @@
         /* 2. The Iris (Thermal Band / Internal Clock) */
         #thermal-iris { width: 65%; height: 65%; z-index: 3; opacity: 0.8; top: 17.5%; left: 17.5%; border: 1px solid rgba(255,255,255,0.05); }
         
-        /* Thermodynamic Spectral Palette */
         .flow-aura { background: radial-gradient(circle, var(--sys-cyan) 0%, transparent 70%); box-shadow: 0 0 60px var(--sys-cyan); }
-        .vent-aura { background: radial-gradient(circle, var(--os-grey) 0%, transparent 70%); box-shadow: 0 0 60px var(--os-grey); animation: breath 4s infinite ease-in-out; }
-        .sleep-aura { background: radial-gradient(circle, var(--bio-purple) 0%, transparent 70%); box-shadow: 0 0 30px var(--bio-purple); opacity: 0.3; }
-        .inertia-aura { background: radial-gradient(circle, var(--chrono-amber) 0%, transparent 70%); box-shadow: 0 0 60px var(--chrono-amber); }
-        .dlmo-aura { background: radial-gradient(circle, var(--bio-cobalt) 0%, transparent 70%); box-shadow: 0 0 60px var(--bio-cobalt); animation: breath 6s infinite ease-in-out; }
+        .vent-aura { background: radial-gradient(circle, var(--silver-vent) 0%, transparent 70%); box-shadow: 0 0 60px var(--silver-vent); animation: breath 4s infinite ease-in-out; }
+        .inertia-aura { background: radial-gradient(circle, var(--mag-inertia) 0%, transparent 70%); box-shadow: 0 0 60px var(--mag-inertia); }
+        .dlmo-aura { background: radial-gradient(circle, var(--gold-dlmo) 0%, transparent 70%); box-shadow: 0 0 60px var(--gold-dlmo); animation: breath 6s infinite ease-in-out; }
+        .sleep-aura { background: radial-gradient(circle, #000 0%, transparent 70%); box-shadow: none; opacity: 0; }
 
         @keyframes breath {
             0%, 100% { transform: scale(1); opacity: 0.6; }
@@ -100,40 +100,44 @@
         /* 3. The Pupil (Ultradian Energy Aperture) */
         #ultradian-pupil { width: 30%; height: 30%; background: #000; box-shadow: inset 0 0 20px rgba(255,255,255,0.1), 0 0 20px #000; z-index: 4; border: 2px solid rgba(255,255,255,0.05); top: 35%; left: 35%; }
 
-        /* 4. Eyelid Mask & Eyelid (Isolated to prevent breaking Iris/Pupil/Sclera hovers) */
+        /* 4. Eyelid Mask & Organic Crescent Shutter */
         .eye-mask { position: absolute; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; z-index: 5; pointer-events: none; }
         
-        #readiness-eyelid { position: absolute; top: 0; left: 0; width: 100%; background: rgba(5,8,15,0.98); z-index: 6; transition: height 0.8s ease-in-out; pointer-events: auto; border-bottom: 2px solid var(--os-grey); border-radius: 0 !important; cursor: crosshair; }
+        #readiness-eyelid { 
+            position: absolute; top: 0; left: 0; width: 100%; 
+            background: rgba(5,8,15,0.98); z-index: 6; 
+            transition: height 0.8s ease-in-out, box-shadow 0.8s ease-in-out; 
+            pointer-events: auto; 
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+            border-bottom-left-radius: 50%; 
+            border-bottom-right-radius: 50%; 
+            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.8);
+            cursor: crosshair; 
+        }
         
-        .eyelid-open { height: 12%; border-bottom-color: var(--os-grey); } /* Permanent geometric footprint */
-        .eyelid-half { height: 50%; border-bottom-color: var(--bio-cobalt); box-shadow: 0 15px 30px rgba(0,0,0,0.9); }
-        .eyelid-closed { height: 100%; border-bottom-color: transparent; }
+        .eyelid-open { height: 12%; } 
+        .eyelid-half { height: 50%; border-bottom-color: var(--gold-dlmo); box-shadow: inset 0 -15px 30px rgba(0,0,0,0.9), 0 10px 20px rgba(0,0,0,0.5); }
+        .eyelid-closed { height: 100%; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
         
-        /* Native Hardware Tooltips */
-        .ring:hover::after, #readiness-eyelid:hover::after {
-            content: attr(data-desc);
+        /* Unified Master Diagnostic Readout */
+        #q-diagnostic-text {
             position: absolute;
-            background: rgba(0,0,0,0.95);
-            border: 1px solid var(--theme-main);
-            color: #fff;
-            padding: 8px 12px;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            text-align: center;
             font-family: 'JetBrains Mono';
             font-size: 0.65rem;
-            white-space: nowrap;
-            border-radius: 4px;
-            z-index: 100;
-            pointer-events: none;
+            color: #fff;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(0,0,0,1);
+            height: 15px;
+            pointer-events: none;
+            z-index: 100;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            transition: opacity 0.2s;
         }
-
-        /* Placement Rules */
-        #tension-sclera:hover::after { bottom: -45px; left: 50%; transform: translateX(-50%); }
-        #thermal-iris:hover::after { bottom: -110px; left: 50%; transform: translateX(-50%); }
-        #ultradian-pupil:hover::after { bottom: -190px; left: 50%; transform: translateX(-50%); }
-        
-        /* Eyelid tooltip placed inside the lid so it is not clipped by the mask */
-        #readiness-eyelid:hover::after { top: 12px; left: 50%; transform: translateX(-50%); border-color: var(--os-grey); }
 
     </style>
 </head>
@@ -142,15 +146,17 @@
     <div class="global-header desktop-only">PHYSIOLOGICAL</div>
 
     <div class="q-physio-dial">
-        <div id="tension-sclera" class="ring" data-desc="SCLERA: Calendar Friction vs Biologic Rhythm"></div>
+        <div id="tension-sclera" class="ring" data-desc="[ SCLERA ] CALENDAR FRICTION VS BIOLOGIC RHYTHM" onmouseover="document.getElementById('q-diagnostic-text').innerText = this.getAttribute('data-desc');" onmouseout="document.getElementById('q-diagnostic-text').innerText = '';"></div>
         
-        <div id="thermal-iris" class="ring iris-band" data-desc="IRIS: Metabolic State & Thermal Proxy"></div>
+        <div id="thermal-iris" class="ring iris-band" data-desc="[ IRIS ] METABOLIC STATE & THERMAL PROXY" onmouseover="document.getElementById('q-diagnostic-text').innerText = this.getAttribute('data-desc');" onmouseout="document.getElementById('q-diagnostic-text').innerText = '';"></div>
         
-        <div id="ultradian-pupil" class="ring" data-desc="PUPIL: Cognitive Bandwidth Aperture"></div>
+        <div id="ultradian-pupil" class="ring" data-desc="[ PUPIL ] COGNITIVE BANDWIDTH APERTURE" onmouseover="document.getElementById('q-diagnostic-text').innerText = this.getAttribute('data-desc');" onmouseout="document.getElementById('q-diagnostic-text').innerText = '';"></div>
         
         <div class="eye-mask">
-            <div id="readiness-eyelid" class="eyelid-open" data-desc="EYELID: Readiness State & Sleep Guard"></div>
+            <div id="readiness-eyelid" class="eyelid-open" data-desc="[ EYELID ] READINESS STATE & SLEEP GUARD" onmouseover="document.getElementById('q-diagnostic-text').innerText = this.getAttribute('data-desc');" onmouseout="document.getElementById('q-diagnostic-text').innerText = '';"></div>
         </div>
+
+        <div id="q-diagnostic-text"></div>
     </div>
 
 </body>
