@@ -76,33 +76,33 @@
         
         .ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.5s ease; pointer-events: auto; cursor: crosshair; }
         
-        /* 1. The Sclera (Outer Boundary & Base Plate - Biological White) */
+        /* 1. The Sclera (Outer Boundary & Base Plate - Deep Slate "White") */
         #tension-sclera { 
             width: 100%; height: 100%; z-index: 2; 
-            background-color: #e0e0e0; 
-            border: 1px solid rgba(255,255,255,0.8); 
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.3);
+            background-color: #1f2229; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.9);
             transition: background-color 1s ease, border-color 1s ease;
         }
         #tension-sclera.tension-high { 
-            background-color: #ffcccc; 
+            background-color: #3d1515; 
             border-color: var(--friction-red); 
             animation: friction-pulse 1.5s infinite alternate; 
         }
 
         @keyframes friction-pulse {
-            from { box-shadow: inset 0 0 40px rgba(0,0,0,0.3), 0 0 20px var(--friction-red), inset 0 0 20px var(--friction-red); }
-            to { box-shadow: inset 0 0 40px rgba(0,0,0,0.3), 0 0 50px var(--friction-red), inset 0 0 60px var(--friction-red); }
+            from { box-shadow: inset 0 0 80px rgba(0,0,0,0.9), 0 0 20px var(--friction-red), inset 0 0 20px var(--friction-red); }
+            to { box-shadow: inset 0 0 80px rgba(0,0,0,0.9), 0 0 50px var(--friction-red), inset 0 0 60px var(--friction-red); }
         }
 
-        /* 2. The Iris (Thermal Band / Internal Clock) */
-        #thermal-iris { width: 65%; height: 65%; z-index: 3; opacity: 0.8; top: 17.5%; left: 17.5%; border: 1px solid rgba(255,255,255,0.05); }
+        /* 2. The Iris (Anatomical 45% Proportion) */
+        #thermal-iris { width: 45%; height: 45%; z-index: 3; opacity: 0.8; top: 27.5%; left: 27.5%; border: 1px solid rgba(255,255,255,0.05); }
         
-        /* Thermodynamic Spectral Palette - Hollow Rings */
-        .flow-aura { background: radial-gradient(circle, transparent 42%, var(--sys-cyan) 55%, transparent 75%); box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.2); }
-        .vent-aura { background: radial-gradient(circle, transparent 42%, var(--silver-vent) 55%, transparent 75%); box-shadow: 0 0 15px rgba(224, 224, 224, 0.2), inset 0 0 15px rgba(224, 224, 224, 0.2); animation: breath 4s infinite ease-in-out; }
-        .inertia-aura { background: radial-gradient(circle, transparent 42%, var(--mag-inertia) 55%, transparent 75%); box-shadow: 0 0 15px rgba(255, 0, 255, 0.2), inset 0 0 15px rgba(255, 0, 255, 0.2); }
-        .dlmo-aura { background: radial-gradient(circle, transparent 42%, var(--gold-dlmo) 55%, transparent 75%); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2), inset 0 0 15px rgba(255, 215, 0, 0.2); animation: breath 6s infinite ease-in-out; }
+        /* Hollow Core Gradients */
+        .flow-aura { background: radial-gradient(circle, transparent 40%, var(--sys-cyan) 60%, transparent 80%); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.15); }
+        .vent-aura { background: radial-gradient(circle, transparent 40%, var(--silver-vent) 60%, transparent 80%); box-shadow: 0 0 15px rgba(224, 224, 224, 0.15), inset 0 0 15px rgba(224, 224, 224, 0.15); animation: breath 4s infinite ease-in-out; }
+        .inertia-aura { background: radial-gradient(circle, transparent 40%, var(--mag-inertia) 60%, transparent 80%); box-shadow: 0 0 15px rgba(255, 0, 255, 0.15), inset 0 0 15px rgba(255, 0, 255, 0.15); }
+        .dlmo-aura { background: radial-gradient(circle, transparent 40%, var(--gold-dlmo) 60%, transparent 80%); box-shadow: 0 0 15px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(255, 215, 0, 0.15); animation: breath 6s infinite ease-in-out; }
         .sleep-aura { background: transparent; box-shadow: none; opacity: 0; }
 
         @keyframes breath {
@@ -110,8 +110,14 @@
             50% { transform: scale(1.05); opacity: 0.9; }
         }
 
-        /* 3. The Pupil (Ultradian Energy Aperture) */
-        #ultradian-pupil { width: 30%; height: 30%; background: #000; box-shadow: inset 0 0 20px rgba(255,255,255,0.1), 0 0 20px #000; z-index: 4; border: 2px solid rgba(255,255,255,0.05); top: 35%; left: 35%; }
+        /* 3. The Pupil (Anatomical 18% Base - Scales to 21.6% in Flow, 14.4% in Vent) */
+        #ultradian-pupil { 
+            width: 18%; height: 18%; background: #000; 
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.1), 0 0 30px rgba(0,0,0,0.9); 
+            z-index: 4; border: 1px solid rgba(255,255,255,0.05); 
+            top: 41%; left: 41%; 
+            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+        }
 
         /* 4. Eyelid Mask & Organic Crescent Shutter */
         .eye-mask { position: absolute; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; z-index: 5; pointer-events: none; }
