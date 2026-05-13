@@ -1,7 +1,7 @@
 // THE QUADRATURE: PHYSIOLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Localized Calibration Modals & Persistence Logic.
-// REVISION: Absolute Anatomy Headers & Static Flex Descriptors
+// REVISION: Absolute Anatomy Headers & Static Flex Descriptors (Coordinate Fix)
 
 let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
 let savedAnchor = localStorage.getItem('q_bio_anchor');
@@ -153,8 +153,8 @@ window.addEventListener('q-ui-mounted', () => {
     const quadTL = document.getElementById('quad-tl');
     if (quadTL) {
         quadTL.innerHTML = `
-            <div class="v-head">[ IRIS ]</div>
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
+                <div class="v-head">[ IRIS ]</div>
                 <div class="t-row"><span class="w-lbl">SCHEDULE DRIFT:</span> <span id="tau-offset" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">BIOMETRIC SENSOR:</span> <span id="bio-sensor" class="val-sm" style="color: var(--os-grey);">[ PENDING PAIRING ]</span></div>
                 <div style="font-family:'Orbitron'; font-size:0.55rem; color:#888; text-align:right; font-weight:700; letter-spacing:1px; border-top:1px solid rgba(255,255,255,0.1); margin-top:4px; padding-top:4px;">INTERNAL CLOCK</div>
@@ -165,8 +165,8 @@ window.addEventListener('q-ui-mounted', () => {
     const quadTR = document.getElementById('quad-tr');
     if (quadTR) {
         quadTR.innerHTML = `
-            <div class="v-head">[ PUPIL ]</div>
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
+                <div class="v-head">[ PUPIL ]</div>
                 <div class="t-row"><span class="w-lbl">CURRENT STATE:</span> <span id="brac-state" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">CYCLE REMAINING:</span> <span id="phase-horizon" class="val-sm">--</span></div>
                 <div class="bar-bg"><div class="bar-fill" id="bio-bar"></div></div>
@@ -178,8 +178,8 @@ window.addEventListener('q-ui-mounted', () => {
     const quadBL = document.getElementById('quad-bl');
     if (quadBL) {
         quadBL.innerHTML = `
-            <div class="v-head">[ EYELID ]</div>
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
+                <div class="v-head">[ EYELID ]</div>
                 <div style="font-family:'Orbitron'; font-size:0.55rem; color:#888; text-align:right; font-weight:700; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:4px; padding-bottom:4px;">SLEEP TARGETS</div>
                 <div class="t-row"><span class="w-lbl">OPTIMAL BEDTIME:</span> <span id="dlmo-target" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">RECOVERY STATUS:</span> <span id="recovery-vec" class="val-sm">--</span></div>
@@ -190,8 +190,8 @@ window.addEventListener('q-ui-mounted', () => {
     const quadBR = document.getElementById('quad-br');
     if (quadBR) {
         quadBR.innerHTML = `
-            <div class="v-head">[ SCLERA ]</div>
             <div style="position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto;">
+                <div class="v-head">[ SCLERA ]</div>
                 <div style="font-family:'Orbitron'; font-size:0.55rem; color:#888; text-align:left; font-weight:700; letter-spacing:1px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:4px; padding-bottom:4px;">SCHEDULE ALIGNMENT</div>
                 <div class="t-row"><span class="w-lbl">CALENDAR FRICTION:</span> <span id="tension-score" class="val-sm">--</span></div>
                 <div class="t-row"><span class="w-lbl">DAY STATUS:</span> <span id="align-status" class="val-sm">--</span></div>
