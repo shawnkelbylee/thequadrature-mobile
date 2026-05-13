@@ -17,7 +17,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&family=Orbitron:wght@400;500;700;900&display=swap');
 
-       :root {
+        :root {
             --void: #05080f; 
             
             /* Thermodynamic Spectral Palette */
@@ -88,11 +88,12 @@
         /* 2. The Iris (Thermal Band / Internal Clock) */
         #thermal-iris { width: 65%; height: 65%; z-index: 3; opacity: 0.8; top: 17.5%; left: 17.5%; border: 1px solid rgba(255,255,255,0.05); }
         
-        .flow-aura { background: radial-gradient(circle, var(--sys-cyan) 0%, transparent 70%); box-shadow: 0 0 60px var(--sys-cyan); }
-        .vent-aura { background: radial-gradient(circle, var(--silver-vent) 0%, transparent 70%); box-shadow: 0 0 60px var(--silver-vent); animation: breath 4s infinite ease-in-out; }
-        .inertia-aura { background: radial-gradient(circle, var(--mag-inertia) 0%, transparent 70%); box-shadow: 0 0 60px var(--mag-inertia); }
-        .dlmo-aura { background: radial-gradient(circle, var(--gold-dlmo) 0%, transparent 70%); box-shadow: 0 0 60px var(--gold-dlmo); animation: breath 6s infinite ease-in-out; }
-        .sleep-aura { background: radial-gradient(circle, #000 0%, transparent 70%); box-shadow: none; opacity: 0; }
+        /* Thermodynamic Spectral Palette - Hollow Rings */
+        .flow-aura { background: radial-gradient(circle, transparent 42%, var(--sys-cyan) 55%, transparent 75%); box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.2); }
+        .vent-aura { background: radial-gradient(circle, transparent 42%, var(--silver-vent) 55%, transparent 75%); box-shadow: 0 0 15px rgba(224, 224, 224, 0.2), inset 0 0 15px rgba(224, 224, 224, 0.2); animation: breath 4s infinite ease-in-out; }
+        .inertia-aura { background: radial-gradient(circle, transparent 42%, var(--mag-inertia) 55%, transparent 75%); box-shadow: 0 0 15px rgba(255, 0, 255, 0.2), inset 0 0 15px rgba(255, 0, 255, 0.2); }
+        .dlmo-aura { background: radial-gradient(circle, transparent 42%, var(--gold-dlmo) 55%, transparent 75%); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2), inset 0 0 15px rgba(255, 215, 0, 0.2); animation: breath 6s infinite ease-in-out; }
+        .sleep-aura { background: transparent; box-shadow: none; opacity: 0; }
 
         @keyframes breath {
             0%, 100% { transform: scale(1); opacity: 0.6; }
