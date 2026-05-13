@@ -89,7 +89,7 @@ window.openPhysioModal = function(target) {
             <div class="physio-row"><span class="physio-label">DLMO OFFSET (MIN):</span><input type="number" id="m-dlmo" class="physio-input" value="${currentDlmo}"></div>
         `;
     } else if (target === 'br') {
-        title.innerText = 'SCHEDULE ALIGNMENT';
+        title.innerText = 'CIVIL ALIGNMENT';
         const start = localStorage.getItem('q_civil_start') || '09:00';
         const end = localStorage.getItem('q_civil_end') || '17:00';
         html = `
