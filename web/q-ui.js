@@ -791,7 +791,7 @@ window.injectUniversalUI = function() {
             let deltaDeg = nextNodeDeg - p;
             let nextNodeName = (nextNodeDeg === 90) ? '1ST EQUINOX' : (nextNodeDeg === 180) ? 'NORTHERN SOLSTICE' : (nextNodeDeg === 270) ? '2ND EQUINOX' : 'SOUTHERN SOLSTICE';
             
-            quadFooter.innerHTML = `<span style="color:var(--starlight);">NEXT: ${nextNodeName}</span> <span style="color:var(--theme-main, #00f0ff); font-weight:bold;">[ Δ -${deltaDeg.toFixed(4)}° ]</span>`;
+           quadFooter.innerHTML = `<span style="color:var(--starlight);">NEXT: ${nextNodeName}</span> <span style="color:var(--theme-main, #00f0ff); font-weight:bold;">-${deltaDeg.toFixed(4)}°</span>`;
 
             // Legacy OS Temporal Countdown (Keplerian Sync)
             const remMs = e.detail.nextCelestialEvent - e.detail.t;
