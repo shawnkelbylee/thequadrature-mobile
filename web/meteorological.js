@@ -518,25 +518,26 @@ function initEclipticEngine() {
 function updateGlobeKinematics() {
     const now = window.Q_MASTER_CLOCK ? new Date(window.Q_MASTER_CLOCK) : new Date();
 
-    // 1. SEASONAL Y-AXIS SHIFT (Rise and Fall)
+    // 1. SEASONAL POLAR PITCH (Z-Axis Shift)
     const start = new Date(now.getFullYear(), 0, 0);
     const diff = now - start;
     const oneDay = 1000 * 60 * 60 * 24;
     const dayOfYear = Math.floor(diff / oneDay);
     const rads = ((dayOfYear - 80) / 365.24) * (Math.PI * 2);
     
-    const maxTiltPX = 35; 
-    const yShift = -(Math.sin(rads) * maxTiltPX);
+    const maxTiltDeg = 23.5; 
+    const zPitch = -(Math.sin(rads) * maxTiltDeg);
 
     const globe = document.querySelector('.q-meteo-globe');
-    if (globe) { globe.style.transform = `translate(-50%, calc(-50% + ${yShift}px))`; }
+    if (globe) { globe.style.transform = `translate(-50%, -50%)`; } // Lock center
 
-    // 2. GEOLOCATION LOCK & TERMINATOR SWEEP
+    // 2. GEOLOCATION LOCK & 3D ROTATION
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0; 
     const surface = document.getElementById('diurnal-surface');
     if(surface) {
         const lonOffsetPct = ((userLon + 180) / 360) * 100;
         surface.style.backgroundPosition = `${lonOffsetPct}% 0`;
+        surface.style.transform = `rotateX(${zPitch}deg)`; // Pitch poles forward/back
     }
 
     const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600)) / 24;
