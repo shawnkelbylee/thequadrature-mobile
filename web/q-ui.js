@@ -881,17 +881,22 @@ window.addEventListener('click', (e) => {
             let isShortText = text.length > 0 && text.length < 40;
 
             if (dataTarget === 'dashboard' || dataRoute === 'dashboard' || hrefStr.includes('dashboard') || onClickStr.includes('dashboard') || (isShortText && text.includes('dashboard'))) {
-                e.preventDefault(); e.stopPropagation();
-                if (window.Q_IntegrationHub && typeof window.Q_IntegrationHub.openHub === 'function') window.Q_IntegrationHub.openHub();
-                return; 
+            e.preventDefault(); e.stopPropagation();
+            if (window.Q_IntegrationHub && typeof window.Q_IntegrationHub.openHub === 'function') {
+                if (window.actuateInternalIris) window.actuateInternalIris(() => window.Q_IntegrationHub.openHub());
+                else window.Q_IntegrationHub.openHub();
             }
+            return;
+        }
 
-            if (dataTarget === 'planner' || dataRoute === 'planner' || hrefStr.includes('planner') || onClickStr.includes('planner') || (isShortText && text.includes('omni-planner')) || (isShortText && text.includes('omni planner'))) {
-                e.preventDefault(); e.stopPropagation();
-                if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.openPlanner === 'function') window.Q_OmniPlanner.openPlanner();
-                return; 
+        if (dataTarget === 'planner' || dataRoute === 'planner' || hrefStr.includes('planner') || onClickStr.includes('planner') || (isShortText && text.includes('omni-planner')) || (isShortText && text.includes('omni planner'))) {
+            e.preventDefault(); e.stopPropagation();
+            if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.openPlanner === 'function') {
+                if (window.actuateInternalIris) window.actuateInternalIris(() => window.Q_OmniPlanner.openPlanner());
+                else window.Q_OmniPlanner.openPlanner();
             }
-
+            return;
+        }
             if (dataTarget.includes('physiological') || dataRoute.includes('physiological') || hrefStr.includes('physiological') || onClickStr.includes('physiological') || (isShortText && text.includes('physiological'))) {
                 targetUrl = 'PHYSIOLOGICAL.html'; break;
             } else if (dataTarget.includes('metaphysical') || dataRoute.includes('metaphysical') || hrefStr.includes('metaphysical') || onClickStr.includes('metaphysical') || (isShortText && text.includes('metaphysical'))) {
