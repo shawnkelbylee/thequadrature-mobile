@@ -72,27 +72,27 @@
         .bar-fill { height: 100%; background: var(--theme-main); width: 0%; box-shadow: 0 0 10px var(--theme-main); transition: width 0.1s linear; }
 
         /* PROPRIOCEPTIVE EYE ARCHITECTURE */
-        .q-physio-dial { position: absolute; width: 450px; height: 450px; display: flex; justify-content: center; align-items: center; z-index: 5; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+        .q-physio-dial { position: absolute; width: 85vmin; aspect-ratio: 1/1; max-width: 400px; display: flex; justify-content: center; align-items: center; z-index: 5; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
         
         .ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.5s ease; pointer-events: auto; cursor: crosshair; }
         
         /* 1. The Sclera (Outer Boundary & Base Plate - Deep Slate "White") */
         #tension-sclera { 
             width: 100%; height: 100%; z-index: 2; 
-            background-color: #1f2229; 
+            background-color: #dce0e8; 
             border: 1px solid rgba(255,255,255,0.1); 
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.9);
+            box-shadow: inset 0 0 80px var(--void), inset 0 0 30px rgba(0,0,0,0.8);
             transition: background-color 1s ease, border-color 1s ease;
         }
         #tension-sclera.tension-high { 
-            background-color: #3d1515; 
+            background-color: #ccbaba;
             border-color: var(--friction-red); 
             animation: friction-pulse 1.5s infinite alternate; 
         }
 
         @keyframes friction-pulse {
-            from { box-shadow: inset 0 0 80px rgba(0,0,0,0.9), 0 0 20px var(--friction-red), inset 0 0 20px var(--friction-red); }
-            to { box-shadow: inset 0 0 80px rgba(0,0,0,0.9), 0 0 50px var(--friction-red), inset 0 0 60px var(--friction-red); }
+            from { box-shadow: inset 0 0 80px var(--void), inset 0 0 30px rgba(0,0,0,0.8), 0 0 20px var(--friction-red), inset 0 0 20px var(--friction-red); }
+            to { box-shadow: inset 0 0 80px var(--void), inset 0 0 30px rgba(0,0,0,0.8), 0 0 50px var(--friction-red), inset 0 0 60px var(--friction-red); }
         }
 
         /* 2. The Iris (Anatomical 45% Proportion) */
@@ -101,7 +101,7 @@
         /* Hollow Core Gradients */
         .flow-aura { background: radial-gradient(circle, transparent 40%, var(--sys-cyan) 60%, transparent 80%); box-shadow: 0 0 15px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.15); }
         .vent-aura { background: radial-gradient(circle, transparent 40%, var(--silver-vent) 60%, transparent 80%); box-shadow: 0 0 15px rgba(224, 224, 224, 0.15), inset 0 0 15px rgba(224, 224, 224, 0.15); animation: breath 4s infinite ease-in-out; }
-        .inertia-aura { background: radial-gradient(circle, transparent 40%, var(--mag-inertia) 60%, transparent 80%); box-shadow: 0 0 15px rgba(255, 0, 255, 0.15), inset 0 0 15px rgba(255, 0, 255, 0.15); }
+        .inertia-aura { background: radial-gradient(circle, transparent 40%, var(--bio-purple) 60%, transparent 80%); box-shadow: 0 0 15px rgba(184, 41, 255, 0.15), inset 0 0 15px rgba(184, 41, 255, 0.15); }
         .dlmo-aura { background: radial-gradient(circle, transparent 40%, var(--gold-dlmo) 60%, transparent 80%); box-shadow: 0 0 15px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(255, 215, 0, 0.15); animation: breath 6s infinite ease-in-out; }
         .sleep-aura { background: transparent; box-shadow: none; opacity: 0; }
 
