@@ -84,94 +84,44 @@
         .sparkline-container { width: 100%; height: 14px; display: flex; align-items: flex-end; gap: 2px; margin: 2px 0; }
         .spark-bar { flex-grow: 1; background: var(--env-green); border-radius: 1px 1px 0 0; transition: height 0.5s ease, background 0.5s ease; opacity: 0.8; box-shadow: 0 0 5px var(--env-green-glow);}
         
-        .master-wheel-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); display: flex; justify-content: center; align-items: center; z-index: 5; }
+        .master-wheel-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85vmin; max-width: 400px; aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center; z-index: 5; }
         .wheel-glass { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, rgba(167, 255, 131, 0.02) 0%, rgba(14, 165, 233, 0.05) 60%, rgba(2, 6, 23, 0.6) 100%); backdrop-filter: blur(8px); border: 1px solid var(--env-green-dim); box-shadow: 0 0 60px var(--env-green-dim), inset 0 0 40px rgba(0,0,0,0.8); pointer-events: none; }
-        .equator-hub { position: absolute; width: 95%; height: 95%; top: 2.5%; left: 2.5%; pointer-events: none; z-index: 10; }
-
-        #axis-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(2, 6, 15, 0.9); border: 1px solid var(--env-green); padding: 8px 16px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; color: var(--env-green); border-radius: 4px; box-shadow: 0 0 15px var(--env-green-dim); z-index: 100; opacity: 0; transition: opacity 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 2px; }
-
-        .ecliptic-axis, .axial-tilt, .celestial-equator, .apsides-line { pointer-events: auto; cursor: crosshair; }
-        .ecliptic-axis::after, .celestial-equator::after, .apsides-line::after { content: ''; position: absolute; top: -10px; left: 0; width: 100%; height: 20px; }
-        .axial-tilt::after { content: ''; position: absolute; top: 0; left: -10px; width: 20px; height: 100%; }
-
-        .ecliptic-axis { position: absolute; width: 100%; height: 2px; top: 50%; left: 0; background: linear-gradient(90deg, rgba(167,255,131,0) 0%, var(--env-green) 10%, var(--env-green) 90%, rgba(167,255,131,0) 100%); transform: translateY(-50%); z-index: 11; box-shadow: 0 0 10px var(--env-green-dim); }
-        .axial-tilt { position: absolute; width: 2px; height: 100%; top: 0; left: 50%; background: linear-gradient(180deg, transparent 10%, var(--white-pure) 40%, var(--white-pure) 60%, transparent 90%); transform: translateX(-50%) rotate(23.5deg); z-index: 11; box-shadow: 0 0 10px rgba(255, 255, 255, 0.4); }
-        .celestial-equator { position: absolute; width: 100%; height: 2px; top: 50%; left: 0; background: linear-gradient(90deg, transparent 10%, var(--white-pure) 40%, var(--white-pure) 60%, transparent 90%); transform: translateY(-50%) rotate(23.5deg); z-index: 11; box-shadow: 0 0 10px rgba(255, 255, 255, 0.4); }
-        .apsides-line { position: absolute; width: 84.21%; height: 2px; top: 50%; left: 50%; background: linear-gradient(90deg, var(--atmos-blue) 0%, transparent 50%, var(--perihelion-mag) 100%); box-shadow: 0 0 10px var(--atmos-dim); transform: translate(-50%, -50%) rotate(-76deg); z-index: 11; }
-
-        @keyframes solar-pulse-low { 0%, 100% { box-shadow: 0 0 20px var(--squall-amber), 0 0 40px rgba(245, 158, 11, 0.5), inset 0 0 5px #fff; opacity: 1; } 50% { box-shadow: 0 0 10px var(--squall-amber), 0 0 20px rgba(245, 158, 11, 0.3), inset 0 0 2px #fff; opacity: 0.85; } }
-        .sun-fulcrum { position: absolute; width: 24px; height: 24px; border-radius: 50%; background: var(--squall-amber); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: solar-pulse-low 3s ease-in-out infinite; z-index: 12; }
-
-        .wheel-ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: transform 0.1s linear, box-shadow 0.3s ease; }
-        .r-outer { width: 95%; height: 95%; border: 2px solid var(--env-green); opacity: 0.7; box-shadow: 0 0 15px var(--env-green-glow), inset 0 0 20px rgba(0,0,0,0.5); }
-        .r-mid { width: 78%; height: 78%; background: conic-gradient(from 0deg, var(--void) 0deg, var(--env-green) 45deg, var(--void) 90deg, var(--env-green) 135deg, var(--void) 180deg, var(--env-green) 225deg, var(--void) 270deg, var(--env-green) 315deg, var(--void) 360deg); -webkit-mask: radial-gradient(transparent 65%, black 66%); opacity: 0.8; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
-        .r-inner { width: 55%; height: 55%; border: 2px solid var(--env-green-dim); box-shadow: 0 0 0 1px var(--env-green), inset 0 0 30px var(--env-green-dim); background: rgba(0,0,0,0.4); }
-
-        .horizon-cone { position: absolute; top: -10px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 30px solid var(--env-green); filter: drop-shadow(0 -5px 15px var(--env-green)); pointer-events: none; }
-        .seasonal-marker { position: absolute; font-family: 'Segoe UI Emoji', Arial, sans-serif; font-size: 1.4rem; color: var(--env-green); filter: drop-shadow(0 0 8px var(--env-green-glow)); display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; margin-left: -20px; margin-top: -20px; z-index: 50; pointer-events: none; background: rgba(2, 6, 23, 0.85); border: 1px solid var(--env-green-dim); border-radius: 50%; box-shadow: 0 0 15px rgba(0,0,0,0.9); }
-
-        .astro-tooltip { position: absolute; background: rgba(2, 6, 15, 0.95); backdrop-filter: blur(10px); border: 1px solid; padding: 12px; border-radius: 6px; width: 220px; font-family: 'JetBrains Mono'; font-size: 0.6rem; color: var(--starlight); z-index: 100; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,0.9); text-shadow: none; }
-        .astro-tt-head { font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed; padding-bottom: 4px; }
         
-        .perihelion-marker { position: absolute; width: 14px; height: 14px; background: var(--perihelion-mag); border-radius: 50%; box-shadow: 0 0 25px var(--perihelion-mag), 0 0 10px #fff; z-index: 35; margin-left: -7px; margin-top: -7px; cursor: help; pointer-events: auto; }
-        .aphelion-marker { position: absolute; width: 14px; height: 14px; background: var(--atmos-blue); border-radius: 50%; box-shadow: 0 0 25px var(--atmos-blue), 0 0 10px #fff; z-index: 35; margin-left: -7px; margin-top: -7px; cursor: help; pointer-events: auto; }
-        
-        .perihelion-marker:hover .astro-tooltip, .aphelion-marker:hover .astro-tooltip { opacity: 1; visibility: visible; }
-        .perihelion-marker .astro-tooltip { border-color: var(--perihelion-mag); top: 20px; left: 20px; }
-        .aphelion-marker .astro-tooltip { border-color: var(--atmos-blue); bottom: 20px; right: 20px; }
+ #axis-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(2, 6, 15, 0.9); border: 1px solid var(--env-green); padding: 8px 16px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; color: var(--env-green); border-radius: 4px; box-shadow: 0 0 15px var(--env-green-dim); z-index: 100; opacity: 0; transition: opacity 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 2px; }
 
-        .earth-anchor-container { position: absolute; width: 64px; height: 64px; margin-left: -32px; margin-top: -32px; z-index: 40; }
-        .earth-axis { position: absolute; width: 2px; height: 140%; top: -20%; left: 50%; margin-left: -1px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.8) 80%, transparent); z-index: 1; box-shadow: 0 0 5px rgba(255,255,255,0.5); transform: rotate(23.5deg); }
-        .earth-anchor { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; z-index: 2; background-color: #020813; transform: rotate(23.5deg) translateZ(0); -webkit-mask-image: -webkit-radial-gradient(white, black); }
-        .globe-surface { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0b2e59; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: 128px 64px; background-repeat: repeat-x; animation: pan-surface linear infinite; }
-        @keyframes pan-surface { 0% { background-position: 0px center; } 100% { background-position: 128px center; } }
-        .speed-fast { animation-duration: 2.0s; } .speed-med { animation-duration: 4.0s; } .speed-slow { animation-duration: 7.0s; }
-        .earth-shadow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 3; pointer-events: none; }
-        .alpha-shadow { background: linear-gradient(to top, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
-        .beta-shadow  { background: linear-gradient(to right, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
-        .gamma-shadow { background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
-        .delta-shadow { background: linear-gradient(to left, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.35) 75%); } 
-        .earth-volumetric { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 4; pointer-events: none; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 100%); box-shadow: inset -2px -2px 6px rgba(0,0,0,0.35), inset 2px 2px 6px rgba(255,255,255,0.4), 0 0 10px rgba(167, 255, 131, 0.2); }
+        /* THE ECLIPTIC-ANCHORED DIURNAL GLOBE */
+        .q-meteo-globe { position: absolute; width: 65%; height: 65%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 40; border-radius: 50%; overflow: hidden; box-shadow: 0 0 30px rgba(14, 165, 233, 0.2); background-color: #020813; }
+        
+        .globe-sphere { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; transform: rotate(23.5deg); overflow: hidden; }
+        .globe-surface { position: absolute; width: 200%; height: 100%; top: 0; left: 0; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: auto 100%; background-repeat: repeat-x; transition: background-position 0.1s linear; }
+        
+        .globe-terminator-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; pointer-events: none; z-index: 3; }
+        .globe-terminator { position: absolute; width: 200%; height: 100%; top: 0; left: 0; background: linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 40%, transparent 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.95) 100%); mix-blend-mode: multiply; transition: transform 0.1s linear; }
+        
+        .globe-volumetric { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; box-shadow: inset -10px -10px 30px rgba(0,0,0,0.9), inset 2px 2px 15px rgba(255,255,255,0.15); z-index: 4; pointer-events: none; }       
+       
     </style>
 </head>
 <body class="mode-q">
 
     <div class="global-header desktop-only">METEOROLOGICAL</div>
     <div class="matrix-layer"></div>
-    <div id="axis-hud">GEOMETRIC AXIS DATA</div>
+    <div id="axis-hud">ECLIPTIC TRACKING ACTIVE</div>
 
     <div class="master-wheel-container q-center-dial">
         <div class="wheel-glass"></div>
-        <div class="equator-hub">
-            <div class="ecliptic-axis" onmouseover="if(window.showAxisHUD) window.showAxisHUD('SEASONAL CROSS: ECLIPTIC EQUATOR (0°/180° - 90°/270°)')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()"></div>
-            <div class="celestial-equator" onmouseover="if(window.showAxisHUD) window.showAxisHUD('CELESTIAL EQUATOR: PERPENDICULAR TO AXIS (23.5° TO ECLIPTIC)')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()"></div>
-            <div class="axial-tilt" onmouseover="if(window.showAxisHUD) window.showAxisHUD('AXIAL CROSS: 23.5° OBLIQUITY (SEASONAL SHIFT)')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()"></div>
-            <div class="apsides-line" onmouseover="if(window.showAxisHUD) window.showAxisHUD('LINE OF APSIDES: 14° PERIHELION TO 194° APHELION')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()"></div>
-            <div class="sun-fulcrum"></div>
-        </div>
         
-        <div id="seasonal-markers" style="position:absolute; width:100%; height:100%; z-index:50; pointer-events:none;"></div>
-        
-        <div class="earth-anchor-container" style="top: 2.5%; left: 50%;" title="SOUTHERN SOLSTICE / PERIHELION PROXIMITY">
-            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-fast"></div></div><div class="earth-shadow alpha-shadow"></div><div class="earth-volumetric"></div>
+        <div class="q-meteo-globe" onmouseover="if(window.showAxisHUD) window.showAxisHUD('ECLIPTIC LOCK: 23.5° TILT / SEASONAL WOBBLE')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()">
+            <div class="globe-sphere">
+                <div class="globe-surface" id="diurnal-surface"></div>
+            </div>
+            
+            <div class="globe-terminator-container">
+                <div class="globe-terminator" id="diurnal-terminator"></div>
+            </div>
+            
+            <div class="globe-volumetric"></div>
         </div>
-        <div class="earth-anchor-container" style="top: 50%; left: 97.5%;" title="1ST EQUINOX / NOMINAL VELOCITY">
-            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-med"></div></div><div class="earth-shadow beta-shadow"></div><div class="earth-volumetric"></div>
-        </div>
-        <div class="earth-anchor-container" style="top: 97.5%; left: 50%;" title="NORTHERN SOLSTICE / APHELION PROXIMITY">
-            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-slow"></div></div><div class="earth-shadow gamma-shadow"></div><div class="earth-volumetric"></div>
-        </div>
-        <div class="earth-anchor-container" style="top: 50%; left: 2.5%;" title="2ND EQUINOX / NOMINAL VELOCITY">
-            <div class="earth-axis"></div><div class="earth-anchor"><div class="globe-surface speed-med"></div></div><div class="earth-shadow delta-shadow"></div><div class="earth-volumetric"></div>
-        </div>
-        <div class="wheel-ring r-outer"></div>
-        <div class="wheel-ring r-mid"></div>
-        <div class="wheel-ring r-inner" id="action-horizon-ring"><div class="horizon-cone"></div></div>
     </div>
-
-    <div class="master-wheel-container q-center-dial" style="z-index: 60; pointer-events:none;">
-        <div id="orbital-nodes" style="position:absolute; width:100%; height:100%;"></div>
-    </div>
-
 </body>
 </html>

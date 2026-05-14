@@ -21,66 +21,28 @@ let currentRiskVal = 0;
 let currentOptTarget = '';
 let isBooted = false;
 
-window.injectVectorData = function() {
+  window.injectVectorData = function() {
     const optTL = document.getElementById('opt-tl') || document.querySelectorAll('.opt-oval')[0];
     const optTR = document.getElementById('opt-tr') || document.querySelectorAll('.opt-oval')[1];
     const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
     const optBR = document.getElementById('opt-br') || document.querySelectorAll('.opt-oval')[3];
 
-    if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'risk'); }; optTL.style.color = 'var(--env-green)'; }
-    if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'meteo'); }; optTR.style.color = 'var(--env-green)'; }
-    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'model'); }; optBL.style.color = 'var(--env-green)'; }
-    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'phase'); }; optBR.style.color = 'var(--env-green)'; }
+    if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'insolation'); }; optTL.style.color = 'var(--env-green)'; }
+    if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'hydrosphere'); }; optTR.style.color = 'var(--env-green)'; }
+    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'troposphere'); }; optBL.style.color = 'var(--env-green)'; }
+    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'stratosphere'); }; optBR.style.color = 'var(--env-green)'; }
 
     const quadTL = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
-    if (quadTL) {
-        quadTL.innerHTML = `
-            <div class="panel-data-wrapper">
-                <div class="v-head">RISK ASSESSMENT</div>
-                <div class="t-row"><span class="w-lbl">SYSTEM HOOK:</span> <span id="iot-status-badge" class="val-sm val-highlight">IOT: ACTIVE</span></div>
-                <div class="t-row"><span class="w-lbl">PROBABILITY INDEX:</span> <span class="val-sm val-highlight" id="risk-index">EPHEMERIS SYNCED</span></div>
-                <div class="sparkline-container" id="risk-sparkline"></div>
-                <div class="t-row"><span class="w-lbl">ADVERSE CONDITION:</span> <span class="val-sm val-highlight" id="hazard-status" style="cursor:pointer;" onclick="window.openImpact()">MONITORED</span></div>
-            </div>
-        `;
-    }
+    if (quadTL) quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">LOCAL NOON ZENITH:</span> <span class="val-sm val-highlight">84.2° (PEAK)</span></div><div class="t-row"><span class="w-lbl">PEAK UV INDEX:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">LUMEN DENSITY:</span> <span class="val-sm val-highlight">98,500 LUX</span></div></div>`;
 
     const quadTR = document.getElementById('quad-tr') || document.getElementById('quad-COM');
-    if (quadTR) {
-        quadTR.innerHTML = `
-            <div class="panel-data-wrapper" style="cursor: pointer;" onclick="window.toggleDeltaView()">
-                <div class="v-head">METEOROLOGICAL</div>
-                <div class="t-row"><span class="w-lbl">DATA STREAM:</span> <span id="meteo-badge" class="val-sm val-highlight">ATMOS DELTA: LIVE</span></div>
-                <div class="t-row"><span class="w-lbl" id="lbl-pressure">ATMOSPHERIC PRESSURE:</span> <span class="val-sm val-highlight" id="val-pressure">1013 hPa</span></div>
-                <div class="t-row"><span class="w-lbl" id="lbl-irradiance">SOLAR IRRADIANCE:</span> <span class="val-sm val-highlight" id="val-irradiance">ACTIVE</span></div>
-                <div class="t-row"><span class="w-lbl" id="lbl-precip">VOLUME / TREND:</span> <span class="val-sm val-highlight" id="val-precip">0.0mm / STABLE</span></div>
-            </div>
-        `;
-    }
+    if (quadTR) quadTR.innerHTML = `<div class="panel-data-wrapper" id="pnl-hydro"><div class="v-head">HYDROSPHERE</div><div class="t-row"><span class="w-lbl">ENSO STATE:</span> <span class="val-sm val-highlight">LA NIÑA (COOL)</span></div><div class="t-row"><span class="w-lbl">SST ANOMALY:</span> <span class="val-sm val-highlight">-0.8°C</span></div><div class="t-row"><span class="w-lbl">GULF STREAM VEL:</span> <span class="val-sm val-highlight">1.4 M/S</span></div></div>`;
 
     const quadBL = document.getElementById('quad-bl') || document.getElementById('quad-ENV');
-    if (quadBL) {
-        quadBL.innerHTML = `
-            <div class="panel-data-wrapper">
-                <div class="v-head" id="strat-header">EXPOSURE MODELING</div>
-                <div class="t-row"><span class="w-lbl" id="lbl-yield">YIELD PROJECTION:</span> <span class="val-sm val-highlight" id="strat-yield" style="cursor:pointer;" onclick="window.openImpact()">OPTIMAL</span></div>
-                <div class="t-row"><span class="w-lbl" id="lbl-alloc">RESOURCE ALLOC:</span> <span class="val-sm val-highlight" id="strat-alloc" style="cursor:pointer;" onclick="window.openImpact()">PHASE 2 (GROWTH)</span></div>
-                <div class="t-row"><span class="w-lbl">ACTION HORIZON:</span> <span class="val-sm val-highlight" id="strat-horizon">+14.00°</span></div>
-            </div>
-        `;
-    }
+    if (quadBL) quadBL.innerHTML = `<div class="panel-data-wrapper" id="pnl-tropo"><div class="v-head">TROPOSPHERE</div><div class="t-row"><span class="w-lbl">BAROMETRIC PRESS:</span> <span class="val-sm val-highlight" id="val-pressure">1013 hPa</span></div><div class="t-row"><span class="w-lbl">AMBIENT TEMP:</span> <span class="val-sm val-highlight" id="val-temp">22.0 °C</span></div><div class="t-row"><span class="w-lbl">REL HUMIDITY:</span> <span class="val-sm val-highlight">68%</span></div></div>`;
 
     const quadBR = document.getElementById('quad-br') || document.getElementById('quad-MEC');
-    if (quadBR) {
-        quadBR.innerHTML = `
-            <div class="panel-data-wrapper">
-                <div class="v-head">ENVIRONMENTAL</div>
-                <div class="t-row"><span class="w-lbl">AMBIENT TEMP:</span> <span class="val-sm val-highlight" id="val-temp">-- °C</span></div>
-                <div class="t-row"><span class="w-lbl">BIOME TENSION:</span> <span class="val-sm val-highlight" id="agri-tension">DORMANT / GATHER</span></div>
-                <div class="t-row"><span class="w-lbl">THERMODYNAMIC FRICTION:</span> <span class="val-sm val-highlight" id="thermo-friction">--</span></div>
-            </div>
-        `;
-    }
+    if (quadBR) quadBR.innerHTML = `<div class="panel-data-wrapper" id="pnl-strato"><div class="v-head">STRATOSPHERE</div><div class="t-row"><span class="w-lbl">JET STREAM VEL:</span> <span class="val-sm val-highlight">120 KT</span></div><div class="t-row"><span class="w-lbl">POLAR VORTEX:</span> <span class="val-sm val-highlight">STABLE (LOCKED)</span></div><div class="t-row"><span class="w-lbl">TROPOPAUSE HGT:</span> <span class="val-sm val-highlight">16 KM</span></div></div>`;
 };
 
 window.showAxisHUD = function(text) {
@@ -111,52 +73,7 @@ function initSparklines() {
     }
 }
 
-function renderSeasonalMarkers(mode) {
-    const container = document.getElementById('seasonal-markers');
-    if(!container) return;
-    container.innerHTML = '';
     
-    const markers = [
-        { arc: 45, icon: mode === 'FAUNA' ? '❄️' : '🌱' },
-        { arc: 135, icon: mode === 'FAUNA' ? '🐣' : '🌿' },
-        { arc: 225, icon: mode === 'FAUNA' ? '☀️' : '🌾' },
-        { arc: 315, icon: mode === 'FAUNA' ? '🍂' : '🍁' }
-    ];
-    
-    markers.forEach(m => {
-        let el = document.createElement('div');
-        el.className = 'seasonal-marker';
-        el.innerText = m.icon;
-        let angle = (m.arc - 90) * (Math.PI / 180);
-        let x = 50 + 40 * Math.cos(angle);
-        let y = 50 + 40 * Math.sin(angle);
-        el.style.left = x + '%';
-        el.style.top = y + '%';
-        container.appendChild(el);
-    });
-}
-
-function renderOrbitalNodes() {
-    const container = document.getElementById('orbital-nodes');
-    if(!container) return;
-    container.innerHTML = '';
-    
-    let peri = document.createElement('div');
-    peri.className = 'perihelion-marker';
-    let pAngle = (14 - 90) * (Math.PI / 180);
-    peri.style.left = (50 + 40 * Math.cos(pAngle)) + '%';
-    peri.style.top = (50 + 40 * Math.sin(pAngle)) + '%';
-    peri.innerHTML = '<div class="astro-tooltip"><div class="astro-tt-head">PERIHELION (14.00°)</div>Maximum orbital velocity. True Ellipse acceleration.</div>';
-    container.appendChild(peri);
-
-    let aph = document.createElement('div');
-    aph.className = 'aphelion-marker';
-    let aAngle = (194 - 90) * (Math.PI / 180);
-    aph.style.left = (50 + 40 * Math.cos(aAngle)) + '%';
-    aph.style.top = (50 + 40 * Math.sin(aAngle)) + '%';
-    aph.innerHTML = '<div class="astro-tooltip"><div class="astro-tt-head">APHELION (194.00°)</div>Minimum orbital velocity. True Ellipse deceleration.</div>';
-    container.appendChild(aph);
-}
 
 async function fetchMeteoData() {
     const API_LOCATIONS = {
@@ -211,7 +128,7 @@ window.updateAssetLabels = function() {
         if(yieldLbl) yieldLbl.innerText = "EXPOSURE LIMITS:";
         const allocLbl = document.getElementById('lbl-alloc');
         if(allocLbl) allocLbl.innerText = "METABOLIC DRAW:";
-    } else { 
+   } else { 
         const stratHead = document.getElementById('strat-header');
         if(stratHead) stratHead.innerText = "EXPOSURE MODELING";
         const yieldLbl = document.getElementById('lbl-yield');
@@ -219,7 +136,6 @@ window.updateAssetLabels = function() {
         const allocLbl = document.getElementById('lbl-alloc');
         if(allocLbl) allocLbl.innerText = "RESOURCE ALLOC:";
     }
-    renderSeasonalMarkers(mode);
 };
 
 window.openOptions = function(e, target) {
@@ -593,6 +509,55 @@ window.addEventListener('q-tick', (e) => {
     }
 });
 
+// --- THE ECLIPTIC DIURNAL ENGINE ---
+function initEclipticEngine() {
+    updateGlobeKinematics();
+    setInterval(updateGlobeKinematics, 1000); // 1 Hz Kinetic Tick
+}
+
+function updateGlobeKinematics() {
+    const now = window.Q_MASTER_CLOCK ? new Date(window.Q_MASTER_CLOCK) : new Date();
+
+    // 1. SEASONAL Y-AXIS SHIFT (Rise and Fall)
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+    const rads = ((dayOfYear - 80) / 365.24) * (Math.PI * 2);
+    
+    const maxTiltPX = 35; 
+    const yShift = -(Math.sin(rads) * maxTiltPX);
+
+    const globe = document.querySelector('.q-meteo-globe');
+    if (globe) { globe.style.transform = `translate(-50%, calc(-50% + ${yShift}px))`; }
+
+    // 2. GEOLOCATION LOCK & TERMINATOR SWEEP
+    const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0; 
+    const surface = document.getElementById('diurnal-surface');
+    if(surface) {
+        const lonOffsetPct = ((userLon + 180) / 360) * 100;
+        surface.style.backgroundPosition = `${lonOffsetPct}% 0`;
+    }
+
+    const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600)) / 24;
+    const terminator = document.getElementById('diurnal-terminator');
+    if(terminator) {
+        const solarOffset = (timeFractionUTC * 360 + userLon) % 360;
+        const transX = -(solarOffset / 360) * 100;
+        terminator.style.transform = `translateX(${transX}%)`;
+    }
+}
+
+// --- HUD HOVERS ---
+window.showAxisHUD = function(text) {
+    const hud = document.getElementById('axis-hud');
+    if(hud) { hud.innerText = text; hud.style.opacity = '1'; }
+};
+window.hideAxisHUD = function() {
+    const hud = document.getElementById('axis-hud');
+    if(hud) hud.style.opacity = '0';
+};
+
 // DECOUPLED BOOT SEQUENCE - Bound strictly to q-ui.js emission
 window.addEventListener('q-ui-mounted', () => {
     if(isBooted) return;
@@ -602,23 +567,19 @@ window.addEventListener('q-ui-mounted', () => {
     isBooted = true;
     window.injectVectorData();
     initSparklines();
-    renderSeasonalMarkers(currentAssetMode);
-    renderOrbitalNodes();
+    initEclipticEngine();
     fetchMeteoData();
 });
 
-// Fallback execution block if `q-ui-mounted` fired before this file initialized
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(() => {
-        if(!isBooted && document.getElementById('q-ui-injected-flag')) {
+        if(!isBooted && document.getElementById('quad-tl')) {
             isBooted = true;
             window.injectVectorData();
             initSparklines();
-            renderSeasonalMarkers(currentAssetMode);
-            renderOrbitalNodes();
+            initEclipticEngine();
             fetchMeteoData();
         }
-    }, 150);
+    }, 500);
 }
-
 setInterval(fetchMeteoData, 300000);
