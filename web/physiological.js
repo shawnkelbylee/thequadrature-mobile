@@ -1,7 +1,7 @@
 // THE QUADRATURE: PHYSIOLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase IV UI Engine. Localized Calibration Modals & Persistence Logic.
-// REVISION: Absolute Anatomy Headers & Static Flex Descriptors (Coordinate Fix)
+// REVISION: Timezone Extraction Fix & Continuous Interpolation Pipeline Prep
 
 let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90; 
 let savedAnchor = localStorage.getItem('q_bio_anchor');
@@ -132,7 +132,6 @@ window.savePhysioModal = function() {
 };
 
 window.injectVectorData = function() {
-    // Exact match for the Quad architecture global UI overlay targeting
     const optTL = document.getElementById('opt-tl') || document.querySelectorAll('.opt-oval')[0];
     const optTR = document.getElementById('opt-tr') || document.querySelectorAll('.opt-oval')[1];
     const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
@@ -220,9 +219,17 @@ window.addEventListener('q-tick', (e) => {
     const hours = dateObj.getHours();
     const minutes = dateObj.getMinutes();
     
-    // --- 5-PHASE THERMODYNAMIC MODEL ---
-    let activeMs = ((t % 86400000) - (anchorMins * 60000) + 86400000) % 86400000;
-    let minsSinceWake = Math.floor(activeMs / 60000);
+    // --- LOCAL TIMEZONE EXTRACTION (Bypass raw epoch ms drift) ---
+    let currentTotalMins = (hours * 60) + minutes;
+    
+    // Calculate total minutes elapsed since the wake anchor today
+    let minsSinceWake;
+    if (currentTotalMins >= anchorMins) {
+        minsSinceWake = currentTotalMins - anchorMins;
+    } else {
+        // Rollover from previous day
+        minsSinceWake = (1440 - anchorMins) + currentTotalMins;
+    }
     
     let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
     let wakingDurationMins = 1440 - sleepDuration;
@@ -314,7 +321,7 @@ window.addEventListener('q-tick', (e) => {
         elAlign.style.color = tensionScore > 70 ? "var(--friction-red)" : "var(--theme-main)";
     }
 
-    // --- PROPRIOCEPTIVE EYE ACTUATION ---
+    // --- PROPRIOCEPTIVE EYE ACTUATION (Legacy Class Swap - To be replaced next step) ---
     const pupil = document.getElementById('ultradian-pupil');
     const iris = document.getElementById('thermal-iris');
     const sclera = document.getElementById('tension-sclera');
@@ -341,8 +348,8 @@ window.addEventListener('q-tick', (e) => {
     }
 
     if (eyelid) {
-        if (currentBioState === "SLEEP / RECOVERY") eyelid.className = "ring eyelid-closed";
-        else if (currentBioState === "DLMO WIND-DOWN") eyelid.className = "ring eyelid-half";
-        else eyelid.className = "ring eyelid-open";
+        if (currentBioState === "SLEEP / RECOVERY") eyelid.className = "eyelid-closed";
+        else if (currentBioState === "DLMO WIND-DOWN") eyelid.className = "eyelid-half";
+        else eyelid.className = "eyelid-open";
     }
 });
