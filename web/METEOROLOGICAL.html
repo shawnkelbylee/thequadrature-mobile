@@ -53,53 +53,48 @@
             text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
-        #q-universal-modal { z-index: 999999 !important; }
+        /* DYNAMIC CORNER PANELS INJECTED BY Q-UI.JS - DO NOT HARDCODE HERE */
 
-        .v-head { 
-            position: absolute; white-space: nowrap;
-            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
-            margin: 0; padding: 0; z-index: 25; border: none;
-            color: var(--theme-main);
-            text-shadow: 0 0 10px var(--theme-dim);
-            transition: color 0.3s, text-shadow 0.3s;
-        }
-        
-        #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(8px); }
-        #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(-8px); }
-        #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(8px); }
-        #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(-8px); }
-
-        
-
-        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
-        
-        
-
-        .val-sm { font-family: 'Orbitron'; font-weight: 700; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); text-transform: uppercase; transition: 0.3s; }
-        
-        .val-highlight { color: var(--env-green); text-shadow: 0 0 10px var(--env-green-dim); }
-
-        .panel-data-wrapper { position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto; z-index: 20; }
-
-        .sparkline-container { width: 100%; height: 14px; display: flex; align-items: flex-end; gap: 2px; margin: 2px 0; }
-        .spark-bar { flex-grow: 1; background: var(--env-green); border-radius: 1px 1px 0 0; transition: height 0.5s ease, background 0.5s ease; opacity: 0.8; box-shadow: 0 0 5px var(--env-green-glow);}
-        
+        /* --- MOBILE GEOMETRY & DIAL BOUNDARIES --- */
         .master-wheel-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85vmin; max-width: 400px; aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center; z-index: 5; }
         .wheel-glass { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, rgba(167, 255, 131, 0.02) 0%, rgba(14, 165, 233, 0.05) 60%, rgba(2, 6, 23, 0.6) 100%); backdrop-filter: blur(8px); border: 1px solid var(--env-green-dim); box-shadow: 0 0 60px var(--env-green-dim), inset 0 0 40px rgba(0,0,0,0.8); pointer-events: none; }
         
- #axis-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(2, 6, 15, 0.9); border: 1px solid var(--env-green); padding: 8px 16px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; color: var(--env-green); border-radius: 4px; box-shadow: 0 0 15px var(--env-green-dim); z-index: 100; opacity: 0; transition: opacity 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 2px; }
+        /* Decorative UI Rings */
+        .wheel-ring { position: absolute; border-radius: 50%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .r-outer { width: 95%; height: 95%; border: 2px solid var(--env-green); opacity: 0.7; box-shadow: 0 0 15px var(--env-green-glow), inset 0 0 20px rgba(0,0,0,0.5); }
+        .r-mid { width: 78%; height: 78%; background: conic-gradient(from 0deg, var(--void) 0deg, var(--env-green) 45deg, var(--void) 90deg, var(--env-green) 135deg, var(--void) 180deg, var(--env-green) 225deg, var(--void) 270deg, var(--env-green) 315deg, var(--void) 360deg); -webkit-mask: radial-gradient(transparent 65%, black 66%); opacity: 0.8; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .r-inner { width: 55%; height: 55%; border: 2px solid var(--env-green-dim); box-shadow: 0 0 0 1px var(--env-green), inset 0 0 30px var(--env-green-dim); background: rgba(0,0,0,0.4); }
+        .horizon-cone { position: absolute; top: -10px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 30px solid var(--env-green); filter: drop-shadow(0 -5px 15px var(--env-green)); }
 
-        /* THE ECLIPTIC-ANCHORED DIURNAL GLOBE */
-        .q-meteo-globe { position: absolute; width: 65%; height: 65%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 40; border-radius: 50%; overflow: hidden; box-shadow: 0 0 30px rgba(14, 165, 233, 0.2); background-color: #020813; }
+        /* --- THE ECLIPTIC-ANCHORED DIURNAL GLOBE --- */
+        .q-meteo-globe { position: absolute; width: 65%; height: 65%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 40; border-radius: 50%; box-shadow: 0 0 30px rgba(14, 165, 233, 0.2); background-color: #020813; }
         
-        .globe-sphere { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; transform: rotate(23.5deg); overflow: hidden; }
+        /* 0-Degree Vertical Axis Line */
+        .globe-axis-line { position: absolute; width: 2px; height: 130%; top: -15%; left: 50%; transform: translateX(-50%); background: linear-gradient(to bottom, transparent, var(--atmos-blue), transparent); z-index: 10; opacity: 0.7; box-shadow: 0 0 10px var(--atmos-dim); pointer-events: none; }
+        
+        /* Earth Surface (0-Degree Vertical) */
+        .globe-sphere { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; }
         .globe-surface { position: absolute; width: 200%; height: 100%; top: 0; left: 0; background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); background-size: auto 100%; background-repeat: repeat-x; transition: background-position 0.1s linear; }
         
-        .globe-terminator-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; pointer-events: none; z-index: 3; }
-        .globe-terminator { position: absolute; width: 200%; height: 100%; top: 0; left: 0; background: linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 40%, transparent 50%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.95) 100%); mix-blend-mode: multiply; transition: transform 0.1s linear; }
+        /* The 3D Sweeping Solar Shadow */
+        .globe-terminator-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; pointer-events: none; z-index: 3; }
+        .globe-terminator { position: absolute; width: 200%; height: 100%; top: 0; left: 0; mix-blend-mode: multiply; transition: transform 0.1s linear; }
         
-        .globe-volumetric { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; box-shadow: inset -10px -10px 30px rgba(0,0,0,0.9), inset 2px 2px 15px rgba(255,255,255,0.15); z-index: 4; pointer-events: none; }       
-       
+        /* Overscaled repeating gradient ensures the globe never hits a void edge during the 24h sweep */
+        .globe-terminator::before {
+            content: ''; position: absolute; width: 300%; height: 100%; top: 0; left: 0;
+            background: repeating-linear-gradient(to right,
+                rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.7) 12.5%,
+                transparent 25%, transparent 75%,
+                rgba(0,0,0,0.7) 87.5%, rgba(0,0,0,0.98) 100%
+            );
+            background-size: 33.333% 100%; 
+        }
+        
+        /* Permanent Volumetric Inset to simulate a physical sphere regardless of terminator position */
+        .globe-volumetric { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; box-shadow: inset -15px -15px 40px rgba(0,0,0,0.9), inset 5px 5px 20px rgba(255,255,255,0.15); z-index: 4; pointer-events: none; }
+        
+        #axis-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(2, 6, 15, 0.9); border: 1px solid var(--env-green); padding: 8px 16px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; color: var(--env-green); border-radius: 4px; box-shadow: 0 0 15px var(--env-green-dim); z-index: 100; opacity: 0; transition: opacity 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 2px; }
     </style>
 </head>
 <body class="mode-q">
@@ -111,7 +106,9 @@
     <div class="master-wheel-container q-center-dial">
         <div class="wheel-glass"></div>
         
-        <div class="q-meteo-globe" onmouseover="if(window.showAxisHUD) window.showAxisHUD('ECLIPTIC LOCK: 23.5° TILT / SEASONAL WOBBLE')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()">
+        <div class="q-meteo-globe" onmouseover="if(window.showAxisHUD) window.showAxisHUD('ECLIPTIC DIURNAL ENGINE: VERTICAL AXIS / Y-SHIFT')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()">
+            <div class="globe-axis-line"></div>
+            
             <div class="globe-sphere">
                 <div class="globe-surface" id="diurnal-surface"></div>
             </div>
@@ -122,6 +119,11 @@
             
             <div class="globe-volumetric"></div>
         </div>
+
+        <div class="wheel-ring r-outer"></div>
+        <div class="wheel-ring r-mid"></div>
+        <div class="wheel-ring r-inner" id="action-horizon-ring"><div class="horizon-cone"></div></div>
     </div>
+
 </body>
 </html>
