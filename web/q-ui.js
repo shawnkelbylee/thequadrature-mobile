@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XIV UI Engine. Restoration & Dual-Row Scrubber Matrix Deployment.
+// STATUS: Phase XV UI Engine. Hard-Override Temporal Sync & Duplicate Purge.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -930,22 +930,22 @@ window.addEventListener('click', (e) => {
             let isShortText = text.length > 0 && text.length < 40;
 
             if (dataTarget === 'dashboard' || dataRoute === 'dashboard' || hrefStr.includes('dashboard') || onClickStr.includes('dashboard') || (isShortText && text.includes('dashboard'))) {
-            e.preventDefault(); e.stopPropagation();
-            if (window.Q_IntegrationHub && typeof window.Q_IntegrationHub.openHub === 'function') {
-                if (window.actuateInternalIris) window.actuateInternalIris(() => window.Q_IntegrationHub.openHub());
-                else window.Q_IntegrationHub.openHub();
+                e.preventDefault(); e.stopPropagation();
+                if (window.Q_IntegrationHub && typeof window.Q_IntegrationHub.openHub === 'function') {
+                    if (window.actuateInternalIris) window.actuateInternalIris(() => window.Q_IntegrationHub.openHub());
+                    else window.Q_IntegrationHub.openHub();
+                }
+                return;
             }
-            return;
-        }
 
-        if (dataTarget === 'planner' || dataRoute === 'planner' || hrefStr.includes('planner') || onClickStr.includes('planner') || (isShortText && text.includes('omni-planner')) || (isShortText && text.includes('omni planner'))) {
-            e.preventDefault(); e.stopPropagation();
-            if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.openPlanner === 'function') {
-                if (window.actuateInternalIris) window.actuateInternalIris(() => window.Q_OmniPlanner.openPlanner());
-                else window.Q_OmniPlanner.openPlanner();
+            if (dataTarget === 'planner' || dataRoute === 'planner' || hrefStr.includes('planner') || onClickStr.includes('planner') || (isShortText && text.includes('omni-planner')) || (isShortText && text.includes('omni planner'))) {
+                e.preventDefault(); e.stopPropagation();
+                if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.openPlanner === 'function') {
+                    if (window.actuateInternalIris) window.actuateInternalIris(() => window.Q_OmniPlanner.openPlanner());
+                    else window.Q_OmniPlanner.openPlanner();
+                }
+                return;
             }
-            return;
-        }
             if (dataTarget.includes('physiological') || dataRoute.includes('physiological') || hrefStr.includes('physiological') || onClickStr.includes('physiological') || (isShortText && text.includes('physiological'))) {
                 targetUrl = 'PHYSIOLOGICAL.html'; break;
             } else if (dataTarget.includes('metaphysical') || dataRoute.includes('metaphysical') || hrefStr.includes('metaphysical') || onClickStr.includes('metaphysical') || (isShortText && text.includes('metaphysical'))) {
@@ -1121,43 +1121,43 @@ window.bindMasterTickScrubber = function() {
     });
 };
 
-window.scrubTime = function(val) {
-    if(window.stopMacroLoop) window.stopMacroLoop();
-    if(!window.getSimState || !window.ANCHOR_ALPHA_DYNAMIC) return;
-    const targetDays = parseFloat(val);
+// --- UNIFIED TEMPORAL STATE MANAGEMENT ---
+
+window.getSimState = function() {
+    try {
+        let stored = localStorage.getItem('Q_MASTER_CLOCK');
+        if (stored) return JSON.parse(stored);
+    } catch(e) {}
+    return { isLive: true, simTime: Date.now() };
+};
+
+window.setSimState = function(state) {
+    let payload = JSON.stringify(state);
+    localStorage.setItem('Q_MASTER_CLOCK', payload);
+    window.dispatchEvent(new StorageEvent('storage', { key: 'Q_MASTER_CLOCK', newValue: payload }));
     
-    const liveDate = new Date();
-    const liveMsSinceMidnight = (liveDate.getUTCHours() * 3600000) + 
-                                (liveDate.getUTCMinutes() * 60000) + 
-                                (liveDate.getUTCSeconds() * 1000) + 
-                                liveDate.getUTCMilliseconds();
-    
-    const targetMs = window.ANCHOR_ALPHA_DYNAMIC + (targetDays * 86400000);
-    const dTarget = new Date(targetMs);
-    dTarget.setUTCHours(0, 0, 0, 0);
-    
-    const finalMs = dTarget.getTime() + liveMsSinceMidnight;
-    
-    window.updateMasterClock(false, finalMs);
-    if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('LIGHT');
+    // HARD-OVERRIDE: Force immediate Q-Core synchronization
+    if (window.Q_STATE) {
+        window.Q_STATE.isLive = state.isLive;
+        window.Q_STATE.simTime = state.simTime;
+    }
 };
 
 window.setLiveClock = function() {
     if(window.stopMacroLoop) window.stopMacroLoop();
-    window.updateMasterClock(true, Date.now());
+    
+    let state = { isLive: true, simTime: Date.now() };
+    window.setSimState(state);
     if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('HEAVY');
     
+    // Explicitly reset camera toggle to Ecliptic
     const camBtn = document.getElementById('q-cam-toggle');
     if (camBtn) {
         camBtn.innerText = '[ CAM: ECLIPTIC ]';
         camBtn.classList.remove('active');
     }
-};
-
-window.updateMasterClock = function(isLive, simTime) {
-    const payload = JSON.stringify({ isLive, simTime, scrubSpeed: 0 });
-    localStorage.setItem('Q_MASTER_CLOCK', payload);
-    window.dispatchEvent(new StorageEvent('storage', { key: 'Q_MASTER_CLOCK', newValue: payload }));
+    window.dispatchEvent(new CustomEvent('q-camera-toggle', { detail: { isFree: false } }));
+    
     window.syncScrubberUI();
 };
 
@@ -1172,13 +1172,18 @@ window.syncScrubberUI = function() {
         liveBtn.innerText = state.isLive ? "LIVE" : "RESYNC";
     }
     
-    if(scrubber && state.isLive === false && window.ANCHOR_ALPHA_DYNAMIC) {
-        let daysElapsed = (state.simTime - window.ANCHOR_ALPHA_DYNAMIC) / 86400000;
+    if (scrubber && window.ANCHOR_ALPHA_DYNAMIC) {
+        // Evaluate target math regardless of live state
+        let targetTime = state.isLive ? Date.now() : state.simTime;
+        let daysElapsed = (targetTime - window.ANCHOR_ALPHA_DYNAMIC) / 86400000;
         let currentDay = Math.floor(daysElapsed);
+        
         let sMax = parseInt(scrubber.max);
         let sMin = parseInt(scrubber.min);
+        
         if (currentDay >= sMax - 90) scrubber.max = currentDay + 365;
         if (currentDay <= sMin + 90) scrubber.min = currentDay - 365;
+        
         scrubber.value = daysElapsed;
     }
 };
@@ -1202,20 +1207,20 @@ window.stopMacroLoop = function() {
 
 window.executeMicroStep = function(daysDelta) {
     window.stopMacroLoop();
-    let state = window.getSimState ? window.getSimState() : {isLive:true, simTime:Date.now()};
+    let state = window.getSimState();
     if (state.isLive) {
         state.isLive = false;
         state.simTime = Date.now();
     }
     state.simTime += daysDelta * 86400000;
-    if(window.setSimState) window.setSimState(state);
-    else window.updateMasterClock(false, state.simTime);
+    window.setSimState(state);
+    window.syncScrubberUI();
 };
 
 window.executeMacroLoop = function(direction) {
     window.stopMacroLoop();
     
-    let state = window.getSimState ? window.getSimState() : {isLive:true, simTime:Date.now()};
+    let state = window.getSimState();
     if (state.isLive) {
         state.isLive = false;
         state.simTime = Date.now();
@@ -1229,18 +1234,28 @@ window.executeMacroLoop = function(direction) {
 
     macroInterval = setInterval(() => {
         state.simTime += direction * 86400000;
-        if(window.setSimState) window.setSimState(state);
-        else window.updateMasterClock(false, state.simTime);
+        window.setSimState(state);
+        window.syncScrubberUI();
     }, 66); 
 };
 
 window.attachScrubberEvents = function() {
+    const liveToggle = document.getElementById('q-live-toggle');
+    const scrubber = document.getElementById('q-global-scrubber');
     const camToggle = document.getElementById('q-cam-toggle');
+    
     const microRev = document.getElementById('q-micro-rev');
     const microFwd = document.getElementById('q-micro-fwd');
     const macroRev = document.getElementById('q-macro-rev');
     const macroFwd = document.getElementById('q-macro-fwd');
     const macroStop = document.getElementById('q-macro-stop');
+
+    // Live / Resync Hook
+    if (liveToggle) {
+        liveToggle.addEventListener('click', () => {
+            window.setLiveClock();
+        });
+    }
 
     // Camera Mode Authority Dispatch
     if (camToggle) {
@@ -1258,6 +1273,18 @@ window.attachScrubberEvents = function() {
         });
     }
 
+    // High-Resolution Slider Hook (0.041666 Step / 1 Hour)
+    if (scrubber) {
+        scrubber.addEventListener('input', (e) => {
+            window.stopMacroLoop(); // Slider acts as universal kill-switch
+            let val = parseFloat(e.target.value);
+            let msOffset = window.ANCHOR_ALPHA_DYNAMIC + (val * 86400000);
+            window.setSimState({ isLive: false, simTime: msOffset });
+            window.syncScrubberUI();
+        });
+    }
+
+    // Micro / Macro Kinetic Hooks
     if (microRev) microRev.addEventListener('click', () => window.executeMicroStep(-1));
     if (microFwd) microFwd.addEventListener('click', () => window.executeMicroStep(1));
     if (macroRev) macroRev.addEventListener('click', () => window.executeMacroLoop(-1));
@@ -1276,5 +1303,12 @@ window.addEventListener('DOMContentLoaded', () => {
         if (micFab && controlsPanel) {
             controlsPanel.appendChild(micFab);
         }
+    }
+});
+
+// Watch for external system state changes
+window.addEventListener('storage', (e) => {
+    if (e.key === 'Q_MASTER_CLOCK') {
+        window.syncScrubberUI();
     }
 });
