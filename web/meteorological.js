@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase IX. Emissive Terminator Masking & Nocturnal Telemetry.
+// STATUS: Phase X. Emissive Terminator & Explicit Camera State Authority.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -30,6 +30,18 @@ let prevMouseX = 0;
 let prevMouseY = 0;
 let camTheta = 0; 
 let camPhi = Math.PI / 2; 
+
+// --- EXTERNAL STATE RECEIVERS (From q-ui.js) ---
+window.addEventListener('q-camera-toggle', (e) => {
+    isFreeCam = e.detail.isFree;
+    if (!isFreeCam && camera) {
+        // Instant snap-back if toggled to Ecliptic
+        camTheta = 0;
+        camPhi = Math.PI / 2;
+        camera.position.set(0, 0, 2.3);
+        camera.lookAt(0, 0, 0);
+    }
+});
 
 // --- THE HARD RESET TRIGGER (RESYNC) ---
 document.addEventListener('click', (e) => {
@@ -647,11 +659,13 @@ function initThreeGlobe() {
     const ambient = new THREE.AmbientLight(0x111b33, 0.15);
     scene.add(ambient);
     
-    // --- SPHERICAL CAMERA DRAG CONTROLLER ---
-    renderer.domElement.style.touchAction = 'none'; // Prevent browser scrolling during rotation
+    // --- RESTRICTED SPHERICAL CAMERA DRAG CONTROLLER ---
+    renderer.domElement.style.touchAction = 'none';
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
-        isFreeCam = true;
+        // KILL SWITCH: If the UI button is set to ECLIPTIC, entirely reject the mouse input.
+        if (!isFreeCam) return; 
+        
         isDragging = true;
         prevMouseX = e.clientX;
         prevMouseY = e.clientY;
