@@ -1,7 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
 // STATUS: Phase V. Ecliptic-Anchored Seasonal Terminator & Live Atmosphere.
-// REVISION: Corrected East-West Terminator Sweep, API URL Patch, Scrubber State Hook.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -114,13 +113,11 @@ function fetchAtmosphericLayer() {
             const lastInfrared = data.satellite.infrared[data.satellite.infrared.length - 1];
             const path = lastInfrared.path;
             
-            // Corrected RainViewer schema: /{size}/{z}/{x}/{y}/{color}/{options}.png
             const tileUrl = `${host}${path}/2048/0/0/0/0/0_0.png`;
             const fallbackUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png';
             
             const atmos = document.getElementById('diurnal-atmosphere');
             if (atmos) {
-                // Layer the API over the fallback to guarantee coverage
                 atmos.style.backgroundImage = `url('${tileUrl}'), url('${fallbackUrl}')`;
             }
         }
@@ -550,39 +547,47 @@ function updateGlobeKinematics() {
         now = new Date();
     }
 
-    // 2. SEASONAL POLAR PITCH (Z-Axis Shift)
     const start = new Date(now.getFullYear(), 0, 0);
     const diff = now - start;
     const oneDay = 1000 * 60 * 60 * 24;
     const dayOfYear = Math.floor(diff / oneDay);
     const rads = ((dayOfYear - 80) / 365.24) * (Math.PI * 2);
     
-    const maxTiltDeg = 23.5; 
-    const zPitch = -(Math.sin(rads) * maxTiltDeg);
+    // Axial tilt declination mapped to Z-pitch
+    const zPitch = -(Math.sin(rads) * 23.5);
 
-    // 3. GEOLOCATION LOCK & 3D ROTATION
+    // 2. GEOLOCATION LOCK & Y-PAN PITCH SIMULATION
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0; 
     const lonOffsetPct = ((userLon + 180) / 360) * 100;
+    
+    // Simulate 3D pitch by panning the texture Y-axis (Prevents CSS rotateX squash)
+    const panY = Math.sin(rads) * 15; 
     
     const surface = document.getElementById('diurnal-surface');
     const atmos = document.getElementById('diurnal-atmosphere');
     
     if(surface) {
-        surface.style.backgroundPosition = `${lonOffsetPct}% 0`;
-        surface.style.transform = `rotateX(${zPitch}deg)`; 
+        surface.style.backgroundPosition = `${lonOffsetPct}% ${50 + panY}%`;
+        surface.style.transform = `none`; 
     }
     if(atmos) {
-        atmos.style.backgroundPosition = `${lonOffsetPct}% 0`;
-        atmos.style.transform = `rotateX(${zPitch}deg)`; 
+        atmos.style.backgroundPosition = `${lonOffsetPct}% ${50 + panY}%`;
+        atmos.style.transform = `none`; 
     }
 
-    // 4. TERMINATOR SWEEP (East to West Translation)
+    // 3. TERMINATOR TILT & EAST-WEST SWEEP
+    const termContainer = document.querySelector('.globe-terminator-container');
+    if (termContainer) {
+        // Tilt the shadow to match the solar declination relative to the vertical axis
+        termContainer.style.transform = `rotate(${zPitch}deg)`;
+    }
+
     const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600) + (now.getUTCMilliseconds() / 3600000)) / 24;
     const terminator = document.getElementById('diurnal-terminator');
     if(terminator) {
-        // Offset 180 ensures local noon correctly centers the day gradient
+        // Standard continuous East-to-West (Right to Left) sweep
         let offsetDeg = (timeFractionUTC * 360 + userLon) % 360;
-        let transX = -(((offsetDeg + 180) % 360) / 360) * 50; 
+        let transX = -(offsetDeg / 360) * 50; 
         terminator.style.transform = `translateX(${transX}%)`;
     }
 }
