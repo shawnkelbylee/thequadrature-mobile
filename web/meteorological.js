@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XVIII. Atmospheric Decoupling & Absolute Cache Bypass.
+// STATUS: Phase XX. DOM Anchor Realignment & Global Unit Transformation.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -10,10 +10,9 @@ let alertThreshold = 75;
 let currentAssetMode = "FLORA";
 let iotProtocol = "MANUAL";
 let climateAnchor = "CLW";
-let baroUnit = "hPa";
+let unitSystem = localStorage.getItem('Q_UNIT_SYS') || 'METRIC';
 let actionHorizon = "ANCHOR";
-let tempUnit = "C";
-let thermoBaseline = 22.0;
+let thermoBaseline = 22.0; // Stored natively in Celsius
 let crossVectorSync = true;
 
 let currentRiskVal = 0;
@@ -35,7 +34,6 @@ let camPhi = Math.PI / 2;
 window.addEventListener('q-camera-toggle', (e) => {
     isFreeCam = e.detail.isFree;
     if (!isFreeCam && camera) {
-        // Instant snap-back if toggled to Ecliptic
         camTheta = 0;
         camPhi = Math.PI / 2;
         camera.position.set(0, 0, 2.3);
@@ -43,7 +41,6 @@ window.addEventListener('q-camera-toggle', (e) => {
     }
 });
 
-// --- THE HARD RESET TRIGGER (RESYNC) ---
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'q-live-toggle') {
         isFreeCam = false;
@@ -63,21 +60,26 @@ window.injectVectorData = function() {
     const optBR = document.getElementById('opt-br') || document.querySelectorAll('.opt-oval')[3];
 
     if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'insolation'); }; optTL.style.color = 'var(--env-green)'; }
-    if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'hydrosphere'); }; optTR.style.color = 'var(--env-green)'; }
-    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'troposphere'); }; optBL.style.color = 'var(--env-green)'; }
-    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'stratosphere'); }; optBR.style.color = 'var(--env-green)'; }
+    if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'meteo'); }; optTR.style.color = 'var(--env-green)'; }
+    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'phase'); }; optBL.style.color = 'var(--env-green)'; }
+    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'model'); }; optBR.style.color = 'var(--env-green)'; }
+
+    const dStyleTop = "font-family:'Orbitron'; font-size:0.55rem; color:rgba(255,255,255,0.5); font-weight:700; border-top:1px solid rgba(255,255,255,0.1); margin-top:4px; padding-top:4px; letter-spacing:1px; text-align:center;";
+    const dStyleBot = "font-family:'Orbitron'; font-size:0.55rem; color:rgba(255,255,255,0.5); font-weight:700; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:6px; padding-bottom:4px; letter-spacing:1px; text-align:center;";
+    
+    let isImp = (unitSystem === 'IMPERIAL');
 
     const quadTL = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
-    if (quadTL) quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">LOCAL NOON ZENITH:</span> <span class="val-sm val-highlight">84.2° (PEAK)</span></div><div class="t-row"><span class="w-lbl">PEAK UV INDEX:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">LUMEN DENSITY:</span> <span class="val-sm val-highlight">98,500 LUX</span></div></div>`;
+    if (quadTL) quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">SUN PEAK ANGLE:</span> <span class="val-sm val-highlight">84.2° (PEAK)</span></div><div class="t-row"><span class="w-lbl">MAX UV LEVEL:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">SUNLIGHT INTENSITY:</span> <span class="val-sm val-highlight" id="val-irradiance">98,500 LUX</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE ]</div></div>`;
 
     const quadTR = document.getElementById('quad-tr') || document.getElementById('quad-COM');
-    if (quadTR) quadTR.innerHTML = `<div class="panel-data-wrapper" id="pnl-hydro"><div class="v-head">HYDROSPHERE</div><div class="t-row"><span class="w-lbl">ENSO STATE:</span> <span class="val-sm val-highlight">LA NIÑA (COOL)</span></div><div class="t-row"><span class="w-lbl">SST ANOMALY:</span> <span class="val-sm val-highlight">-0.8°C</span></div><div class="t-row"><span class="w-lbl">GULF STREAM VEL:</span> <span class="val-sm val-highlight">1.4 M/S</span></div></div>`;
+    if (quadTR) quadTR.innerHTML = `<div class="panel-data-wrapper" id="pnl-hydro"><div class="v-head">HYDROSPHERE</div><div class="t-row"><span class="w-lbl">EL NIÑO PHASE:</span> <span class="val-sm val-highlight">LA NIÑA (COOL)</span></div><div class="t-row"><span class="w-lbl">SURFACE TEMP VAR:</span> <span class="val-sm val-highlight" id="val-sst">${isImp ? '-1.4 °F' : '-0.8 °C'}</span></div><div class="t-row"><span class="w-lbl">OCEAN CURRENT SPD:</span> <span class="val-sm val-highlight" id="val-gulf">${isImp ? '3.1 MPH' : '1.4 M/S'}</span></div><div style="${dStyleTop}">[ OCEAN & WATER ]</div></div>`;
 
     const quadBL = document.getElementById('quad-bl') || document.getElementById('quad-ENV');
-    if (quadBL) quadBL.innerHTML = `<div class="panel-data-wrapper" id="pnl-tropo"><div class="v-head">TROPOSPHERE</div><div class="t-row"><span class="w-lbl">BAROMETRIC PRESS:</span> <span class="val-sm val-highlight" id="val-pressure">1013 hPa</span></div><div class="t-row"><span class="w-lbl">AMBIENT TEMP:</span> <span class="val-sm val-highlight" id="val-temp">22.0 °C</span></div><div class="t-row"><span class="w-lbl">REL HUMIDITY:</span> <span class="val-sm val-highlight">68%</span></div></div>`;
+    if (quadBL) quadBL.innerHTML = `<div class="panel-data-wrapper" id="pnl-tropo"><div class="v-head">TROPOSPHERE</div><div style="${dStyleBot}">[ SURFACE WEATHER ]</div><div class="t-row"><span class="w-lbl">AIR PRESSURE:</span> <span class="val-sm val-highlight" id="val-pressure">${isImp ? '29.92 inHg' : '1013 hPa'}</span></div><div class="t-row"><span class="w-lbl">AIR TEMPERATURE:</span> <span class="val-sm val-highlight" id="val-temp">${isImp ? '71.6 °F' : '22.0 °C'}</span></div><div class="t-row"><span class="w-lbl">HUMIDITY:</span> <span class="val-sm val-highlight">68%</span></div></div>`;
 
     const quadBR = document.getElementById('quad-br') || document.getElementById('quad-MEC');
-    if (quadBR) quadBR.innerHTML = `<div class="panel-data-wrapper" id="pnl-strato"><div class="v-head">STRATOSPHERE</div><div class="t-row"><span class="w-lbl">JET STREAM VEL:</span> <span class="val-sm val-highlight">120 KT</span></div><div class="t-row"><span class="w-lbl">POLAR VORTEX:</span> <span class="val-sm val-highlight">STABLE (LOCKED)</span></div><div class="t-row"><span class="w-lbl">TROPOPAUSE HGT:</span> <span class="val-sm val-highlight">16 KM</span></div></div>`;
+    if (quadBR) quadBR.innerHTML = `<div class="panel-data-wrapper" id="pnl-strato"><div class="v-head">STRATOSPHERE</div><div style="${dStyleBot}">[ UPPER ATMOSPHERE ]</div><div class="t-row"><span class="w-lbl">JET STREAM SPEED:</span> <span class="val-sm val-highlight" id="val-jet">${isImp ? '138 MPH' : '222 KM/H'}</span></div><div class="t-row"><span class="w-lbl">ARCTIC AIR STABILITY:</span> <span class="val-sm val-highlight">STABLE (LOCKED)</span></div><div class="t-row"><span class="w-lbl">STORM CEILING:</span> <span class="val-sm val-highlight" id="val-tropo">${isImp ? '10 MILES' : '16 KM'}</span></div></div>`;
 };
 
 window.showAxisHUD = function(text) {
@@ -141,8 +143,6 @@ async function fetchMeteoData() {
 }
 
 function fetchAtmosphericLayer() {
-    // ABSOLUTE CACHE BYPASS: Appending Date.now() ensures the browser network layer
-    // always hits the RainViewer endpoint for live JSON instead of serving from cache.
     fetch('https://api.rainviewer.com/public/weather-maps.json?nocache=' + Date.now())
     .then(res => res.json())
     .then(data => {
@@ -229,10 +229,10 @@ window.openOptions = function(e, target) {
                 </select>
             </div>
             <div style="margin-top: 10px;">
-                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">BAROMETRIC UNIT</label>
-                <select id="baro-unit" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                    <option value="hPa" ${baroUnit==='hPa'?'selected':''}>HECTOPASCALS (hPa)</option>
-                    <option value="inHg" ${baroUnit==='inHg'?'selected':''}>INCHES OF MERCURY (inHg)</option>
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">GLOBAL UNIT SYSTEM</label>
+                <select id="unit-sys" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                    <option value="METRIC" ${unitSystem==='METRIC'?'selected':''}>METRIC (DECIMAL)</option>
+                    <option value="IMPERIAL" ${unitSystem==='IMPERIAL'?'selected':''}>IMPERIAL (EMPIRICAL)</option>
                 </select>
             </div>
         `;
@@ -258,13 +258,6 @@ window.openOptions = function(e, target) {
         title = "ENVIRONMENTAL PHASE CALIBRATION";
         html = `
             <div>
-                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">TEMPERATURE UNIT</label>
-                <select id="temp-unit" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                    <option value="C" ${tempUnit==='C'?'selected':''}>CELSIUS (°C)</option>
-                    <option value="F" ${tempUnit==='F'?'selected':''}>FAHRENHEIT (°F)</option>
-                </select>
-            </div>
-            <div style="margin-top: 10px;">
                 <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">THERMODYNAMIC BASELINE (COMFORT): <span id="base-val" style="color:var(--env-green);">${thermoBaseline.toFixed(1)}°</span></label>
                 <input type="range" id="thermo-base" min="15" max="30" step="0.5" value="${thermoBaseline}" class="modal-input" oninput="document.getElementById('base-val').innerText = this.value + '°'" style="width: 100%; margin-top: 4px;">
             </div>
@@ -291,9 +284,13 @@ window.saveOptions = function() {
     } else if (currentOptTarget === 'meteo') {
         const cEl = document.getElementById('climate-anchor');
         if(cEl) climateAnchor = cEl.value;
-        const bEl = document.getElementById('baro-unit');
-        if(bEl) baroUnit = bEl.value;
+        const uSys = document.getElementById('unit-sys');
+        if(uSys) {
+            unitSystem = uSys.value;
+            localStorage.setItem('Q_UNIT_SYS', unitSystem);
+        }
         fetchMeteoData();
+        window.injectVectorData(); // Force DOM refresh to instantly apply unit toggle
     } else if (currentOptTarget === 'model') {
         const aEl = document.getElementById('asset-track');
         if(aEl) currentAssetMode = aEl.value;
@@ -301,8 +298,6 @@ window.saveOptions = function() {
         if(hEl) actionHorizon = hEl.value;
         window.updateAssetLabels();
     } else if (currentOptTarget === 'phase') {
-        const uEl = document.getElementById('temp-unit');
-        if(uEl) tempUnit = uEl.value;
         const tbEl = document.getElementById('thermo-base');
         if(tbEl) thermoBaseline = parseFloat(tbEl.value);
         const cvEl = document.getElementById('cv-sync');
@@ -348,9 +343,11 @@ window.openImpact = function() {
     let severity = currentRiskVal >= alertThreshold ? "SEVERE" : (currentRiskVal >= alertThreshold - 25 ? "ELEVATED" : "NOMINAL");
     let apiDataString = "";
     
+    let isImp = (unitSystem === 'IMPERIAL');
+
     if (liveWeather && isLive) {
-        let pDisp = baroUnit === 'inHg' ? (liveWeather.surface_pressure * 0.02953).toFixed(2) + ' inHg' : liveWeather.surface_pressure.toFixed(1) + ' hPa';
-        let tDisp = tempUnit === 'F' ? (liveWeather.temperature_2m * 9/5 + 32).toFixed(1) + ' °F' : liveWeather.temperature_2m.toFixed(1) + ' °C';
+        let pDisp = isImp ? (liveWeather.surface_pressure * 0.02953).toFixed(2) + ' inHg' : liveWeather.surface_pressure.toFixed(1) + ' hPa';
+        let tDisp = isImp ? (liveWeather.temperature_2m * 9/5 + 32).toFixed(1) + ' °F' : liveWeather.temperature_2m.toFixed(1) + ' °C';
         apiDataString = '<br><br><span style="color:var(--atmos-blue); font-size:0.65rem; line-height: 1.4; display:block; border-top: 1px dashed var(--atmos-blue); padding-top: 8px; margin-top: 8px;"><strong>[ CROSS-VECTOR API TELEMETRY ]</strong><br>&#x2022; OPEN-METEO (Env): Temp ' + tDisp + ' | Pressure ' + pDisp + ' | Irradiance ' + liveWeather.direct_normal_irradiance + 'W/m²</span>';
     }
 
@@ -400,9 +397,23 @@ window.addEventListener('q-tick', (e) => {
         renderer.render(scene, camera);
     }
 
-    // 2. DOM UPDATES
+    // 2. DOM UPDATES & METRIC CONVERSION
     const badge = document.getElementById('iot-status-badge');
     if(badge) badge.innerText = 'IOT: ' + iotProtocol;
+    
+    let isImp = (unitSystem === 'IMPERIAL');
+
+    const valSst = document.getElementById('val-sst');
+    if(valSst) valSst.innerText = isImp ? '-1.4 °F' : '-0.8 °C';
+
+    const valGulf = document.getElementById('val-gulf');
+    if(valGulf) valGulf.innerText = isImp ? '3.1 MPH' : '1.4 M/S';
+
+    const valJet = document.getElementById('val-jet');
+    if(valJet) valJet.innerText = isImp ? '138 MPH' : '222 KM/H';
+
+    const valTropo = document.getElementById('val-tropo');
+    if(valTropo) valTropo.innerText = isImp ? '10 MILES' : '16 KM';
 
     const trueArc = qData.trueArc;
     
@@ -471,24 +482,20 @@ window.addEventListener('q-tick', (e) => {
         if(valPress) {
             let deltaPress = currentRiskVal / 10;
             let sign = currentRiskVal > 50 ? '-' : '+';
-            let v = baroUnit === 'inHg' ? (deltaPress * 0.02953).toFixed(2) : deltaPress.toFixed(1);
-            let u = baroUnit === 'inHg' ? 'inHg' : 'hPa';
+            let v = isImp ? (deltaPress * 0.02953).toFixed(2) : deltaPress.toFixed(1);
+            let u = isImp ? 'inHg' : 'hPa';
             valPress.innerText = `${sign}${v} ${u}`;
         }
         const valIrr = document.getElementById('val-irradiance');
         if(valIrr) {
             valIrr.innerText = (currentRiskVal > 50 ? '-12' : '+4') + ' W/m²';
         }
-        const valPrecip = document.getElementById('val-precip');
-        if(valPrecip) {
-            valPrecip.innerText = (currentRiskVal > 50 ? '+45%' : '-5%') + ' FROM NORM';
-        }
         const valTemp = document.getElementById('val-temp');
         if(valTemp) {
             let deltaTemp = currentRiskVal / 15;
             let sign = currentRiskVal > 50 ? '+' : '-';
-            let v = tempUnit === 'F' ? (deltaTemp * 9/5).toFixed(1) : deltaTemp.toFixed(1);
-            let u = tempUnit === 'F' ? '°F' : '°C';
+            let v = isImp ? (deltaTemp * 9/5).toFixed(1) : deltaTemp.toFixed(1);
+            let u = isImp ? '°F' : '°C';
             valTemp.innerText = `${sign}${v} ${u}`;
         }
     } else {
@@ -501,31 +508,22 @@ window.addEventListener('q-tick', (e) => {
             
             const valIrr = document.getElementById('val-irradiance');
             if(valIrr) valIrr.innerText = liveWeather.direct_normal_irradiance.toFixed(1) + ' W/m²';
-            
-            const valPrecip = document.getElementById('val-precip');
-            if(valPrecip) {
-                valPrecip.innerText = liveWeather.precipitation.toFixed(1) + 'mm / LIVE';
-            }
         } else {
             const valIrr = document.getElementById('val-irradiance');
             if(valIrr) valIrr.innerText = "ACTIVE / NOMINAL";
-            const valPrecip = document.getElementById('val-precip');
-            if(valPrecip) {
-                valPrecip.innerText = "0.0mm / STABLE";
-            }
         }
         
         const valPress = document.getElementById('val-pressure');
         if(valPress) {
-            let v = baroUnit === 'inHg' ? (currentPress * 0.02953).toFixed(2) : currentPress.toFixed(1);
-            let u = baroUnit === 'inHg' ? 'inHg' : 'hPa';
+            let v = isImp ? (currentPress * 0.02953).toFixed(2) : currentPress.toFixed(1);
+            let u = isImp ? 'inHg' : 'hPa';
             valPress.innerText = `${v} ${u}`;
         }
         
         const valTemp = document.getElementById('val-temp');
         if(valTemp) {
-            let v = tempUnit === 'F' ? (currentTempC * 9/5 + 32).toFixed(1) : currentTempC.toFixed(1);
-            let u = tempUnit === 'F' ? '°F' : '°C';
+            let v = isImp ? (currentTempC * 9/5 + 32).toFixed(1) : currentTempC.toFixed(1);
+            let u = isImp ? '°F' : '°C';
             valTemp.innerText = `${v} ${u}`;
         }
     }
@@ -568,8 +566,8 @@ window.addEventListener('q-tick', (e) => {
     
     const thermoFrictionEl = document.getElementById('thermo-friction');
     if (thermoFrictionEl) {
-        let fricDisp = tempUnit === 'F' ? (thermoFrictionC * 9/5).toFixed(2) : thermoFrictionC.toFixed(2);
-        let u = tempUnit === 'F' ? 'ΔF' : 'ΔC';
+        let fricDisp = isImp ? (thermoFrictionC * 9/5).toFixed(2) : thermoFrictionC.toFixed(2);
+        let u = isImp ? 'ΔF' : 'ΔC';
         thermoFrictionEl.innerText = `${fricDisp} ${u}`;
     }
 });
