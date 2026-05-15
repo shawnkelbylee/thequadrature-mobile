@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VI. True WebGL Spherical Physics & Live RainViewer Telemetry.
+// STATUS: Phase VII. Geostationary Ecliptic Lock & Q-Core Sync.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -355,9 +355,17 @@ window.openImpact = function() {
     if(window.Q_ModalEngine) window.Q_ModalEngine.render('&#x26A0;&#xFE0E; IMPACT DIAGNOSTIC', html);
 };
 
+// --- CORE PHYSICS SYNC BRIDGE ---
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
+    // 1. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
+    if (scene && camera && renderer) {
+        updateGlobeKinematics(activeTime, daysElapsed);
+        renderer.render(scene, camera);
+    }
+
+    // 2. DOM UPDATES
     const badge = document.getElementById('iot-status-badge');
     if(badge) badge.innerText = 'IOT: ' + iotProtocol;
 
@@ -539,7 +547,7 @@ function initThreeGlobe() {
     scene = new THREE.Scene();
     
     camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-    camera.position.z = 2.3; // Pulled forward to fill the void
+    camera.position.z = 2.3; 
     
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -548,7 +556,7 @@ function initThreeGlobe() {
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin("anonymous");
     
-    // Base Earth (StandardMaterial natively calculates light and soft shadows)
+    // Base Earth
     const earthGeo = new THREE.SphereGeometry(1, 64, 64);
     const earthMat = new THREE.MeshStandardMaterial({
         map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'),
@@ -557,7 +565,7 @@ function initThreeGlobe() {
     earthMesh = new THREE.Mesh(earthGeo, earthMat);
     scene.add(earthMesh);
 
-    // Live Cloud / Radar Layer
+    // Live Cloud Layer
     const cloudGeo = new THREE.SphereGeometry(1.015, 64, 64);
     const cloudMat = new THREE.MeshStandardMaterial({
         map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png'),
@@ -573,8 +581,8 @@ function initThreeGlobe() {
     sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
     scene.add(sunLight);
     
-    // Minimal ambient bounce so the night side isn't entirely black
-    const ambient = new THREE.AmbientLight(0x020617, 0.5);
+    // Starlight Ambient Base (Prevents Total Blackout on Night Side)
+    const ambient = new THREE.AmbientLight(0x111b33, 0.6);
     scene.add(ambient);
     
     window.addEventListener('resize', () => {
@@ -585,60 +593,43 @@ function initThreeGlobe() {
         }
     });
 
-    // Start Real-Time Render Loop
-    function kineticLoop() {
-        updateGlobeKinematics();
-        renderer.render(scene, camera);
-        requestAnimationFrame(kineticLoop);
-    }
-    kineticLoop();
+    // NOTE: The independent kinetic loop is dead. 
+    // Rendering is now hard-slaved to the q-tick event listener above.
 }
 
-function updateGlobeKinematics() {
+// THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
+function updateGlobeKinematics(activeTimeMs, daysElapsed) {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
-    let now;
-    if (window.getSimState) {
-        const state = window.getSimState();
-        now = state.isLive ? new Date() : new Date(state.simTime);
-    } else if (window.Q_MASTER_CLOCK) {
-        now = new Date(window.Q_MASTER_CLOCK);
-    } else {
-        now = new Date();
-    }
-
-    // 1. STATIC EARTH (Longitude Lock)
+    const d = new Date(activeTimeMs);
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
-    
-    // Rotate mesh so the target longitude faces the camera perfectly
-    const staticRotationY = -(userLon * (Math.PI / 180)) - (Math.PI / 2);
-    earthMesh.rotation.y = staticRotationY;
-    cloudMesh.rotation.y = staticRotationY;
 
-    // 2. ORBITING SUN (Seasonal Wobble - Y Axis)
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now - start;
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
+    // 1. ECLIPTIC CAMERA LOCK (User Longitude Centered)
+    const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600) + (d.getUTCMilliseconds() / 3600000)) / 24;
     
-    const rads = ((dayOfYear - 80) / 365.24) * (Math.PI * 2);
-    const declination = Math.sin(rads) * (23.5 * Math.PI / 180);
-
-    // 3. ORBITING SUN (Diurnal Sweep - X/Z Axis)
-    const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600) + (now.getUTCMilliseconds() / 3600000)) / 24;
-    
-    // Calculate True Solar Time for location
     let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
     if (localTimeFraction < 0) localTimeFraction += 1;
 
-    // Map sweep: East (+X) to West (-X). Noon (0.5) is dead front (+Z).
-    const theta = (0.5 - localTimeFraction) * (Math.PI * 2);
+    const rotationOffset = -(Math.PI / 2); 
+    const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
+    
+    earthMesh.rotation.y = rotationY;
+    cloudMesh.rotation.y = rotationY;
 
-    // 4. APPLY 3D SPHERICAL COORDINATES TO LIGHT SOURCE
+    // 2. SEASONAL TILT (The Earth Pitches)
+    // Anchor is Southern Solstice (Max positive pitch toward Ecliptic Camera)
+    const eclipticPitch = Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
+    
+    earthMesh.rotation.x = eclipticPitch;
+    cloudMesh.rotation.x = eclipticPitch;
+
+    // 3. DIURNAL SWEEP (The Sun Orbits the Static Longitude)
+    const theta = (0.5 - localTimeFraction) * (Math.PI * 2);
+    
     const sunDistance = 5;
-    const sunX = sunDistance * Math.cos(declination) * Math.sin(theta);
-    const sunY = sunDistance * Math.sin(declination);
-    const sunZ = sunDistance * Math.cos(declination) * Math.cos(theta);
+    const sunX = sunDistance * Math.sin(theta);
+    const sunY = 0; // Locked strictly to the Ecliptic plane
+    const sunZ = sunDistance * Math.cos(theta);
 
     sunLight.position.set(sunX, sunY, sunZ);
 }
