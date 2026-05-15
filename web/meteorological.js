@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VII. Geostationary Ecliptic Lock & Q-Core Sync.
+// STATUS: Phase VIII. Persistent Free-Cam Matrix & Spherical Drag Kinematics.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -22,6 +22,27 @@ let isBooted = false;
 
 // --- WEBGL GLOBE VARIABLES ---
 let scene, camera, renderer, earthMesh, cloudMesh, sunLight;
+
+// --- FREE-CAM STATE MACHINE ---
+let isFreeCam = false;
+let isDragging = false;
+let prevMouseX = 0;
+let prevMouseY = 0;
+let camTheta = 0; 
+let camPhi = Math.PI / 2; 
+
+// --- THE HARD RESET TRIGGER (RESYNC) ---
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'q-live-toggle') {
+        isFreeCam = false;
+        camTheta = 0;
+        camPhi = Math.PI / 2;
+        if (camera) {
+            camera.position.set(0, 0, 2.3);
+            camera.lookAt(0, 0, 0);
+        }
+    }
+});
 
 window.injectVectorData = function() {
     const optTL = document.getElementById('opt-tl') || document.querySelectorAll('.opt-oval')[0];
@@ -585,6 +606,46 @@ function initThreeGlobe() {
     const ambient = new THREE.AmbientLight(0x111b33, 0.15);
     scene.add(ambient);
     
+    // --- SPHERICAL CAMERA DRAG CONTROLLER ---
+    renderer.domElement.style.touchAction = 'none'; // Prevent browser scrolling during rotation
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+        isFreeCam = true;
+        isDragging = true;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+        if (window.showAxisHUD) window.showAxisHUD('FREE-CAM ORBIT ACTIVE');
+    });
+    
+    window.addEventListener('pointermove', (e) => {
+        if (!isDragging || !camera) return;
+        
+        const deltaX = e.clientX - prevMouseX;
+        const deltaY = e.clientY - prevMouseY;
+        
+        // Map 2D pixel drag to 3D spherical radians
+        camTheta -= deltaX * 0.005;
+        camPhi -= deltaY * 0.005;
+        
+        // Clamp Phi to prevent camera from flipping upside down at the poles
+        camPhi = Math.max(0.001, Math.min(Math.PI - 0.001, camPhi));
+        
+        // Apply pure spherical coordinate matrix
+        const radius = 2.3;
+        camera.position.x = radius * Math.sin(camPhi) * Math.sin(camTheta);
+        camera.position.y = radius * Math.cos(camPhi);
+        camera.position.z = radius * Math.sin(camPhi) * Math.cos(camTheta);
+        camera.lookAt(0, 0, 0);
+        
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+    });
+    
+    window.addEventListener('pointerup', () => {
+        isDragging = false;
+    });
+    // ----------------------------------------
+
     window.addEventListener('resize', () => {
         if(container && camera && renderer) {
             camera.aspect = container.clientWidth / container.clientHeight;
@@ -629,6 +690,13 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed) {
     const sunZ = sunDistance * Math.cos(theta);
 
     sunLight.position.set(sunX, sunY, sunZ);
+
+    // 4. CAMERA STATE ENFORCEMENT
+    // Ensure the camera remains locked to the Ecliptic Anchor if Free-Cam has not been triggered
+    if (!isFreeCam && camera) {
+        camera.position.set(0, 0, 2.3);
+        camera.lookAt(0, 0, 0);
+    }
 }
 
 // DECOUPLED BOOT SEQUENCE - Bound strictly to q-ui.js emission
