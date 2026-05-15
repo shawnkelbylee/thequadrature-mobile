@@ -8,6 +8,8 @@
     <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // METEOROLOGICAL VECTOR</title>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <script src="q-ui.js"></script>
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
@@ -67,38 +69,11 @@
         .master-wheel-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85vmin; max-width: 400px; aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center; z-index: 5; }
         .wheel-glass { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, rgba(167, 255, 131, 0.02) 0%, rgba(14, 165, 233, 0.05) 60%, rgba(2, 6, 23, 0.6) 100%); backdrop-filter: blur(8px); border: 1px solid var(--env-green-dim); box-shadow: 0 0 60px var(--env-green-dim), inset 0 0 40px rgba(0,0,0,0.8); pointer-events: none; }
 
-        /* THE ECLIPTIC-ANCHORED DIURNAL GLOBE */
-        .q-meteo-globe { position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 40; border-radius: 50%; overflow: hidden; box-shadow: 0 0 30px rgba(14, 165, 233, 0.2); background-color: #020813; }
+        /* NATIVE 3D WEBGL CONTAINER */
+        .q-meteo-globe { position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 40; border-radius: 50%; box-shadow: 0 0 30px rgba(14, 165, 233, 0.2); background-color: #020813; overflow: hidden; }
+        #webgl-globe { width: 100%; height: 100%; }
         
-        .globe-sphere { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; }
-        
-        .globe-surface { 
-            position: absolute; width: 200%; height: 130%; top: -15%; left: 0; 
-            background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'); 
-            background-size: auto 100%; background-repeat: repeat-x; z-index: 1; 
-        }
-        
-        .globe-atmosphere { 
-            position: absolute; width: 200%; height: 130%; top: -15%; left: 0; 
-            background-image: url('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png'); 
-            background-size: auto 100%; background-repeat: repeat-x; 
-            mix-blend-mode: screen; opacity: 0.85; z-index: 2; pointer-events: none; 
-        }
-        
-        .globe-terminator-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; pointer-events: none; z-index: 3; }
-        
-        .globe-terminator { 
-            position: absolute; width: 200%; height: 100%; top: 0; left: 0; mix-blend-mode: multiply; 
-            background: linear-gradient(to right,
-                rgba(2,6,15,0.98) 0%, 
-                transparent 25%, 
-                rgba(2,6,15,0.98) 50%, 
-                transparent 75%, 
-                rgba(2,6,15,0.98) 100%
-            );
-        }
-        
-        .globe-volumetric { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; box-shadow: inset -15px -15px 40px rgba(0,0,0,0.9), inset 5px 5px 20px rgba(255,255,255,0.15); z-index: 4; pointer-events: none; }
+        .globe-axis-line { position: absolute; width: 2px; height: 130%; top: -15%; left: 50%; transform: translateX(-50%); background: linear-gradient(to bottom, transparent, var(--atmos-blue), transparent); z-index: 10; opacity: 0.7; box-shadow: 0 0 10px var(--atmos-dim); pointer-events: none; }
         
         #axis-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(2, 6, 15, 0.9); border: 1px solid var(--env-green); padding: 8px 16px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; color: var(--env-green); border-radius: 4px; box-shadow: 0 0 15px var(--env-green-dim); z-index: 100; opacity: 0; transition: opacity 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 2px; }
     </style>
@@ -112,17 +87,9 @@
     <div class="master-wheel-container q-center-dial">
         <div class="wheel-glass"></div>
         
-        <div class="q-meteo-globe" onmouseover="if(window.showAxisHUD) window.showAxisHUD('ECLIPTIC DIURNAL ENGINE: VERTICAL AXIS / POLAR Z-PITCH')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()">
-            <div class="globe-sphere">
-                <div class="globe-surface" id="diurnal-surface"></div>
-                <div class="globe-atmosphere" id="diurnal-atmosphere"></div>
-            </div>
-            
-            <div class="globe-terminator-container">
-                <div class="globe-terminator" id="diurnal-terminator"></div>
-            </div>
-            
-            <div class="globe-volumetric"></div>
+        <div class="q-meteo-globe" onmouseover="if(window.showAxisHUD) window.showAxisHUD('ECLIPTIC DIURNAL ENGINE: 3D LIGHT TARGETING')" onmouseout="if(window.hideAxisHUD) window.hideAxisHUD()">
+            <div class="globe-axis-line"></div>
+            <div id="webgl-globe"></div>
         </div>
     </div>
 

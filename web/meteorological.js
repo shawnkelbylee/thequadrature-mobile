@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase V. Ecliptic-Anchored Seasonal Terminator & Live Atmosphere.
+// STATUS: Phase VI. True WebGL Spherical Physics & Live RainViewer Telemetry.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -19,6 +19,9 @@ let crossVectorSync = true;
 let currentRiskVal = 0;
 let currentOptTarget = '';
 let isBooted = false;
+
+// --- WEBGL GLOBE VARIABLES ---
+let scene, camera, renderer, earthMesh, cloudMesh, sunLight;
 
 window.injectVectorData = function() {
     const optTL = document.getElementById('opt-tl') || document.querySelectorAll('.opt-oval')[0];
@@ -112,13 +115,15 @@ function fetchAtmosphericLayer() {
         if (data.satellite && data.satellite.infrared && data.satellite.infrared.length > 0) {
             const lastInfrared = data.satellite.infrared[data.satellite.infrared.length - 1];
             const path = lastInfrared.path;
-            
             const tileUrl = `${host}${path}/2048/0/0/0/0/0_0.png`;
-            const fallbackUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png';
             
-            const atmos = document.getElementById('diurnal-atmosphere');
-            if (atmos) {
-                atmos.style.backgroundImage = `url('${tileUrl}'), url('${fallbackUrl}')`;
+            if (cloudMesh && cloudMesh.material) {
+                const loader = new THREE.TextureLoader();
+                loader.setCrossOrigin("anonymous");
+                loader.load(tileUrl, (texture) => {
+                    cloudMesh.material.map = texture;
+                    cloudMesh.material.needsUpdate = true;
+                });
             }
         }
     })
@@ -526,16 +531,73 @@ window.addEventListener('q-tick', (e) => {
     }
 });
 
-// --- THE ECLIPTIC DIURNAL ENGINE ---
-function initEclipticEngine() {
+// --- NATIVE 3D PHYSICS ENGINE ---
+function initThreeGlobe() {
+    const container = document.getElementById('webgl-globe');
+    if (!container) return;
+    
+    scene = new THREE.Scene();
+    
+    camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.z = 3.5;
+    
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin("anonymous");
+    
+    // Base Earth (StandardMaterial natively calculates light and soft shadows)
+    const earthGeo = new THREE.SphereGeometry(1, 64, 64);
+    const earthMat = new THREE.MeshStandardMaterial({
+        map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'),
+        roughness: 0.8
+    });
+    earthMesh = new THREE.Mesh(earthGeo, earthMat);
+    scene.add(earthMesh);
+
+    // Live Cloud / Radar Layer
+    const cloudGeo = new THREE.SphereGeometry(1.015, 64, 64);
+    const cloudMat = new THREE.MeshStandardMaterial({
+        map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_clouds_1024.png'),
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+    scene.add(cloudMesh);
+
+    // The Sun (Directional Light)
+    sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    scene.add(sunLight);
+    
+    // Minimal ambient bounce so the night side isn't entirely black
+    const ambient = new THREE.AmbientLight(0x020617, 0.5);
+    scene.add(ambient);
+    
+    window.addEventListener('resize', () => {
+        if(container && camera && renderer) {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+    });
+
+    // Start Real-Time Render Loop
     function kineticLoop() {
         updateGlobeKinematics();
-        requestAnimationFrame(kineticLoop); 
+        renderer.render(scene, camera);
+        requestAnimationFrame(kineticLoop);
     }
     kineticLoop();
 }
 
 function updateGlobeKinematics() {
+    if (!earthMesh || !cloudMesh || !sunLight) return;
+
+    // 1. HARD-HOOK TO SCRUBBER SIM_TIME
     let now;
     if (window.getSimState) {
         const state = window.getSimState();
@@ -546,51 +608,32 @@ function updateGlobeKinematics() {
         now = new Date();
     }
 
-    // 1. GEOLOCATION LOCK (Axial Tilt Severed)
+    // 2. ISOLATED SOLAR DECLINATION (The Wobble)
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+    
+    // Calculate the declination angle for the Sun based on the Ecliptic (23.5 max tilt)
+    const rads = ((dayOfYear - 80) / 365.24) * (Math.PI * 2);
+    const declination = Math.sin(rads) * (23.5 * Math.PI / 180);
+
+    // Orbit the light source along the Y-axis without changing the horizontal distance
+    const sunDistance = 5;
+    sunLight.position.set(0, Math.sin(declination) * sunDistance, Math.cos(declination) * sunDistance);
+
+    // 3. DIURNAL ROTATION (Time of Day & Longitude Lock)
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0; 
-    const lonOffsetPct = ((userLon + 180) / 360) * 100;
-    
-    const surface = document.getElementById('diurnal-surface');
-    const atmos = document.getElementById('diurnal-atmosphere');
-    
-    if(surface) {
-        surface.style.backgroundPosition = `${lonOffsetPct}% 50%`;
-        surface.style.transform = `none`; 
-    }
-    if(atmos) {
-        atmos.style.backgroundPosition = `${lonOffsetPct}% 50%`;
-        atmos.style.transform = `none`; 
-    }
-
-    // 2. ISOLATED TERMINATOR SWEEP
-    const termContainer = document.querySelector('.globe-terminator-container');
-    if (termContainer) {
-        termContainer.style.transform = `none`; // Hard-lock vertical
-    }
-
     const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600) + (now.getUTCMilliseconds() / 3600000)) / 24;
     
-    const terminator = document.getElementById('diurnal-terminator');
-    if(terminator) {
-        // Map local time: Noon (0.5) perfectly aligns Day, Midnight (0.0) aligns Night.
-        let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
-        if (localTimeFraction < 0) localTimeFraction += 1;
-        
-        let phase = (localTimeFraction + 0.5) % 1;
-        let transX = -(phase * 50);
-        
-        terminator.style.transform = `translateX(${transX}%)`;
-    }
+    // Rotate Earth mesh so the Sun aligns perfectly with Local Noon
+    // 360 degrees rotation per day, phase shifted to align with the +Z light source
+    const rotationOffset = Math.PI; 
+    const rotationY = (timeFractionUTC * Math.PI * 2) + (userLon * Math.PI / 180) + rotationOffset;
+    
+    earthMesh.rotation.y = rotationY;
+    cloudMesh.rotation.y = rotationY;
 }
-// --- HUD HOVERS ---
-window.showAxisHUD = function(text) {
-    const hud = document.getElementById('axis-hud');
-    if(hud) { hud.innerText = text; hud.style.opacity = '1'; }
-};
-window.hideAxisHUD = function() {
-    const hud = document.getElementById('axis-hud');
-    if(hud) hud.style.opacity = '0';
-};
 
 // DECOUPLED BOOT SEQUENCE - Bound strictly to q-ui.js emission
 window.addEventListener('q-ui-mounted', () => {
@@ -601,7 +644,7 @@ window.addEventListener('q-ui-mounted', () => {
     isBooted = true;
     window.injectVectorData();
     initSparklines();
-    initEclipticEngine();
+    initThreeGlobe();
     fetchMeteoData();
     fetchAtmosphericLayer();
 });
@@ -612,7 +655,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
             isBooted = true;
             window.injectVectorData();
             initSparklines();
-            initEclipticEngine();
+            initThreeGlobe();
             fetchMeteoData();
             fetchAtmosphericLayer();
         }
