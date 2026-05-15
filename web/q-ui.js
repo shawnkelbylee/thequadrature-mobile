@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XV UI Engine. Hard-Override Temporal Sync & Duplicate Purge.
+// STATUS: Phase XVI UI Engine. Infinite Resolution Slider Kinetics.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -596,7 +596,7 @@ window.injectUniversalUI = function() {
                 <button id="q-live-toggle" class="btn-micro active">LIVE</button>
             </div>
             <div class="scrub-row-2">
-                <input type="range" id="q-global-scrubber" min="-365" max="365" step="0.041666" value="0" class="q-scrubber">
+                <input type="range" id="q-global-scrubber" min="-365" max="365" step="any" value="0" class="q-scrubber">
             </div>
         </div>
     `;
@@ -1110,12 +1110,12 @@ window.bindMasterTickScrubber = function() {
         if (isLive) {
             const scrubber = document.getElementById('q-global-scrubber');
             if (scrubber) {
-                let currentDay = Math.floor(daysElapsed);
+                // Remove integer snap to allow smooth continuous playback when live
                 let sMax = parseInt(scrubber.max);
                 let sMin = parseInt(scrubber.min);
-                if (currentDay >= sMax - 90) scrubber.max = currentDay + 365;
-                if (currentDay <= sMin + 90) scrubber.min = currentDay - 365;
-                scrubber.value = currentDay;
+                if (daysElapsed >= sMax - 90) scrubber.max = Math.floor(daysElapsed) + 365;
+                if (daysElapsed <= sMin + 90) scrubber.min = Math.floor(daysElapsed) - 365;
+                scrubber.value = daysElapsed;
             }
         }
     });
@@ -1273,7 +1273,7 @@ window.attachScrubberEvents = function() {
         });
     }
 
-    // High-Resolution Slider Hook (0.041666 Step / 1 Hour)
+    // Infinite-Resolution Slider Hook (step="any")
     if (scrubber) {
         scrubber.addEventListener('input', (e) => {
             window.stopMacroLoop(); // Slider acts as universal kill-switch
