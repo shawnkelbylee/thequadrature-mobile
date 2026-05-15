@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXIV UI Engine. Slider Automation Matrix & DOM Flanking.
+// STATUS: Phase XXVI UI Engine. Orbital Interference Pattern & Aliasing Fix.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -1257,7 +1257,7 @@ window.executeMacroLoop = function(direction) {
     }, 66); 
 };
 
-// Row 2: Temporal Math (Continuous Slider Automation)
+// Row 2: Temporal Math (Cinematic Interference Pattern)
 window.executeTimeLoop = function(direction, stepMs, activeBtnId) {
     window.stopMacroLoop();
     let state = window.getSimState();
@@ -1269,14 +1269,14 @@ window.executeTimeLoop = function(direction, stepMs, activeBtnId) {
     const btnStop = document.getElementById('q-macro-stop');
     const activeBtn = document.getElementById(activeBtnId);
     
-    if (btnStop) btnStop.disabled = false; // Universal Kill Switch arms
+    if (btnStop) btnStop.disabled = false; 
     if (activeBtn) activeBtn.classList.add('active');
 
     timeLoopInterval = setInterval(() => {
         state.simTime += direction * stepMs;
         window.setSimState(state);
         window.syncScrubberUI();
-    }, 33); // Higher framerate (30FPS) for fluid shadow sweep
+    }, 33); 
 };
 
 window.attachScrubberEvents = function() {
@@ -1333,12 +1333,12 @@ window.attachScrubberEvents = function() {
     if (macroFwd) macroFwd.addEventListener('click', () => window.executeMacroLoop(1));
     if (macroStop) macroStop.addEventListener('click', window.stopMacroLoop);
     
-    // Row 2 Listeners (Temporal Automation)
-    // Micro: +/- 15 Minutes (900,000 ms) | Macro: +/- 4 Hours (14,400,000 ms)
-    if (timeMacroRev) timeMacroRev.addEventListener('click', () => window.executeTimeLoop(-1, 14400000, 'q-time-macro-rev'));
+    // Row 2 Listeners (Temporal Automation - The Interference Pattern)
+    // Micro: Exactly 15 Minutes (900,000 ms) | Macro: 24 Hours + 15 Minutes (87,300,000 ms)
+    if (timeMacroRev) timeMacroRev.addEventListener('click', () => window.executeTimeLoop(-1, 87300000, 'q-time-macro-rev'));
     if (timeMicroRev) timeMicroRev.addEventListener('click', () => window.executeTimeLoop(-1, 900000, 'q-time-micro-rev'));
     if (timeMicroFwd) timeMicroFwd.addEventListener('click', () => window.executeTimeLoop(1, 900000, 'q-time-micro-fwd'));
-    if (timeMacroFwd) timeMacroFwd.addEventListener('click', () => window.executeTimeLoop(1, 14400000, 'q-time-macro-fwd'));
+    if (timeMacroFwd) timeMacroFwd.addEventListener('click', () => window.executeTimeLoop(1, 87300000, 'q-time-macro-fwd'));
 };
 
 window.addEventListener('DOMContentLoaded', () => {
