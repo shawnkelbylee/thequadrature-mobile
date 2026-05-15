@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VIII. Persistent Free-Cam Matrix & Spherical Drag Kinematics.
+// STATUS: Phase IX. Emissive Terminator Masking & Nocturnal Telemetry.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -21,7 +21,7 @@ let currentOptTarget = '';
 let isBooted = false;
 
 // --- WEBGL GLOBE VARIABLES ---
-let scene, camera, renderer, earthMesh, cloudMesh, sunLight;
+let scene, camera, renderer, earthMesh, cloudMesh, nightMesh, sunLight;
 
 // --- FREE-CAM STATE MACHINE ---
 let isFreeCam = false;
@@ -598,11 +598,52 @@ function initThreeGlobe() {
     cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
     scene.add(cloudMesh);
 
+    // Dynamic Nocturnal Mask (ShaderMaterial)
+    const nightGeo = new THREE.SphereGeometry(1.002, 64, 64);
+    const nightShader = {
+        uniforms: {
+            tNight: { value: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_lights_2048.png') },
+            sunPos: { value: new THREE.Vector3(0, 0, 5) }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            varying vec3 vWorldNormal;
+            void main() {
+                vUv = uv;
+                vWorldNormal = normalize(mat3(modelMatrix) * normal);
+                gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform sampler2D tNight;
+            uniform vec3 sunPos;
+            varying vec2 vUv;
+            varying vec3 vWorldNormal;
+            void main() {
+                vec3 nightColor = texture2D(tNight, vUv).rgb;
+                vec3 sunDir = normalize(sunPos);
+                
+                // Dot product calculates angle between surface normal and sun vector
+                float intensity = dot(vWorldNormal, sunDir);
+                
+                // Fade lights in strictly on the dark hemisphere (-0.2 is deep shadow)
+                float alpha = smoothstep(0.05, -0.2, intensity);
+                gl_FragColor = vec4(nightColor, alpha);
+            }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    };
+    const nightMat = new THREE.ShaderMaterial(nightShader);
+    nightMesh = new THREE.Mesh(nightGeo, nightMat);
+    scene.add(nightMesh);
+
     // The Sun (Directional Light)
     sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
     scene.add(sunLight);
     
-    // Starlight Ambient Base (Crushed to 0.15 to expose the dark side terminator contrast)
+    // Starlight Ambient Base (Crushed to expose the dark side terminator contrast)
     const ambient = new THREE.AmbientLight(0x111b33, 0.15);
     scene.add(ambient);
     
@@ -691,7 +732,16 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed) {
 
     sunLight.position.set(sunX, sunY, sunZ);
 
-    // 4. CAMERA STATE ENFORCEMENT
+    // 4. NOCTURNAL SHADER SYNC
+    if (nightMesh) {
+        nightMesh.rotation.y = rotationY;
+        nightMesh.rotation.x = eclipticPitch;
+        if (nightMesh.material.uniforms) {
+            nightMesh.material.uniforms.sunPos.value.set(sunX, sunY, sunZ);
+        }
+    }
+
+    // 5. CAMERA STATE ENFORCEMENT
     // Ensure the camera remains locked to the Ecliptic Anchor if Free-Cam has not been triggered
     if (!isFreeCam && camera) {
         camera.position.set(0, 0, 2.3);
