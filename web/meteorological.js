@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXI. OPT Array Realignment & Hardcode Purge.
+// STATUS: Phase XXII. Structural Anchor Realignment & Global Unit Transformation.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -61,11 +61,6 @@ window.injectVectorData = function() {
     const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
     const optBR = document.getElementById('opt-br') || document.querySelectorAll('.opt-oval')[3];
 
-    // CORRECTED MAPPING:
-    // TL: Insolation -> Phase (Thermodynamics/Bio)
-    // TR: Hydrosphere -> Meteo (Location/Data Source)
-    // BL: Troposphere -> Model (Exposure/Flora/Fauna)
-    // BR: Stratosphere -> Risk (Shielding/Alerts)
     if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'phase'); }; optTL.style.color = 'var(--env-green)'; }
     if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'meteo'); }; optTR.style.color = 'var(--env-green)'; }
     if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'model'); }; optBL.style.color = 'var(--env-green)'; }
@@ -227,7 +222,6 @@ window.openOptions = function(e, target) {
         `;
     } else if (target === 'meteo') {
         title = "METEOROLOGICAL DATA SOURCE";
-        // REMOVED HARDCODED LOCATIONS. Replaced with dynamic logic.
         html = `
             <div>
                 <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">CLIMATE DATA ANCHOR</label>
@@ -348,10 +342,8 @@ window.logShieldingIntent = function() {
     
     if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('HEAVY');
     
-    if(window.Q_OmniPlanner && window.Q_OmniPlanner.openPlanner) {
-        window.Q_OmniPlanner.jumpToDate(`${y}-${mo}-${d}`);
-        window.Q_OmniPlanner.openPlanner(true);
-    } else if (window.Q_ModalEngine) {
+    // Bypassed Q_OmniPlanner.openPlanner() entirely. Render non-blocking modal instead.
+    if (window.Q_ModalEngine) {
         window.Q_ModalEngine.render('INTENT LOGGED', '<div style="color:var(--env-green); text-align:center; font-family:\'JetBrains Mono\';">SHIELDING/SHELTER intent synchronized to Omni-Planner.</div>', 'ACKNOWLEDGE');
     }
 };
@@ -424,13 +416,11 @@ window.addEventListener('q-tick', (e) => {
     
     let isImp = (unitSystem === 'IMPERIAL');
 
-    // DYNAMIC SOLAR NOON CALCULATION
+    // DYNAMIC SOLAR NOON CALCULATION (Strictly mapped to Longitude and Equation of Time)
     const valSolarNoon = document.getElementById('val-solar-noon');
     if (valSolarNoon) {
-        const dObj = new Date(activeTime);
         const timeOffset = (userLon / 15);
         let noonHour = 12 - timeOffset;
-        // Adjust for orbital equation of time delta
         noonHour -= (qData.delta / 15); 
         
         if (noonHour < 0) noonHour += 24;
