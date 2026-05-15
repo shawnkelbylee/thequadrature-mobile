@@ -1,6 +1,6 @@
 // THE QUADRATURE: UNIFIED UI MATRIX & RENDERER
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XVI UI Engine. Infinite Resolution Slider Kinetics.
+// STATUS: Phase XXIV UI Engine. Slider Automation Matrix & DOM Flanking.
 
 window.injectUniversalUI = function() {
     if (window.self !== window.top) return;
@@ -186,7 +186,7 @@ window.injectUniversalUI = function() {
         .q-scrubber::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; background: var(--theme-main, #00f0ff); clip-path: polygon(50% 0%, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0% 50%, 40% 40%); cursor: grab; pointer-events: auto; }
         .q-scrubber::-webkit-slider-thumb:active { cursor: grabbing; }
 
-        /* --- NEW DUAL-ROW SCRUBBER STYLES --- */
+        /* --- DUAL-ROW SCRUBBER STYLES --- */
         .q-scrubber-panel {
             flex-direction: column !important;
             border-radius: 8px !important;
@@ -233,6 +233,8 @@ window.injectUniversalUI = function() {
         .scrub-row-2 {
             width: 100%;
             display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         @media (max-width: 950px) {
@@ -368,7 +370,7 @@ window.injectUniversalUI = function() {
 
             .q-global-controls { 
                 display: flex !important; 
-                flex-direction: column !important; /* Keep dual row on mobile */
+                flex-direction: column !important; 
                 align-items: center !important; 
                 justify-content: space-between !important;
                 width: 95vw !important; 
@@ -398,7 +400,7 @@ window.injectUniversalUI = function() {
             #q-mic-fab.listening { animation: pulse-mic 1.5s infinite; background: var(--theme-main, #00f0ff); color: #000; box-shadow: 0 0 25px var(--theme-main, #00f0ff) !important; }
             
             .scrub-row-1 { order: 2 !important; justify-content: space-around; width: 100%; }
-            .scrub-row-2 { order: 3 !important; width: 100%; }
+            .scrub-row-2 { order: 3 !important; width: 100%; flex-wrap: wrap; justify-content: center; }
         }
     `;
     document.head.appendChild(style);
@@ -587,16 +589,20 @@ window.injectUniversalUI = function() {
             <div class="scrub-row-1">
                 <button id="q-cam-toggle" class="btn-micro">[ CAM: ECLIPTIC ]</button>
                 <div class="macro-micro-group">
-                    <button id="q-macro-rev" class="btn-micro">&lt;&lt;</button>
-                    <button id="q-micro-rev" class="btn-micro">&lt;</button>
+                    <button id="q-macro-rev" class="btn-micro" title="Season Macro">&lt;&lt;</button>
+                    <button id="q-micro-rev" class="btn-micro" title="Season Micro">&lt;</button>
                     <button id="q-macro-stop" class="btn-micro" disabled>||</button>
-                    <button id="q-micro-fwd" class="btn-micro">&gt;</button>
-                    <button id="q-macro-fwd" class="btn-micro">&gt;&gt;</button>
+                    <button id="q-micro-fwd" class="btn-micro" title="Season Micro">&gt;</button>
+                    <button id="q-macro-fwd" class="btn-micro" title="Season Macro">&gt;&gt;</button>
                 </div>
                 <button id="q-live-toggle" class="btn-micro active">LIVE</button>
             </div>
             <div class="scrub-row-2">
+                <button id="q-time-macro-rev" class="btn-micro" title="Time Macro">&lt;&lt;</button>
+                <button id="q-time-micro-rev" class="btn-micro" title="Time Micro">&lt;</button>
                 <input type="range" id="q-global-scrubber" min="-365" max="365" step="any" value="0" class="q-scrubber">
+                <button id="q-time-micro-fwd" class="btn-micro" title="Time Micro">&gt;</button>
+                <button id="q-time-macro-fwd" class="btn-micro" title="Time Macro">&gt;&gt;</button>
             </div>
         </div>
     `;
@@ -1110,7 +1116,6 @@ window.bindMasterTickScrubber = function() {
         if (isLive) {
             const scrubber = document.getElementById('q-global-scrubber');
             if (scrubber) {
-                // Remove integer snap to allow smooth continuous playback when live
                 let sMax = parseInt(scrubber.max);
                 let sMin = parseInt(scrubber.min);
                 if (daysElapsed >= sMax - 90) scrubber.max = Math.floor(daysElapsed) + 365;
@@ -1136,7 +1141,6 @@ window.setSimState = function(state) {
     localStorage.setItem('Q_MASTER_CLOCK', payload);
     window.dispatchEvent(new StorageEvent('storage', { key: 'Q_MASTER_CLOCK', newValue: payload }));
     
-    // HARD-OVERRIDE: Force immediate Q-Core synchronization
     if (window.Q_STATE) {
         window.Q_STATE.isLive = state.isLive;
         window.Q_STATE.simTime = state.simTime;
@@ -1150,7 +1154,6 @@ window.setLiveClock = function() {
     window.setSimState(state);
     if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('HEAVY');
     
-    // Explicitly reset camera toggle to Ecliptic
     const camBtn = document.getElementById('q-cam-toggle');
     if (camBtn) {
         camBtn.innerText = '[ CAM: ECLIPTIC ]';
@@ -1173,7 +1176,6 @@ window.syncScrubberUI = function() {
     }
     
     if (scrubber && window.ANCHOR_ALPHA_DYNAMIC) {
-        // Evaluate target math regardless of live state
         let targetTime = state.isLive ? Date.now() : state.simTime;
         let daysElapsed = (targetTime - window.ANCHOR_ALPHA_DYNAMIC) / 86400000;
         let currentDay = Math.floor(daysElapsed);
@@ -1188,23 +1190,40 @@ window.syncScrubberUI = function() {
     }
 };
 
-// --- KINETIC EVENT LISTENERS & MACRO LOOP ---
+// --- DUAL-AXIS AUTOMATION KINETICS ---
 let macroInterval = null;
+let timeLoopInterval = null;
 
 window.stopMacroLoop = function() {
+    // Kill Seasonal Automation
     if (macroInterval) {
         clearInterval(macroInterval);
         macroInterval = null;
     }
+    // Kill Temporal Automation
+    if (timeLoopInterval) {
+        clearInterval(timeLoopInterval);
+        timeLoopInterval = null;
+    }
+    
     const btnStop = document.getElementById('q-macro-stop');
-    const btnRev = document.getElementById('q-macro-rev');
-    const btnFwd = document.getElementById('q-macro-fwd');
+    const btnRevSeason = document.getElementById('q-macro-rev');
+    const btnFwdSeason = document.getElementById('q-macro-fwd');
+    const btnRevTime = document.getElementById('q-time-macro-rev');
+    const btnFwdTime = document.getElementById('q-time-macro-fwd');
+    const btnMicroRevTime = document.getElementById('q-time-micro-rev');
+    const btnMicroFwdTime = document.getElementById('q-time-micro-fwd');
     
     if (btnStop) btnStop.disabled = true;
-    if (btnRev) btnRev.classList.remove('active');
-    if (btnFwd) btnFwd.classList.remove('active');
+    if (btnRevSeason) btnRevSeason.classList.remove('active');
+    if (btnFwdSeason) btnFwdSeason.classList.remove('active');
+    if (btnRevTime) btnRevTime.classList.remove('active');
+    if (btnFwdTime) btnFwdTime.classList.remove('active');
+    if (btnMicroRevTime) btnMicroRevTime.classList.remove('active');
+    if (btnMicroFwdTime) btnMicroFwdTime.classList.remove('active');
 };
 
+// Row 1: Seasonal Math (+/- 1 Full Day exactly to hold shadow in place)
 window.executeMicroStep = function(daysDelta) {
     window.stopMacroLoop();
     let state = window.getSimState();
@@ -1219,7 +1238,6 @@ window.executeMicroStep = function(daysDelta) {
 
 window.executeMacroLoop = function(direction) {
     window.stopMacroLoop();
-    
     let state = window.getSimState();
     if (state.isLive) {
         state.isLive = false;
@@ -1239,25 +1257,50 @@ window.executeMacroLoop = function(direction) {
     }, 66); 
 };
 
+// Row 2: Temporal Math (Continuous Slider Automation)
+window.executeTimeLoop = function(direction, stepMs, activeBtnId) {
+    window.stopMacroLoop();
+    let state = window.getSimState();
+    if (state.isLive) {
+        state.isLive = false;
+        state.simTime = Date.now();
+    }
+
+    const btnStop = document.getElementById('q-macro-stop');
+    const activeBtn = document.getElementById(activeBtnId);
+    
+    if (btnStop) btnStop.disabled = false; // Universal Kill Switch arms
+    if (activeBtn) activeBtn.classList.add('active');
+
+    timeLoopInterval = setInterval(() => {
+        state.simTime += direction * stepMs;
+        window.setSimState(state);
+        window.syncScrubberUI();
+    }, 33); // Higher framerate (30FPS) for fluid shadow sweep
+};
+
 window.attachScrubberEvents = function() {
     const liveToggle = document.getElementById('q-live-toggle');
     const scrubber = document.getElementById('q-global-scrubber');
     const camToggle = document.getElementById('q-cam-toggle');
     
+    // Row 1 DOM Hooks
     const microRev = document.getElementById('q-micro-rev');
     const microFwd = document.getElementById('q-micro-fwd');
     const macroRev = document.getElementById('q-macro-rev');
     const macroFwd = document.getElementById('q-macro-fwd');
     const macroStop = document.getElementById('q-macro-stop');
+    
+    // Row 2 DOM Hooks
+    const timeMacroRev = document.getElementById('q-time-macro-rev');
+    const timeMicroRev = document.getElementById('q-time-micro-rev');
+    const timeMicroFwd = document.getElementById('q-time-micro-fwd');
+    const timeMacroFwd = document.getElementById('q-time-macro-fwd');
 
-    // Live / Resync Hook
     if (liveToggle) {
-        liveToggle.addEventListener('click', () => {
-            window.setLiveClock();
-        });
+        liveToggle.addEventListener('click', () => { window.setLiveClock(); });
     }
 
-    // Camera Mode Authority Dispatch
     if (camToggle) {
         camToggle.addEventListener('click', () => {
             const isCurrentlyFree = camToggle.classList.contains('active');
@@ -1273,10 +1316,9 @@ window.attachScrubberEvents = function() {
         });
     }
 
-    // Infinite-Resolution Slider Hook (step="any")
     if (scrubber) {
         scrubber.addEventListener('input', (e) => {
-            window.stopMacroLoop(); // Slider acts as universal kill-switch
+            window.stopMacroLoop(); // Universal interference kill
             let val = parseFloat(e.target.value);
             let msOffset = window.ANCHOR_ALPHA_DYNAMIC + (val * 86400000);
             window.setSimState({ isLive: false, simTime: msOffset });
@@ -1284,12 +1326,19 @@ window.attachScrubberEvents = function() {
         });
     }
 
-    // Micro / Macro Kinetic Hooks
+    // Row 1 Listeners (Seasonal +/- 1 Day)
     if (microRev) microRev.addEventListener('click', () => window.executeMicroStep(-1));
     if (microFwd) microFwd.addEventListener('click', () => window.executeMicroStep(1));
     if (macroRev) macroRev.addEventListener('click', () => window.executeMacroLoop(-1));
     if (macroFwd) macroFwd.addEventListener('click', () => window.executeMacroLoop(1));
     if (macroStop) macroStop.addEventListener('click', window.stopMacroLoop);
+    
+    // Row 2 Listeners (Temporal Automation)
+    // Micro: +/- 15 Minutes (900,000 ms) | Macro: +/- 4 Hours (14,400,000 ms)
+    if (timeMacroRev) timeMacroRev.addEventListener('click', () => window.executeTimeLoop(-1, 14400000, 'q-time-macro-rev'));
+    if (timeMicroRev) timeMicroRev.addEventListener('click', () => window.executeTimeLoop(-1, 900000, 'q-time-micro-rev'));
+    if (timeMicroFwd) timeMicroFwd.addEventListener('click', () => window.executeTimeLoop(1, 900000, 'q-time-micro-fwd'));
+    if (timeMacroFwd) timeMacroFwd.addEventListener('click', () => window.executeTimeLoop(1, 14400000, 'q-time-macro-fwd'));
 };
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -1306,7 +1355,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Watch for external system state changes
 window.addEventListener('storage', (e) => {
     if (e.key === 'Q_MASTER_CLOCK') {
         window.syncScrubberUI();
