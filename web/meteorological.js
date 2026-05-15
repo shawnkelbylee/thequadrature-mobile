@@ -539,7 +539,7 @@ function initThreeGlobe() {
     scene = new THREE.Scene();
     
     camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-    camera.position.z = 3.5;
+    camera.position.z = 2.3; // Pulled forward to fill the void
     
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -597,7 +597,6 @@ function initThreeGlobe() {
 function updateGlobeKinematics() {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
-    // 1. HARD-HOOK TO SCRUBBER SIM_TIME
     let now;
     if (window.getSimState) {
         const state = window.getSimState();
@@ -608,31 +607,40 @@ function updateGlobeKinematics() {
         now = new Date();
     }
 
-    // 2. ISOLATED SOLAR DECLINATION (The Wobble)
+    // 1. STATIC EARTH (Longitude Lock)
+    const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
+    
+    // Rotate mesh so the target longitude faces the camera perfectly
+    const staticRotationY = -(userLon * (Math.PI / 180)) - (Math.PI / 2);
+    earthMesh.rotation.y = staticRotationY;
+    cloudMesh.rotation.y = staticRotationY;
+
+    // 2. ORBITING SUN (Seasonal Wobble - Y Axis)
     const start = new Date(now.getFullYear(), 0, 0);
     const diff = now - start;
     const oneDay = 1000 * 60 * 60 * 24;
     const dayOfYear = Math.floor(diff / oneDay);
     
-    // Calculate the declination angle for the Sun based on the Ecliptic (23.5 max tilt)
     const rads = ((dayOfYear - 80) / 365.24) * (Math.PI * 2);
     const declination = Math.sin(rads) * (23.5 * Math.PI / 180);
 
-    // Orbit the light source along the Y-axis without changing the horizontal distance
-    const sunDistance = 5;
-    sunLight.position.set(0, Math.sin(declination) * sunDistance, Math.cos(declination) * sunDistance);
-
-    // 3. DIURNAL ROTATION (Time of Day & Longitude Lock)
-    const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0; 
+    // 3. ORBITING SUN (Diurnal Sweep - X/Z Axis)
     const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600) + (now.getUTCMilliseconds() / 3600000)) / 24;
     
-    // Rotate Earth mesh so the Sun aligns perfectly with Local Noon
-    // 360 degrees rotation per day, phase shifted to align with the +Z light source
-    const rotationOffset = Math.PI; 
-    const rotationY = (timeFractionUTC * Math.PI * 2) + (userLon * Math.PI / 180) + rotationOffset;
-    
-    earthMesh.rotation.y = rotationY;
-    cloudMesh.rotation.y = rotationY;
+    // Calculate True Solar Time for location
+    let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
+    if (localTimeFraction < 0) localTimeFraction += 1;
+
+    // Map sweep: East (+X) to West (-X). Noon (0.5) is dead front (+Z).
+    const theta = (0.5 - localTimeFraction) * (Math.PI * 2);
+
+    // 4. APPLY 3D SPHERICAL COORDINATES TO LIGHT SOURCE
+    const sunDistance = 5;
+    const sunX = sunDistance * Math.cos(declination) * Math.sin(theta);
+    const sunY = sunDistance * Math.sin(declination);
+    const sunZ = sunDistance * Math.cos(declination) * Math.cos(theta);
+
+    sunLight.position.set(sunX, sunY, sunZ);
 }
 
 // DECOUPLED BOOT SEQUENCE - Bound strictly to q-ui.js emission
