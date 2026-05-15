@@ -581,8 +581,8 @@ function initThreeGlobe() {
     sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
     scene.add(sunLight);
     
-    // Starlight Ambient Base (Prevents Total Blackout on Night Side)
-    const ambient = new THREE.AmbientLight(0x111b33, 0.6);
+    // Starlight Ambient Base (Crushed to 0.15 to expose the dark side terminator contrast)
+    const ambient = new THREE.AmbientLight(0x111b33, 0.15);
     scene.add(ambient);
     
     window.addEventListener('resize', () => {
@@ -592,9 +592,6 @@ function initThreeGlobe() {
             renderer.setSize(container.clientWidth, container.clientHeight);
         }
     });
-
-    // NOTE: The independent kinetic loop is dead. 
-    // Rendering is now hard-slaved to the q-tick event listener above.
 }
 
 // THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
@@ -617,8 +614,8 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed) {
     cloudMesh.rotation.y = rotationY;
 
     // 2. SEASONAL TILT (The Earth Pitches)
-    // Anchor is Southern Solstice (Max positive pitch toward Ecliptic Camera)
-    const eclipticPitch = Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
+    // Anchor is Southern Solstice (Max negative pitch to tilt North away from Ecliptic Camera)
+    const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
     
     earthMesh.rotation.x = eclipticPitch;
     cloudMesh.rotation.x = eclipticPitch;
