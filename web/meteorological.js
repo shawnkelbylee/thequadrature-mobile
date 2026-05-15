@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XX. DOM Anchor Realignment & Global Unit Transformation.
+// STATUS: Phase XXI. OPT Array Realignment & Hardcode Purge.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -9,10 +9,12 @@ let showDelta = false;
 let alertThreshold = 75;
 let currentAssetMode = "FLORA";
 let iotProtocol = "MANUAL";
-let climateAnchor = "CLW";
+let climateAnchor = "GEO"; 
+let manualLat = 0;
+let manualLon = 0;
 let unitSystem = localStorage.getItem('Q_UNIT_SYS') || 'METRIC';
 let actionHorizon = "ANCHOR";
-let thermoBaseline = 22.0; // Stored natively in Celsius
+let thermoBaseline = 22.0; 
 let crossVectorSync = true;
 
 let currentRiskVal = 0;
@@ -30,7 +32,7 @@ let prevMouseY = 0;
 let camTheta = 0; 
 let camPhi = Math.PI / 2; 
 
-// --- EXTERNAL STATE RECEIVERS (From q-ui.js) ---
+// --- EXTERNAL STATE RECEIVERS ---
 window.addEventListener('q-camera-toggle', (e) => {
     isFreeCam = e.detail.isFree;
     if (!isFreeCam && camera) {
@@ -59,10 +61,15 @@ window.injectVectorData = function() {
     const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
     const optBR = document.getElementById('opt-br') || document.querySelectorAll('.opt-oval')[3];
 
-    if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'insolation'); }; optTL.style.color = 'var(--env-green)'; }
+    // CORRECTED MAPPING:
+    // TL: Insolation -> Phase (Thermodynamics/Bio)
+    // TR: Hydrosphere -> Meteo (Location/Data Source)
+    // BL: Troposphere -> Model (Exposure/Flora/Fauna)
+    // BR: Stratosphere -> Risk (Shielding/Alerts)
+    if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'phase'); }; optTL.style.color = 'var(--env-green)'; }
     if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'meteo'); }; optTR.style.color = 'var(--env-green)'; }
-    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'phase'); }; optBL.style.color = 'var(--env-green)'; }
-    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'model'); }; optBR.style.color = 'var(--env-green)'; }
+    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'model'); }; optBL.style.color = 'var(--env-green)'; }
+    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'risk'); }; optBR.style.color = 'var(--env-green)'; }
 
     const dStyleTop = "font-family:'Orbitron'; font-size:0.55rem; color:rgba(255,255,255,0.5); font-weight:700; border-top:1px solid rgba(255,255,255,0.1); margin-top:4px; padding-top:4px; letter-spacing:1px; text-align:center;";
     const dStyleBot = "font-family:'Orbitron'; font-size:0.55rem; color:rgba(255,255,255,0.5); font-weight:700; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:6px; padding-bottom:4px; letter-spacing:1px; text-align:center;";
@@ -70,7 +77,7 @@ window.injectVectorData = function() {
     let isImp = (unitSystem === 'IMPERIAL');
 
     const quadTL = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
-    if (quadTL) quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">SUN PEAK ANGLE:</span> <span class="val-sm val-highlight">84.2° (PEAK)</span></div><div class="t-row"><span class="w-lbl">MAX UV LEVEL:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">SUNLIGHT INTENSITY:</span> <span class="val-sm val-highlight" id="val-irradiance">98,500 LUX</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE ]</div></div>`;
+    if (quadTL) quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">LOCAL SOLAR NOON:</span> <span class="val-sm val-highlight" id="val-solar-noon">--:--</span></div><div class="t-row"><span class="w-lbl">MAX UV LEVEL:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">SUNLIGHT INTENSITY:</span> <span class="val-sm val-highlight" id="val-irradiance">98,500 LUX</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE ]</div></div>`;
 
     const quadTR = document.getElementById('quad-tr') || document.getElementById('quad-COM');
     if (quadTR) quadTR.innerHTML = `<div class="panel-data-wrapper" id="pnl-hydro"><div class="v-head">HYDROSPHERE</div><div class="t-row"><span class="w-lbl">EL NIÑO PHASE:</span> <span class="val-sm val-highlight">LA NIÑA (COOL)</span></div><div class="t-row"><span class="w-lbl">SURFACE TEMP VAR:</span> <span class="val-sm val-highlight" id="val-sst">${isImp ? '-1.4 °F' : '-0.8 °C'}</span></div><div class="t-row"><span class="w-lbl">OCEAN CURRENT SPD:</span> <span class="val-sm val-highlight" id="val-gulf">${isImp ? '3.1 MPH' : '1.4 M/S'}</span></div><div style="${dStyleTop}">[ OCEAN & WATER ]</div></div>`;
@@ -111,17 +118,19 @@ function initSparklines() {
 }
 
 async function fetchMeteoData() {
-    const API_LOCATIONS = {
-        'CLW': { lat: 27.9659, lon: -82.8001 },
-        'PHL': { lat: 39.9526, lon: -75.1652 },
-        'ENC': { lat: 34.1593, lon: -118.5012 },
-        'GLOBAL': { lat: window.Q_STATE?.location?.lat || 0, lon: window.Q_STATE?.location?.lon || 0 }
-    };
+    let lat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 0;
+    let lon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0;
 
-    const loc = API_LOCATIONS[climateAnchor] || API_LOCATIONS['CLW']; 
-    
+    if (climateAnchor === 'MANUAL') {
+        lat = manualLat;
+        lon = manualLon;
+    } else if (climateAnchor === 'GLOBAL') {
+        lat = 0; // Equatorial
+        lon = 0; // Prime Meridian
+    }
+
     try {
-        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + loc.lat + '&longitude=' + loc.lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         if (data && data.current) {
@@ -218,15 +227,21 @@ window.openOptions = function(e, target) {
         `;
     } else if (target === 'meteo') {
         title = "METEOROLOGICAL DATA SOURCE";
+        // REMOVED HARDCODED LOCATIONS. Replaced with dynamic logic.
         html = `
             <div>
-                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">MICRO-CLIMATE ANCHOR</label>
-                <select id="climate-anchor" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                    <option value="CLW" ${climateAnchor==='CLW'?'selected':''}>Clearwater, FL (Current Base)</option>
-                    <option value="PHL" ${climateAnchor==='PHL'?'selected':''}>Philadelphia, PA (Eastern Seaboard)</option>
-                    <option value="ENC" ${climateAnchor==='ENC'?'selected':''}>Encino, CA (Western Coastal)</option>
-                    <option value="GLOBAL" ${climateAnchor==='GLOBAL'?'selected':''}>Global Average (Macro)</option>
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">CLIMATE DATA ANCHOR</label>
+                <select id="climate-anchor" class="modal-input" onchange="document.getElementById('manual-coord-box').style.display = this.value === 'MANUAL' ? 'block' : 'none';" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                    <option value="GEO" ${climateAnchor==='GEO'?'selected':''}>ACTIVE GEOLOCATION (LOCAL)</option>
+                    <option value="GLOBAL" ${climateAnchor==='GLOBAL'?'selected':''}>GLOBAL AVERAGE (MACRO)</option>
+                    <option value="MANUAL" ${climateAnchor==='MANUAL'?'selected':''}>MANUAL COORDINATE ENTRY</option>
                 </select>
+            </div>
+            <div id="manual-coord-box" style="display: ${climateAnchor === 'MANUAL' ? 'block' : 'none'}; margin-top: 10px; padding: 10px; border: 1px solid rgba(14, 165, 233, 0.5); background: rgba(0,0,0,0.4); border-radius: 4px;">
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">LATITUDE (DECIMAL)</label>
+                <input type="number" id="manual-lat" class="modal-input" value="${manualLat}" step="0.0001" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 6px; font-family: 'JetBrains Mono'; font-size: 0.8rem; width: 100%; box-sizing:border-box; margin-bottom: 8px;">
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">LONGITUDE (DECIMAL)</label>
+                <input type="number" id="manual-lon" class="modal-input" value="${manualLon}" step="0.0001" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 6px; font-family: 'JetBrains Mono'; font-size: 0.8rem; width: 100%; box-sizing:border-box;">
             </div>
             <div style="margin-top: 10px;">
                 <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">GLOBAL UNIT SYSTEM</label>
@@ -258,8 +273,8 @@ window.openOptions = function(e, target) {
         title = "ENVIRONMENTAL PHASE CALIBRATION";
         html = `
             <div>
-                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">THERMODYNAMIC BASELINE (COMFORT): <span id="base-val" style="color:var(--env-green);">${thermoBaseline.toFixed(1)}°</span></label>
-                <input type="range" id="thermo-base" min="15" max="30" step="0.5" value="${thermoBaseline}" class="modal-input" oninput="document.getElementById('base-val').innerText = this.value + '°'" style="width: 100%; margin-top: 4px;">
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">THERMODYNAMIC BASELINE (COMFORT): <span id="base-val" style="color:var(--env-green);">${thermoBaseline.toFixed(1)}°C</span></label>
+                <input type="range" id="thermo-base" min="15" max="30" step="0.5" value="${thermoBaseline}" class="modal-input" oninput="document.getElementById('base-val').innerText = this.value + '°C'" style="width: 100%; margin-top: 4px;">
             </div>
             <div style="margin-top: 10px;">
                 <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">CROSS-VECTOR SYNC (BIO)</label>
@@ -284,6 +299,10 @@ window.saveOptions = function() {
     } else if (currentOptTarget === 'meteo') {
         const cEl = document.getElementById('climate-anchor');
         if(cEl) climateAnchor = cEl.value;
+        const latEl = document.getElementById('manual-lat');
+        if(latEl) manualLat = parseFloat(latEl.value);
+        const lonEl = document.getElementById('manual-lon');
+        if(lonEl) manualLon = parseFloat(lonEl.value);
         const uSys = document.getElementById('unit-sys');
         if(uSys) {
             unitSystem = uSys.value;
@@ -391,9 +410,11 @@ window.openImpact = function() {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
+    const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
+    
     // 1. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
     if (scene && camera && renderer) {
-        updateGlobeKinematics(activeTime, daysElapsed);
+        updateGlobeKinematics(activeTime, daysElapsed, userLon);
         renderer.render(scene, camera);
     }
 
@@ -402,6 +423,27 @@ window.addEventListener('q-tick', (e) => {
     if(badge) badge.innerText = 'IOT: ' + iotProtocol;
     
     let isImp = (unitSystem === 'IMPERIAL');
+
+    // DYNAMIC SOLAR NOON CALCULATION
+    const valSolarNoon = document.getElementById('val-solar-noon');
+    if (valSolarNoon) {
+        const dObj = new Date(activeTime);
+        const timeOffset = (userLon / 15);
+        let noonHour = 12 - timeOffset;
+        // Adjust for orbital equation of time delta
+        noonHour -= (qData.delta / 15); 
+        
+        if (noonHour < 0) noonHour += 24;
+        if (noonHour >= 24) noonHour -= 24;
+        
+        let hr = Math.floor(noonHour);
+        let min = Math.floor((noonHour - hr) * 60);
+        let tz = isImp ? (hr >= 12 ? ' PM' : ' AM') : '';
+        if (isImp && hr > 12) hr -= 12;
+        if (isImp && hr === 0) hr = 12;
+        
+        valSolarNoon.innerText = `${hr.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}${tz}`;
+    }
 
     const valSst = document.getElementById('val-sst');
     if(valSst) valSst.innerText = isImp ? '-1.4 °F' : '-0.8 °C';
@@ -711,11 +753,10 @@ function initThreeGlobe() {
 }
 
 // THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
-function updateGlobeKinematics(activeTimeMs, daysElapsed) {
+function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon) {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
     const d = new Date(activeTimeMs);
-    const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
 
     // 1. ECLIPTIC CAMERA LOCK (User Longitude Centered)
     const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600) + (d.getUTCMilliseconds() / 3600000)) / 24;
