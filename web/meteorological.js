@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase X. Emissive Terminator & Explicit Camera State Authority.
+// STATUS: Phase XVIII. Atmospheric Decoupling & Absolute Cache Bypass.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -141,7 +141,9 @@ async function fetchMeteoData() {
 }
 
 function fetchAtmosphericLayer() {
-    fetch('https://api.rainviewer.com/public/weather-maps.json')
+    // ABSOLUTE CACHE BYPASS: Appending Date.now() ensures the browser network layer
+    // always hits the RainViewer endpoint for live JSON instead of serving from cache.
+    fetch('https://api.rainviewer.com/public/weather-maps.json?nocache=' + Date.now())
     .then(res => res.json())
     .then(data => {
         const host = data.host;
@@ -727,7 +729,11 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed) {
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
     
     earthMesh.rotation.y = rotationY;
-    cloudMesh.rotation.y = rotationY;
+
+    // 1b. ATMOSPHERIC DRIFT: Detach troposphere from the crust
+    // Add a 3% rotational slip per day to simulate global jet stream flow
+    const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
+    cloudMesh.rotation.y = rotationY + atmosphericSlip;
 
     // 2. SEASONAL TILT (The Earth Pitches)
     // Anchor is Southern Solstice (Max negative pitch to tilt North away from Ecliptic Camera)
