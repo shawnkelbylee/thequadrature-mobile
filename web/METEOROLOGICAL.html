@@ -85,17 +85,16 @@
             mix-blend-mode: screen; opacity: 0.85; z-index: 2; pointer-events: none; 
         }
         
-        .globe-terminator-container { position: absolute; width: 150%; height: 150%; top: -25%; left: -25%; pointer-events: none; z-index: 3; }
+        .globe-terminator-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; border-radius: 50%; overflow: hidden; pointer-events: none; z-index: 3; }
         
         .globe-terminator { 
             position: absolute; width: 200%; height: 100%; top: 0; left: 0; mix-blend-mode: multiply; 
             background: linear-gradient(to right,
-                rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 12.5%, 
-                transparent 25%, transparent 25%, 
-                rgba(0,0,0,0.5) 37.5%, rgba(0,0,0,0.95) 50%,
-                rgba(0,0,0,0.5) 62.5%, transparent 75%, 
-                transparent 75%, rgba(0,0,0,0.5) 87.5%, 
-                rgba(0,0,0,0.95) 100%
+                rgba(2,6,15,0.98) 0%, 
+                transparent 25%, 
+                rgba(2,6,15,0.98) 50%, 
+                transparent 75%, 
+                rgba(2,6,15,0.98) 100%
             );
         }
         

@@ -536,7 +536,6 @@ function initEclipticEngine() {
 }
 
 function updateGlobeKinematics() {
-    // 1. HARD-HOOK TO SCRUBBER SIM_TIME
     let now;
     if (window.getSimState) {
         const state = window.getSimState();
@@ -547,51 +546,42 @@ function updateGlobeKinematics() {
         now = new Date();
     }
 
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now - start;
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-    const rads = ((dayOfYear - 80) / 365.24) * (Math.PI * 2);
-    
-    // Axial tilt declination mapped to Z-pitch
-    const zPitch = -(Math.sin(rads) * 23.5);
-
-    // 2. GEOLOCATION LOCK & Y-PAN PITCH SIMULATION
+    // 1. GEOLOCATION LOCK (Axial Tilt Severed)
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0; 
     const lonOffsetPct = ((userLon + 180) / 360) * 100;
-    
-    // Simulate 3D pitch by panning the texture Y-axis (Prevents CSS rotateX squash)
-    const panY = Math.sin(rads) * 15; 
     
     const surface = document.getElementById('diurnal-surface');
     const atmos = document.getElementById('diurnal-atmosphere');
     
     if(surface) {
-        surface.style.backgroundPosition = `${lonOffsetPct}% ${50 + panY}%`;
+        surface.style.backgroundPosition = `${lonOffsetPct}% 50%`;
         surface.style.transform = `none`; 
     }
     if(atmos) {
-        atmos.style.backgroundPosition = `${lonOffsetPct}% ${50 + panY}%`;
+        atmos.style.backgroundPosition = `${lonOffsetPct}% 50%`;
         atmos.style.transform = `none`; 
     }
 
-    // 3. TERMINATOR TILT & EAST-WEST SWEEP
+    // 2. ISOLATED TERMINATOR SWEEP
     const termContainer = document.querySelector('.globe-terminator-container');
     if (termContainer) {
-        // Tilt the shadow to match the solar declination relative to the vertical axis
-        termContainer.style.transform = `rotate(${zPitch}deg)`;
+        termContainer.style.transform = `none`; // Hard-lock vertical
     }
 
     const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600) + (now.getUTCMilliseconds() / 3600000)) / 24;
+    
     const terminator = document.getElementById('diurnal-terminator');
     if(terminator) {
-        // Standard continuous East-to-West (Right to Left) sweep
-        let offsetDeg = (timeFractionUTC * 360 + userLon) % 360;
-        let transX = -(offsetDeg / 360) * 50; 
+        // Map local time: Noon (0.5) perfectly aligns Day, Midnight (0.0) aligns Night.
+        let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
+        if (localTimeFraction < 0) localTimeFraction += 1;
+        
+        let phase = (localTimeFraction + 0.5) % 1;
+        let transX = -(phase * 50);
+        
         terminator.style.transform = `translateX(${transX}%)`;
     }
 }
-
 // --- HUD HOVERS ---
 window.showAxisHUD = function(text) {
     const hud = document.getElementById('axis-hud');
