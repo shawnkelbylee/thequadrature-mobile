@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXII. Structural Anchor Realignment & Global Unit Transformation.
+// STATUS: Phase XXIII. Omni-Planner Severance & Localized Solar Math.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -8,7 +8,6 @@ let showDelta = false;
 
 let alertThreshold = 75;
 let currentAssetMode = "FLORA";
-let iotProtocol = "MANUAL";
 let climateAnchor = "GEO"; 
 let manualLat = 0;
 let manualLon = 0;
@@ -206,18 +205,14 @@ window.openOptions = function(e, target) {
     let title = ""; let html = "";
 
     if(target === 'risk') {
-        title = "RISK ASSESSMENT METRICS";
+        title = "ENVIRONMENTAL RISK TOLERANCE";
         html = `
             <div>
                 <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">RISK THRESHOLD SENSITIVITY: <span id="thresh-val" style="color:var(--env-green);">${alertThreshold}%</span></label>
                 <input type="range" id="risk-thresh" min="50" max="95" value="${alertThreshold}" class="modal-input" oninput="document.getElementById('thresh-val').innerText = this.value + '%'" style="width: 100%; margin-top: 4px;">
-            </div>
-            <div style="margin-top: 10px;">
-                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">IOT SHIELDING PROTOCOL</label>
-                <select id="iot-protocol" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                    <option value="MANUAL" ${iotProtocol==='MANUAL'?'selected':''}>MANUAL (USER CONFIRMATION)</option>
-                    <option value="AUTONOMOUS" ${iotProtocol==='AUTONOMOUS'?'selected':''}>AUTONOMOUS (AUTO-TRIGGER)</option>
-                </select>
+                <div style="font-size: 0.5rem; color: var(--starlight); margin-top: 8px; font-family: 'JetBrains Mono'; line-height: 1.4;">
+                    Adjusts the visual threat indicator based on the true orbit eccentricity delta. Does not dispatch external data.
+                </div>
             </div>
         `;
     } else if (target === 'meteo') {
@@ -288,8 +283,6 @@ window.saveOptions = function() {
     if (currentOptTarget === 'risk') {
         const tEl = document.getElementById('risk-thresh');
         if(tEl) alertThreshold = parseInt(tEl.value);
-        const pEl = document.getElementById('iot-protocol');
-        if(pEl) iotProtocol = pEl.value;
     } else if (currentOptTarget === 'meteo') {
         const cEl = document.getElementById('climate-anchor');
         if(cEl) climateAnchor = cEl.value;
@@ -303,7 +296,7 @@ window.saveOptions = function() {
             localStorage.setItem('Q_UNIT_SYS', unitSystem);
         }
         fetchMeteoData();
-        window.injectVectorData(); // Force DOM refresh to instantly apply unit toggle
+        window.injectVectorData(); 
     } else if (currentOptTarget === 'model') {
         const aEl = document.getElementById('asset-track');
         if(aEl) currentAssetMode = aEl.value;
@@ -317,35 +310,6 @@ window.saveOptions = function() {
         if(cvEl) crossVectorSync = cvEl.value === 'ACTIVE';
     }
     if(window.Q_ModalEngine) window.Q_ModalEngine.close();
-};
-
-window.logShieldingIntent = function() {
-    if(!window.ANCHOR_ALPHA_DYNAMIC) return;
-    const state = window.getSimState ? window.getSimState() : null;
-    if(!state) return;
-    const t = state.isLive ? Date.now() : state.simTime;
-    const pDate = new Date(t);
-    const y = pDate.getFullYear();
-    const mo = (pDate.getMonth()+1).toString().padStart(2,'0');
-    const d = pDate.getDate().toString().padStart(2,'0');
-    const key = `${y}-${mo}-${d}-12-00`; 
-
-    if(window.loadPlannerData) window.loadPlannerData();
-    if(!window.qData) window.qData = {};
-    if(!window.qData[key]) window.qData[key] = { text: "", link: "" };
-
-    if(!window.qData[key].text.includes("[SHIELDING/SHELTER]")) {
-        window.qData[key].text = `[SHIELDING/SHELTER] SEVERE ENVIRONMENTAL HAZARD DETECTED. SHELTER PROTOCOL ENGAGED.\n` + window.qData[key].text;
-        if(window.savePlannerData) window.savePlannerData();
-        window.dispatchEvent(new Event('storage'));
-    }
-    
-    if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('HEAVY');
-    
-    // Bypassed Q_OmniPlanner.openPlanner() entirely. Render non-blocking modal instead.
-    if (window.Q_ModalEngine) {
-        window.Q_ModalEngine.render('INTENT LOGGED', '<div style="color:var(--env-green); text-align:center; font-family:\'JetBrains Mono\';">SHIELDING/SHELTER intent synchronized to Omni-Planner.</div>', 'ACKNOWLEDGE');
-    }
 };
 
 window.openImpact = function() {
@@ -362,32 +326,31 @@ window.openImpact = function() {
         apiDataString = '<br><br><span style="color:var(--atmos-blue); font-size:0.65rem; line-height: 1.4; display:block; border-top: 1px dashed var(--atmos-blue); padding-top: 8px; margin-top: 8px;"><strong>[ CROSS-VECTOR API TELEMETRY ]</strong><br>&#x2022; OPEN-METEO (Env): Temp ' + tDisp + ' | Pressure ' + pDisp + ' | Irradiance ' + liveWeather.direct_normal_irradiance + 'W/m²</span>';
     }
 
-    let iotHook = (window.Q_STATE && window.Q_STATE.hardware_hooks) ? window.Q_STATE.hardware_hooks.iot_webhooks : 'STANDBY';
-    let iotString = '<span style="color:var(--env-green); font-weight:bold;">[IoT: ' + iotProtocol + ']</span> ';
+    let actionLabel = '<span style="color:var(--env-green); font-weight:bold;">[ACTION REQUIRED]</span> ';
 
     let desc = "", action = "";
 
     if (currentAssetMode === "FAUNA") {
         if (severity === "SEVERE") {
             desc = 'Lethal exposure thresholds projected (' + currentRiskVal + '% probability). Significant drop in ambient survivability indices.' + apiDataString;
-            action = iotString + "ACTION: Mandate indoor sheltering. Adjust feeding schedules to match metabolic caloric burn requirements for extreme temperature resistance.";
+            action = actionLabel + "Mandate indoor sheltering. Adjust feeding schedules to match metabolic caloric burn requirements for extreme temperature resistance.";
         } else if (severity === "ELEVATED") {
             desc = 'Behavioral shift markers detected. Approaching stressful ambient conditions.' + apiDataString;
-            action = iotString + "ACTION: Shift K-9 or livestock exercise routines to cooler Arc degrees. Increase hydration provisions.";
+            action = actionLabel + "Shift K-9 or livestock exercise routines to cooler Arc degrees. Increase hydration provisions.";
         } else {
             desc = 'Nominal biological exposure limits.' + apiDataString;
-            action = iotString + "ACTION: Maintain standard husbandry cycles and outdoor exposure allowances.";
+            action = actionLabel + "Maintain standard husbandry cycles and outdoor exposure allowances.";
         }
     } else { 
         if (severity === "SEVERE") {
             desc = 'Historical cross-reference confirms a ' + currentRiskVal + '% probability of extreme exposure phenomena at this exact coordinate.' + apiDataString;
-            action = iotString + "ACTION: Execute immediate flora shielding. Alter thermodynamic allocation to mitigate shock.";
+            action = actionLabel + "Execute immediate flora shielding. Alter thermodynamic allocation to mitigate shock.";
         } else if (severity === "ELEVATED") {
             desc = 'Meteorological Delta indicates non-standard atmospheric tension.' + apiDataString;
-            action = iotString + "ACTION: Prepare contingency harvesting. Withhold non-essential resource allocation until variance passes.";
+            action = actionLabel + "Prepare contingency harvesting. Withhold non-essential resource allocation until variance passes.";
         } else {
             desc = 'Optimal thermodynamic flow for human and agricultural output.' + apiDataString;
-            action = iotString + "ACTION: Execute Phase 2 expansion. Maximize resource allocation while quadrature window remains open.";
+            action = actionLabel + "Execute Phase 2 expansion. Maximize resource allocation while quadrature window remains open.";
         }
     }
 
@@ -411,23 +374,22 @@ window.addEventListener('q-tick', (e) => {
     }
 
     // 2. DOM UPDATES & METRIC CONVERSION
-    const badge = document.getElementById('iot-status-badge');
-    if(badge) badge.innerText = 'IOT: ' + iotProtocol;
-    
     let isImp = (unitSystem === 'IMPERIAL');
 
-    // DYNAMIC SOLAR NOON CALCULATION (Strictly mapped to Longitude and Equation of Time)
+    // DYNAMIC SOLAR NOON CALCULATION (Locked to Local Device Timezone)
     const valSolarNoon = document.getElementById('val-solar-noon');
     if (valSolarNoon) {
         const timeOffset = (userLon / 15);
-        let noonHour = 12 - timeOffset;
-        noonHour -= (qData.delta / 15); 
+        let noonHourUTC = 12 - timeOffset - (qData.delta / 15);
         
-        if (noonHour < 0) noonHour += 24;
-        if (noonHour >= 24) noonHour -= 24;
+        const localOffsetHours = new Date().getTimezoneOffset() / 60;
+        let noonHourLocal = noonHourUTC - localOffsetHours;
         
-        let hr = Math.floor(noonHour);
-        let min = Math.floor((noonHour - hr) * 60);
+        while (noonHourLocal < 0) noonHourLocal += 24;
+        while (noonHourLocal >= 24) noonHourLocal -= 24;
+        
+        let hr = Math.floor(noonHourLocal);
+        let min = Math.floor((noonHourLocal - hr) * 60);
         let tz = isImp ? (hr >= 12 ? ' PM' : ' AM') : '';
         if (isImp && hr > 12) hr -= 12;
         if (isImp && hr === 0) hr = 12;
@@ -483,14 +445,6 @@ window.addEventListener('q-tick', (e) => {
     if(riskEl) riskEl.innerText = currentRiskVal + '% (ORBITAL DELTA)';
     if(currentRiskVal >= alertThreshold) {
         if(hazardEl) hazardEl.innerText = "IMMINENT THREAT";
-        
-        if(iotProtocol === "AUTONOMOUS") {
-            window.logShieldingIntent();
-        } else {
-            if(hazardEl) hazardEl.onclick = (e) => { e.stopPropagation(); window.logShieldingIntent(); };
-            if(yieldEl) yieldEl.onclick = (e) => { e.stopPropagation(); window.logShieldingIntent(); };
-            if(allocEl) allocEl.onclick = (e) => { e.stopPropagation(); window.logShieldingIntent(); };
-        }
     } else if (currentRiskVal >= alertThreshold - 25) {
         if(hazardEl) hazardEl.innerText = "ELEVATED CONCERN";
     } else {
