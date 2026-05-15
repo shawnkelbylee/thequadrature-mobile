@@ -1,7 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase IV UI Engine. Decoupled Logic & Math Engine.
-// REVISION: Guaranteed DOM Mount Hooking & Correct Transit Mathematical Restore.
+// STATUS: Phase V. Ecliptic-Anchored Seasonal Terminator & Live Atmosphere.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -21,7 +20,7 @@ let currentRiskVal = 0;
 let currentOptTarget = '';
 let isBooted = false;
 
-  window.injectVectorData = function() {
+window.injectVectorData = function() {
     const optTL = document.getElementById('opt-tl') || document.querySelectorAll('.opt-oval')[0];
     const optTR = document.getElementById('opt-tr') || document.querySelectorAll('.opt-oval')[1];
     const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
@@ -73,8 +72,6 @@ function initSparklines() {
     }
 }
 
-    
-
 async function fetchMeteoData() {
     const API_LOCATIONS = {
         'CLW': { lat: 27.9659, lon: -82.8001 },
@@ -105,6 +102,25 @@ async function fetchMeteoData() {
         }
         liveWeather = null;
     }
+}
+
+function fetchAtmosphericLayer() {
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+    .then(res => res.json())
+    .then(data => {
+        const host = data.host;
+        if (data.satellite && data.satellite.infrared && data.satellite.infrared.length > 0) {
+            const lastInfrared = data.satellite.infrared[data.satellite.infrared.length - 1];
+            const path = lastInfrared.path;
+            const tileUrl = `${host}${path}/2048/0/0/0/0_0.png`;
+            
+            const atmos = document.getElementById('diurnal-atmosphere');
+            if (atmos) {
+                atmos.style.backgroundImage = `url('${tileUrl}')`;
+            }
+        }
+    })
+    .catch(err => console.warn('Q-SYSTEM: Atmospheric telemetry offline.', err));
 }
 
 window.toggleDeltaView = function() {
@@ -344,7 +360,6 @@ window.addEventListener('q-tick', (e) => {
         window.Q_PHASE_III.executeThermicOverride(qData.delta);
     }
 
-    // EXACT MATH RESTORED FROM ENVVECHUD.HTML BASELINE
     const continuousMeanDeg = daysElapsed * (360 / 365.24219);
     const continuousTrueDeg = continuousMeanDeg + qData.delta;
     const actionRing = document.getElementById('action-horizon-ring');
@@ -511,8 +526,11 @@ window.addEventListener('q-tick', (e) => {
 
 // --- THE ECLIPTIC DIURNAL ENGINE ---
 function initEclipticEngine() {
-    updateGlobeKinematics();
-    setInterval(updateGlobeKinematics, 1000); // 1 Hz Kinetic Tick
+    function kineticLoop() {
+        updateGlobeKinematics();
+        requestAnimationFrame(kineticLoop); // Real-time Scrubber Sync
+    }
+    kineticLoop();
 }
 
 function updateGlobeKinematics() {
@@ -533,18 +551,29 @@ function updateGlobeKinematics() {
 
     // 2. GEOLOCATION LOCK & 3D ROTATION
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0; 
+    const lonOffsetPct = ((userLon + 180) / 360) * 100;
+    
     const surface = document.getElementById('diurnal-surface');
+    const atmos = document.getElementById('diurnal-atmosphere');
+    
     if(surface) {
-        const lonOffsetPct = ((userLon + 180) / 360) * 100;
         surface.style.backgroundPosition = `${lonOffsetPct}% 0`;
-        surface.style.transform = `rotateX(${zPitch}deg)`; // Pitch poles forward/back
+        surface.style.transform = `rotateX(${zPitch}deg)`; 
+    }
+    if(atmos) {
+        atmos.style.backgroundPosition = `${lonOffsetPct}% 0`;
+        atmos.style.transform = `rotateX(${zPitch}deg)`; 
     }
 
     const timeFractionUTC = (now.getUTCHours() + (now.getUTCMinutes() / 60) + (now.getUTCSeconds() / 3600)) / 24;
     const terminator = document.getElementById('diurnal-terminator');
     if(terminator) {
-        const solarOffset = (timeFractionUTC * 360 + userLon) % 360;
-        const transX = -(solarOffset / 360) * 100;
+        // Invert the time fraction to sweep Right to Left (East to West)
+        let invertedOffset = ((1 - timeFractionUTC) * 360 - userLon) % 360;
+        if (invertedOffset < 0) invertedOffset += 360; // Normalize to positive degrees
+        
+        // Map 0-360 degrees to a 0% to -100% X-axis translation
+        const transX = -(invertedOffset / 360) * 100;
         terminator.style.transform = `translateX(${transX}%)`;
     }
 }
@@ -570,6 +599,7 @@ window.addEventListener('q-ui-mounted', () => {
     initSparklines();
     initEclipticEngine();
     fetchMeteoData();
+    fetchAtmosphericLayer();
 });
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -580,7 +610,9 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
             initSparklines();
             initEclipticEngine();
             fetchMeteoData();
+            fetchAtmosphericLayer();
         }
     }, 500);
 }
 setInterval(fetchMeteoData, 300000);
+setInterval(fetchAtmosphericLayer, 300000);
