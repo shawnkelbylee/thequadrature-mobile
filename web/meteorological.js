@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXI. Fatal Crash Rollback & Stable Mathematical Restoration.
+// STATUS: Phase XXXII. Dedicated Astronomical API & Absolute Terminator Sync.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -120,37 +120,50 @@ function initSparklines() {
 }
 
 async function fetchMeteoData() {
-    let lat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 0;
-    let lon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : 0;
+    let lat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; // Fallback to Florida
+    let lon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001;
 
     if (climateAnchor === 'MANUAL') {
         lat = manualLat;
         lon = manualLon;
     } else if (climateAnchor === 'GLOBAL') {
-        lat = 0; // Equatorial
-        lon = 0; // Prime Meridian
+        lat = 0; 
+        lon = 0; 
     }
 
-    // ROLLBACK: Restored stable 'current' fetch to prevent catastrophic 400 Bad Request exception
+    // 1. WEATHER FETCH (Open-Meteo)
     try {
-        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        const data = await response.json();
-        if (data && data.current) {
-            liveWeather = data.current;
-            if(window.Q_LOG) window.Q_LOG('INFO', 'ENVIRONMENTAL', 'METEO_API_SYNC', data.current);
-            const badge = document.getElementById('meteo-badge');
-            if(badge) {
-                badge.innerText = "ATMOS DELTA: LIVE";
+        const responseW = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
+        if (responseW.ok) {
+            const dataW = await responseW.json();
+            if (dataW && dataW.current) {
+                liveWeather = dataW.current;
+                if(window.Q_LOG) window.Q_LOG('INFO', 'ENVIRONMENTAL', 'METEO_API_SYNC', dataW.current);
+                const badge = document.getElementById('meteo-badge');
+                if(badge) badge.innerText = "ATMOS DELTA: LIVE";
             }
         }
     } catch (error) {
         if(window.Q_LOG) window.Q_LOG('ERROR', 'ENVIRONMENTAL', 'METEO_API_FAILED', { error: error.message, fallback: 'STATIC_BASELINE' });
         const badge = document.getElementById('meteo-badge');
-        if(badge) {
-            badge.innerText = "STATIC BASELINE (DEGRADED)";
-        }
+        if(badge) badge.innerText = "STATIC BASELINE (DEGRADED)";
         liveWeather = null;
+    }
+
+    // 2. ASTRONOMICAL FETCH (Sunrise-Sunset.org)
+    // 'formatted=0' ensures ISO 8601 strict UTC string returns for flawless local Date parsing
+    try {
+        const responseA = await fetch('https://api.sunrise-sunset.org/json?lat=' + lat + '&lng=' + lon + '&formatted=0');
+        if (responseA.ok) {
+            const dataA = await responseA.json();
+            if (dataA && dataA.results) {
+                window.Q_METEO_SUNRISE = new Date(dataA.results.sunrise);
+                window.Q_METEO_SUNSET = new Date(dataA.results.sunset);
+                window.Q_METEO_NOON = new Date(dataA.results.solar_noon);
+            }
+        }
+    } catch (error) {
+        console.warn('Q-SYSTEM: Astronomical API offline. Falling back to geometric estimates.', error);
     }
 }
 
@@ -384,7 +397,6 @@ window.openImpact = function() {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
-    const userLat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; 
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
@@ -396,50 +408,29 @@ window.addEventListener('q-tick', (e) => {
     // 2. DOM UPDATES & METRIC CONVERSION
     let isImp = (unitSystem === 'IMPERIAL');
 
-    const valSolarNoon = document.getElementById('val-solar-noon');
-    const valDawn = document.getElementById('val-dawn');
-    const valDusk = document.getElementById('val-dusk');
-
-    const eqTimeHours = (qData.delta / 15);
-    const localOffsetHours = new Date().getTimezoneOffset() / 60;
-    
-    let noonHourLocal = 12 - (userLon / 15) - eqTimeHours - localOffsetHours;
-    while (noonHourLocal < 0) noonHourLocal += 24;
-    while (noonHourLocal >= 24) noonHourLocal -= 24;
-
-    function formatHour(decimalHour) {
-        if (isNaN(decimalHour)) return "--:--";
-        let h = decimalHour;
-        while(h < 0) h += 24;
-        while(h >= 24) h -= 24;
-        let hr = Math.floor(h);
-        let min = Math.floor((h - hr) * 60);
+    // NATIVE JAVASCRIPT TIMEZONE EXTRACTION (Parsed from strict ISO 8601 UTC string)
+    function formatApiTime(dObj) {
+        if (!dObj || isNaN(dObj.getTime())) return "--:--";
+        let hr = dObj.getHours();
+        let min = dObj.getMinutes();
         let tz = isImp ? (hr >= 12 ? ' PM' : ' AM') : '';
         if (isImp && hr > 12) hr -= 12;
         if (isImp && hr === 0) hr = 12;
         return `${hr.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}${tz}`;
     }
 
-    if (valSolarNoon) valSolarNoon.innerText = formatHour(noonHourLocal);
+    const valSolarNoon = document.getElementById('val-solar-noon');
+    const valDawn = document.getElementById('val-dawn');
+    const valDusk = document.getElementById('val-dusk');
 
-    if (valDawn || valDusk) {
-        // Solar Declination (True Anomaly based)
-        const decRad = Math.asin(Math.sin(qData.trueArc * Math.PI / 180) * Math.sin(23.44 * Math.PI / 180));
-        const latRad = userLat * Math.PI / 180;
-        
-        // Atmospheric Refraction Constant (-0.833°)
-        const refRad = -0.833 * Math.PI / 180;
-        
-        let cosH = (Math.sin(refRad) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
-        let hHours;
-        let polarState = "";
-        
-        if (cosH > 1) { hHours = NaN; polarState = "POLAR NIGHT"; } 
-        else if (cosH < -1) { hHours = NaN; polarState = "POLAR DAY"; } 
-        else { hHours = Math.acos(cosH) * (12 / Math.PI); }
-
-        if (valDawn) valDawn.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal - hHours);
-        if (valDusk) valDusk.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal + hHours);
+    if (window.Q_METEO_SUNRISE && window.Q_METEO_SUNSET && window.Q_METEO_NOON) {
+        if (valDawn) valDawn.innerText = formatApiTime(window.Q_METEO_SUNRISE);
+        if (valDusk) valDusk.innerText = formatApiTime(window.Q_METEO_SUNSET);
+        if (valSolarNoon) valSolarNoon.innerText = formatApiTime(window.Q_METEO_NOON);
+    } else {
+        if (valDawn) valDawn.innerText = "--:--";
+        if (valDusk) valDusk.innerText = "--:--";
+        if (valSolarNoon) valSolarNoon.innerText = "--:--";
     }
 
     const valSst = document.getElementById('val-sst');
@@ -745,35 +736,60 @@ function initThreeGlobe() {
 function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
-    const d = new Date(activeTimeMs);
-
-    // 1. ECLIPTIC CAMERA LOCK (User Longitude Centered + True Ellipse Offset)
-    const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600) + (d.getUTCMilliseconds() / 3600000)) / 24;
-    
-    const eqTimeFraction = (qDataDelta / 360);
-    let localTimeFraction = (timeFractionUTC + (userLon / 360) + eqTimeFraction) % 1;
-    if (localTimeFraction < 0) localTimeFraction += 1;
-
-    // ROLLBACK: Re-anchored properly to local longitude view plane
+    // 1. ECLIPTIC CAMERA LOCK (Viewport securely anchored to local longitude)
     const rotationOffset = -(Math.PI / 2); 
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
-    
     earthMesh.rotation.y = rotationY;
 
     // 1b. ATMOSPHERIC DRIFT: Detach troposphere from the crust
-    // Add a 3% rotational slip per day to simulate global jet stream flow
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
     cloudMesh.rotation.y = rotationY + atmosphericSlip;
 
     // 2. SEASONAL TILT (The Earth Pitches)
-    // Anchor is Southern Solstice (Max negative pitch to tilt North away from Ecliptic Camera)
     const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
-    
     earthMesh.rotation.x = eclipticPitch;
     cloudMesh.rotation.x = eclipticPitch;
 
-    // 3. DIURNAL SWEEP (The Sun Orbits the Static Longitude)
-    const theta = (0.5 - localTimeFraction) * (Math.PI * 2); 
+    // 3. DIURNAL SWEEP (API Telemetry Override)
+    let theta = 0;
+    
+    if (window.Q_METEO_SUNRISE && window.Q_METEO_SUNSET) {
+        const srMs = window.Q_METEO_SUNRISE.getTime();
+        const ssMs = window.Q_METEO_SUNSET.getTime();
+        
+        // Ensure accurate tracking regardless of timezone bounds
+        if (activeTimeMs >= srMs && activeTimeMs <= ssMs) {
+            // Daytime Sequence
+            const dayLengthMs = ssMs - srMs;
+            const elapsedMs = activeTimeMs - srMs;
+            const dayFraction = elapsedMs / dayLengthMs;
+            
+            // Map Sunrise (+X) to Sunset (-X) through Front (+Z)
+            theta = (0.25 - (dayFraction * 0.5)) * (Math.PI * 2);
+        } else {
+            // Nighttime Sequence
+            let nightStartMs = ssMs;
+            let nightEndMs = srMs + 86400000; 
+            if (activeTimeMs < srMs) {
+                nightStartMs = ssMs - 86400000; 
+                nightEndMs = srMs;
+            }
+            
+            const nightLengthMs = nightEndMs - nightStartMs;
+            const elapsedNightMs = activeTimeMs - nightStartMs;
+            const nightFraction = elapsedNightMs / nightLengthMs;
+            
+            // Map Sunset (-X) to Sunrise (+X) through Back (-Z)
+            theta = (-0.25 - (nightFraction * 0.5)) * (Math.PI * 2);
+        }
+    } else {
+        // Fallback: Geometric standard rotation if API is unreachable
+        const d = new Date(activeTimeMs);
+        const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600)) / 24;
+        let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
+        if (localTimeFraction < 0) localTimeFraction += 1;
+        theta = (0.5 - localTimeFraction) * (Math.PI * 2);
+    }
     
     const sunDistance = 5;
     const sunX = sunDistance * Math.sin(theta);
@@ -792,7 +808,6 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     }
 
     // 5. CAMERA STATE ENFORCEMENT
-    // Ensure the camera remains locked to the Ecliptic Anchor if Free-Cam has not been triggered
     if (!isFreeCam && camera) {
         camera.position.set(0, 0, 2.3);
         camera.lookAt(0, 0, 0);
