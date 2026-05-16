@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXVII. True Ellipse Terminator Sync & Dual-State Insolation.
+// STATUS: Phase XXVIII. Viewport Rollback & Chronological Simplification.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -409,11 +409,11 @@ window.addEventListener('q-tick', (e) => {
 
     function formatHour(decimalHour) {
         if (isNaN(decimalHour)) return "--:--";
-        let h = decimalHour;
-        while(h < 0) h += 24;
-        while(h >= 24) h -= 24;
-        let hr = Math.floor(h);
-        let min = Math.floor((h - hr) * 60);
+        let dObj = new Date();
+        dObj.setHours(0, 0, 0, 0);
+        dObj.setMinutes(Math.round(decimalHour * 60)); // Exact float-to-minute alignment
+        let hr = dObj.getHours();
+        let min = dObj.getMinutes();
         let tz = isImp ? (hr >= 12 ? ' PM' : ' AM') : '';
         if (isImp && hr > 12) hr -= 12;
         if (isImp && hr === 0) hr = 12;
@@ -754,25 +754,25 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     let localTimeFraction = (timeFractionUTC + (userLon / 360) + eqTimeFraction) % 1;
     if (localTimeFraction < 0) localTimeFraction += 1;
 
-    const rotationOffset = Math.PI; // FIXED: Aligns equirectangular map (-Z Prime Meridian) exactly 180 deg to front.
+    // REVERTED: Viewport camera securely locked to Local Observer Meridian
+    const rotationOffset = -(Math.PI / 2); 
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
     
     earthMesh.rotation.y = rotationY;
 
     // 1b. ATMOSPHERIC DRIFT: Detach troposphere from the crust
-    // Add a 3% rotational slip per day to simulate global jet stream flow
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
     cloudMesh.rotation.y = rotationY + atmosphericSlip;
 
     // 2. SEASONAL TILT (The Earth Pitches)
-    // Anchor is Southern Solstice (Max negative pitch to tilt North away from Ecliptic Camera)
     const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
     
     earthMesh.rotation.x = eclipticPitch;
     cloudMesh.rotation.x = eclipticPitch;
 
-    // 3. DIURNAL SWEEP (The Sun Orbits the Static Longitude)
-    const theta = (0.5 - localTimeFraction) * (Math.PI * 2);
+    // 3. DIURNAL SWEEP 
+    // CORRECTION: The Math.PI offset is now applied strictly to the celestial orbit to true the terminator
+    const theta = (0.5 - localTimeFraction) * (Math.PI * 2) + Math.PI; 
     
     const sunDistance = 5;
     const sunX = sunDistance * Math.sin(theta);
@@ -791,7 +791,6 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     }
 
     // 5. CAMERA STATE ENFORCEMENT
-    // Ensure the camera remains locked to the Ecliptic Anchor if Free-Cam has not been triggered
     if (!isFreeCam && camera) {
         camera.position.set(0, 0, 2.3);
         camera.lookAt(0, 0, 0);
