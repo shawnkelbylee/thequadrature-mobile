@@ -2,14 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>THE QUADRATURE // ASTROPHYSICAL VECTOR</title>
     
     <script src="q-ui.js"></script>
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
-    <script src="astrophysical.js?v=23.1"></script>
+    <script src="astrophysical.js?v=24.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
@@ -21,15 +24,13 @@
             --titanium: #334155; --carbon: #0f172a; --steel: #64748b;
             --theme-main: var(--cyan-glow); --theme-dim: var(--cyan-dim); --gold: #F4D068;
             --starlight: rgba(255, 255, 255, 0.6);
-            --dyn-phase-color: var(--magenta-glow);
-            --dyn-phase-dim: var(--magenta-dim);
             --dial-size: 45vh; 
         }
 
         body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; background-color: var(--void); background: radial-gradient(circle at center, #0a0f1a 0%, var(--void) 85%); color: var(--core-plat); font-family: 'JetBrains Mono', monospace; display: flex; justify-content: center; align-items: center; user-select: none; color-scheme: dark; perspective: 1500px; transform-style: preserve-3d; touch-action: manipulation; }
         
         #q-universal-modal { z-index: 999999 !important; }
-        .radar-box, .opt-btn, .globe, .fmt-toggle, .orbit-node { pointer-events: auto !important; position: relative; z-index: 100 !important; }
+        .orbit-node { pointer-events: auto !important; position: relative; z-index: 100 !important; }
 
         .matrix-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
         #stars { z-index: 1; }
@@ -41,13 +42,6 @@
             color: var(--theme-main); z-index: 50; pointer-events: none;
             text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
         }
-
-        /* --- CORNER QUADRANT CONTAINERS --- */
-        .corner-panel { position: absolute; width: 280px; height: 120px; z-index: 20; pointer-events: auto; }
-        #quad-tl { top: 12vh; left: 4vw; }
-        #quad-tr { top: 12vh; right: 4vw; }
-        #quad-bl { bottom: 8vh; left: 4vw; }
-        #quad-br { bottom: 8vh; right: 4vw; }
 
         .v-head { 
             position: absolute; white-space: nowrap;
@@ -71,8 +65,8 @@
         #needle-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); border: 1px solid var(--titanium); padding: 8px 18px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 100; opacity: 0; transition: opacity 0.3s ease, border-color 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 1px; color: #fff; max-width: 80vw; }
 
         /* --- BARYCENTRIC VISUALIZER CSS --- */
-        .bary-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); z-index: 5; }
-        .bary-svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 10px rgba(0,240,255,0.1)); }
+        .bary-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); z-index: 5; pointer-events: none; }
+        .bary-svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 10px rgba(0,240,255,0.1)); pointer-events: none; }
         
         .orbit-path { fill: none; stroke: var(--titanium); stroke-width: 1; stroke-dasharray: 4 4; opacity: 0.5; }
         .orbit-path-earth { stroke: var(--cyan-glow); opacity: 0.4; }
@@ -80,25 +74,13 @@
         .barycenter { fill: var(--magenta-glow); filter: drop-shadow(0 0 8px var(--magenta-glow)); }
         .solar-core { fill: #F4D068; filter: drop-shadow(0 0 15px #F4D068); }
         
-        /* Interactive nodes on the SVG */
-        .orbit-node { cursor: crosshair; transition: all 0.2s ease; }
+        .orbit-node { cursor: crosshair; transition: all 0.2s ease; pointer-events: auto; }
         .orbit-node:hover { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 10px #fff); }
 
         .earth-node { fill: var(--cyan-glow); filter: drop-shadow(0 0 8px var(--cyan-glow)); }
         .lunar-node { fill: var(--core-plat); filter: drop-shadow(0 0 4px #fff); }
         .inner-planet { fill: var(--steel); }
 
-        /* OPT Node Styling (Centered Text) */
-        .opt-oval { position: absolute; width: 60px; height: 30px; border: 1px solid var(--titanium); border-radius: 15px; display: flex; justify-content: center; align-items: center; z-index: 50; cursor: pointer; background: rgba(0,0,0,0.5); transition: 0.2s; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; color: var(--steel); letter-spacing: 1px; }
-        .opt-oval:hover { border-color: var(--cyan-glow); color: var(--cyan-glow); box-shadow: inset 0 0 10px var(--cyan-dim), 0 0 10px var(--cyan-dim); }
-        
-        /* Relative Positioning to Corner Panels */
-        #opt-tl { top: -20px; right: 0; }
-        #opt-tr { top: -20px; left: 0; }
-        #opt-bl { bottom: -20px; right: 0; }
-        #opt-br { bottom: -20px; left: 0; }
-
-        /* Dynamic Line Drawing */
         .connecting-line { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 0.5; }
     </style>
 </head>
@@ -110,25 +92,16 @@
     <div class="star-container" id="stars"></div>
     <div id="needle-hud">SYSTEMIC CONTEXT</div>
 
-    <div id="quad-tl" class="corner-panel">
-        <div id="opt-tl" class="opt-oval">OPT</div>
-    </div>
-    <div id="quad-tr" class="corner-panel">
-        <div id="opt-tr" class="opt-oval">OPT</div>
-    </div>
-    <div id="quad-bl" class="corner-panel">
-        <div id="opt-bl" class="opt-oval">OPT</div>
-    </div>
-    <div id="quad-br" class="corner-panel">
-        <div id="opt-br" class="opt-oval">OPT</div>
-    </div>
-
-    <div class="bary-container" id="bary-root">
+    <div class="bary-container q-center-dial" id="bary-root">
         <svg class="bary-svg" viewBox="-100 -100 200 200" preserveAspectRatio="xMidYMid meet">
             <line x1="-100" y1="0" x2="100" y2="0" stroke="rgba(51, 65, 85, 0.3)" stroke-width="0.5" />
             <line x1="0" y1="-100" x2="0" y2="100" stroke="rgba(51, 65, 85, 0.3)" stroke-width="0.5" />
             
-            <circle cx="0" cy="0" r="30" class="orbit-path" /> <circle cx="0" cy="0" r="55" class="orbit-path" /> <circle cx="0" cy="0" r="85" class="orbit-path orbit-path-earth" /> <circle cx="0" cy="0" r="1.5" class="barycenter orbit-node" 
+            <circle cx="0" cy="0" r="30" class="orbit-path" /> 
+            <circle cx="0" cy="0" r="55" class="orbit-path" /> 
+            <circle cx="0" cy="0" r="85" class="orbit-path orbit-path-earth" /> 
+
+            <circle cx="0" cy="0" r="1.5" class="barycenter orbit-node" 
                 onmouseover="showNeedleHUD('SOLAR SYSTEM BARYCENTER (SSB): The true center of mass. The Sun orbits this coordinate.', 'var(--magenta-glow)')" 
                 onmouseout="hideNeedleHUD()" />
 
@@ -144,7 +117,8 @@
             <g id="svg-earth-group" transform="translate(60, 60)">
                 <circle cx="0" cy="0" r="4" class="earth-node orbit-node" 
                     onmouseover="showNeedleHUD('EARTH: Current Orbital Coordinate', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()" />
-                <circle cx="0" cy="0" r="10" class="orbit-path" style="stroke-opacity: 0.8;" /> <circle id="svg-moon" cx="7" cy="7" r="1.5" class="lunar-node orbit-node" 
+                <circle cx="0" cy="0" r="10" class="orbit-path" style="stroke-opacity: 0.8;" /> 
+                <circle id="svg-moon" cx="7" cy="7" r="1.5" class="lunar-node orbit-node" 
                     onmouseover="showNeedleHUD('THE MOON: Current Phase & Orbital Distance', '#fff')" onmouseout="hideNeedleHUD()" />
                 <line x1="0" y1="0" x2="7" y2="7" class="connecting-line" id="svg-lunar-line" />
             </g>
