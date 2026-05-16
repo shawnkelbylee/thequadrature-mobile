@@ -788,9 +788,9 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         // Calculate the exact millisecond distance from absolute Solar Noon
         const msOffset = activeTimeMs - noonMs;
         
-        // INVERTED: Sweeps light from East (+X) to West (-X)
-        theta = -(msOffset / 86400000) * (Math.PI * 2); 
-    }
+        // Solar Noon = 0 radians (Light vector faces +Z camera directly).
+        // 24 Hours = Math.PI * 2 radians.
+        theta = (msOffset / 86400000) * (Math.PI * 2);
     } else {
         // Fallback: Geometric standard rotation if API is unreachable
         const d = new Date(activeTimeMs);
