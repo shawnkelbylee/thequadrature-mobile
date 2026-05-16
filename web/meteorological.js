@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXVII. Latitude Camera Elevation & Axis Stabilization.
+// STATUS: Phase XXXVIII. Ptolemaic Pitch Restoration & Scrubber Gear Calibration.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -39,11 +39,23 @@ let camPhi = Math.PI / 2;
 // --- EXTERNAL STATE RECEIVERS ---
 window.addEventListener('q-camera-toggle', (e) => {
     isFreeCam = e.detail.isFree;
+    if (!isFreeCam && camera) {
+        camTheta = 0;
+        camPhi = Math.PI / 2;
+        camera.position.set(0, 0, 2.3);
+        camera.lookAt(0, 0, 0);
+    }
 });
 
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'q-live-toggle') {
         isFreeCam = false;
+        camTheta = 0;
+        camPhi = Math.PI / 2;
+        if (camera) {
+            camera.position.set(0, 0, 2.3);
+            camera.lookAt(0, 0, 0);
+        }
     }
 });
 
@@ -394,7 +406,6 @@ window.openImpact = function() {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
-    const userLat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; 
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. DEBOUNCED ASTRONOMICAL TELEMETRY SYNC
@@ -411,7 +422,7 @@ window.addEventListener('q-tick', (e) => {
     
     // 2. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
     if (scene && camera && renderer) {
-        updateGlobeKinematics(activeTime, daysElapsed, userLon, userLat, qData.delta);
+        updateGlobeKinematics(activeTime, daysElapsed, userLon, qData.delta);
         renderer.render(scene, camera);
     }
 
@@ -751,26 +762,22 @@ function initThreeGlobe() {
 }
 
 // THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
-function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, userLat, qDataDelta) {
+function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
     // 1. ECLIPTIC CAMERA LOCK (Viewport securely anchored to local longitude)
-    // FIX: Earth mesh is strictly upright to prevent diagonal shadow shear
-    earthMesh.rotation.x = 0;
-    earthMesh.rotation.z = 0;
-
     const rotationOffset = -(Math.PI / 2); 
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
     earthMesh.rotation.y = rotationY;
 
     // 1b. ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
-    cloudMesh.rotation.x = 0;
-    cloudMesh.rotation.z = 0;
     cloudMesh.rotation.y = rotationY + atmosphericSlip;
 
-    // 2. TRUE COPERNICAN DECLINATION (The Sun shifts North/South for Seasons)
-    const declinationRad = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.44 * Math.PI / 180);
+    // 2. SEASONAL TILT (The Earth Pitches visually to the camera)
+    const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.44 * Math.PI / 180);
+    earthMesh.rotation.x = eclipticPitch;
+    cloudMesh.rotation.x = eclipticPitch;
 
     // 3. DIURNAL SWEEP (Absolute Solar Noon Anchor)
     let theta = 0;
@@ -791,37 +798,35 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, userLat, qDat
         theta = (0.5 - localTimeFraction) * (Math.PI * 2);
     }
     
-    // Map the Sun's orbit, applying the seasonal declination strictly to the Y-axis
+    // MATHEMATICAL CORRECTION: Pitch the Sun's orbit by the exact same eclipticPitch.
+    // This perfectly eliminates the diagonal shear, allowing the Earth to pitch visually 
+    // while the terminator shadow respects the true physical alignment of the poles.
     const sunDistance = 5;
-    const sunY = sunDistance * Math.sin(declinationRad); 
-    const sunRadiusXZ = sunDistance * Math.cos(declinationRad); 
+    const sX = sunDistance * Math.sin(theta);
+    const sZ = sunDistance * Math.cos(theta);
     
-    const sunX = sunRadiusXZ * Math.sin(theta);
-    const sunZ = sunRadiusXZ * Math.cos(theta);
+    const sunX = sX;
+    const sunY = -sZ * Math.sin(eclipticPitch); 
+    const sunZ = sZ * Math.cos(eclipticPitch);
 
     sunLight.position.set(sunX, sunY, sunZ);
 
     // 4. NOCTURNAL SHADER SYNC
     if (nightMesh) {
         nightMesh.rotation.y = rotationY;
-        nightMesh.rotation.x = 0;
+        nightMesh.rotation.x = eclipticPitch;
         if (nightMesh.material.uniforms) {
             nightMesh.material.uniforms.sunPos.value.set(sunX, sunY, sunZ);
         }
     }
 
-    // 5. CAMERA STATE ENFORCEMENT & LATITUDE ELEVATION
+    // 5. CAMERA STATE ENFORCEMENT
+    // Camera is lowered back to the Equatorial plane (Y=0)
     if (!isFreeCam && camera) {
-        const userLatRad = userLat * (Math.PI / 180);
-        const radius = 2.3;
-        
-        // Continuously sync internal Free-Cam state so dragging is seamless
-        camPhi = (Math.PI / 2) - userLatRad; 
+        camPhi = Math.PI / 2; 
         camTheta = 0; 
         
-        camera.position.x = 0; // Locked to longitude facing +Z
-        camera.position.y = radius * Math.cos(camPhi); // Elevated strictly to user latitude
-        camera.position.z = radius * Math.sin(camPhi);
+        camera.position.set(0, 0, 2.3);
         camera.lookAt(0, 0, 0);
     }
 }
@@ -1034,16 +1039,17 @@ window.attachScrubberEvents = function() {
         });
     }
 
+    // Time Macro gear is now strictly set to 1 Hour (3,600,000 ms) for rapid diurnal spin
     document.getElementById('q-micro-rev')?.addEventListener('click', () => window.executeMicroStep(-1));
     document.getElementById('q-micro-fwd')?.addEventListener('click', () => window.executeMicroStep(1));
     document.getElementById('q-macro-rev')?.addEventListener('click', () => window.executeMacroLoop(-1));
     document.getElementById('q-macro-fwd')?.addEventListener('click', () => window.executeMacroLoop(1));
     document.getElementById('q-macro-stop')?.addEventListener('click', window.stopMacroLoop);
     
-    document.getElementById('q-time-macro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 87300000, 'q-time-macro-rev'));
+    document.getElementById('q-time-macro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 3600000, 'q-time-macro-rev'));
     document.getElementById('q-time-micro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 900000, 'q-time-micro-rev'));
     document.getElementById('q-time-micro-fwd')?.addEventListener('click', () => window.executeTimeLoop(1, 900000, 'q-time-micro-fwd'));
-    document.getElementById('q-time-macro-fwd')?.addEventListener('click', () => window.executeTimeLoop(1, 87300000, 'q-time-macro-fwd'));
+    document.getElementById('q-time-macro-fwd')?.addEventListener('click', () => window.executeTimeLoop(1, 3600000, 'q-time-macro-fwd'));
 };
 
 // Auto-inject on load
