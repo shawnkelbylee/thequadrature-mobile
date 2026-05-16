@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XLII. Syntax Restoration & Render Loop Unlocked.
+// STATUS: Phase XLIII. Geostationary Ecliptic Satellite & True Axial Kinematics.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -27,7 +27,7 @@ window.Q_ASTRO_DEBOUNCE = null;
 
 // --- WEBGL GLOBE VARIABLES ---
 let scene, camera, renderer, earthMesh, cloudMesh, nightMesh, sunLight;
-let seasonalPivot, tiltGroup;
+let earthGroup;
 
 // --- FREE-CAM STATE MACHINE ---
 let isFreeCam = false;
@@ -41,9 +41,11 @@ let camPhi = Math.PI / 2;
 window.addEventListener('q-camera-toggle', (e) => {
     isFreeCam = e.detail.isFree;
     if (!isFreeCam && camera) {
-        camTheta = 0;
         camPhi = Math.PI / 2;
-        camera.position.set(0, 0, 2.3);
+        const radius = 2.3;
+        camera.position.x = radius * Math.sin(camPhi) * Math.sin(camTheta);
+        camera.position.y = radius * Math.cos(camPhi);
+        camera.position.z = radius * Math.sin(camPhi) * Math.cos(camTheta);
         camera.lookAt(0, 0, 0);
     }
 });
@@ -51,10 +53,12 @@ window.addEventListener('q-camera-toggle', (e) => {
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'q-live-toggle') {
         isFreeCam = false;
-        camTheta = 0;
         camPhi = Math.PI / 2;
         if (camera) {
-            camera.position.set(0, 0, 2.3);
+            const radius = 2.3;
+            camera.position.x = radius * Math.sin(camPhi) * Math.sin(camTheta);
+            camera.position.y = radius * Math.cos(camPhi);
+            camera.position.z = radius * Math.sin(camPhi) * Math.cos(camTheta);
             camera.lookAt(0, 0, 0);
         }
     }
@@ -641,14 +645,12 @@ function initThreeGlobe() {
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin("anonymous");
     
-    // Core Hierarchy: Seasonal Pivot encapsulates the Tilted Earth
-    seasonalPivot = new THREE.Group();
-    scene.add(seasonalPivot);
+    // Core Hierarchy: Absolute World Tilted Framework
+    earthGroup = new THREE.Group();
+    scene.add(earthGroup);
     
-    tiltGroup = new THREE.Group();
-    // Static Axial Tilt (23.44 deg). Pitched to face North Pole away at Solstice zero-point.
-    tiltGroup.rotation.x = -23.44 * (Math.PI / 180); 
-    seasonalPivot.add(tiltGroup);
+    // Static Axial Tilt (23.44 deg) applied exactly once in world space.
+    earthGroup.rotation.x = 23.44 * (Math.PI / 180);
 
     // Base Earth
     const earthGeo = new THREE.SphereGeometry(1, 64, 64);
@@ -657,7 +659,7 @@ function initThreeGlobe() {
         roughness: 0.8
     });
     earthMesh = new THREE.Mesh(earthGeo, earthMat);
-    tiltGroup.add(earthMesh);
+    earthGroup.add(earthMesh);
 
     // Live Cloud Layer
     const cloudGeo = new THREE.SphereGeometry(1.015, 64, 64);
@@ -669,10 +671,10 @@ function initThreeGlobe() {
         depthWrite: false
     });
     cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
-    tiltGroup.add(cloudMesh);
+    earthGroup.add(cloudMesh);
 
     // Dynamic Nocturnal Mask (ShaderMaterial)
-    // FIX: smoothstep gradient expanded for true atmospheric twilight scatter
+    // Modified smoothstep for accurate twilight atmospheric scatter
     const nightGeo = new THREE.SphereGeometry(1.002, 64, 64);
     const nightShader = {
         uniforms: {
@@ -710,11 +712,10 @@ function initThreeGlobe() {
     };
     const nightMat = new THREE.ShaderMaterial(nightShader);
     nightMesh = new THREE.Mesh(nightGeo, nightMat);
-    tiltGroup.add(nightMesh);
+    earthGroup.add(nightMesh);
 
-    // The Sun strictly locked to the Ecliptic Plane (Y=0)
+    // The Sun (Directional Light)
     sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    sunLight.position.set(0, 0, 5);
     scene.add(sunLight);
     
     // Starlight Ambient Base
@@ -771,49 +772,59 @@ function initThreeGlobe() {
 
 // THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
 function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
-    if (!earthMesh || !cloudMesh || !seasonalPivot) return;
+    if (!earthGroup || !sunLight) return;
 
     // 1. MACRO STEP (SEASONAL ORBIT)
-    // The pivot rotates on Y, sweeping the permanently tilted axis in a true physical circle
-    // relative to the stationary Ecliptic Sun and Camera.
+    // The Sun dynamically orbits the Earth on the fixed Ecliptic Plane (Y=0)
     const seasonalAngle = (daysElapsed / 365.24219) * (Math.PI * 2);
-    seasonalPivot.rotation.y = -seasonalAngle; 
+    const sunAngle = seasonalAngle + (Math.PI / 2); 
+    
+    const sunDistance = 5;
+    const sunX = sunDistance * Math.cos(sunAngle);
+    const sunZ = sunDistance * Math.sin(sunAngle);
+    sunLight.position.set(sunX, 0, sunZ);
 
     // 2. MICRO STEP (DIURNAL SPIN)
-    // The Earth physically rotates 360 degrees inside the tilted frame every 24 hours.
     let diurnalAngle = 0;
-    
     if (window.Q_METEO_NOON && !isNaN(window.Q_METEO_NOON.getTime())) {
         const noonMs = window.Q_METEO_NOON.getTime();
         const msOffset = activeTimeMs - noonMs;
         diurnalAngle = (msOffset / 86400000) * (Math.PI * 2);
     } else {
-        // FALLBACK: Execute geometric standard rotation while API is fetching
+        // Fallback
         const d = new Date(activeTimeMs);
         const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600)) / 24;
         diurnalAngle = timeFractionUTC * (Math.PI * 2);
     }
     
-    // Offset applied to ensure user's explicit longitude directly faces the camera at Solar Noon
+    // The Earth physically spins continuously on its permanently tilted axis
     const rotationOffset = -(Math.PI / 2); 
     const lonOffset = (userLon * (Math.PI / 180));
-    const finalDiurnalY = diurnalAngle - lonOffset + rotationOffset;
+    const earthSpin = sunAngle + diurnalAngle - lonOffset + rotationOffset;
 
-    earthMesh.rotation.y = finalDiurnalY;
-    if (nightMesh) nightMesh.rotation.y = finalDiurnalY;
+    earthMesh.rotation.y = earthSpin;
+    nightMesh.rotation.y = earthSpin;
 
     // ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
-    cloudMesh.rotation.y = finalDiurnalY + atmosphericSlip;
+    cloudMesh.rotation.y = earthSpin + atmosphericSlip;
+
+    // NOCTURNAL SHADER SYNC (Passing the absolute world position of the Sun)
+    if (nightMesh && nightMesh.material.uniforms) {
+        nightMesh.material.uniforms.sunPos.value.set(sunX, 0, sunZ);
+    }
 
     // 3. CAMERA STATE ENFORCEMENT
-    // Camera is permanently anchored to the Equatorial/Ecliptic plane (Y=0). 
-    // Unrestricted when Free-Cam is engaged.
+    // Camera acts as a Geostationary Satellite on the Ecliptic tracking the user's longitude.
     if (!isFreeCam && camera) {
+        const camAngle = sunAngle + diurnalAngle;
+        camTheta = camAngle;
         camPhi = Math.PI / 2; 
-        camTheta = 0; 
         
-        camera.position.set(0, 0, 2.3);
+        const radius = 2.3;
+        camera.position.x = radius * Math.cos(camAngle);
+        camera.position.y = 0;
+        camera.position.z = radius * Math.sin(camAngle);
         camera.lookAt(0, 0, 0);
     }
 }
