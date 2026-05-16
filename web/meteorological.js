@@ -1,19 +1,19 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXII. Dedicated Astronomical API & Absolute Terminator Sync.
+// STATUS: Phase XXXIII. Local Scrubber, Twilight Telemetry & Solar Noon Anchor.
 
 let liveWeather = null;
 let sparkBars = [];
 let showDelta = false;
 
 let alertThreshold = 75;
-let currentAssetMode = "FAUNA";
+let currentAssetMode = "FAUNA"; // Boot Default
 let iotProtocol = "MANUAL";
 let climateAnchor = "GEO"; 
 let manualLat = 0;
 let manualLon = 0;
 let unitSystem = localStorage.getItem('Q_UNIT_SYS') || 'METRIC';
-let insolationMode = 'CHRONOLOGIC';
+let insolationMode = 'CHRONOLOGIC'; // Boot Default
 let actionHorizon = "ANCHOR";
 let thermoBaseline = 22.0; 
 let crossVectorSync = true;
@@ -21,6 +21,9 @@ let crossVectorSync = true;
 let currentRiskVal = 0;
 let currentOptTarget = '';
 let isBooted = false;
+
+window.Q_LAST_ASTRO_DATE = "";
+window.Q_ASTRO_DEBOUNCE = null;
 
 // --- WEBGL GLOBE VARIABLES ---
 let scene, camera, renderer, earthMesh, cloudMesh, nightMesh, sunLight;
@@ -76,8 +79,10 @@ window.injectVectorData = function() {
     if (quadTL) {
         if (insolationMode === 'KINETIC') {
             quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">LOCAL SOLAR NOON:</span> <span class="val-sm val-highlight" id="val-solar-noon">--:--</span></div><div class="t-row"><span class="w-lbl">MAX UV LEVEL:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">SUNLIGHT INTENSITY:</span> <span class="val-sm val-highlight" id="val-irradiance">98,500 LUX</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE - KINETIC ]</div></div>`;
-        } else {
+        } else if (insolationMode === 'CHRONOLOGIC') {
             quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">DAWN (SUNRISE):</span> <span class="val-sm val-highlight" id="val-dawn">--:--</span></div><div class="t-row"><span class="w-lbl">LOCAL SOLAR NOON:</span> <span class="val-sm val-highlight" id="val-solar-noon">--:--</span></div><div class="t-row"><span class="w-lbl">DUSK (SUNSET):</span> <span class="val-sm val-highlight" id="val-dusk">--:--</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE - CHRONOLOGIC ]</div></div>`;
+        } else {
+            quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">CIVIL TWILIGHT:</span> <span class="val-sm val-highlight" id="val-twi-c">--:--</span></div><div class="t-row"><span class="w-lbl">NAUTICAL TWILIGHT:</span> <span class="val-sm val-highlight" id="val-twi-n">--:--</span></div><div class="t-row"><span class="w-lbl">ASTRONOMICAL:</span> <span class="val-sm val-highlight" id="val-twi-a">--:--</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE - TWILIGHT ]</div></div>`;
         }
     }
 
@@ -119,19 +124,38 @@ function initSparklines() {
     }
 }
 
-async function fetchMeteoData() {
-    let lat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; // Fallback to Florida
+async function fetchAstroDataForDate(dateStr) {
+    let lat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659;
     let lon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001;
 
-    if (climateAnchor === 'MANUAL') {
-        lat = manualLat;
-        lon = manualLon;
-    } else if (climateAnchor === 'GLOBAL') {
-        lat = 0; 
-        lon = 0; 
-    }
+    if (climateAnchor === 'MANUAL') { lat = manualLat; lon = manualLon; } 
+    else if (climateAnchor === 'GLOBAL') { lat = 0; lon = 0; }
 
-    // 1. WEATHER FETCH (Open-Meteo)
+    try {
+        const responseA = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&formatted=0&date=${dateStr}`);
+        if (responseA.ok) {
+            const dataA = await responseA.json();
+            if (dataA && dataA.results) {
+                window.Q_METEO_SUNRISE = new Date(dataA.results.sunrise);
+                window.Q_METEO_SUNSET = new Date(dataA.results.sunset);
+                window.Q_METEO_NOON = new Date(dataA.results.solar_noon);
+                window.Q_METEO_TWI_C = new Date(dataA.results.civil_twilight_begin);
+                window.Q_METEO_TWI_N = new Date(dataA.results.nautical_twilight_begin);
+                window.Q_METEO_TWI_A = new Date(dataA.results.astronomical_twilight_begin);
+            }
+        }
+    } catch (error) {
+        console.warn('Q-SYSTEM: Astronomical API offline or rate-limited.', error);
+    }
+}
+
+async function fetchMeteoData() {
+    let lat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; 
+    let lon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001;
+
+    if (climateAnchor === 'MANUAL') { lat = manualLat; lon = manualLon; } 
+    else if (climateAnchor === 'GLOBAL') { lat = 0; lon = 0; }
+
     try {
         const responseW = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
         if (responseW.ok) {
@@ -148,22 +172,6 @@ async function fetchMeteoData() {
         const badge = document.getElementById('meteo-badge');
         if(badge) badge.innerText = "STATIC BASELINE (DEGRADED)";
         liveWeather = null;
-    }
-
-    // 2. ASTRONOMICAL FETCH (Sunrise-Sunset.org)
-    // 'formatted=0' ensures ISO 8601 strict UTC string returns for flawless local Date parsing
-    try {
-        const responseA = await fetch('https://api.sunrise-sunset.org/json?lat=' + lat + '&lng=' + lon + '&formatted=0');
-        if (responseA.ok) {
-            const dataA = await responseA.json();
-            if (dataA && dataA.results) {
-                window.Q_METEO_SUNRISE = new Date(dataA.results.sunrise);
-                window.Q_METEO_SUNSET = new Date(dataA.results.sunset);
-                window.Q_METEO_NOON = new Date(dataA.results.solar_noon);
-            }
-        }
-    } catch (error) {
-        console.warn('Q-SYSTEM: Astronomical API offline. Falling back to geometric estimates.', error);
     }
 }
 
@@ -299,6 +307,7 @@ window.openOptions = function(e, target) {
                 <select id="inso-mode" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
                     <option value="KINETIC" ${insolationMode==='KINETIC'?'selected':''}>KINETIC (UV & INTENSITY)</option>
                     <option value="CHRONOLOGIC" ${insolationMode==='CHRONOLOGIC'?'selected':''}>CHRONOLOGIC (DAWN & DUSK)</option>
+                    <option value="TWILIGHT" ${insolationMode==='TWILIGHT'?'selected':''}>TWILIGHT (CIVIL & NAUTICAL)</option>
                 </select>
             </div>
         `;
@@ -399,16 +408,27 @@ window.addEventListener('q-tick', (e) => {
     
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
-    // 1. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
+    // 1. DEBOUNCED ASTRONOMICAL TELEMETRY SYNC
+    const simD = new Date(activeTimeMs);
+    const simDateStr = `${simD.getUTCFullYear()}-${String(simD.getUTCMonth()+1).padStart(2,'0')}-${String(simD.getUTCDate()).padStart(2,'0')}`;
+    
+    if (simDateStr !== window.Q_LAST_ASTRO_DATE) {
+        window.Q_LAST_ASTRO_DATE = simDateStr;
+        clearTimeout(window.Q_ASTRO_DEBOUNCE);
+        window.Q_ASTRO_DEBOUNCE = setTimeout(() => {
+            fetchAstroDataForDate(simDateStr);
+        }, 400); // Wait 400ms after slider stops moving to execute the fetch
+    }
+    
+    // 2. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
     if (scene && camera && renderer) {
-        updateGlobeKinematics(activeTime, daysElapsed, userLon, qData.delta);
+        updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qData.delta);
         renderer.render(scene, camera);
     }
 
-    // 2. DOM UPDATES & METRIC CONVERSION
+    // 3. DOM UPDATES & METRIC CONVERSION
     let isImp = (unitSystem === 'IMPERIAL');
 
-    // NATIVE JAVASCRIPT TIMEZONE EXTRACTION (Parsed from strict ISO 8601 UTC string)
     function formatApiTime(dObj) {
         if (!dObj || isNaN(dObj.getTime())) return "--:--";
         let hr = dObj.getHours();
@@ -422,15 +442,24 @@ window.addEventListener('q-tick', (e) => {
     const valSolarNoon = document.getElementById('val-solar-noon');
     const valDawn = document.getElementById('val-dawn');
     const valDusk = document.getElementById('val-dusk');
+    const valTwiC = document.getElementById('val-twi-c');
+    const valTwiN = document.getElementById('val-twi-n');
+    const valTwiA = document.getElementById('val-twi-a');
 
     if (window.Q_METEO_SUNRISE && window.Q_METEO_SUNSET && window.Q_METEO_NOON) {
         if (valDawn) valDawn.innerText = formatApiTime(window.Q_METEO_SUNRISE);
         if (valDusk) valDusk.innerText = formatApiTime(window.Q_METEO_SUNSET);
         if (valSolarNoon) valSolarNoon.innerText = formatApiTime(window.Q_METEO_NOON);
+        if (valTwiC) valTwiC.innerText = formatApiTime(window.Q_METEO_TWI_C);
+        if (valTwiN) valTwiN.innerText = formatApiTime(window.Q_METEO_TWI_N);
+        if (valTwiA) valTwiA.innerText = formatApiTime(window.Q_METEO_TWI_A);
     } else {
         if (valDawn) valDawn.innerText = "--:--";
         if (valDusk) valDusk.innerText = "--:--";
         if (valSolarNoon) valSolarNoon.innerText = "--:--";
+        if (valTwiC) valTwiC.innerText = "--:--";
+        if (valTwiN) valTwiN.innerText = "--:--";
+        if (valTwiA) valTwiA.innerText = "--:--";
     }
 
     const valSst = document.getElementById('val-sst');
@@ -750,38 +779,17 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     earthMesh.rotation.x = eclipticPitch;
     cloudMesh.rotation.x = eclipticPitch;
 
-    // 3. DIURNAL SWEEP (API Telemetry Override)
+    // 3. DIURNAL SWEEP (Absolute Solar Noon Anchor)
     let theta = 0;
     
-    if (window.Q_METEO_SUNRISE && window.Q_METEO_SUNSET) {
-        const srMs = window.Q_METEO_SUNRISE.getTime();
-        const ssMs = window.Q_METEO_SUNSET.getTime();
+    if (window.Q_METEO_NOON) {
+        const noonMs = window.Q_METEO_NOON.getTime();
+        // Calculate the exact millisecond distance from absolute Solar Noon
+        const msOffset = activeTimeMs - noonMs;
         
-        // Ensure accurate tracking regardless of timezone bounds
-        if (activeTimeMs >= srMs && activeTimeMs <= ssMs) {
-            // Daytime Sequence
-            const dayLengthMs = ssMs - srMs;
-            const elapsedMs = activeTimeMs - srMs;
-            const dayFraction = elapsedMs / dayLengthMs;
-            
-            // Map Sunrise (+X) to Sunset (-X) through Front (+Z)
-            theta = (0.25 - (dayFraction * 0.5)) * (Math.PI * 2);
-        } else {
-            // Nighttime Sequence
-            let nightStartMs = ssMs;
-            let nightEndMs = srMs + 86400000; 
-            if (activeTimeMs < srMs) {
-                nightStartMs = ssMs - 86400000; 
-                nightEndMs = srMs;
-            }
-            
-            const nightLengthMs = nightEndMs - nightStartMs;
-            const elapsedNightMs = activeTimeMs - nightStartMs;
-            const nightFraction = elapsedNightMs / nightLengthMs;
-            
-            // Map Sunset (-X) to Sunrise (+X) through Back (-Z)
-            theta = (-0.25 - (nightFraction * 0.5)) * (Math.PI * 2);
-        }
+        // Solar Noon = 0 radians (Light vector faces +Z camera directly).
+        // 24 Hours = Math.PI * 2 radians.
+        theta = (msOffset / 86400000) * (Math.PI * 2);
     } else {
         // Fallback: Geometric standard rotation if API is unreachable
         const d = new Date(activeTimeMs);
@@ -826,6 +834,12 @@ window.addEventListener('q-ui-mounted', () => {
     initThreeGlobe();
     fetchMeteoData();
     fetchAtmosphericLayer();
+    
+    // Initial Boot Fetch for Astronomical Data
+    const dObj = new Date();
+    const localDateStr = `${dObj.getUTCFullYear()}-${String(dObj.getUTCMonth()+1).padStart(2,'0')}-${String(dObj.getUTCDate()).padStart(2,'0')}`;
+    window.Q_LAST_ASTRO_DATE = localDateStr;
+    fetchAstroDataForDate(localDateStr);
 });
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -837,8 +851,200 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
             initThreeGlobe();
             fetchMeteoData();
             fetchAtmosphericLayer();
+            
+            const dObj = new Date();
+            const localDateStr = `${dObj.getUTCFullYear()}-${String(dObj.getUTCMonth()+1).padStart(2,'0')}-${String(dObj.getUTCDate()).padStart(2,'0')}`;
+            window.Q_LAST_ASTRO_DATE = localDateStr;
+            fetchAstroDataForDate(localDateStr);
         }
     }, 500);
 }
 setInterval(fetchMeteoData, 300000);
 setInterval(fetchAtmosphericLayer, 300000);
+
+// ==========================================
+// LOCALIZED METEOROLOGICAL SCRUBBER ENGINE
+// ==========================================
+
+function injectLocalScrubber() {
+    const scrubberContainer = document.createElement('div');
+    scrubberContainer.className = "q-global-controls q-scrubber-panel";
+    scrubberContainer.id = "q-universal-controls";
+    scrubberContainer.innerHTML = `
+        <div class="scrub-row-1">
+            <button id="q-cam-toggle" class="btn-micro">[ CAM: ECLIPTIC ]</button>
+            <div class="macro-micro-group">
+                <button id="q-macro-rev" class="btn-micro" title="Season Macro">&lt;&lt;</button>
+                <button id="q-micro-rev" class="btn-micro" title="Season Micro">&lt;</button>
+                <button id="q-macro-stop" class="btn-micro" disabled>||</button>
+                <button id="q-micro-fwd" class="btn-micro" title="Season Micro">&gt;</button>
+                <button id="q-macro-fwd" class="btn-micro" title="Season Macro">&gt;&gt;</button>
+            </div>
+            <button id="q-live-toggle" class="btn-micro active">LIVE</button>
+        </div>
+        <div class="scrub-row-2">
+            <button id="q-time-macro-rev" class="btn-micro" title="Time Macro">&lt;&lt;</button>
+            <button id="q-time-micro-rev" class="btn-micro" title="Time Micro">&lt;</button>
+            <input type="range" id="q-global-scrubber" min="-365" max="365" step="any" value="0" class="q-scrubber">
+            <button id="q-time-micro-fwd" class="btn-micro" title="Time Micro">&gt;</button>
+            <button id="q-time-macro-fwd" class="btn-micro" title="Time Macro">&gt;&gt;</button>
+        </div>
+    `;
+    document.body.appendChild(scrubberContainer);
+
+    window.bindMasterTickScrubber();
+    window.syncScrubberUI();
+    window.attachScrubberEvents();
+}
+
+window.bindMasterTickScrubber = function() {
+    window.addEventListener('q-tick', (e) => {
+        const { isLive, daysElapsed } = e.detail;
+        if (isLive) {
+            const scrubber = document.getElementById('q-global-scrubber');
+            if (scrubber) {
+                let sMax = parseInt(scrubber.max);
+                let sMin = parseInt(scrubber.min);
+                if (daysElapsed >= sMax - 90) scrubber.max = Math.floor(daysElapsed) + 365;
+                if (daysElapsed <= sMin + 90) scrubber.min = Math.floor(daysElapsed) - 365;
+                scrubber.value = daysElapsed;
+            }
+        }
+    });
+};
+
+window.getSimState = function() {
+    try { let stored = localStorage.getItem('Q_MASTER_CLOCK'); if (stored) return JSON.parse(stored); } catch(e) {}
+    return { isLive: true, simTime: Date.now() };
+};
+
+window.setSimState = function(state) {
+    let payload = JSON.stringify(state);
+    localStorage.setItem('Q_MASTER_CLOCK', payload);
+    window.dispatchEvent(new StorageEvent('storage', { key: 'Q_MASTER_CLOCK', newValue: payload }));
+    if (window.Q_STATE) { window.Q_STATE.isLive = state.isLive; window.Q_STATE.simTime = state.simTime; }
+};
+
+window.setLiveClock = function() {
+    if(window.stopMacroLoop) window.stopMacroLoop();
+    let state = { isLive: true, simTime: Date.now() };
+    window.setSimState(state);
+    if(window.Q_MobileBridge) window.Q_MobileBridge.pulse('HEAVY');
+    const camBtn = document.getElementById('q-cam-toggle');
+    if (camBtn) { camBtn.innerText = '[ CAM: ECLIPTIC ]'; camBtn.classList.remove('active'); }
+    window.dispatchEvent(new CustomEvent('q-camera-toggle', { detail: { isFree: false } }));
+    window.syncScrubberUI();
+};
+
+window.syncScrubberUI = function() {
+    if(!window.getSimState) return;
+    const state = window.getSimState();
+    const liveBtn = document.getElementById('q-live-toggle');
+    const scrubber = document.getElementById('q-global-scrubber');
+    if(liveBtn) { liveBtn.classList.toggle('active', state.isLive); liveBtn.innerText = state.isLive ? "LIVE" : "RESYNC"; }
+    if (scrubber && window.ANCHOR_ALPHA_DYNAMIC) {
+        let targetTime = state.isLive ? Date.now() : state.simTime;
+        let daysElapsed = (targetTime - window.ANCHOR_ALPHA_DYNAMIC) / 86400000;
+        let currentDay = Math.floor(daysElapsed);
+        let sMax = parseInt(scrubber.max); let sMin = parseInt(scrubber.min);
+        if (currentDay >= sMax - 90) scrubber.max = currentDay + 365;
+        if (currentDay <= sMin + 90) scrubber.min = currentDay - 365;
+        scrubber.value = daysElapsed;
+    }
+};
+
+let macroInterval = null; let timeLoopInterval = null;
+
+window.stopMacroLoop = function() {
+    if (macroInterval) { clearInterval(macroInterval); macroInterval = null; }
+    if (timeLoopInterval) { clearInterval(timeLoopInterval); timeLoopInterval = null; }
+    const btnStop = document.getElementById('q-macro-stop');
+    const btnRevSeason = document.getElementById('q-macro-rev');
+    const btnFwdSeason = document.getElementById('q-macro-fwd');
+    const btnRevTime = document.getElementById('q-time-macro-rev');
+    const btnFwdTime = document.getElementById('q-time-macro-fwd');
+    const btnMicroRevTime = document.getElementById('q-time-micro-rev');
+    const btnMicroFwdTime = document.getElementById('q-time-micro-fwd');
+    if (btnStop) btnStop.disabled = true;
+    if (btnRevSeason) btnRevSeason.classList.remove('active');
+    if (btnFwdSeason) btnFwdSeason.classList.remove('active');
+    if (btnRevTime) btnRevTime.classList.remove('active');
+    if (btnFwdTime) btnFwdTime.classList.remove('active');
+    if (btnMicroRevTime) btnMicroRevTime.classList.remove('active');
+    if (btnMicroFwdTime) btnMicroFwdTime.classList.remove('active');
+};
+
+window.executeMicroStep = function(daysDelta) {
+    window.stopMacroLoop();
+    let state = window.getSimState();
+    if (state.isLive) { state.isLive = false; state.simTime = Date.now(); }
+    state.simTime += daysDelta * 86400000;
+    window.setSimState(state); window.syncScrubberUI();
+};
+
+window.executeMacroLoop = function(direction) {
+    window.stopMacroLoop();
+    let state = window.getSimState();
+    if (state.isLive) { state.isLive = false; state.simTime = Date.now(); }
+    const btnStop = document.getElementById('q-macro-stop');
+    const activeBtn = document.getElementById(direction < 0 ? 'q-macro-rev' : 'q-macro-fwd');
+    if (btnStop) btnStop.disabled = false; if (activeBtn) activeBtn.classList.add('active');
+    macroInterval = setInterval(() => { state.simTime += direction * 86400000; window.setSimState(state); window.syncScrubberUI(); }, 66); 
+};
+
+window.executeTimeLoop = function(direction, stepMs, activeBtnId) {
+    window.stopMacroLoop();
+    let state = window.getSimState();
+    if (state.isLive) { state.isLive = false; state.simTime = Date.now(); }
+    const btnStop = document.getElementById('q-macro-stop');
+    const activeBtn = document.getElementById(activeBtnId);
+    if (btnStop) btnStop.disabled = false; if (activeBtn) activeBtn.classList.add('active');
+    timeLoopInterval = setInterval(() => { state.simTime += direction * stepMs; window.setSimState(state); window.syncScrubberUI(); }, 33); 
+};
+
+window.attachScrubberEvents = function() {
+    const liveToggle = document.getElementById('q-live-toggle');
+    const scrubber = document.getElementById('q-global-scrubber');
+    const camToggle = document.getElementById('q-cam-toggle');
+    
+    if (liveToggle) liveToggle.addEventListener('click', () => window.setLiveClock());
+    if (camToggle) {
+        camToggle.addEventListener('click', () => {
+            const isCurrentlyFree = camToggle.classList.contains('active');
+            if (isCurrentlyFree) {
+                camToggle.classList.remove('active'); camToggle.innerText = '[ CAM: ECLIPTIC ]';
+                window.dispatchEvent(new CustomEvent('q-camera-toggle', { detail: { isFree: false } }));
+            } else {
+                camToggle.classList.add('active'); camToggle.innerText = '[ CAM: FREE ]';
+                window.dispatchEvent(new CustomEvent('q-camera-toggle', { detail: { isFree: true } }));
+            }
+        });
+    }
+    if (scrubber) {
+        scrubber.addEventListener('input', (e) => {
+            window.stopMacroLoop();
+            let val = parseFloat(e.target.value);
+            let msOffset = window.ANCHOR_ALPHA_DYNAMIC + (val * 86400000);
+            window.setSimState({ isLive: false, simTime: msOffset });
+            window.syncScrubberUI();
+        });
+    }
+
+    document.getElementById('q-micro-rev')?.addEventListener('click', () => window.executeMicroStep(-1));
+    document.getElementById('q-micro-fwd')?.addEventListener('click', () => window.executeMicroStep(1));
+    document.getElementById('q-macro-rev')?.addEventListener('click', () => window.executeMacroLoop(-1));
+    document.getElementById('q-macro-fwd')?.addEventListener('click', () => window.executeMacroLoop(1));
+    document.getElementById('q-macro-stop')?.addEventListener('click', window.stopMacroLoop);
+    
+    document.getElementById('q-time-macro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 87300000, 'q-time-macro-rev'));
+    document.getElementById('q-time-micro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 900000, 'q-time-micro-rev'));
+    document.getElementById('q-time-micro-fwd')?.addEventListener('click', () => window.executeTimeLoop(1, 900000, 'q-time-micro-fwd'));
+    document.getElementById('q-time-macro-fwd')?.addEventListener('click', () => window.executeTimeLoop(1, 87300000, 'q-time-macro-fwd'));
+};
+
+// Auto-inject on load
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(injectLocalScrubber, 600);
+} else {
+    window.addEventListener('DOMContentLoaded', () => setTimeout(injectLocalScrubber, 600));
+}
