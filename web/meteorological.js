@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXIX. True Ecliptic Anchor, YXZ Euler Matrix & Twilight Gradient.
+// STATUS: Phase XL. Strict Ecliptic Solar Anchor & Earth Pitch Kinematics.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -766,21 +766,23 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     const rotationOffset = -(Math.PI / 2); 
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
     
-    // 2. TRUE COPERNICAN DECLINATION (The Earth Pitches visually to the camera)
+    // 2. TRUE COPERNICAN PITCH (The Earth Pitches visually to the camera)
     const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.44 * Math.PI / 180);
 
     // FIX: Apply YXZ Euler order so the globe rotates on its axis BEFORE pitching forward
     earthMesh.rotation.order = 'YXZ';
     earthMesh.rotation.y = rotationY;
     earthMesh.rotation.x = eclipticPitch;
+    earthMesh.rotation.z = 0;
 
     // 1b. ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
     cloudMesh.rotation.order = 'YXZ';
     cloudMesh.rotation.y = rotationY + atmosphericSlip;
     cloudMesh.rotation.x = eclipticPitch;
+    cloudMesh.rotation.z = 0;
 
-    // 3. DIURNAL SWEEP (Absolute Solar Noon Anchor)
+    // 3. DIURNAL SWEEP (Sun locked strictly to Y=0)
     let theta = 0;
     
     // SAFEGUARD: Execute API anchor only if fetch has completed successfully
@@ -812,6 +814,7 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         nightMesh.rotation.order = 'YXZ';
         nightMesh.rotation.y = rotationY;
         nightMesh.rotation.x = eclipticPitch;
+        nightMesh.rotation.z = 0;
         if (nightMesh.material.uniforms) {
             nightMesh.material.uniforms.sunPos.value.set(sunX, sunY, sunZ);
         }
