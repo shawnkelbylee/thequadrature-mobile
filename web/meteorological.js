@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXVI. Copernican Kinematics & Ecliptic Declination Sync.
+// STATUS: Phase XXXVII. Latitude Camera Elevation & Axis Stabilization.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -39,23 +39,11 @@ let camPhi = Math.PI / 2;
 // --- EXTERNAL STATE RECEIVERS ---
 window.addEventListener('q-camera-toggle', (e) => {
     isFreeCam = e.detail.isFree;
-    if (!isFreeCam && camera) {
-        camTheta = 0;
-        camPhi = Math.PI / 2;
-        camera.position.set(0, 0, 2.3);
-        camera.lookAt(0, 0, 0);
-    }
 });
 
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'q-live-toggle') {
         isFreeCam = false;
-        camTheta = 0;
-        camPhi = Math.PI / 2;
-        if (camera) {
-            camera.position.set(0, 0, 2.3);
-            camera.lookAt(0, 0, 0);
-        }
     }
 });
 
@@ -406,6 +394,7 @@ window.openImpact = function() {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
+    const userLat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; 
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. DEBOUNCED ASTRONOMICAL TELEMETRY SYNC
@@ -422,7 +411,7 @@ window.addEventListener('q-tick', (e) => {
     
     // 2. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
     if (scene && camera && renderer) {
-        updateGlobeKinematics(activeTime, daysElapsed, userLon, qData.delta);
+        updateGlobeKinematics(activeTime, daysElapsed, userLon, userLat, qData.delta);
         renderer.render(scene, camera);
     }
 
@@ -762,11 +751,11 @@ function initThreeGlobe() {
 }
 
 // THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
-function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
+function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, userLat, qDataDelta) {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
     // 1. ECLIPTIC CAMERA LOCK (Viewport securely anchored to local longitude)
-    // Keep Earth mesh upright to prevent 3D geometric shear.
+    // FIX: Earth mesh is strictly upright to prevent diagonal shadow shear
     earthMesh.rotation.x = 0;
     earthMesh.rotation.z = 0;
 
@@ -776,17 +765,17 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
 
     // 1b. ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
-    cloudMesh.rotation.y = rotationY + atmosphericSlip;
     cloudMesh.rotation.x = 0;
+    cloudMesh.rotation.z = 0;
+    cloudMesh.rotation.y = rotationY + atmosphericSlip;
 
-    // 2. TRUE COPERNICAN DECLINATION (The Sun shifts North/South)
-    // Eliminates Ptolemaic diagonal shear by tilting the Sun's orbit along the Ecliptic plane.
+    // 2. TRUE COPERNICAN DECLINATION (The Sun shifts North/South for Seasons)
     const declinationRad = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.44 * Math.PI / 180);
 
     // 3. DIURNAL SWEEP (Absolute Solar Noon Anchor)
     let theta = 0;
     
-    // SAFEGUARD: Only execute API anchor if the async fetch has completed and returned a valid date
+    // SAFEGUARD: Execute API anchor only if fetch has completed successfully
     if (window.Q_METEO_NOON && !isNaN(window.Q_METEO_NOON.getTime())) {
         const noonMs = window.Q_METEO_NOON.getTime();
         const msOffset = activeTimeMs - noonMs;
@@ -794,7 +783,7 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         // PHYSICS: Clockwise celestial rotation across the X-Z plane
         theta = -(msOffset / 86400000) * (Math.PI * 2);
     } else {
-        // FALLBACK: Execute geometric standard rotation while API is fetching or if offline
+        // FALLBACK: Execute geometric standard rotation while API is fetching
         const d = new Date(activeTimeMs);
         const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600)) / 24;
         let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
@@ -802,7 +791,7 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         theta = (0.5 - localTimeFraction) * (Math.PI * 2);
     }
     
-    // Map the Sun's orbit applying the seasonal declination to the Y-axis.
+    // Map the Sun's orbit, applying the seasonal declination strictly to the Y-axis
     const sunDistance = 5;
     const sunY = sunDistance * Math.sin(declinationRad); 
     const sunRadiusXZ = sunDistance * Math.cos(declinationRad); 
@@ -821,9 +810,18 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         }
     }
 
-    // 5. CAMERA STATE ENFORCEMENT
+    // 5. CAMERA STATE ENFORCEMENT & LATITUDE ELEVATION
     if (!isFreeCam && camera) {
-        camera.position.set(0, 0, 2.3);
+        const userLatRad = userLat * (Math.PI / 180);
+        const radius = 2.3;
+        
+        // Continuously sync internal Free-Cam state so dragging is seamless
+        camPhi = (Math.PI / 2) - userLatRad; 
+        camTheta = 0; 
+        
+        camera.position.x = 0; // Locked to longitude facing +Z
+        camera.position.y = radius * Math.cos(camPhi); // Elevated strictly to user latitude
+        camera.position.z = radius * Math.sin(camPhi);
         camera.lookAt(0, 0, 0);
     }
 }
