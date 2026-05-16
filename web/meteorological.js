@@ -1,7 +1,7 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
 // Postulate: Here and Now are Infinitely One!
-// STATUS: Phase XLIV. Geostationary Ecliptic Satellite & Solar Noon Synchronization Anchor.
+// STATUS: Phase XLV. Absolute Alpha Anchor & Geosynchronous Ecliptic Kinematics.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -651,6 +651,8 @@ function initThreeGlobe() {
     scene.add(earthGroup);
     
     // Static Axial Tilt (23.44 deg) applied exactly once in world space.
+    // Positive rotation on X tilts the North Pole towards the +Z vector.
+    earthGroup.rotation.order = 'YXZ';
     earthGroup.rotation.x = 23.44 * (Math.PI / 180);
 
     // Base Earth
@@ -771,36 +773,56 @@ function initThreeGlobe() {
 }
 
 // THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
-function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
+function updateGlobeKinematics(activeTimeMs, daysElapsedFromCore, userLon, qDataDelta) {
     if (!earthGroup || !sunLight) return;
 
-    // THE SYNCHRONIZATION ANCHOR
-    // Engine remains dormant until absolute local solar noon is validated.
-    if (!window.Q_METEO_NOON || isNaN(window.Q_METEO_NOON.getTime())) {
-        return; 
-    }
+    // 1. ABSOLUTE EPOCH ANCHOR
+    // Hardcoded UNIX Timestamp for the Southern Solstice (Dec 21, 2025, 15:03:00 UTC)
+    const ALPHA_ANCHOR = 1766329380000; 
+    const elapsedMs = activeTimeMs - ALPHA_ANCHOR;
+    const daysElapsed = elapsedMs / 86400000;
 
-    // 1. MACRO STEP (SEASONAL ORBIT)
-    const seasonalAngle = (daysElapsed / 365.24219) * (Math.PI * 2);
-    const sunAngle = seasonalAngle + (Math.PI / 2); 
+    // 2. MACRO STEP (SEASONAL ORBIT)
+    // The Earth's North Pole is permanently tilted towards the +Z vector in world space.
+    // At the Southern Solstice (t=0), the Sun is positioned at -Z (angle Math.PI).
+    const seasonalAngle = Math.PI + (daysElapsed / 365.24219) * (Math.PI * 2);
     
     const sunDistance = 5;
-    const sunX = sunDistance * Math.cos(sunAngle);
-    const sunZ = sunDistance * Math.sin(sunAngle);
+    const sunX = sunDistance * Math.sin(seasonalAngle);
+    const sunZ = sunDistance * Math.cos(seasonalAngle);
     sunLight.position.set(sunX, 0, sunZ);
 
-    // 2. MICRO STEP (DIURNAL SPIN)
-    // Synchronized mapping of absolute temporal distance from physical Solar Noon
-    const noonMs = window.Q_METEO_NOON.getTime();
-    const msOffset = activeTimeMs - noonMs;
-    const diurnalAngle = (msOffset / 86400000) * (Math.PI * 2);
+    // 3. MICRO STEP (DIURNAL & GEOSYNCHRONOUS TRACKING)
+    const d = new Date(activeTimeMs);
+    const timeFractionUTC = (d.getUTCHours() + d.getUTCMinutes()/60 + d.getUTCSeconds()/3600 + d.getUTCMilliseconds()/3600000) / 24;
     
-    const rotationOffset = -(Math.PI / 2); 
-    const lonOffset = (userLon * (Math.PI / 180));
-    const earthSpin = sunAngle + diurnalAngle - lonOffset + rotationOffset;
+    let localTimeFraction = timeFractionUTC + (userLon / 360);
+    localTimeFraction = localTimeFraction - Math.floor(localTimeFraction); // Constrain 0 to 1
+
+    // Camera acts as a Geosynchronous Satellite fixed to the Ecliptic (Y=0).
+    // At local Solar Noon (0.5), it aligns perfectly with the Sun's current vector.
+    const camAngle = seasonalAngle + (localTimeFraction - 0.5) * (Math.PI * 2);
+
+    if (!isFreeCam && camera) {
+        camTheta = camAngle;
+        camPhi = Math.PI / 2; 
+        
+        const radius = 2.3;
+        camera.position.x = radius * Math.sin(camTheta);
+        camera.position.y = 0;
+        camera.position.z = radius * Math.cos(camTheta);
+        camera.lookAt(0, 0, 0);
+    }
+
+    // 4. MESH SYNC
+    // The Earth mesh physically rotates to ensure the user's explicit longitude 
+    // directly faces the camera's world angle.
+    const userLonRad = userLon * (Math.PI / 180);
+    const fixedOffset = -(Math.PI / 2); // Three.js texture prime meridian alignment
+    const earthSpin = camAngle - userLonRad + fixedOffset;
 
     earthMesh.rotation.y = earthSpin;
-    nightMesh.rotation.y = earthSpin;
+    if (nightMesh) nightMesh.rotation.y = earthSpin;
 
     // ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
@@ -809,20 +831,6 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     // NOCTURNAL SHADER SYNC
     if (nightMesh && nightMesh.material.uniforms) {
         nightMesh.material.uniforms.sunPos.value.set(sunX, 0, sunZ);
-    }
-
-    // 3. CAMERA STATE ENFORCEMENT
-    // Camera locked as Geostationary Ecliptic tracking user longitude
-    if (!isFreeCam && camera) {
-        const camAngle = sunAngle + diurnalAngle;
-        camTheta = camAngle;
-        camPhi = Math.PI / 2; 
-        
-        const radius = 2.3;
-        camera.position.x = radius * Math.cos(camAngle);
-        camera.position.y = 0;
-        camera.position.z = radius * Math.sin(camAngle);
-        camera.lookAt(0, 0, 0);
     }
 }
 
@@ -946,9 +954,13 @@ window.syncScrubberUI = function() {
     const liveBtn = document.getElementById('q-live-toggle');
     const scrubber = document.getElementById('q-global-scrubber');
     if(liveBtn) { liveBtn.classList.toggle('active', state.isLive); liveBtn.innerText = state.isLive ? "LIVE" : "RESYNC"; }
-    if (scrubber && window.ANCHOR_ALPHA_DYNAMIC) {
+    
+    // We now decouple the scrubber display from ANCHOR_ALPHA_DYNAMIC if it's not set externally, 
+    // by using the absolute world anchor directly.
+    const ALPHA_ANCHOR = 1766329380000; 
+    if (scrubber) {
         let targetTime = state.isLive ? Date.now() : state.simTime;
-        let daysElapsed = (targetTime - window.ANCHOR_ALPHA_DYNAMIC) / 86400000;
+        let daysElapsed = (targetTime - ALPHA_ANCHOR) / 86400000;
         let currentDay = Math.floor(daysElapsed);
         let sMax = parseInt(scrubber.max); let sMin = parseInt(scrubber.min);
         if (currentDay >= sMax - 90) scrubber.max = currentDay + 365;
@@ -1024,11 +1036,12 @@ window.attachScrubberEvents = function() {
             }
         });
     }
+    const ALPHA_ANCHOR = 1766329380000; 
     if (scrubber) {
         scrubber.addEventListener('input', (e) => {
             window.stopMacroLoop();
             let val = parseFloat(e.target.value);
-            let msOffset = window.ANCHOR_ALPHA_DYNAMIC + (val * 86400000);
+            let msOffset = ALPHA_ANCHOR + (val * 86400000);
             window.setSimState({ isLive: false, simTime: msOffset });
             window.syncScrubberUI();
         });
