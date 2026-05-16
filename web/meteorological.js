@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXIII. Local Scrubber, Twilight Telemetry & Solar Noon Anchor.
+// STATUS: Phase XXXIV. Tick Loop Restoration & Variable Sync.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -409,7 +409,8 @@ window.addEventListener('q-tick', (e) => {
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. DEBOUNCED ASTRONOMICAL TELEMETRY SYNC
-    const simD = new Date(activeTimeMs);
+    // FIX: Using correct 'activeTime' variable from payload
+    const simD = new Date(activeTime);
     const simDateStr = `${simD.getUTCFullYear()}-${String(simD.getUTCMonth()+1).padStart(2,'0')}-${String(simD.getUTCDate()).padStart(2,'0')}`;
     
     if (simDateStr !== window.Q_LAST_ASTRO_DATE) {
@@ -417,12 +418,12 @@ window.addEventListener('q-tick', (e) => {
         clearTimeout(window.Q_ASTRO_DEBOUNCE);
         window.Q_ASTRO_DEBOUNCE = setTimeout(() => {
             fetchAstroDataForDate(simDateStr);
-        }, 400); // Wait 400ms after slider stops moving to execute the fetch
+        }, 400); 
     }
     
     // 2. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
     if (scene && camera && renderer) {
-        updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qData.delta);
+        updateGlobeKinematics(activeTime, daysElapsed, userLon, qData.delta);
         renderer.render(scene, camera);
     }
 
