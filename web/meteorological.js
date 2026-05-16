@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXX. Pure API Telemetry & Chronological Terminator Sweep.
+// STATUS: Phase XXXI. Fatal Crash Rollback & Stable Mathematical Restoration.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -131,8 +131,9 @@ async function fetchMeteoData() {
         lon = 0; // Prime Meridian
     }
 
+    // ROLLBACK: Restored stable 'current' fetch to prevent catastrophic 400 Bad Request exception
     try {
-        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m&daily=sunrise,sunset&timezone=auto');
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         if (data && data.current) {
@@ -142,12 +143,6 @@ async function fetchMeteoData() {
             if(badge) {
                 badge.innerText = "ATMOS DELTA: LIVE";
             }
-        }
-        if (data && data.daily) {
-            // Force Z suffix to ensure Javascript treats the string as absolute UTC, 
-            // relying on Open-Meteo's 'timezone=auto' to serve the exact localized stamp
-            window.Q_METEO_SUNRISE = new Date(data.daily.sunrise[0] + "Z");
-            window.Q_METEO_SUNSET = new Date(data.daily.sunset[0] + "Z");
         }
     } catch (error) {
         if(window.Q_LOG) window.Q_LOG('ERROR', 'ENVIRONMENTAL', 'METEO_API_FAILED', { error: error.message, fallback: 'STATIC_BASELINE' });
@@ -389,6 +384,7 @@ window.openImpact = function() {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
+    const userLat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; 
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
@@ -400,31 +396,50 @@ window.addEventListener('q-tick', (e) => {
     // 2. DOM UPDATES & METRIC CONVERSION
     let isImp = (unitSystem === 'IMPERIAL');
 
-    function formatApiTime(dObj) {
-        if (!dObj) return "--:--";
-        let hr = dObj.getHours();
-        let min = dObj.getMinutes();
+    const valSolarNoon = document.getElementById('val-solar-noon');
+    const valDawn = document.getElementById('val-dawn');
+    const valDusk = document.getElementById('val-dusk');
+
+    const eqTimeHours = (qData.delta / 15);
+    const localOffsetHours = new Date().getTimezoneOffset() / 60;
+    
+    let noonHourLocal = 12 - (userLon / 15) - eqTimeHours - localOffsetHours;
+    while (noonHourLocal < 0) noonHourLocal += 24;
+    while (noonHourLocal >= 24) noonHourLocal -= 24;
+
+    function formatHour(decimalHour) {
+        if (isNaN(decimalHour)) return "--:--";
+        let h = decimalHour;
+        while(h < 0) h += 24;
+        while(h >= 24) h -= 24;
+        let hr = Math.floor(h);
+        let min = Math.floor((h - hr) * 60);
         let tz = isImp ? (hr >= 12 ? ' PM' : ' AM') : '';
         if (isImp && hr > 12) hr -= 12;
         if (isImp && hr === 0) hr = 12;
         return `${hr.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}${tz}`;
     }
 
-    const valSolarNoon = document.getElementById('val-solar-noon');
-    const valDawn = document.getElementById('val-dawn');
-    const valDusk = document.getElementById('val-dusk');
+    if (valSolarNoon) valSolarNoon.innerText = formatHour(noonHourLocal);
 
-    if (window.Q_METEO_SUNRISE && window.Q_METEO_SUNSET) {
-        if (valDawn) valDawn.innerText = formatApiTime(window.Q_METEO_SUNRISE);
-        if (valDusk) valDusk.innerText = formatApiTime(window.Q_METEO_SUNSET);
-        if (valSolarNoon) {
-            let noonMs = (window.Q_METEO_SUNRISE.getTime() + window.Q_METEO_SUNSET.getTime()) / 2;
-            valSolarNoon.innerText = formatApiTime(new Date(noonMs));
-        }
-    } else {
-        if (valDawn) valDawn.innerText = "--:--";
-        if (valDusk) valDusk.innerText = "--:--";
-        if (valSolarNoon) valSolarNoon.innerText = "--:--";
+    if (valDawn || valDusk) {
+        // Solar Declination (True Anomaly based)
+        const decRad = Math.asin(Math.sin(qData.trueArc * Math.PI / 180) * Math.sin(23.44 * Math.PI / 180));
+        const latRad = userLat * Math.PI / 180;
+        
+        // Atmospheric Refraction Constant (-0.833°)
+        const refRad = -0.833 * Math.PI / 180;
+        
+        let cosH = (Math.sin(refRad) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
+        let hHours;
+        let polarState = "";
+        
+        if (cosH > 1) { hHours = NaN; polarState = "POLAR NIGHT"; } 
+        else if (cosH < -1) { hHours = NaN; polarState = "POLAR DAY"; } 
+        else { hHours = Math.acos(cosH) * (12 / Math.PI); }
+
+        if (valDawn) valDawn.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal - hHours);
+        if (valDusk) valDusk.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal + hHours);
     }
 
     const valSst = document.getElementById('val-sst');
@@ -680,3 +695,135 @@ function initThreeGlobe() {
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
         // KILL SWITCH: If the UI button is set to ECLIPTIC, entirely reject the mouse input.
+        if (!isFreeCam) return; 
+        
+        isDragging = true;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+        if (window.showAxisHUD) window.showAxisHUD('FREE-CAM ORBIT ACTIVE');
+    });
+    
+    window.addEventListener('pointermove', (e) => {
+        if (!isDragging || !camera) return;
+        
+        const deltaX = e.clientX - prevMouseX;
+        const deltaY = e.clientY - prevMouseY;
+        
+        // Map 2D pixel drag to 3D spherical radians
+        camTheta -= deltaX * 0.005;
+        camPhi -= deltaY * 0.005;
+        
+        // Clamp Phi to prevent camera from flipping upside down at the poles
+        camPhi = Math.max(0.001, Math.min(Math.PI - 0.001, camPhi));
+        
+        // Apply pure spherical coordinate matrix
+        const radius = 2.3;
+        camera.position.x = radius * Math.sin(camPhi) * Math.sin(camTheta);
+        camera.position.y = radius * Math.cos(camPhi);
+        camera.position.z = radius * Math.sin(camPhi) * Math.cos(camTheta);
+        camera.lookAt(0, 0, 0);
+        
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+    });
+    
+    window.addEventListener('pointerup', () => {
+        isDragging = false;
+    });
+    // ----------------------------------------
+
+    window.addEventListener('resize', () => {
+        if(container && camera && renderer) {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+    });
+}
+
+// THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
+function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
+    if (!earthMesh || !cloudMesh || !sunLight) return;
+
+    const d = new Date(activeTimeMs);
+
+    // 1. ECLIPTIC CAMERA LOCK (User Longitude Centered + True Ellipse Offset)
+    const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600) + (d.getUTCMilliseconds() / 3600000)) / 24;
+    
+    const eqTimeFraction = (qDataDelta / 360);
+    let localTimeFraction = (timeFractionUTC + (userLon / 360) + eqTimeFraction) % 1;
+    if (localTimeFraction < 0) localTimeFraction += 1;
+
+    // ROLLBACK: Re-anchored properly to local longitude view plane
+    const rotationOffset = -(Math.PI / 2); 
+    const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
+    
+    earthMesh.rotation.y = rotationY;
+
+    // 1b. ATMOSPHERIC DRIFT: Detach troposphere from the crust
+    // Add a 3% rotational slip per day to simulate global jet stream flow
+    const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
+    cloudMesh.rotation.y = rotationY + atmosphericSlip;
+
+    // 2. SEASONAL TILT (The Earth Pitches)
+    // Anchor is Southern Solstice (Max negative pitch to tilt North away from Ecliptic Camera)
+    const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
+    
+    earthMesh.rotation.x = eclipticPitch;
+    cloudMesh.rotation.x = eclipticPitch;
+
+    // 3. DIURNAL SWEEP (The Sun Orbits the Static Longitude)
+    const theta = (0.5 - localTimeFraction) * (Math.PI * 2); 
+    
+    const sunDistance = 5;
+    const sunX = sunDistance * Math.sin(theta);
+    const sunY = 0; // Locked strictly to the Ecliptic plane
+    const sunZ = sunDistance * Math.cos(theta);
+
+    sunLight.position.set(sunX, sunY, sunZ);
+
+    // 4. NOCTURNAL SHADER SYNC
+    if (nightMesh) {
+        nightMesh.rotation.y = rotationY;
+        nightMesh.rotation.x = eclipticPitch;
+        if (nightMesh.material.uniforms) {
+            nightMesh.material.uniforms.sunPos.value.set(sunX, sunY, sunZ);
+        }
+    }
+
+    // 5. CAMERA STATE ENFORCEMENT
+    // Ensure the camera remains locked to the Ecliptic Anchor if Free-Cam has not been triggered
+    if (!isFreeCam && camera) {
+        camera.position.set(0, 0, 2.3);
+        camera.lookAt(0, 0, 0);
+    }
+}
+
+// DECOUPLED BOOT SEQUENCE - Bound strictly to q-ui.js emission
+window.addEventListener('q-ui-mounted', () => {
+    if(isBooted) return;
+    const tlNode = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
+    if(!tlNode) return; 
+
+    isBooted = true;
+    window.injectVectorData();
+    initSparklines();
+    initThreeGlobe();
+    fetchMeteoData();
+    fetchAtmosphericLayer();
+});
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(() => {
+        if(!isBooted && document.getElementById('quad-tl')) {
+            isBooted = true;
+            window.injectVectorData();
+            initSparklines();
+            initThreeGlobe();
+            fetchMeteoData();
+            fetchAtmosphericLayer();
+        }
+    }, 500);
+}
+setInterval(fetchMeteoData, 300000);
+setInterval(fetchAtmosphericLayer, 300000);
