@@ -1,6 +1,7 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XLIII. Geostationary Ecliptic Satellite & True Axial Kinematics.
+// Postulate: Here and Now are Infinitely One!
+// STATUS: Phase XLIV. Geostationary Ecliptic Satellite & Solar Noon Synchronization Anchor.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -674,7 +675,6 @@ function initThreeGlobe() {
     earthGroup.add(cloudMesh);
 
     // Dynamic Nocturnal Mask (ShaderMaterial)
-    // Modified smoothstep for accurate twilight atmospheric scatter
     const nightGeo = new THREE.SphereGeometry(1.002, 64, 64);
     const nightShader = {
         uniforms: {
@@ -774,8 +774,13 @@ function initThreeGlobe() {
 function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     if (!earthGroup || !sunLight) return;
 
+    // THE SYNCHRONIZATION ANCHOR
+    // Engine remains dormant until absolute local solar noon is validated.
+    if (!window.Q_METEO_NOON || isNaN(window.Q_METEO_NOON.getTime())) {
+        return; 
+    }
+
     // 1. MACRO STEP (SEASONAL ORBIT)
-    // The Sun dynamically orbits the Earth on the fixed Ecliptic Plane (Y=0)
     const seasonalAngle = (daysElapsed / 365.24219) * (Math.PI * 2);
     const sunAngle = seasonalAngle + (Math.PI / 2); 
     
@@ -785,19 +790,11 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     sunLight.position.set(sunX, 0, sunZ);
 
     // 2. MICRO STEP (DIURNAL SPIN)
-    let diurnalAngle = 0;
-    if (window.Q_METEO_NOON && !isNaN(window.Q_METEO_NOON.getTime())) {
-        const noonMs = window.Q_METEO_NOON.getTime();
-        const msOffset = activeTimeMs - noonMs;
-        diurnalAngle = (msOffset / 86400000) * (Math.PI * 2);
-    } else {
-        // Fallback
-        const d = new Date(activeTimeMs);
-        const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600)) / 24;
-        diurnalAngle = timeFractionUTC * (Math.PI * 2);
-    }
+    // Synchronized mapping of absolute temporal distance from physical Solar Noon
+    const noonMs = window.Q_METEO_NOON.getTime();
+    const msOffset = activeTimeMs - noonMs;
+    const diurnalAngle = (msOffset / 86400000) * (Math.PI * 2);
     
-    // The Earth physically spins continuously on its permanently tilted axis
     const rotationOffset = -(Math.PI / 2); 
     const lonOffset = (userLon * (Math.PI / 180));
     const earthSpin = sunAngle + diurnalAngle - lonOffset + rotationOffset;
@@ -809,13 +806,13 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
     cloudMesh.rotation.y = earthSpin + atmosphericSlip;
 
-    // NOCTURNAL SHADER SYNC (Passing the absolute world position of the Sun)
+    // NOCTURNAL SHADER SYNC
     if (nightMesh && nightMesh.material.uniforms) {
         nightMesh.material.uniforms.sunPos.value.set(sunX, 0, sunZ);
     }
 
     // 3. CAMERA STATE ENFORCEMENT
-    // Camera acts as a Geostationary Satellite on the Ecliptic tracking the user's longitude.
+    // Camera locked as Geostationary Ecliptic tracking user longitude
     if (!isFreeCam && camera) {
         const camAngle = sunAngle + diurnalAngle;
         camTheta = camAngle;
