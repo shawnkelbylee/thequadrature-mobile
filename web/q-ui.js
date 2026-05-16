@@ -689,13 +689,17 @@ window.injectUniversalUI = function() {
         const legDateEl = document.getElementById('leg-date');
         if (legDateEl && e.detail.legacyDateStr) {
             const monthMap = { "JAN": "JANUARY", "FEB": "FEBRUARY", "MAR": "MARCH", "APR": "APRIL", "MAY": "MAY", "JUN": "JUNE", "JUL": "JULY", "AUG": "AUGUST", "SEP": "SEPTEMBER", "OCT": "OCTOBER", "NOV": "NOVEMBER", "DEC": "DECEMBER" };
+            const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
             let rawDate = e.detail.legacyDateStr.toUpperCase();
             let parts = rawDate.replace(',', '').split(' ');
+            
             if (parts.length >= 3) {
                 let fullMonth = monthMap[parts[0]] || parts[0];
+                let dayOfWeek = e.detail.activeTime ? days[e.detail.activeTime.getDay()] : "";
+                
                 legDateEl.innerHTML = `
-                    <div style="font-size:1.0rem; color:var(--theme-main, #00f0ff); font-weight:bold; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">${fullMonth} ${parts[1]}</div>
-                    <div style="font-size:0.75rem; color:var(--theme-main, #00f0ff); font-weight:bold; opacity:0.8; margin-top:2px;">${parts[2]}</div>
+                    <div style="font-size:0.9rem; color:var(--theme-main, #00f0ff); font-weight:bold; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">${fullMonth} ${parts[1]}, ${parts[2]}</div>
+                    <div style="font-size:0.75rem; color:var(--theme-main, #00f0ff); font-weight:bold; opacity:0.8; margin-top:2px;">${dayOfWeek}</div>
                 `;
             } else {
                 legDateEl.innerHTML = `<span style="color:var(--theme-main, #00f0ff); font-weight:bold; text-shadow:0 0 10px var(--theme-dim, rgba(0,240,255,0.2));">${rawDate}</span>`;
