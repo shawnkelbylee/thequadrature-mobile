@@ -12,7 +12,7 @@
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
-    <script src="astrophysical.js?v=25.2"></script>
+    <script src="astrophysical.js?v=25.3"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
@@ -44,43 +44,8 @@
             text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
-        /* --- CORNER QUADRANT CONTAINERS --- */
-        .corner-panel { position: absolute; width: 280px; height: 120px; z-index: 20; pointer-events: auto; }
-        #quad-tl { top: 12vh; left: 4vw; }
-        #quad-tr { top: 12vh; right: 4vw; }
-        #quad-bl { bottom: 8vh; left: 4vw; }
-        #quad-br { bottom: 8vh; right: 4vw; }
-
-        .v-head { 
-            position: absolute; white-space: nowrap;
-            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
-            margin: 0; padding: 0; z-index: 25; border: none;
-            color: var(--theme-main);
-            text-shadow: 0 0 10px var(--theme-dim);
-            transition: color 0.3s, text-shadow 0.3s;
-        }
-        
-        #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(8px); }
-        #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(-8px); }
-        #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(8px); }
-        #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(-8px); }
-
-        .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
-        .val-sm { font-family: 'Orbitron'; font-weight: 900; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 8px var(--theme-dim); text-transform: uppercase; }
-
-        .panel-data-wrapper { position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto; z-index: 20; }
-        
         /* DYNAMIC CURSOR TOOLTIP */
         #astro-tooltip { position: fixed; background: rgba(10, 15, 25, 0.95); border: 1px solid var(--titanium); border-left: 2px solid var(--cyan-glow); padding: 8px 12px; font-family: 'JetBrains Mono'; font-size: 0.55rem; color: #fff; border-radius: 4px; box-shadow: 0 0 15px rgba(0,0,0,0.8); z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; white-space: pre-wrap; line-height: 1.4; max-width: 250px; }
-
-        /* OPT Node Styling */
-        .opt-oval { position: absolute; width: 60px; height: 30px; border: 1px solid var(--titanium); border-radius: 15px; display: flex; justify-content: center; align-items: center; z-index: 50; cursor: pointer; background: rgba(0,0,0,0.5); transition: 0.2s; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; color: var(--steel); letter-spacing: 1px; }
-        .opt-oval:hover { border-color: var(--cyan-glow); color: var(--cyan-glow); box-shadow: inset 0 0 10px var(--cyan-dim), 0 0 10px var(--cyan-dim); }
-        
-        #opt-tl { top: -20px; right: 0; }
-        #opt-tr { top: -20px; left: 0; }
-        #opt-bl { bottom: -20px; right: 0; }
-        #opt-br { bottom: -20px; left: 0; }
 
         /* --- BARYCENTRIC VISUALIZER CSS --- */
         .bary-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); z-index: 5; pointer-events: none; }
@@ -108,11 +73,6 @@
     <div class="star-container" id="stars"></div>
     
     <div id="astro-tooltip"></div>
-
-    <div id="quad-tl" class="corner-panel"><div id="opt-tl" class="opt-oval">OPT</div></div>
-    <div id="quad-tr" class="corner-panel"><div id="opt-tr" class="opt-oval">OPT</div></div>
-    <div id="quad-bl" class="corner-panel"><div id="opt-bl" class="opt-oval">OPT</div></div>
-    <div id="quad-br" class="corner-panel"><div id="opt-br" class="opt-oval">OPT</div></div>
 
     <div class="bary-container q-center-dial" id="bary-root">
         <svg class="bary-svg" viewBox="-120 -120 240 240" preserveAspectRatio="xMidYMid meet">
