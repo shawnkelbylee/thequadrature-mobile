@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXIX. Telemetry Shift & Chronological API Integration.
+// STATUS: Phase XXX. Pure API Telemetry & Chronological Terminator Sweep.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -144,8 +144,10 @@ async function fetchMeteoData() {
             }
         }
         if (data && data.daily) {
-            window.Q_METEO_SUNRISE = new Date(data.daily.sunrise[0]);
-            window.Q_METEO_SUNSET = new Date(data.daily.sunset[0]);
+            // Force Z suffix to ensure Javascript treats the string as absolute UTC, 
+            // relying on Open-Meteo's 'timezone=auto' to serve the exact localized stamp
+            window.Q_METEO_SUNRISE = new Date(data.daily.sunrise[0] + "Z");
+            window.Q_METEO_SUNSET = new Date(data.daily.sunset[0] + "Z");
         }
     } catch (error) {
         if(window.Q_LOG) window.Q_LOG('ERROR', 'ENVIRONMENTAL', 'METEO_API_FAILED', { error: error.message, fallback: 'STATIC_BASELINE' });
@@ -678,133 +680,3 @@ function initThreeGlobe() {
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
         // KILL SWITCH: If the UI button is set to ECLIPTIC, entirely reject the mouse input.
-        if (!isFreeCam) return; 
-        
-        isDragging = true;
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
-        if (window.showAxisHUD) window.showAxisHUD('FREE-CAM ORBIT ACTIVE');
-    });
-    
-    window.addEventListener('pointermove', (e) => {
-        if (!isDragging || !camera) return;
-        
-        const deltaX = e.clientX - prevMouseX;
-        const deltaY = e.clientY - prevMouseY;
-        
-        // Map 2D pixel drag to 3D spherical radians
-        camTheta -= deltaX * 0.005;
-        camPhi -= deltaY * 0.005;
-        
-        // Clamp Phi to prevent camera from flipping upside down at the poles
-        camPhi = Math.max(0.001, Math.min(Math.PI - 0.001, camPhi));
-        
-        // Apply pure spherical coordinate matrix
-        const radius = 2.3;
-        camera.position.x = radius * Math.sin(camPhi) * Math.sin(camTheta);
-        camera.position.y = radius * Math.cos(camPhi);
-        camera.position.z = radius * Math.sin(camPhi) * Math.cos(camTheta);
-        camera.lookAt(0, 0, 0);
-        
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
-    });
-    
-    window.addEventListener('pointerup', () => {
-        isDragging = false;
-    });
-    // ----------------------------------------
-
-    window.addEventListener('resize', () => {
-        if(container && camera && renderer) {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        }
-    });
-}
-
-// THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
-function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
-    if (!earthMesh || !cloudMesh || !sunLight) return;
-
-    const d = new Date(activeTimeMs);
-
-    // 1. ECLIPTIC CAMERA LOCK (User Longitude Centered + True Ellipse Offset)
-    const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600) + (d.getUTCMilliseconds() / 3600000)) / 24;
-    
-    const eqTimeFraction = (qDataDelta / 360);
-    let localTimeFraction = (timeFractionUTC + (userLon / 360) + eqTimeFraction) % 1;
-    if (localTimeFraction < 0) localTimeFraction += 1;
-
-    // REVERTED: Viewport camera securely locked to Local Observer Meridian
-    const rotationOffset = -(Math.PI / 2); 
-    const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
-    
-    earthMesh.rotation.y = rotationY;
-
-    // 1b. ATMOSPHERIC DRIFT: Detach troposphere from the crust
-    const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
-    cloudMesh.rotation.y = rotationY + atmosphericSlip;
-
-    // 2. SEASONAL TILT (The Earth Pitches)
-    const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
-    
-    earthMesh.rotation.x = eclipticPitch;
-    cloudMesh.rotation.x = eclipticPitch;
-
-    // 3. DIURNAL SWEEP 
-    // CORRECTION: Stripped Math.PI offset. Light mapped exactly to UTC true time fraction.
-    const theta = (0.5 - localTimeFraction) * (Math.PI * 2); 
-    
-    const sunDistance = 5;
-    const sunX = sunDistance * Math.sin(theta);
-    const sunY = 0; // Locked strictly to the Ecliptic plane
-    const sunZ = sunDistance * Math.cos(theta);
-
-    sunLight.position.set(sunX, sunY, sunZ);
-
-    // 4. NOCTURNAL SHADER SYNC
-    if (nightMesh) {
-        nightMesh.rotation.y = rotationY;
-        nightMesh.rotation.x = eclipticPitch;
-        if (nightMesh.material.uniforms) {
-            nightMesh.material.uniforms.sunPos.value.set(sunX, sunY, sunZ);
-        }
-    }
-
-    // 5. CAMERA STATE ENFORCEMENT
-    if (!isFreeCam && camera) {
-        camera.position.set(0, 0, 2.3);
-        camera.lookAt(0, 0, 0);
-    }
-}
-
-// DECOUPLED BOOT SEQUENCE - Bound strictly to q-ui.js emission
-window.addEventListener('q-ui-mounted', () => {
-    if(isBooted) return;
-    const tlNode = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
-    if(!tlNode) return; 
-
-    isBooted = true;
-    window.injectVectorData();
-    initSparklines();
-    initThreeGlobe();
-    fetchMeteoData();
-    fetchAtmosphericLayer();
-});
-
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(() => {
-        if(!isBooted && document.getElementById('quad-tl')) {
-            isBooted = true;
-            window.injectVectorData();
-            initSparklines();
-            initThreeGlobe();
-            fetchMeteoData();
-            fetchAtmosphericLayer();
-        }
-    }, 500);
-}
-setInterval(fetchMeteoData, 300000);
-setInterval(fetchAtmosphericLayer, 300000);
