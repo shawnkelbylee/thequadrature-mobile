@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXVIII. Viewport Rollback & Chronological Simplification.
+// STATUS: Phase XXIX. Telemetry Shift & Chronological API Integration.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -132,7 +132,7 @@ async function fetchMeteoData() {
     }
 
     try {
-        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m');
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=surface_pressure,direct_normal_irradiance,precipitation,temperature_2m&daily=sunrise,sunset&timezone=auto');
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         if (data && data.current) {
@@ -142,6 +142,10 @@ async function fetchMeteoData() {
             if(badge) {
                 badge.innerText = "ATMOS DELTA: LIVE";
             }
+        }
+        if (data && data.daily) {
+            window.Q_METEO_SUNRISE = new Date(data.daily.sunrise[0]);
+            window.Q_METEO_SUNSET = new Date(data.daily.sunset[0]);
         }
     } catch (error) {
         if(window.Q_LOG) window.Q_LOG('ERROR', 'ENVIRONMENTAL', 'METEO_API_FAILED', { error: error.message, fallback: 'STATIC_BASELINE' });
@@ -383,7 +387,6 @@ window.openImpact = function() {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
-    const userLat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; 
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
@@ -395,23 +398,8 @@ window.addEventListener('q-tick', (e) => {
     // 2. DOM UPDATES & METRIC CONVERSION
     let isImp = (unitSystem === 'IMPERIAL');
 
-    // DYNAMIC SOLAR NOON & HORIZON CALCULATION 
-    const valSolarNoon = document.getElementById('val-solar-noon');
-    const valDawn = document.getElementById('val-dawn');
-    const valDusk = document.getElementById('val-dusk');
-
-    const eqTimeHours = (qData.delta / 15);
-    const localOffsetHours = new Date().getTimezoneOffset() / 60;
-    
-    let noonHourLocal = 12 - (userLon / 15) - eqTimeHours - localOffsetHours;
-    while (noonHourLocal < 0) noonHourLocal += 24;
-    while (noonHourLocal >= 24) noonHourLocal -= 24;
-
-    function formatHour(decimalHour) {
-        if (isNaN(decimalHour)) return "--:--";
-        let dObj = new Date();
-        dObj.setHours(0, 0, 0, 0);
-        dObj.setMinutes(Math.round(decimalHour * 60)); // Exact float-to-minute alignment
+    function formatApiTime(dObj) {
+        if (!dObj) return "--:--";
         let hr = dObj.getHours();
         let min = dObj.getMinutes();
         let tz = isImp ? (hr >= 12 ? ' PM' : ' AM') : '';
@@ -420,26 +408,21 @@ window.addEventListener('q-tick', (e) => {
         return `${hr.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}${tz}`;
     }
 
-    if (valSolarNoon) valSolarNoon.innerText = formatHour(noonHourLocal);
+    const valSolarNoon = document.getElementById('val-solar-noon');
+    const valDawn = document.getElementById('val-dawn');
+    const valDusk = document.getElementById('val-dusk');
 
-    if (valDawn || valDusk) {
-        // Solar Declination (True Anomaly based)
-        const decRad = Math.asin(Math.sin(qData.trueArc * Math.PI / 180) * Math.sin(23.44 * Math.PI / 180));
-        const latRad = userLat * Math.PI / 180;
-        
-        // Atmospheric Refraction Constant (-0.833°)
-        const refRad = -0.833 * Math.PI / 180;
-        
-        let cosH = (Math.sin(refRad) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
-        let hHours;
-        let polarState = "";
-        
-        if (cosH > 1) { hHours = NaN; polarState = "POLAR NIGHT"; } 
-        else if (cosH < -1) { hHours = NaN; polarState = "POLAR DAY"; } 
-        else { hHours = Math.acos(cosH) * (12 / Math.PI); }
-
-        if (valDawn) valDawn.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal - hHours);
-        if (valDusk) valDusk.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal + hHours);
+    if (window.Q_METEO_SUNRISE && window.Q_METEO_SUNSET) {
+        if (valDawn) valDawn.innerText = formatApiTime(window.Q_METEO_SUNRISE);
+        if (valDusk) valDusk.innerText = formatApiTime(window.Q_METEO_SUNSET);
+        if (valSolarNoon) {
+            let noonMs = (window.Q_METEO_SUNRISE.getTime() + window.Q_METEO_SUNSET.getTime()) / 2;
+            valSolarNoon.innerText = formatApiTime(new Date(noonMs));
+        }
+    } else {
+        if (valDawn) valDawn.innerText = "--:--";
+        if (valDusk) valDusk.innerText = "--:--";
+        if (valSolarNoon) valSolarNoon.innerText = "--:--";
     }
 
     const valSst = document.getElementById('val-sst');
@@ -771,8 +754,8 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     cloudMesh.rotation.x = eclipticPitch;
 
     // 3. DIURNAL SWEEP 
-    // CORRECTION: The Math.PI offset is now applied strictly to the celestial orbit to true the terminator
-    const theta = (0.5 - localTimeFraction) * (Math.PI * 2) + Math.PI; 
+    // CORRECTION: Stripped Math.PI offset. Light mapped exactly to UTC true time fraction.
+    const theta = (0.5 - localTimeFraction) * (Math.PI * 2); 
     
     const sunDistance = 5;
     const sunX = sunDistance * Math.sin(theta);
