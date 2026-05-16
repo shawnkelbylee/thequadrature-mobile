@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XLI. Static Ecliptic Lock & Nested Orbital Pivot Matrix.
+// STATUS: Phase XLII. Syntax Restoration & Render Loop Unlocked.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -709,7 +709,7 @@ function initThreeGlobe() {
         depthWrite: false
     };
     const nightMat = new THREE.ShaderMaterial(nightShader);
-    nightMesh = new Mesh(nightGeo, nightMat);
+    nightMesh = new THREE.Mesh(nightGeo, nightMat);
     tiltGroup.add(nightMesh);
 
     // The Sun strictly locked to the Ecliptic Plane (Y=0)
@@ -800,7 +800,7 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     const finalDiurnalY = diurnalAngle - lonOffset + rotationOffset;
 
     earthMesh.rotation.y = finalDiurnalY;
-    nightMesh.rotation.y = finalDiurnalY;
+    if (nightMesh) nightMesh.rotation.y = finalDiurnalY;
 
     // ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
@@ -1032,7 +1032,6 @@ window.attachScrubberEvents = function() {
     document.getElementById('q-macro-fwd')?.addEventListener('click', () => window.executeMacroLoop(1));
     document.getElementById('q-macro-stop')?.addEventListener('click', window.stopMacroLoop);
     
-    // Time Macro gear correctly set to 1 Hour (3,600,000 ms) for rapid diurnal spin
     document.getElementById('q-time-macro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 3600000, 'q-time-macro-rev'));
     document.getElementById('q-time-micro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 900000, 'q-time-micro-rev'));
     document.getElementById('q-time-micro-fwd')?.addEventListener('click', () => window.executeTimeLoop(1, 900000, 'q-time-micro-fwd'));
