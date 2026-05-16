@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXVIII. Ptolemaic Pitch Restoration & Scrubber Gear Calibration.
+// STATUS: Phase XXXIX. True Ecliptic Anchor, YXZ Euler Matrix & Twilight Gradient.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -214,7 +214,7 @@ window.updateAssetLabels = function() {
     const mode = modeEl ? modeEl.value : 'FLORA';
     if (mode === "FAUNA") {
         const stratHead = document.getElementById('strat-header');
-        if(stratHead) stratHead.innerText = "BIOLOGICAL / FAUNA";
+        if(stratHead) stratHead.innerText = "PHYSIOLOGIC / BIOMETRIC";
         const yieldLbl = document.getElementById('lbl-yield');
         if(yieldLbl) yieldLbl.innerText = "EXPOSURE LIMITS:";
         const allocLbl = document.getElementById('lbl-alloc');
@@ -277,13 +277,13 @@ window.openOptions = function(e, target) {
                 <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">DOMAIN TRACKING MODE</label>
                 <select id="asset-track" class="modal-input" onchange="window.updateAssetLabels()" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
                     <option value="FLORA" ${currentAssetMode === 'FLORA' ? 'selected' : ''}>FLORA / AGRARIAN (Agriculture & Biome)</option>
-                    <option value="FAUNA" ${currentAssetMode === 'FAUNA' ? 'selected' : ''}>FAUNA / BIOLOGICAL (Livestock & Animal Care)</option>
+                    <option value="FAUNA" ${currentAssetMode === 'FAUNA' ? 'selected' : ''}>PHYSIOLOGIC / BIOMETRIC (Livestock & Animal Care)</option>
                 </select>
             </div>
             <div style="margin-top: 10px;">
                 <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">ACTION HORIZON</label>
                 <select id="action-horizon" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
-                    <option value="ANCHOR" ${actionHorizon==='ANCHOR'?'selected':''}>NEXT ANCHOR (SEASONAL)</option>
+                    <option value="ANCHOR" ${actionHorizon==='ANCHOR'?'selected':''}>NEXT SEASONAL ANCHOR</option>
                     <option value="SECTOR" ${actionHorizon==='SECTOR'?'selected':''}>NEXT SECTOR (30-DAY)</option>
                 </select>
             </div>
@@ -377,7 +377,7 @@ window.openImpact = function() {
             action = actionLabel + "Mandate indoor sheltering. Adjust feeding schedules to match metabolic caloric burn requirements for extreme temperature resistance.";
         } else if (severity === "ELEVATED") {
             desc = 'Behavioral shift markers detected. Approaching stressful ambient conditions.' + apiDataString;
-            action = actionLabel + "Shift K-9 or livestock exercise routines to cooler Arc degrees. Increase hydration provisions.";
+            action = actionLabel + "Shift exercise routines to cooler Arc degrees. Increase hydration provisions.";
         } else {
             desc = 'Nominal biological exposure limits.' + apiDataString;
             action = actionLabel + "Maintain standard husbandry cycles and outdoor exposure allowances.";
@@ -662,6 +662,7 @@ function initThreeGlobe() {
     scene.add(cloudMesh);
 
     // Dynamic Nocturnal Mask (ShaderMaterial)
+    // FIX: Widened smoothstep thresholds to generate an accurate Twilight gradient scatter
     const nightGeo = new THREE.SphereGeometry(1.002, 64, 64);
     const nightShader = {
         uniforms: {
@@ -686,11 +687,10 @@ function initThreeGlobe() {
                 vec3 nightColor = texture2D(tNight, vUv).rgb;
                 vec3 sunDir = normalize(sunPos);
                 
-                // Dot product calculates angle between surface normal and sun vector
                 float intensity = dot(vWorldNormal, sunDir);
                 
-                // Fade lights in strictly on the dark hemisphere (-0.2 is deep shadow)
-                float alpha = smoothstep(0.05, -0.2, intensity);
+                // Broadened smoothstep creates true atmospheric twilight bleed
+                float alpha = smoothstep(0.15, -0.35, intensity);
                 gl_FragColor = vec4(nightColor, alpha);
             }
         `,
@@ -706,7 +706,7 @@ function initThreeGlobe() {
     sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
     scene.add(sunLight);
     
-    // Starlight Ambient Base (Crushed to expose the dark side terminator contrast)
+    // Starlight Ambient Base
     const ambient = new THREE.AmbientLight(0x111b33, 0.15);
     scene.add(ambient);
     
@@ -714,7 +714,6 @@ function initThreeGlobe() {
     renderer.domElement.style.touchAction = 'none';
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
-        // KILL SWITCH: If the UI button is set to ECLIPTIC, entirely reject the mouse input.
         if (!isFreeCam) return; 
         
         isDragging = true;
@@ -733,10 +732,8 @@ function initThreeGlobe() {
         camTheta -= deltaX * 0.005;
         camPhi -= deltaY * 0.005;
         
-        // Clamp Phi to prevent camera from flipping upside down at the poles
         camPhi = Math.max(0.001, Math.min(Math.PI - 0.001, camPhi));
         
-        // Apply pure spherical coordinate matrix
         const radius = 2.3;
         camera.position.x = radius * Math.sin(camPhi) * Math.sin(camTheta);
         camera.position.y = radius * Math.cos(camPhi);
@@ -768,15 +765,19 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     // 1. ECLIPTIC CAMERA LOCK (Viewport securely anchored to local longitude)
     const rotationOffset = -(Math.PI / 2); 
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
+    
+    // 2. TRUE COPERNICAN DECLINATION (The Earth Pitches visually to the camera)
+    const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.44 * Math.PI / 180);
+
+    // FIX: Apply YXZ Euler order so the globe rotates on its axis BEFORE pitching forward
+    earthMesh.rotation.order = 'YXZ';
     earthMesh.rotation.y = rotationY;
+    earthMesh.rotation.x = eclipticPitch;
 
     // 1b. ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
+    cloudMesh.rotation.order = 'YXZ';
     cloudMesh.rotation.y = rotationY + atmosphericSlip;
-
-    // 2. SEASONAL TILT (The Earth Pitches visually to the camera)
-    const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.44 * Math.PI / 180);
-    earthMesh.rotation.x = eclipticPitch;
     cloudMesh.rotation.x = eclipticPitch;
 
     // 3. DIURNAL SWEEP (Absolute Solar Noon Anchor)
@@ -798,21 +799,17 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         theta = (0.5 - localTimeFraction) * (Math.PI * 2);
     }
     
-    // MATHEMATICAL CORRECTION: Pitch the Sun's orbit by the exact same eclipticPitch.
-    // This perfectly eliminates the diagonal shear, allowing the Earth to pitch visually 
-    // while the terminator shadow respects the true physical alignment of the poles.
+    // The Sun strictly locked to the Ecliptic Plane (Y=0)
     const sunDistance = 5;
-    const sX = sunDistance * Math.sin(theta);
-    const sZ = sunDistance * Math.cos(theta);
-    
-    const sunX = sX;
-    const sunY = -sZ * Math.sin(eclipticPitch); 
-    const sunZ = sZ * Math.cos(eclipticPitch);
+    const sunX = sunDistance * Math.sin(theta);
+    const sunY = 0; 
+    const sunZ = sunDistance * Math.cos(theta);
 
     sunLight.position.set(sunX, sunY, sunZ);
 
     // 4. NOCTURNAL SHADER SYNC
     if (nightMesh) {
+        nightMesh.rotation.order = 'YXZ';
         nightMesh.rotation.y = rotationY;
         nightMesh.rotation.x = eclipticPitch;
         if (nightMesh.material.uniforms) {
@@ -821,7 +818,7 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     }
 
     // 5. CAMERA STATE ENFORCEMENT
-    // Camera is lowered back to the Equatorial plane (Y=0)
+    // Camera is permanently anchored to the Equatorial/Ecliptic plane (Y=0)
     if (!isFreeCam && camera) {
         camPhi = Math.PI / 2; 
         camTheta = 0; 
@@ -1039,13 +1036,13 @@ window.attachScrubberEvents = function() {
         });
     }
 
-    // Time Macro gear is now strictly set to 1 Hour (3,600,000 ms) for rapid diurnal spin
     document.getElementById('q-micro-rev')?.addEventListener('click', () => window.executeMicroStep(-1));
     document.getElementById('q-micro-fwd')?.addEventListener('click', () => window.executeMicroStep(1));
     document.getElementById('q-macro-rev')?.addEventListener('click', () => window.executeMacroLoop(-1));
     document.getElementById('q-macro-fwd')?.addEventListener('click', () => window.executeMacroLoop(1));
     document.getElementById('q-macro-stop')?.addEventListener('click', window.stopMacroLoop);
     
+    // Time Macro gear correctly set to 1 Hour (3,600,000 ms) for rapid diurnal spin
     document.getElementById('q-time-macro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 3600000, 'q-time-macro-rev'));
     document.getElementById('q-time-micro-rev')?.addEventListener('click', () => window.executeTimeLoop(-1, 900000, 'q-time-micro-rev'));
     document.getElementById('q-time-micro-fwd')?.addEventListener('click', () => window.executeTimeLoop(1, 900000, 'q-time-micro-fwd'));
