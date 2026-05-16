@@ -9,7 +9,7 @@
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
-    <script src="astrophysical.js?v=23.0"></script>
+    <script src="astrophysical.js?v=23.1"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
@@ -23,7 +23,7 @@
             --starlight: rgba(255, 255, 255, 0.6);
             --dyn-phase-color: var(--magenta-glow);
             --dyn-phase-dim: var(--magenta-dim);
-            --dial-size: 45vh; /* Responsive sizing for the center visualizer */
+            --dial-size: 45vh; 
         }
 
         body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; background-color: var(--void); background: radial-gradient(circle at center, #0a0f1a 0%, var(--void) 85%); color: var(--core-plat); font-family: 'JetBrains Mono', monospace; display: flex; justify-content: center; align-items: center; user-select: none; color-scheme: dark; perspective: 1500px; transform-style: preserve-3d; touch-action: manipulation; }
@@ -42,6 +42,13 @@
             text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
+        /* --- CORNER QUADRANT CONTAINERS --- */
+        .corner-panel { position: absolute; width: 280px; height: 120px; z-index: 20; pointer-events: auto; }
+        #quad-tl { top: 12vh; left: 4vw; }
+        #quad-tr { top: 12vh; right: 4vw; }
+        #quad-bl { bottom: 8vh; left: 4vw; }
+        #quad-br { bottom: 8vh; right: 4vw; }
+
         .v-head { 
             position: absolute; white-space: nowrap;
             font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
@@ -51,10 +58,10 @@
             transition: color 0.3s, text-shadow 0.3s;
         }
         
-        #quad-BIO .v-head, #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(8px); }
-        #quad-COM .v-head, #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(-8px); }
-        #quad-ENV .v-head, #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(8px); }
-        #quad-MEC .v-head, #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(-8px); }
+        #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(8px); }
+        #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(-8px); }
+        #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(8px); }
+        #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(-8px); }
 
         .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
         .val-sm { font-family: 'Orbitron'; font-weight: 900; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 8px var(--theme-dim); text-transform: uppercase; }
@@ -81,11 +88,11 @@
         .lunar-node { fill: var(--core-plat); filter: drop-shadow(0 0 4px #fff); }
         .inner-planet { fill: var(--steel); }
 
-        /* OPT Node Styling (Centered) */
+        /* OPT Node Styling (Centered Text) */
         .opt-oval { position: absolute; width: 60px; height: 30px; border: 1px solid var(--titanium); border-radius: 15px; display: flex; justify-content: center; align-items: center; z-index: 50; cursor: pointer; background: rgba(0,0,0,0.5); transition: 0.2s; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; color: var(--steel); letter-spacing: 1px; }
         .opt-oval:hover { border-color: var(--cyan-glow); color: var(--cyan-glow); box-shadow: inset 0 0 10px var(--cyan-dim), 0 0 10px var(--cyan-dim); }
         
-        /* Positioning the ovals relative to the corners */
+        /* Relative Positioning to Corner Panels */
         #opt-tl { top: -20px; right: 0; }
         #opt-tr { top: -20px; left: 0; }
         #opt-bl { bottom: -20px; right: 0; }
@@ -102,6 +109,19 @@
     <div class="matrix-layer"></div>
     <div class="star-container" id="stars"></div>
     <div id="needle-hud">SYSTEMIC CONTEXT</div>
+
+    <div id="quad-tl" class="corner-panel">
+        <div id="opt-tl" class="opt-oval">OPT</div>
+    </div>
+    <div id="quad-tr" class="corner-panel">
+        <div id="opt-tr" class="opt-oval">OPT</div>
+    </div>
+    <div id="quad-bl" class="corner-panel">
+        <div id="opt-bl" class="opt-oval">OPT</div>
+    </div>
+    <div id="quad-br" class="corner-panel">
+        <div id="opt-br" class="opt-oval">OPT</div>
+    </div>
 
     <div class="bary-container" id="bary-root">
         <svg class="bary-svg" viewBox="-100 -100 200 200" preserveAspectRatio="xMidYMid meet">
