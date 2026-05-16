@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXV. Clockwise Celestial Physics & API Boot Safeguards.
+// STATUS: Phase XXXVI. Copernican Kinematics & Ecliptic Declination Sync.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -766,18 +766,22 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
     // 1. ECLIPTIC CAMERA LOCK (Viewport securely anchored to local longitude)
+    // Keep Earth mesh upright to prevent 3D geometric shear.
+    earthMesh.rotation.x = 0;
+    earthMesh.rotation.z = 0;
+
     const rotationOffset = -(Math.PI / 2); 
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
     earthMesh.rotation.y = rotationY;
 
-    // 1b. ATMOSPHERIC DRIFT: Detach troposphere from the crust
+    // 1b. ATMOSPHERIC DRIFT
     const atmosphericSlip = (daysElapsed * 0.03) * (Math.PI * 2);
     cloudMesh.rotation.y = rotationY + atmosphericSlip;
+    cloudMesh.rotation.x = 0;
 
-    // 2. SEASONAL TILT (The Earth Pitches)
-    const eclipticPitch = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.5 * Math.PI / 180);
-    earthMesh.rotation.x = eclipticPitch;
-    cloudMesh.rotation.x = eclipticPitch;
+    // 2. TRUE COPERNICAN DECLINATION (The Sun shifts North/South)
+    // Eliminates Ptolemaic diagonal shear by tilting the Sun's orbit along the Ecliptic plane.
+    const declinationRad = -Math.cos((daysElapsed / 365.24219) * Math.PI * 2) * (23.44 * Math.PI / 180);
 
     // 3. DIURNAL SWEEP (Absolute Solar Noon Anchor)
     let theta = 0;
@@ -787,8 +791,7 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         const noonMs = window.Q_METEO_NOON.getTime();
         const msOffset = activeTimeMs - noonMs;
         
-        // PHYSICS: In a right-handed 3D coordinate system, clockwise celestial rotation 
-        // across the X-Z plane requires subtraction (decreased angle over time).
+        // PHYSICS: Clockwise celestial rotation across the X-Z plane
         theta = -(msOffset / 86400000) * (Math.PI * 2);
     } else {
         // FALLBACK: Execute geometric standard rotation while API is fetching or if offline
@@ -796,21 +799,23 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
         const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600)) / 24;
         let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
         if (localTimeFraction < 0) localTimeFraction += 1;
-        // This geometric equivalent also correctly subtracts fraction over time for clockwise sweep
         theta = (0.5 - localTimeFraction) * (Math.PI * 2);
     }
     
+    // Map the Sun's orbit applying the seasonal declination to the Y-axis.
     const sunDistance = 5;
-    const sunX = sunDistance * Math.sin(theta);
-    const sunY = 0; // Locked strictly to the Ecliptic plane
-    const sunZ = sunDistance * Math.cos(theta);
+    const sunY = sunDistance * Math.sin(declinationRad); 
+    const sunRadiusXZ = sunDistance * Math.cos(declinationRad); 
+    
+    const sunX = sunRadiusXZ * Math.sin(theta);
+    const sunZ = sunRadiusXZ * Math.cos(theta);
 
     sunLight.position.set(sunX, sunY, sunZ);
 
     // 4. NOCTURNAL SHADER SYNC
     if (nightMesh) {
         nightMesh.rotation.y = rotationY;
-        nightMesh.rotation.x = eclipticPitch;
+        nightMesh.rotation.x = 0;
         if (nightMesh.material.uniforms) {
             nightMesh.material.uniforms.sunPos.value.set(sunX, sunY, sunZ);
         }
