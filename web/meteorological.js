@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXIII. Omni-Planner Severance & Localized Solar Math.
+// STATUS: Phase XXVII. True Ellipse Terminator Sync & Dual-State Insolation.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -12,6 +12,7 @@ let climateAnchor = "GEO";
 let manualLat = 0;
 let manualLon = 0;
 let unitSystem = localStorage.getItem('Q_UNIT_SYS') || 'METRIC';
+let insolationMode = 'KINETIC';
 let actionHorizon = "ANCHOR";
 let thermoBaseline = 22.0; 
 let crossVectorSync = true;
@@ -71,7 +72,13 @@ window.injectVectorData = function() {
     let isImp = (unitSystem === 'IMPERIAL');
 
     const quadTL = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
-    if (quadTL) quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">LOCAL SOLAR NOON:</span> <span class="val-sm val-highlight" id="val-solar-noon">--:--</span></div><div class="t-row"><span class="w-lbl">MAX UV LEVEL:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">SUNLIGHT INTENSITY:</span> <span class="val-sm val-highlight" id="val-irradiance">98,500 LUX</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE ]</div></div>`;
+    if (quadTL) {
+        if (insolationMode === 'KINETIC') {
+            quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">LOCAL SOLAR NOON:</span> <span class="val-sm val-highlight" id="val-solar-noon">--:--</span></div><div class="t-row"><span class="w-lbl">MAX UV LEVEL:</span> <span class="val-sm val-highlight">11.4 (EXTREME)</span></div><div class="t-row"><span class="w-lbl">SUNLIGHT INTENSITY:</span> <span class="val-sm val-highlight" id="val-irradiance">98,500 LUX</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE - KINETIC ]</div></div>`;
+        } else {
+            quadTL.innerHTML = `<div class="panel-data-wrapper" id="pnl-insolation"><div class="v-head">INSOLATION</div><div class="t-row"><span class="w-lbl">DAWN (SUNRISE):</span> <span class="val-sm val-highlight" id="val-dawn">--:--</span></div><div class="t-row"><span class="w-lbl">LOCAL SOLAR NOON:</span> <span class="val-sm val-highlight" id="val-solar-noon">--:--</span></div><div class="t-row"><span class="w-lbl">DUSK (SUNSET):</span> <span class="val-sm val-highlight" id="val-dusk">--:--</span></div><div style="${dStyleTop}">[ SOLAR EXPOSURE - CHRONOLOGIC ]</div></div>`;
+        }
+    }
 
     const quadTR = document.getElementById('quad-tr') || document.getElementById('quad-COM');
     if (quadTR) quadTR.innerHTML = `<div class="panel-data-wrapper" id="pnl-hydro"><div class="v-head">HYDROSPHERE</div><div class="t-row"><span class="w-lbl">EL NIÑO PHASE:</span> <span class="val-sm val-highlight">LA NIÑA (COOL)</span></div><div class="t-row"><span class="w-lbl">SURFACE TEMP VAR:</span> <span class="val-sm val-highlight" id="val-sst">${isImp ? '-1.4 °F' : '-0.8 °C'}</span></div><div class="t-row"><span class="w-lbl">OCEAN CURRENT SPD:</span> <span class="val-sm val-highlight" id="val-gulf">${isImp ? '3.1 MPH' : '1.4 M/S'}</span></div><div style="${dStyleTop}">[ OCEAN & WATER ]</div></div>`;
@@ -272,6 +279,13 @@ window.openOptions = function(e, target) {
                     <option value="DISABLED" ${!crossVectorSync?'selected':''}>DISABLED (ISOLATED)</option>
                 </select>
             </div>
+            <div style="margin-top: 10px;">
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">INSOLATION TELEMETRY MODE</label>
+                <select id="inso-mode" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--env-green); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                    <option value="KINETIC" ${insolationMode==='KINETIC'?'selected':''}>KINETIC (UV & INTENSITY)</option>
+                    <option value="CHRONOLOGIC" ${insolationMode==='CHRONOLOGIC'?'selected':''}>CHRONOLOGIC (DAWN & DUSK)</option>
+                </select>
+            </div>
         `;
     }
     if (window.Q_ModalEngine) {
@@ -308,6 +322,9 @@ window.saveOptions = function() {
         if(tbEl) thermoBaseline = parseFloat(tbEl.value);
         const cvEl = document.getElementById('cv-sync');
         if(cvEl) crossVectorSync = cvEl.value === 'ACTIVE';
+        const insoEl = document.getElementById('inso-mode');
+        if(insoEl) insolationMode = insoEl.value;
+        window.injectVectorData(); 
     }
     if(window.Q_ModalEngine) window.Q_ModalEngine.close();
 };
@@ -365,36 +382,60 @@ window.openImpact = function() {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
+    const userLat = window.Q_USER_LATITUDE !== undefined ? window.Q_USER_LATITUDE : 27.9659; 
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. UPDATE 3D KINEMATICS STRICTLY FROM Q-CORE PAYLOAD
     if (scene && camera && renderer) {
-        updateGlobeKinematics(activeTime, daysElapsed, userLon);
+        updateGlobeKinematics(activeTime, daysElapsed, userLon, qData.delta);
         renderer.render(scene, camera);
     }
 
     // 2. DOM UPDATES & METRIC CONVERSION
     let isImp = (unitSystem === 'IMPERIAL');
 
-    // DYNAMIC SOLAR NOON CALCULATION (Locked to Local Device Timezone)
+    // DYNAMIC SOLAR NOON & HORIZON CALCULATION 
     const valSolarNoon = document.getElementById('val-solar-noon');
-    if (valSolarNoon) {
-        const timeOffset = (userLon / 15);
-        let noonHourUTC = 12 - timeOffset - (qData.delta / 15);
-        
-        const localOffsetHours = new Date().getTimezoneOffset() / 60;
-        let noonHourLocal = noonHourUTC - localOffsetHours;
-        
-        while (noonHourLocal < 0) noonHourLocal += 24;
-        while (noonHourLocal >= 24) noonHourLocal -= 24;
-        
-        let hr = Math.floor(noonHourLocal);
-        let min = Math.floor((noonHourLocal - hr) * 60);
+    const valDawn = document.getElementById('val-dawn');
+    const valDusk = document.getElementById('val-dusk');
+
+    const eqTimeHours = (qData.delta / 15);
+    const localOffsetHours = new Date().getTimezoneOffset() / 60;
+    
+    let noonHourLocal = 12 - (userLon / 15) - eqTimeHours - localOffsetHours;
+    while (noonHourLocal < 0) noonHourLocal += 24;
+    while (noonHourLocal >= 24) noonHourLocal -= 24;
+
+    function formatHour(decimalHour) {
+        if (isNaN(decimalHour)) return "--:--";
+        let h = decimalHour;
+        while(h < 0) h += 24;
+        while(h >= 24) h -= 24;
+        let hr = Math.floor(h);
+        let min = Math.floor((h - hr) * 60);
         let tz = isImp ? (hr >= 12 ? ' PM' : ' AM') : '';
         if (isImp && hr > 12) hr -= 12;
         if (isImp && hr === 0) hr = 12;
+        return `${hr.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}${tz}`;
+    }
+
+    if (valSolarNoon) valSolarNoon.innerText = formatHour(noonHourLocal);
+
+    if (valDawn || valDusk) {
+        // Solar Declination (True Anomaly based)
+        const decRad = Math.asin(Math.sin(qData.trueArc * Math.PI / 180) * Math.sin(23.44 * Math.PI / 180));
+        const latRad = userLat * Math.PI / 180;
         
-        valSolarNoon.innerText = `${hr.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}${tz}`;
+        let cosH = -Math.tan(latRad) * Math.tan(decRad);
+        let hHours;
+        let polarState = "";
+        
+        if (cosH > 1) { hHours = NaN; polarState = "POLAR NIGHT"; } 
+        else if (cosH < -1) { hHours = NaN; polarState = "POLAR DAY"; } 
+        else { hHours = Math.acos(cosH) * (12 / Math.PI); }
+
+        if (valDawn) valDawn.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal - hHours);
+        if (valDusk) valDusk.innerText = isNaN(hHours) ? polarState : formatHour(noonHourLocal + hHours);
     }
 
     const valSst = document.getElementById('val-sst');
@@ -697,15 +738,16 @@ function initThreeGlobe() {
 }
 
 // THE KINEMATIC BRIDGE (Triggered exclusively by Q-Core q-tick)
-function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon) {
+function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     if (!earthMesh || !cloudMesh || !sunLight) return;
 
     const d = new Date(activeTimeMs);
 
-    // 1. ECLIPTIC CAMERA LOCK (User Longitude Centered)
+    // 1. ECLIPTIC CAMERA LOCK (User Longitude Centered + True Ellipse Offset)
     const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600) + (d.getUTCMilliseconds() / 3600000)) / 24;
     
-    let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
+    const eqTimeFraction = (qDataDelta / 360);
+    let localTimeFraction = (timeFractionUTC + (userLon / 360) + eqTimeFraction) % 1;
     if (localTimeFraction < 0) localTimeFraction += 1;
 
     const rotationOffset = -(Math.PI / 2); 
