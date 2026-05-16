@@ -1,6 +1,6 @@
 // THE QUADRATURE: METEOROLOGICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XXXIV. Tick Loop Restoration & Variable Sync.
+// STATUS: Phase XXXV. Clockwise Celestial Physics & API Boot Safeguards.
 
 let liveWeather = null;
 let sparkBars = [];
@@ -409,7 +409,6 @@ window.addEventListener('q-tick', (e) => {
     const userLon = window.Q_USER_LONGITUDE !== undefined ? window.Q_USER_LONGITUDE : -82.8001; 
     
     // 1. DEBOUNCED ASTRONOMICAL TELEMETRY SYNC
-    // FIX: Using correct 'activeTime' variable from payload
     const simD = new Date(activeTime);
     const simDateStr = `${simD.getUTCFullYear()}-${String(simD.getUTCMonth()+1).padStart(2,'0')}-${String(simD.getUTCDate()).padStart(2,'0')}`;
     
@@ -783,20 +782,21 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     // 3. DIURNAL SWEEP (Absolute Solar Noon Anchor)
     let theta = 0;
     
-    if (window.Q_METEO_NOON) {
+    // SAFEGUARD: Only execute API anchor if the async fetch has completed and returned a valid date
+    if (window.Q_METEO_NOON && !isNaN(window.Q_METEO_NOON.getTime())) {
         const noonMs = window.Q_METEO_NOON.getTime();
-        // Calculate the exact millisecond distance from absolute Solar Noon
         const msOffset = activeTimeMs - noonMs;
         
-        // Solar Noon = 0 radians (Light vector faces +Z camera directly).
-        // 24 Hours = Math.PI * 2 radians.
-        theta = (msOffset / 86400000) * (Math.PI * 2);
+        // PHYSICS: In a right-handed 3D coordinate system, clockwise celestial rotation 
+        // across the X-Z plane requires subtraction (decreased angle over time).
+        theta = -(msOffset / 86400000) * (Math.PI * 2);
     } else {
-        // Fallback: Geometric standard rotation if API is unreachable
+        // FALLBACK: Execute geometric standard rotation while API is fetching or if offline
         const d = new Date(activeTimeMs);
         const timeFractionUTC = (d.getUTCHours() + (d.getUTCMinutes() / 60) + (d.getUTCSeconds() / 3600)) / 24;
         let localTimeFraction = (timeFractionUTC + (userLon / 360)) % 1;
         if (localTimeFraction < 0) localTimeFraction += 1;
+        // This geometric equivalent also correctly subtracts fraction over time for clockwise sweep
         theta = (0.5 - localTimeFraction) * (Math.PI * 2);
     }
     
