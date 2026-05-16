@@ -7,13 +7,13 @@ let sparkBars = [];
 let showDelta = false;
 
 let alertThreshold = 75;
-let currentAssetMode = "FLORA";
+let currentAssetMode = "FAUNA";
 let iotProtocol = "MANUAL";
 let climateAnchor = "GEO"; 
 let manualLat = 0;
 let manualLon = 0;
 let unitSystem = localStorage.getItem('Q_UNIT_SYS') || 'METRIC';
-let insolationMode = 'KINETIC';
+let insolationMode = 'CHRONOLOGIC';
 let actionHorizon = "ANCHOR";
 let thermoBaseline = 22.0; 
 let crossVectorSync = true;
