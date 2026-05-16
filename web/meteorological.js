@@ -8,6 +8,7 @@ let showDelta = false;
 
 let alertThreshold = 75;
 let currentAssetMode = "FLORA";
+let iotProtocol = "MANUAL";
 let climateAnchor = "GEO"; 
 let manualLat = 0;
 let manualLon = 0;
@@ -426,7 +427,10 @@ window.addEventListener('q-tick', (e) => {
         const decRad = Math.asin(Math.sin(qData.trueArc * Math.PI / 180) * Math.sin(23.44 * Math.PI / 180));
         const latRad = userLat * Math.PI / 180;
         
-        let cosH = -Math.tan(latRad) * Math.tan(decRad);
+        // Atmospheric Refraction Constant (-0.833°)
+        const refRad = -0.833 * Math.PI / 180;
+        
+        let cosH = (Math.sin(refRad) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
         let hHours;
         let polarState = "";
         
@@ -750,7 +754,7 @@ function updateGlobeKinematics(activeTimeMs, daysElapsed, userLon, qDataDelta) {
     let localTimeFraction = (timeFractionUTC + (userLon / 360) + eqTimeFraction) % 1;
     if (localTimeFraction < 0) localTimeFraction += 1;
 
-    const rotationOffset = -(Math.PI / 2); 
+    const rotationOffset = Math.PI; // FIXED: Aligns equirectangular map (-Z Prime Meridian) exactly 180 deg to front.
     const rotationY = -(userLon * (Math.PI / 180)) + rotationOffset;
     
     earthMesh.rotation.y = rotationY;
