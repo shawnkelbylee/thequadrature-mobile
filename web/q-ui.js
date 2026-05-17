@@ -47,7 +47,7 @@ window.injectUniversalUI = function() {
     const authBg = authState === 'ACTIVE' ? '#39ff14' : 'transparent';
     const authColor = authState === 'ACTIVE' ? '#000' : '#ff003c';
     const authBorder = authState === 'ACTIVE' ? '#39ff14' : '#ff003c';
-    const authText = authState === 'ACTIVE' ? '[ IN THE QUAD ]' : '[ AUTHENTICATE ]';
+    const authText = authState === 'ACTIVE' ? '[ IN THE QUAD ]' : ' AUTHENTICATE ';
 
     const faceActive = isHome;
 
