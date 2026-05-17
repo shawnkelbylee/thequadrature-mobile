@@ -1,6 +1,6 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase L. Perfect Structural Replication of Legacy Panels with New Telemetry.
+// STATUS: Phase IV UI Engine. Decoupled Logic & Math Engine.
 // REVISION: Dual-Targeting initialized via q-ui-mounted.
 
 let currentRadarStatus = 'STABLE';
@@ -12,49 +12,9 @@ let standardizedInterval = "ACTIVE";
 let varianceResolution = "HIGH";
 let isBooted = false;
 let currentOptTarget = '';
-let unitSystem = localStorage.getItem('Q_UNIT_SYS') || 'METRIC';
-
-// --- DYNAMIC TOOLTIP LOGIC ---
-const tooltip = document.getElementById('astro-tooltip');
-document.addEventListener('mousemove', (e) => {
-    if(tooltip && tooltip.style.opacity === '1') {
-        tooltip.style.left = (e.clientX + 15) + 'px';
-        tooltip.style.top = (e.clientY + 15) + 'px';
-    }
-});
-
-window.showAstroTooltip = function(text, color) {
-    if(!tooltip) return;
-    tooltip.innerHTML = `<span style="color:${color}; font-weight:900;">[DATA]</span><br>${text}`;
-    tooltip.style.borderLeftColor = color;
-    tooltip.style.opacity = '1';
-};
-
-window.hideAstroTooltip = function() {
-    if(!tooltip) return;
-    tooltip.style.opacity = '0';
-};
-
-window.toggleMacroZoom = function() {
-    let isZoomed = window.Q_MACRO_ZOOM || false;
-    isZoomed = !isZoomed;
-    window.Q_MACRO_ZOOM = isZoomed;
-    const group = document.getElementById('macro-zoom-group');
-    const btn = document.getElementById('q-zoom-toggle');
-    if (group && btn) {
-        if (isZoomed) {
-            group.style.transform = "scale(0.12)";
-            btn.innerText = "[ VIEW: MICRO ]";
-            btn.classList.add('active');
-        } else {
-            group.style.transform = "scale(1)";
-            btn.innerText = "[ VIEW: MACRO ]";
-            btn.classList.remove('active');
-        }
-    }
-};
 
 window.injectVectorData = function() {
+    // DUAL-ID Targeting: Catches the element whether the UI generates 'opt-tl' or just classes
     const optTL = document.getElementById('opt-tl') || document.querySelectorAll('.opt-oval')[0];
     const optTR = document.getElementById('opt-tr') || document.querySelectorAll('.opt-oval')[1];
     const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
@@ -62,19 +22,19 @@ window.injectVectorData = function() {
 
     if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'orbital'); }; optTL.style.color = 'var(--cyan-glow)'; }
     if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'telemetry'); }; optTR.style.color = 'var(--cyan-glow)'; }
-    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'lunar'); }; optBL.style.color = 'var(--cyan-glow)'; }
-    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'system'); }; optBR.style.color = 'var(--cyan-glow)'; }
+    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'thermo'); }; optBL.style.color = 'var(--cyan-glow)'; }
+    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'civil'); }; optBR.style.color = 'var(--cyan-glow)'; }
 
-    // IDENTICAL STRUCTURE: TOP LEFT
+    // DUAL-ID Targeting: Binds successfully to legacy components OR Hollow Shell UI
     const quadTL = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
     if (quadTL) {
         quadTL.innerHTML = `
             <div class="panel-data-wrapper">
-                <div class="v-head">ORBITAL MECHANICS</div>
-                <div class="t-row"><span class="w-lbl">SOLAR VS CIVIL (EOT):</span> <span class="val-sm" id="val-eot">--</span></div>
-                <div class="t-row"><span class="w-lbl">TRUE ANOMALY:</span> <span class="val-sm" id="val-anomaly">--</span></div>
-                <div class="t-row"><span class="w-lbl">ECCENTRICITY:</span> <span class="val-sm">0.0167</span></div>
-                <div class="t-row"><span class="w-lbl">KEPLERIAN STATE:</span> <span class="val-sm" id="kepler-state">ACTIVE</span></div>
+                <div class="v-head">ORBITAL POSITION</div>
+                <div class="t-row"><span class="w-lbl">NEXT ANCHOR:</span> <span class="val-sm" id="next-anchor">--</span></div>
+                <div class="t-row"><span class="w-lbl">DRIFT TO ANCHOR:</span> <span class="val-sm" id="drift-to-anchor">--</span></div>
+                <div class="t-row"><span class="w-lbl">ANCHOR DURATION:</span> <span class="val-sm" id="anchor-duration">--</span></div>
+                <div class="t-row"><span class="w-lbl">ATOMIC FREQUENCY:</span> <span class="val-sm" id="atomic-sync-val">SYNCED</span></div>
                 <div style="width:100%; height:3px; background:#000; margin-top:2px; border:1px solid var(--core-dim);">
                     <div id="macro-bar" style="height:100%; width:0%; background:var(--cyan-glow); box-shadow:0 0 8px var(--cyan-glow); transition: width 0.3s;"></div>
                 </div>
@@ -82,55 +42,52 @@ window.injectVectorData = function() {
         `;
     }
 
-    // IDENTICAL STRUCTURE: TOP RIGHT
     const quadTR = document.getElementById('quad-tr') || document.getElementById('quad-COM');
     if (quadTR) {
         quadTR.innerHTML = `
             <div class="panel-data-wrapper" onclick="window.openOptions(event, 'telemetry')" style="cursor: pointer;">
-                <div class="v-head">MACRO TELEMETRY</div>
-                <div class="t-row"><span class="w-lbl">ORBITAL VELOCITY:</span> <span class="val-sm" id="val-vel">--</span></div>
-                <div class="t-row"><span class="w-lbl">SOLAR DISTANCE:</span> <span class="val-sm" id="val-au">--</span></div>
-                <div class="t-row"><span class="w-lbl">ACCELERATION:</span></div>
-                <div style="font-size:0.8rem; padding:4px; text-align:center; border: 1px solid var(--cyan-glow); background: rgba(0, 240, 255, 0.1); color: var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px;" id="val-accel">--</div>
+                <div class="v-head">TIME DRIFT / Q-DELTA</div>
+                <div class="t-row"><span class="w-lbl">ORBITAL ECCENTRICITY:</span> <span class="val-sm">0.0167</span></div>
+                <div class="t-row"><span class="w-lbl">SYMMETRY LOSS:</span> <span class="val-sm" id="sym-loss">--%</span></div>
+                <div class="t-row"><span class="w-lbl">EQUATION OF TIME (Q-DELTA):</span></div>
+                <div style="font-size:0.8rem; padding:4px; text-align:center; border: 1px solid var(--cyan-glow); background: rgba(0, 240, 255, 0.1); color: var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px;" id="rt-delta">--</div>
             </div>
         `;
     }
 
-    // IDENTICAL STRUCTURE: BOTTOM LEFT
     const quadBL = document.getElementById('quad-bl') || document.getElementById('quad-ENV');
     if (quadBL) {
         quadBL.innerHTML = `
             <div class="panel-data-wrapper">
-                <div class="v-head">LUNAR DYNAMICS</div>
-                <div class="t-row" style="justify-content:center; margin-bottom:2px;"><span style="color:var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; text-shadow:0 0 8px var(--cyan-dim);" id="lunar-dist">ORBITAL DISTANCE: --</span></div>
+                <div class="v-head">THERMODYNAMICS</div>
+                <div class="t-row" style="justify-content:center; margin-bottom:2px;"><span style="color:var(--cyan-glow); font-family: 'Orbitron'; font-weight: 900; text-shadow:0 0 8px var(--cyan-dim);" id="solar-float-delta">KEPLERIAN MULTIPLIER: --</span></div>
                 <div style="width: 100%; height: 2.5vh; min-height: 20px; background: rgba(0,0,0,0.8); border: 1px solid var(--titanium); border-radius: 4px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,240,255,0.1); margin-bottom: 2px;">
-                    <div class="respiration-wave" id="lunar-wave"></div>
-                    <div id="lunar-phase-text" style="position: absolute; font-family: 'Orbitron'; font-size: 0.55rem; color: #fff; text-shadow: 0 0 5px #000; font-weight: 900; z-index: 2; letter-spacing: 1px;">CALCULATING PHASE...</div>
+                    <div class="respiration-wave" id="resp-wave"></div>
+                    <div id="resp-phase-text" style="position: absolute; font-family: 'Orbitron'; font-size: 0.55rem; color: #fff; text-shadow: 0 0 5px #000; font-weight: 900; z-index: 2; letter-spacing: 1px;">CALCULATING VARIANCE...</div>
                 </div>
-                <div class="radar-box" onclick="window.openOptions(event, 'lunar')" style="margin-top:0;">
+                <div class="radar-box" onclick="window.openOptions(event, 'thermo')" style="margin-top:0;">
                     <div class="radar-sweep"></div>
-                    <div class="radar-text" id="lunar-ill-readout">ILLUMINATION: --</div>
+                    <div class="radar-text" id="radar-readout">CALCULATING THERMAL MODEL...</div>
                 </div>
             </div>
         `;
     }
 
-    // IDENTICAL STRUCTURE: BOTTOM RIGHT
     const quadBR = document.getElementById('quad-br') || document.getElementById('quad-MEC');
     if (quadBR) {
         quadBR.innerHTML = `
             <div class="panel-data-wrapper">
-                <div class="v-head">SYSTEM ALIGNMENT</div>
-                <div class="t-row"><span class="w-lbl">BARYCENTRIC OFFSET:</span> <span class="val-sm" id="val-bary">--</span></div>
+                <div class="v-head">CIVIL TIME LAG</div>
+                <div class="t-row"><span class="w-lbl">STANDARDIZED INTERVAL:</span> <span class="val-sm" id="si-lock">ACTIVE</span></div>
                 <div class="val-display" style="padding:2px 8px; margin-bottom:2px;"><div id="nano-counter" style="font-size:0.8rem; text-align:right; color:var(--cyan-glow); font-family:'Orbitron'; font-weight:900;">0.000000000</div></div>
-                <div class="t-row"><span class="w-lbl">Q-DELTA ANCHOR:</span></div>
+                <div class="t-row"><span class="w-lbl">ORBITAL DELTA:</span></div>
                 <div class="variance-container">
                     <div class="variance-wave"></div>
-                    <div class="variance-val" id="val-qdelta">+ 0.0000000000</div>
+                    <div class="variance-val" id="variance-val">+ 0.0000000000</div>
                 </div>
-                <div class="val-display" style="padding:2px 8px; margin-bottom:0; cursor:pointer; margin-top:2px;" onclick="window.openOptions(event, 'system')">
-                    <div id="val-tension" style="font-size:0.65rem; color:var(--cyan-glow); text-shadow: 0 0 8px var(--cyan-dim); text-align: center; font-family:'JetBrains Mono'; font-weight:700;">
-                        MERIDIAN TENSION: --
+                <div class="val-display" style="padding:2px 8px; margin-bottom:0; cursor:pointer; margin-top:2px;" onclick="window.openOptions(event, 'civil')">
+                    <div id="civil-tension-readout" style="font-size:0.65rem; color:var(--cyan-glow); text-shadow: 0 0 8px var(--cyan-dim); text-align: center; font-family:'JetBrains Mono'; font-weight:700;">
+                        CALCULATING OFFSET...
                     </div>
                 </div>
             </div>
@@ -138,216 +95,334 @@ window.injectVectorData = function() {
     }
 };
 
-window.openOptions = function(e, target) {
-    if(e) e.stopPropagation();
-    currentOptTarget = target;
-    let title = "ASTROPHYSICAL CALIBRATION";
-    let html = `<div style="font-family: 'JetBrains Mono'; font-size: 0.75rem; color: var(--starlight); line-height: 1.5; text-align: center;">Vector isolation engaged. Telemetry is hard-locked to planetary invariants and cannot be manually overridden.</div>`;
-    if (window.Q_ModalEngine) {
-        window.Q_ModalEngine.render(title, html, 'ACKNOWLEDGE', () => { window.Q_ModalEngine.close(); });
+window.showNeedleHUD = function(text, color) { 
+    const hud = document.getElementById('needle-hud'); 
+    if (hud) {
+        hud.innerText = text; 
+        hud.style.borderColor = color; 
+        hud.style.color = color; 
+        hud.style.opacity = '1'; 
     }
 };
 
+window.hideNeedleHUD = function() { 
+    const hud = document.getElementById('needle-hud');
+    if (hud) hud.style.opacity = '0'; 
+};
+
+window.openOptions = function(e, target) {
+    if(e) e.stopPropagation();
+    currentOptTarget = target;
+    let title = ""; let html = "";
+
+    if(target === 'orbital') {
+        title = "ORBITAL CALIBRATION";
+        html = `
+            <div>
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">ATOMIC FREQUENCY SYNC</label>
+                <select id="opt-atomic" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                    <option value="MASTER" ${atomicSync==='MASTER'?'selected':''}>MASTER (STRICT TRACKING)</option>
+                    <option value="SLAVE" ${atomicSync==='SLAVE'?'selected':''}>SLAVE (FLUID TRACKING)</option>
+                </select>
+            </div>
+        `;
+        if (window.Q_ModalEngine) window.Q_ModalEngine.render(title, html, 'SAVE PARAMETERS', window.saveOptions);
+    } else if (target === 'telemetry') {
+        title = "DUAL-STATE TELEMETRY";
+        html = `
+            <div style="text-align: center;">
+                <div style="font-size: 0.65rem; color: var(--steel); margin-bottom: 15px;">MAPPING THE VELOCITY VARIANCE</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--titanium); padding-bottom: 15px; margin-bottom: 15px;">
+                    <div style="display:flex; flex-direction:column; align-items:center; width: 45%;">
+                        <span style="font-family:'Orbitron'; font-size:0.55rem; color:var(--cyan-glow); margin-bottom: 4px;">MEAN CIRCLE (CIVIL)</span>
+                        <span id="tel-mean" style="font-weight:bold; font-size:1.1rem; color:var(--cyan-glow); text-shadow:0 0 8px var(--cyan-dim);">--°</span>
+                    </div>
+                    <div style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--steel);">VS</div>
+                    <div style="display:flex; flex-direction:column; align-items:center; width: 45%;">
+                        <span style="font-family:'Orbitron'; font-size:0.55rem; color:var(--cyan-glow); margin-bottom: 4px;">TRUE ELLIPSE (PHYSICS)</span>
+                        <span id="tel-true" style="font-weight:bold; font-size:1.1rem; color:var(--cyan-glow); text-shadow:0 0 8px var(--cyan-dim);">--°</span>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <span style="font-family:'Orbitron'; font-size:0.65rem; color:var(--core-plat);">Q-DELTA (VARIANCE)</span>
+                    <span id="tel-delta" style="font-weight:900; font-size:1.5rem; color:#fff; text-shadow:0 0 15px var(--core-glow); margin-top:5px;">--°</span>
+                </div>
+            </div>
+        `;
+        if (window.Q_ModalEngine) window.Q_ModalEngine.render(title, html);
+    } else if (target === 'thermo') {
+        let iconStr = "⛨", statusStr = "THERMODYNAMICS STABLE", descStr = "Orbital arc in optimal transit window.";
+        if(currentRadarStatus === 'THERMODYNAMIC FRICTION') {
+            iconStr = "🌪"; statusStr = "THERMODYNAMIC FRICTION"; descStr = "Approaching Seasonal Node. Thermodynamic friction elevated.";
+        } else if(currentRadarStatus === 'THERMAL SPIKE') {
+            iconStr = "⚡"; statusStr = "THERMAL SPIKE DETECTED"; descStr = "Approaching inter-quadrant threshold.";
+        }
+        title = "CLIMATIC BASELOAD MODELING";
+        html = `
+            <div style="text-align: center; padding: 10px 0;">
+                <div style="font-size: 2rem; margin-bottom: 10px; color: var(--cyan-glow);">${iconStr}</div>
+                <div style="font-family: 'Orbitron'; font-size: 1.1rem; color: var(--cyan-glow); margin-bottom: 5px;">${statusStr}</div>
+                <div style="font-size: 0.65rem; color: var(--steel); padding: 0 10px;">${descStr}</div>
+            </div>
+        `;
+        if (window.Q_ModalEngine) window.Q_ModalEngine.render(title, html);
+    } else if (target === 'civil') {
+        title = "CIVIL TIME SETTINGS";
+        html = `
+            <div>
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">STANDARDIZED INTERVAL</label>
+                <select id="opt-interval" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                    <option value="ACTIVE" ${standardizedInterval==='ACTIVE'?'selected':''}>ACTIVE (LOCKED TO CIVIL)</option>
+                    <option value="SUSPENDED" ${standardizedInterval==='SUSPENDED'?'selected':''}>SUSPENDED (DRIFTING)</option>
+                </select>
+            </div>
+            <div style="margin-top: 10px;">
+                <label style="font-size: 0.6rem; color: rgba(255,255,255,0.6); font-family: 'Orbitron'; letter-spacing: 1px;">VARIANCE RESOLUTION</label>
+                <select id="opt-resolution" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; margin-top: 4px; width: 100%;">
+                    <option value="HIGH" ${varianceResolution==='HIGH'?'selected':''}>HIGH (NANOSECONDS)</option>
+                    <option value="LOW" ${varianceResolution==='LOW'?'selected':''}>LOW (MILLISECONDS)</option>
+                </select>
+            </div>
+        `;
+        if (window.Q_ModalEngine) window.Q_ModalEngine.render(title, html, 'SAVE SETTINGS', window.saveOptions);
+    }
+};
+
+window.saveOptions = function() {
+    if (currentOptTarget === 'orbital') {
+        const atomicEl = document.getElementById('opt-atomic');
+        if (atomicEl) atomicSync = atomicEl.value;
+        const syncEl = document.getElementById('atomic-sync-val');
+        if (syncEl) syncEl.innerText = atomicSync === 'MASTER' ? 'SYNCED' : 'FLUID';
+    } else if (currentOptTarget === 'civil') {
+        const intEl = document.getElementById('opt-interval');
+        if (intEl) standardizedInterval = intEl.value;
+        const resEl = document.getElementById('opt-resolution');
+        if (resEl) varianceResolution = resEl.value;
+        const siEl = document.getElementById('si-lock');
+        if (siEl) siEl.innerText = standardizedInterval;
+    }
+    if (window.Q_ModalEngine) window.Q_ModalEngine.close();
+};
+
+window.openAnchorModal = function(node) {
+    if (!window.Q_REGISTRY || !window.Q_REGISTRY.ANCHORS) return;
+    let anchorObj = window.Q_REGISTRY.ANCHORS.find(a => a.name.toUpperCase().includes(node));
+    if (!anchorObj) return;
+
+    let aName = anchorObj.name.toUpperCase();
+    let aEvent = anchorObj.event;
+    let aDesc = anchorObj.desc || "Seasonal inflection point.";
+    let aDegree = anchorObj.coord.toFixed(3) + '°';
+    
+    let aTime = window.ANCHOR_ALPHA_DYNAMIC || Date.now();
+    if (node !== 'ALPHA' && window.ANCHOR_ALPHA_DYNAMIC && window.MS_DAY) {
+        const currentDays = (Date.now() - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
+        const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
+        const targetDays = cycleBaseDays + (anchorObj.coord / (360 / 365.24219));
+        aTime = window.ANCHOR_ALPHA_DYNAMIC + (targetDays * window.MS_DAY);
+    }
+    
+    let formatted = { dateStr: '--', timeStr: '--' };
+    if (window.formatLegacyDate) formatted = window.formatLegacyDate(aTime);
+    
+    let durHours = ((anchorObj.duration || 86400000) / 3600000).toFixed(4);
+
+    const html = `
+        <div style="font-family:'Orbitron'; color:var(--cyan-glow); font-size:0.8rem; margin-bottom:5px;">${aEvent}</div>
+        <div style="font-size:0.6rem; color:var(--steel); border-bottom:1px solid var(--cyan-glow); padding-bottom:10px; margin-bottom:10px;">${aDesc}<br><br><span style="color:var(--cyan-glow);">SETTLEMENT GEAR DURATION: ${durHours} HOURS</span></div>
+        <div class="data-grid" style="border-top:none; padding-top:0;">
+            <div class="data-col"><span class="data-lbl">Q COORDINATE</span><span class="data-val data-val-cy">Q${node==='ALPHA'?1:node==='BETA'?2:node==='GAMMA'?3:4} S1 DAY 1</span></div>
+            <div class="data-col"><span class="data-lbl">TRUE ELLIPSE</span><span class="data-val data-val-cy">${aDegree}</span></div>
+            <div class="data-col"><span class="data-lbl">LEGACY DATE</span><span class="data-val">${formatted.dateStr}</span></div>
+            <div class="data-col"><span class="data-lbl">LEGACY TIME</span><span class="data-val">${formatted.timeStr}</span></div>
+        </div>
+    `;
+    if (window.Q_ModalEngine) window.Q_ModalEngine.render('SEASONAL ANCHOR PROTOCOL', html, 'CLOSE PROTOCOL');
+};
+
 window.addEventListener('q-tick', (e) => {
-    const { t, isLive, activeTime, daysElapsed, qData, lagDays } = e.detail;
-
-    // --- PANEL DATA SYNC ---
-    const isImp = (unitSystem === 'IMPERIAL');
-    const B = (360 / 365.24) * (daysElapsed - 81) * (Math.PI / 180);
-    const eotMinutes = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+    const { t, isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
-    // Panel TL
-    const valEot = document.getElementById('val-eot');
-    if (valEot) valEot.innerText = (eotMinutes > 0 ? '+' : '') + eotMinutes.toFixed(1) + ' MIN';
-    const valAnomaly = document.getElementById('val-anomaly');
-    if (valAnomaly) valAnomaly.innerText = qData.trueArc.toFixed(2) + '°';
-    const keplerState = document.getElementById('kepler-state');
-    if (keplerState) keplerState.innerText = atomicSync;
+    // --- DYNAMIC Q-DELTA DIAMOND & RING SHIFT ---
+    const diamondArm = document.getElementById('transit-diamond-arm');
+    if (diamondArm) diamondArm.style.transform = `rotate(${qData.meanArc}deg)`;
+    
+    let diamond = document.getElementById('q-delta-diamond');
+    let gearMid = document.getElementById('kepler-ring');
+    
+    let radDist = (qData.trueArc - 14) * (Math.PI / 180);
+    let velocityMult = 1 + 0.0334 * Math.cos(radDist);
+    
+    // Interpolate color phase (1 = Perihelion/Red-Magenta, 0 = Aphelion/Blue-Cyan)
+    let phase = (Math.cos(radDist) + 1) / 2;
+    
+    let r = Math.round(0 + (255 - 0) * phase);
+    let g = Math.round(240 + (0 - 240) * phase);
+    let b = Math.round(255 + (60 - 255) * phase);
+    
+    let interpColor = `rgb(${r}, ${g}, ${b})`;
+    let interpDim = `rgba(${r}, ${g}, ${b}, 0.2)`;
+    
+    // Apply Dynamic Speed and Color to Ring
+    if (gearMid) {
+        gearMid.style.transform = `rotate(${qData.trueArc * 15}deg)`;
+        gearMid.style.setProperty('--dyn-phase-color', interpColor);
+        gearMid.style.setProperty('--dyn-phase-dim', interpDim);
+    }
+
+    // Apply Shift to Diamond
+    if (diamond) {
+        diamond.style.background = interpColor;
+        diamond.style.boxShadow = `0 0 15px ${interpColor}, inset 0 0 5px #fff`;
+
+        // Pulse diamond near Apsides
+        if (velocityMult > 1.015 || velocityMult < 0.985) {
+            diamond.style.animation = "diamond-pulse 0.8s infinite alternate";
+        } else {
+            diamond.style.animation = "none";
+            diamond.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
+        }
+    }
+    // ---------------------------------
+
+    const earthSurface = document.querySelector('.earth-surface');
+    if (earthSurface) {
+        const siderealDayMs = 86164090;
+        const dayProgress = (t % siderealDayMs) / siderealDayMs;
+        const bgPosition = 200 - (dayProgress * 200);
+        earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
+    }
+
+    const modalTitle = document.getElementById('q-modal-title');
+    if (modalTitle && modalTitle.innerText === 'DUAL-STATE TELEMETRY') {
+        const telMean = document.getElementById('tel-mean');
+        if (telMean) {
+            telMean.innerText = qData.meanArc.toFixed(4) + "°";
+            const telTrue = document.getElementById('tel-true');
+            if (telTrue) telTrue.innerText = qData.trueArc.toFixed(4) + "°";
+            const telDelta = document.getElementById('tel-delta');
+            if (telDelta) telDelta.innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
+        }
+    }
+
+   // Asymmetrical Anchor Detection logic
+    let anchorName = "SOUTHERN SOLSTICE";
+    let progressToAnchor = 0;
+    let driftDeg = 0;
+    let anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.ALPHA : 86400000;
+    
+    if (qData.trueArc >= 0 && qData.trueArc < 90) { 
+        anchorName = "1ST EQUINOX"; 
+        driftDeg = 90 - qData.trueArc;
+        progressToAnchor = (qData.trueArc / 90) * 100; 
+        anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.BETA : 84600000;
+    } else if (qData.trueArc >= 90 && qData.trueArc < 180) { 
+        anchorName = "NORTHERN SOLSTICE"; 
+        driftDeg = 180 - qData.trueArc;
+        progressToAnchor = ((qData.trueArc - 90) / 90) * 100; 
+        anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.GAMMA : 89662680;
+    } else if (qData.trueArc >= 180 && qData.trueArc < 270) { 
+        anchorName = "2ND EQUINOX"; 
+        driftDeg = 270 - qData.trueArc;
+        progressToAnchor = ((qData.trueArc - 180) / 90) * 100; 
+        anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.DELTA : 102599640;
+    } else { 
+        anchorName = "360° THRESHOLD"; 
+        driftDeg = 360 - qData.trueArc;
+        progressToAnchor = ((qData.trueArc - 270) / 90) * 100; 
+        anchorDurMs = window.Q_GEAR_CONSTANTS ? window.Q_GEAR_CONSTANTS.EPSILON : 89662680;
+    }
+    
+    const nextAnchorEl = document.getElementById('next-anchor');
+    if (nextAnchorEl) nextAnchorEl.innerText = anchorName;
+    
+    const driftEl = document.getElementById('drift-to-anchor');
+    if (driftEl) driftEl.innerText = driftDeg.toFixed(2) + "° REMAINING";
+    
+    const durEl = document.getElementById('anchor-duration');
+    if (durEl) durEl.innerText = (anchorDurMs / 3600000).toFixed(4) + "h";
+    
     const macroBar = document.getElementById('macro-bar');
-    if (macroBar) macroBar.style.width = `${(qData.trueArc / 360) * 100}%`;
-
-    // Panel TR
-    const vKmS = 29.78 - (0.5 * Math.cos(qData.trueArc * Math.PI / 180));
-    const valVel = document.getElementById('val-vel');
-    if (valVel) valVel.innerText = isImp ? (vKmS * 2236.94).toFixed(0) + ' MPH' : vKmS.toFixed(2) + ' KM/S';
-    const au = 1 - 0.01672 * Math.cos((daysElapsed / 365.24219) * Math.PI * 2);
-    const valAu = document.getElementById('val-au');
-    if (valAu) valAu.innerText = au.toFixed(5) + ' AU';
-    const valAccel = document.getElementById('val-accel');
-    if (valAccel) {
-        if (qData.trueArc > 0 && qData.trueArc < 180) {
-            valAccel.innerText = '- (DECELERATING)';
-        } else {
-            valAccel.innerText = '+ (TOWARD PERIHELION)';
-        }
-    }
-
-    // Panel BL
-    const lunarCycle = 29.53059;
-    const lunarDays = ((daysElapsed % lunarCycle) + lunarCycle) % lunarCycle;
-    const ill = 0.5 * (1 - Math.cos((lunarDays / lunarCycle) * Math.PI * 2));
-    const lunarDistKm = 384400 - (20000 * Math.cos((lunarDays/27.32)*Math.PI*2));
+    if (macroBar) macroBar.style.width = `${progressToAnchor}%`;
     
-    const lunarDist = document.getElementById('lunar-dist');
-    if (lunarDist) lunarDist.innerText = isImp ? `ORBITAL DISTANCE: ${(lunarDistKm * 0.621371).toFixed(0)} MI` : `ORBITAL DISTANCE: ${lunarDistKm.toFixed(0)} KM`;
-    const lunarIll = document.getElementById('lunar-ill-readout');
-    if (lunarIll) lunarIll.innerText = `ILLUMINATION: ${(ill * 100).toFixed(1)}%`;
-    const lunarPhaseText = document.getElementById('lunar-phase-text');
-    if (lunarPhaseText) {
-        if (lunarDays < 1 || lunarDays > 28.5) lunarPhaseText.innerText = 'NEW MOON';
-        else if (lunarDays < 6) lunarPhaseText.innerText = 'WAXING CRESCENT';
-        else if (lunarDays < 8) lunarPhaseText.innerText = 'FIRST QUARTER';
-        else if (lunarDays < 13) lunarPhaseText.innerText = 'WAXING GIBBOUS';
-        else if (lunarDays < 16) lunarPhaseText.innerText = 'FULL MOON';
-        else if (lunarDays < 21) lunarPhaseText.innerText = 'WANING GIBBOUS';
-        else if (lunarDays < 23) lunarPhaseText.innerText = 'LAST QUARTER';
-        else lunarPhaseText.innerText = 'WANING CRESCENT';
-    }
-    const lunarWave = document.getElementById('lunar-wave');
-    if (lunarWave) {
-        if (lunarDays < 15) {
-            lunarWave.style.background = "repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(0,240,255,0.4) 6px, rgba(0,240,255,0.4) 12px)";
-            lunarWave.style.animation = "wave-shift 0.8s linear infinite";
-        } else {
-            lunarWave.style.background = "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(226,232,240,0.3) 20px, rgba(226,232,240,0.3) 40px)";
-            lunarWave.style.animation = "wave-shift 5s linear infinite";
+    let symLoss = Math.abs(qData.delta) / 180 * 100; 
+    let symLossEl = document.getElementById('sym-loss');
+    if (symLossEl) symLossEl.innerText = symLoss.toFixed(2) + "%";
+
+    const waveEl = document.getElementById('resp-wave');
+    const phaseTextEl = document.getElementById('resp-phase-text');
+    const deltaEl = document.getElementById('solar-float-delta');
+    
+    let newPhase = "";
+    if (velocityMult > 1.015) {
+        if (waveEl) {
+            waveEl.style.background = "repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(0,240,255,0.4) 6px, rgba(0,240,255,0.4) 12px)";
+            waveEl.style.animation = "wave-shift 0.8s linear infinite";
         }
+        newPhase = "ACCELERATED (PERIHELION)";
+    } else if (velocityMult < 0.985) {
+        if (waveEl) {
+            waveEl.style.background = "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,240,255,0.2) 20px, rgba(0,240,255,0.2) 40px)";
+            waveEl.style.animation = "wave-shift 5s linear infinite";
+        }
+        newPhase = "DILATED (APHELION)";
+    } else {
+        if (waveEl) {
+            waveEl.style.background = "repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(226,232,240,0.3) 15px, rgba(226,232,240,0.3) 30px)";
+            waveEl.style.animation = "wave-shift 2.5s linear infinite";
+        }
+        newPhase = "NOMINAL TRANSIT";
     }
 
-    // Panel BR
-    const baryOffset = 1.1 + 0.4 * Math.sin(daysElapsed / 4332 * Math.PI * 2); 
-    const valBary = document.getElementById('val-bary');
-    if (valBary) valBary.innerText = baryOffset.toFixed(2) + ' R⊙';
+    const rtDeltaEl = document.getElementById('rt-delta');
+    if (rtDeltaEl) rtDeltaEl.innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
+    
+    if (deltaEl) deltaEl.innerText = `KEPLERIAN MULTIPLIER: ${velocityMult.toFixed(3)}x`;
+    if (phaseTextEl) phaseTextEl.innerText = newPhase;
+
+    const radarProximity = Math.abs(Math.sin((qData.trueArc * Math.PI) / 45)); 
+    const radarText = document.getElementById('radar-readout');
+    
+    if(radarProximity > 0.98) { 
+        currentRadarStatus = 'THERMODYNAMIC FRICTION'; 
+        if (radarText) radarText.innerText = "⚠ THERMODYNAMIC FRICTION"; 
+    } else if(radarProximity > 0.85) { 
+        currentRadarStatus = 'THERMAL SPIKE'; 
+        if (radarText) radarText.innerText = "THERMAL SPIKE DETECTED"; 
+    } else { 
+        currentRadarStatus = 'STABLE'; 
+        if (radarText) radarText.innerText = "THERMODYNAMICS STABLE"; 
+    }
+
     const nanoCounter = document.getElementById('nano-counter');
     if (nanoCounter) {
         const nanoString = (t / 1000).toFixed(9).split('.'); 
         nanoCounter.innerText = `+${nanoString[1]}`;
     }
-    const valQdelta = document.getElementById('val-qdelta');
-    if (valQdelta) valQdelta.innerText = (qData.delta > 0 ? '+' : '') + qData.delta.toFixed(4) + '°';
-    const valTension = document.getElementById('val-tension');
-    if (valTension) {
-        let tensionHrs = Math.abs(qData.delta * 24).toFixed(2);
-        valTension.innerText = `MERIDIAN TENSION: ${tensionHrs} HRS`;
+    
+    const varianceValText = document.getElementById('variance-val');
+    if (varianceValText) {
+        const expected = Math.round(t / 1000) * 1000;
+        const varianceVal = (t - expected) / 1000;
+        if(varianceResolution === 'HIGH') {
+            varianceValText.innerText = `${varianceVal > 0 ? '+' : ''} ${varianceVal.toFixed(10)}`;
+        } else {
+            varianceValText.innerText = `${varianceVal > 0 ? '+' : ''} ${varianceVal.toFixed(3)} ms`;
+        }
     }
 
-    // --- BARYCENTRIC SVG LOGIC ---
-    const mercAngle = (daysElapsed / 87.97) * Math.PI * 2;
-    const svgMerc = document.getElementById('svg-mercury');
-    if (svgMerc) {
-        svgMerc.setAttribute('cx', 30 * Math.cos(mercAngle));
-        svgMerc.setAttribute('cy', 30 * Math.sin(mercAngle));
+    let offsetStr = "--";
+    if (typeof lagDays !== 'undefined') {
+        offsetStr = `[LAG: +${(lagDays * 24).toFixed(2)}h]`; 
     }
-
-    const venAngle = (daysElapsed / 224.7) * Math.PI * 2;
-    const svgVen = document.getElementById('svg-venus');
-    if (svgVen) {
-        svgVen.setAttribute('cx', 55 * Math.cos(venAngle));
-        svgVen.setAttribute('cy', 55 * Math.sin(venAngle));
-    }
-
-    const jupAngle = (daysElapsed / 4332.59) * Math.PI * 2;
-    const svgJup = document.getElementById('svg-jupiter');
-    if (svgJup) {
-        svgJup.setAttribute('cx', 442 * Math.cos(jupAngle));
-        svgJup.setAttribute('cy', 442 * Math.sin(jupAngle));
-    }
-
-    const satAngle = (daysElapsed / 10759.22) * Math.PI * 2;
-    const svgSat = document.getElementById('svg-saturn');
-    if (svgSat) {
-        svgSat.setAttribute('cx', 807 * Math.cos(satAngle));
-        svgSat.setAttribute('cy', 807 * Math.sin(satAngle));
-    }
-
-    const earthAngle = (daysElapsed / 365.24219) * Math.PI * 2;
-    const ex = 85 * Math.cos(earthAngle);
-    const ey = 85 * Math.sin(earthAngle);
-    const svgEarthGroup = document.getElementById('svg-earth-group');
-    if (svgEarthGroup) {
-        svgEarthGroup.setAttribute('transform', `translate(${ex}, ${ey})`);
-    }
-
-    const moonAngle = (daysElapsed / 27.32) * Math.PI * 2;
-    const mx = 12 * Math.cos(moonAngle);
-    const my = 12 * Math.sin(moonAngle);
-    const svgMoon = document.getElementById('svg-moon');
-    if (svgMoon) {
-        svgMoon.setAttribute('cx', mx);
-        svgMoon.setAttribute('cy', my);
-    }
-
-    const svgSun = document.getElementById('svg-sun');
-    if (svgSun) {
-        svgSun.setAttribute('cx', -2 * Math.cos(jupAngle));
-        svgSun.setAttribute('cy', 2 * Math.sin(jupAngle));
+    const civilTensionReadout = document.getElementById('civil-tension-readout');
+    if (civilTensionReadout) {
+        civilTensionReadout.innerHTML = `<span style="color:var(--cyan-glow);">${offsetStr}</span>`; 
     }
 });
 
-// --- LOCALIZED ASTROPHYSICAL SCRUBBER ---
-function injectAstroScrubber() {
-    const scrubberContainer = document.createElement('div');
-    scrubberContainer.className = "q-global-controls q-scrubber-panel";
-    scrubberContainer.id = "q-astro-controls";
-    scrubberContainer.innerHTML = `
-        <div class="scrub-row-1">
-            <button id="q-zoom-toggle" class="btn-micro" onclick="window.toggleMacroZoom()">[ VIEW: MACRO ]</button>
-            <div class="macro-micro-group">
-                <button id="q-play-rev" class="btn-micro">&lt;&lt;</button>
-                <button id="q-play-stop" class="btn-micro" disabled>||</button>
-                <button id="q-play-fwd" class="btn-micro">&gt;&gt;</button>
-            </div>
-            <button id="q-live-toggle" class="btn-micro active">LIVE</button>
-        </div>
-    `;
-    document.body.appendChild(scrubberContainer);
-    window.attachAstroScrubberEvents();
-}
-
-let astroPlayInterval = null;
-
-window.stopAstroLoop = function() {
-    if (astroPlayInterval) { clearInterval(astroPlayInterval); astroPlayInterval = null; }
-    const btnStop = document.getElementById('q-play-stop');
-    const btnRev = document.getElementById('q-play-rev');
-    const btnFwd = document.getElementById('q-play-fwd');
-    if (btnStop) btnStop.disabled = true;
-    if (btnRev) btnRev.classList.remove('active');
-    if (btnFwd) btnFwd.classList.remove('active');
-};
-
-window.executeAstroLoop = function(direction) {
-    window.stopAstroLoop();
-    let state = window.Q_STATE || { isLive: true, simTime: Date.now() };
-    if (state.isLive) { state.isLive = false; state.simTime = Date.now(); }
-    const btnStop = document.getElementById('q-play-stop');
-    const activeBtn = document.getElementById(direction < 0 ? 'q-play-rev' : 'q-play-fwd');
-    if (btnStop) btnStop.disabled = false; if (activeBtn) activeBtn.classList.add('active');
-    
-    astroPlayInterval = setInterval(() => { 
-        state.simTime += direction * 86400000 * 2; 
-        window.Q_STATE = state;
-        const liveBtn = document.getElementById('q-live-toggle');
-        if(liveBtn) { liveBtn.classList.remove('active'); liveBtn.innerText = "RESYNC"; }
-    }, 33); 
-};
-
-window.attachAstroScrubberEvents = function() {
-    const liveToggle = document.getElementById('q-live-toggle');
-    if (liveToggle) {
-        liveToggle.addEventListener('click', () => {
-            window.stopAstroLoop();
-            window.Q_STATE = { isLive: true, simTime: Date.now() };
-            liveToggle.classList.add('active'); 
-            liveToggle.innerText = "LIVE";
-        });
-    }
-    document.getElementById('q-play-rev')?.addEventListener('click', () => window.executeAstroLoop(-1));
-    document.getElementById('q-play-fwd')?.addEventListener('click', () => window.executeAstroLoop(1));
-    document.getElementById('q-play-stop')?.addEventListener('click', window.stopAstroLoop);
-};
-
-// DECOUPLED BOOT SEQUENCE
+// DECOUPLED BOOT SEQUENCE - Bound strictly to q-ui.js emission
 function bootAstrophysicalVector() {
     if(isBooted) return;
     const tlNode = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
@@ -355,12 +430,12 @@ function bootAstrophysicalVector() {
 
     isBooted = true;
     window.injectVectorData();
-    injectAstroScrubber();
     if(window.generateStars) window.generateStars('stars');
 }
 
 window.addEventListener('q-ui-mounted', bootAstrophysicalVector);
 
+// Fallback execution block if `q-ui-mounted` fired before this file initialized
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(() => {
         if(!isBooted && document.getElementById('q-ui-injected-flag')) bootAstrophysicalVector();
