@@ -9,7 +9,7 @@
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
-    <script src="astrophysical.js?v=27.0"></script>
+    <script src="astrophysical.js?v=28.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
@@ -31,7 +31,7 @@
         .radar-box, .opt-btn, .fmt-toggle { pointer-events: auto !important; position: relative; z-index: 100 !important; }
 
         /* SOLAR GLARE MASKING */
-        #stars { z-index: 1; opacity: 0.5; -webkit-mask-image: radial-gradient(circle at center, transparent 15%, black 60%); mask-image: radial-gradient(circle at center, transparent 15%, black 60%); }
+        #stars { z-index: 1; opacity: 0.8; -webkit-mask-image: radial-gradient(circle at center, transparent 8%, black 50%); mask-image: radial-gradient(circle at center, transparent 8%, black 50%); }
 
         .global-header {
             position: absolute; top: 4vh; left: 0; width: 100vw;
@@ -72,22 +72,22 @@
         #sys-sun { top: 50%; left: 50%; width: 6%; height: 6%; background: var(--gold); box-shadow: 0 0 40px var(--gold), 0 0 80px rgba(244, 208, 104, 0.5); z-index: 25; transition: transform 0.1s; }
         
         /* Solid Planets */
-        .sys-mercury { width: 1.5%; height: 1.5%; background: var(--silver); box-shadow: 0 0 10px var(--silver); z-index: 20; }
-        .sys-venus { width: 2.2%; height: 2.2%; background: var(--magenta-glow); box-shadow: 0 0 15px var(--magenta-glow); z-index: 20; }
+        .sys-mercury { width: 1.5%; height: 1.5%; background: #64748b; box-shadow: 0 0 10px #64748b; z-index: 20; }
+        .sys-venus { width: 2.2%; height: 2.2%; background: #ffeb73; box-shadow: 0 0 15px #ffeb73; z-index: 20; }
         
         #earth-system { position: absolute; width: 0; height: 0; z-index: 25; pointer-events: none; }
-        .sys-earth { width: 2.5vh; height: 2.5vh; background: var(--cyan-glow); box-shadow: 0 0 20px var(--cyan-glow); pointer-events: auto; }
-        .sys-moon { position: absolute; width: 0.8vh; height: 0.8vh; background: var(--silver); box-shadow: 0 0 5px var(--silver); pointer-events: auto; transform: translate(-50%, -50%); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .sys-earth { width: 2.5vh; height: 2.5vh; background: #0055ff; box-shadow: 0 0 20px #0055ff; pointer-events: auto; }
+        .sys-moon { position: absolute; width: 1.0vh; height: 1.0vh; background: #ffffff; box-shadow: 0 0 8px #ffffff; pointer-events: auto; transform: translate(-50%, -50%); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
 
-        .sys-mars { width: 1.8%; height: 1.8%; background: #ff4500; box-shadow: 0 0 12px #ff4500; z-index: 15; opacity: 0; transition: opacity 0.5s; }
-        .sys-jupiter { width: 4.5%; height: 4.5%; background: #ff9933; box-shadow: 0 0 20px #ff9933; z-index: 15; opacity: 0; transition: opacity 0.5s; }
-        .sys-saturn { width: 4.0%; height: 4.0%; background: #b829ff; box-shadow: 0 0 20px #b829ff; z-index: 15; opacity: 0; transition: opacity 0.5s; }
-        .saturn-rings { position: absolute; width: 200%; height: 20%; border-radius: 50%; border: 2px solid rgba(184, 41, 255, 0.8); transform: rotate(15deg); pointer-events: none; }
-        .sys-uranus { width: 2.8%; height: 2.8%; background: #00ffff; box-shadow: 0 0 15px #00ffff; z-index: 15; opacity: 0; transition: opacity 0.5s; }
-        .sys-neptune { width: 2.8%; height: 2.8%; background: #0000ff; box-shadow: 0 0 15px #0000ff; z-index: 15; opacity: 0; transition: opacity 0.5s; }
+        .sys-mars { width: 1.8%; height: 1.8%; background: #ff0000; box-shadow: 0 0 12px #ff0000; z-index: 15; opacity: 0; transition: opacity 0.5s; }
+        .sys-jupiter { width: 6.5%; height: 6.5%; background: #ff9933; box-shadow: 0 0 20px #ff9933; z-index: 15; opacity: 0; transition: opacity 0.5s; }
+        .sys-saturn { width: 5.5%; height: 5.5%; background: #ffff00; box-shadow: 0 0 20px #ffff00; z-index: 15; opacity: 0; transition: opacity 0.5s; }
+        .saturn-rings { position: absolute; width: 200%; height: 20%; border-radius: 50%; border: 2px solid rgba(255, 255, 0, 0.8); transform: rotate(15deg); pointer-events: none; }
+        .sys-uranus { width: 3.5%; height: 3.5%; background: #00ffff; box-shadow: 0 0 15px #00ffff; z-index: 15; opacity: 0; transition: opacity 0.5s; }
+        .sys-neptune { width: 3.5%; height: 3.5%; background: #0000ff; box-shadow: 0 0 15px #0000ff; z-index: 15; opacity: 0; transition: opacity 0.5s; }
 
-        /* Earth Orbital Nodes (Amber/Gold) */
-        .celestial-marker { position: absolute; color: var(--gold); font-family: 'Orbitron'; font-weight: 900; text-shadow: 0 0 10px var(--gold); z-index: 20; transform: translate(-50%, -50%); cursor: help; pointer-events: auto; }
+        /* Earth Orbital Nodes (Silver) */
+        .celestial-marker { position: absolute; color: var(--silver); font-family: 'Orbitron'; font-weight: 900; text-shadow: 0 0 10px var(--silver); z-index: 20; transform: translate(-50%, -50%); cursor: help; pointer-events: auto; }
         .marker-solstice { font-size: 1.0rem; }
         .marker-equinox { font-size: 1.0rem; }
         .marker-apsis { font-size: 0.75rem; }
@@ -106,6 +106,12 @@
         .macro-active .sys-mars, .macro-active .sys-jupiter, .macro-active .sys-saturn, .macro-active .sys-uranus, .macro-active .sys-neptune { opacity: 1; }
         .macro-active .sys-earth { width: 5vh; height: 5vh; }
         .macro-active #sys-sun { width: 15%; height: 15%; }
+        
+        .macro-active .sys-jupiter { width: 25%; height: 25%; }
+        .macro-active .sys-saturn { width: 22%; height: 22%; }
+        .macro-active .sys-uranus { width: 15%; height: 15%; }
+        .macro-active .sys-neptune { width: 15%; height: 15%; }
+        
         .macro-active .celestial-marker { opacity: 0; }
 
         /* SCRUBBER */
@@ -128,35 +134,35 @@
     <div class="solar-system-wrapper q-center-dial">
         
         <div class="extra-solar es-1" style="top: 8%; left: 88%;" onmouseover="showNeedleHUD('Alpha Centauri System (~4.37 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
-        <div class="extra-solar es-2" style="top: 85%; left: 15%;" onmouseover="showNeedleHUD('Barnard\\'s Star (~5.96 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
+        <div class="extra-solar es-2" style="top: 85%; left: 15%;" onmouseover="showNeedleHUD('Barnards Star (~5.96 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
         <div class="extra-solar es-3" style="top: 12%; left: 12%;" onmouseover="showNeedleHUD('Wolf 359 (~7.86 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
         <div class="extra-solar es-4" style="top: 80%; left: 90%;" onmouseover="showNeedleHUD('Lalande 21185 (~8.31 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
 
         <div class="solar-system-container" id="sys-container">
             
             <div class="orbit-ring orbit-earth" style="width: 50%; height: 50%;"></div>
-            <div class="orbit-ring" style="width: 76%; height: 76%;"></div> <div class="orbit-ring" style="width: 160%; height: 160%;"></div> <div class="orbit-ring" style="width: 280%; height: 280%;"></div> <div class="orbit-ring" style="width: 400%; height: 400%;"></div> <div class="orbit-ring" style="width: 520%; height: 520%;"></div> <div class="celestial-marker marker-solstice" id="node-south" onmouseover="showNeedleHUD('SOUTHERN SOLSTICE (0.000°)', 'var(--gold)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('ALPHA')">◓</div>
-            <div class="celestial-marker marker-equinox" id="node-eq1" onmouseover="showNeedleHUD('1ST EQUINOX (90.000°)', 'var(--gold)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('BETA')">◐</div>
-            <div class="celestial-marker marker-solstice" id="node-north" onmouseover="showNeedleHUD('NORTHERN SOLSTICE (180.000°)', 'var(--gold)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('GAMMA')">◒</div>
-            <div class="celestial-marker marker-equinox" id="node-eq2" onmouseover="showNeedleHUD('2ND EQUINOX (270.000°)', 'var(--gold)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('DELTA')">◑</div>
+            <div class="orbit-ring" style="width: 76%; height: 76%;"></div> <div class="orbit-ring" style="width: 160%; height: 160%;"></div> <div class="orbit-ring" style="width: 280%; height: 280%;"></div> <div class="orbit-ring" style="width: 400%; height: 400%;"></div> <div class="orbit-ring" style="width: 520%; height: 520%;"></div> <div class="celestial-marker marker-solstice" id="node-south" onmouseover="showNeedleHUD('SOUTHERN SOLSTICE (0.000°)', 'var(--silver)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('ALPHA')">◓</div>
+            <div class="celestial-marker marker-equinox" id="node-eq1" onmouseover="showNeedleHUD('1ST EQUINOX (90.000°)', 'var(--silver)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('BETA')">◐</div>
+            <div class="celestial-marker marker-solstice" id="node-north" onmouseover="showNeedleHUD('NORTHERN SOLSTICE (180.000°)', 'var(--silver)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('GAMMA')">◒</div>
+            <div class="celestial-marker marker-equinox" id="node-eq2" onmouseover="showNeedleHUD('2ND EQUINOX (270.000°)', 'var(--silver)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('DELTA')">◑</div>
             
-            <div class="celestial-marker marker-apsis" id="node-peri" onmouseover="showNeedleHUD('PERIHELION (14.00°): Minimum Spatial Distance.', 'var(--gold)')" onmouseout="hideNeedleHUD()">▲</div>
-            <div class="celestial-marker marker-apsis" id="node-aph" onmouseover="showNeedleHUD('APHELION (194.00°): Maximum Spatial Distance.', 'var(--gold)')" onmouseout="hideNeedleHUD()">▼</div>
+            <div class="celestial-marker marker-apsis" id="node-peri" onmouseover="showNeedleHUD('PERIHELION (14.00°): Minimum Spatial Distance.', 'var(--silver)')" onmouseout="hideNeedleHUD()">▲</div>
+            <div class="celestial-marker marker-apsis" id="node-aph" onmouseover="showNeedleHUD('APHELION (194.00°): Maximum Spatial Distance.', 'var(--silver)')" onmouseout="hideNeedleHUD()">▼</div>
 
             <div id="barycenter-crosshair" onmouseover="showNeedleHUD('SSB: SOLAR SYSTEM BARYCENTER', 'var(--starlight)')" onmouseout="hideNeedleHUD()"></div>
             <div class="celestial-body" id="sys-sun" onmouseover="showNeedleHUD('SOLAR MASS (GRAVITATIONAL WOBBLE)', 'var(--gold)')" onmouseout="hideNeedleHUD()"></div>
             
-            <div class="celestial-body sys-mercury" id="p-mercury" onmouseover="showNeedleHUD('MERCURY (τ = 88 Days)', 'var(--silver)')" onmouseout="hideNeedleHUD()"></div>
-            <div class="celestial-body sys-venus" id="p-venus" onmouseover="showNeedleHUD('VENUS (τ = 225 Days)', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()"></div>
+            <div class="celestial-body sys-mercury" id="p-mercury" onmouseover="showNeedleHUD('MERCURY (τ = 88 Days)', '#64748b')" onmouseout="hideNeedleHUD()"></div>
+            <div class="celestial-body sys-venus" id="p-venus" onmouseover="showNeedleHUD('VENUS (τ = 225 Days)', '#ffeb73')" onmouseout="hideNeedleHUD()"></div>
             
             <div id="earth-system">
-                <div class="celestial-body sys-earth" id="p-earth" onmouseover="showNeedleHUD('THE TRUE ELLIPSE: Earth', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()"></div>
-                <div class="celestial-body sys-moon" id="p-moon" onmouseover="showNeedleHUD('LUNA (Synodic Phase)', 'var(--silver)')" onmouseout="hideNeedleHUD()"></div>
+                <div class="celestial-body sys-earth" id="p-earth" onmouseover="showNeedleHUD('THE TRUE ELLIPSE: Earth', '#0055ff')" onmouseout="hideNeedleHUD()"></div>
+                <div class="celestial-body sys-moon" id="p-moon" onmouseover="showNeedleHUD('LUNA (Synodic Phase)', '#ffffff')" onmouseout="hideNeedleHUD()"></div>
             </div>
 
-            <div class="celestial-body sys-mars" id="p-mars" onmouseover="showNeedleHUD('MARS (τ = 687 Days)', '#ff4500')" onmouseout="hideNeedleHUD()"></div>
+            <div class="celestial-body sys-mars" id="p-mars" onmouseover="showNeedleHUD('MARS (τ = 687 Days)', '#ff0000')" onmouseout="hideNeedleHUD()"></div>
             <div class="celestial-body sys-jupiter" id="p-jupiter" onmouseover="showNeedleHUD('JUPITER: Primary Barycentric Influencer', '#ff9933')" onmouseout="hideNeedleHUD()"></div>
-            <div class="celestial-body sys-saturn" id="p-saturn" onmouseover="showNeedleHUD('SATURN: Secondary Barycentric Influencer', '#b829ff')" onmouseout="hideNeedleHUD()"><div class="saturn-rings"></div></div>
+            <div class="celestial-body sys-saturn" id="p-saturn" onmouseover="showNeedleHUD('SATURN: Secondary Barycentric Influencer', '#ffff00')" onmouseout="hideNeedleHUD()"><div class="saturn-rings"></div></div>
             <div class="celestial-body sys-uranus" id="p-uranus" onmouseover="showNeedleHUD('URANUS (τ = 84 Years)', '#00ffff')" onmouseout="hideNeedleHUD()"></div>
             <div class="celestial-body sys-neptune" id="p-neptune" onmouseover="showNeedleHUD('NEPTUNE (τ = 165 Years)', '#0000ff')" onmouseout="hideNeedleHUD()"></div>
 

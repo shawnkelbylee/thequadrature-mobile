@@ -1,6 +1,6 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VIII UI Engine. Top-Zero Clockwise Mapping & Logarithmic Macro.
+// STATUS: Phase IX UI Engine. True Epoch Kinematics & Jovian Scaling.
 
 let isBooted = false;
 let currentOptTarget = '';
