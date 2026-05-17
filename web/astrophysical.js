@@ -244,56 +244,9 @@ window.openAnchorModal = function(node) {
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
     
-    // --- DYNAMIC Q-DELTA DIAMOND & RING SHIFT ---
-    const diamondArm = document.getElementById('transit-diamond-arm');
-    if (diamondArm) diamondArm.style.transform = `rotate(${qData.meanArc}deg)`;
-    
-    let diamond = document.getElementById('q-delta-diamond');
-    let gearMid = document.getElementById('kepler-ring');
-    
     let radDist = (qData.trueArc - 14) * (Math.PI / 180);
     let velocityMult = 1 + 0.0334 * Math.cos(radDist);
     
-    // Interpolate color phase (1 = Perihelion/Red-Magenta, 0 = Aphelion/Blue-Cyan)
-    let phase = (Math.cos(radDist) + 1) / 2;
-    
-    let r = Math.round(0 + (255 - 0) * phase);
-    let g = Math.round(240 + (0 - 240) * phase);
-    let b = Math.round(255 + (60 - 255) * phase);
-    
-    let interpColor = `rgb(${r}, ${g}, ${b})`;
-    let interpDim = `rgba(${r}, ${g}, ${b}, 0.2)`;
-    
-    // Apply Dynamic Speed and Color to Ring
-    if (gearMid) {
-        gearMid.style.transform = `rotate(${qData.trueArc * 15}deg)`;
-        gearMid.style.setProperty('--dyn-phase-color', interpColor);
-        gearMid.style.setProperty('--dyn-phase-dim', interpDim);
-    }
-
-    // Apply Shift to Diamond
-    if (diamond) {
-        diamond.style.background = interpColor;
-        diamond.style.boxShadow = `0 0 15px ${interpColor}, inset 0 0 5px #fff`;
-
-        // Pulse diamond near Apsides
-        if (velocityMult > 1.015 || velocityMult < 0.985) {
-            diamond.style.animation = "diamond-pulse 0.8s infinite alternate";
-        } else {
-            diamond.style.animation = "none";
-            diamond.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
-        }
-    }
-    // ---------------------------------
-
-    const earthSurface = document.querySelector('.earth-surface');
-    if (earthSurface) {
-        const siderealDayMs = 86164090;
-        const dayProgress = (t % siderealDayMs) / siderealDayMs;
-        const bgPosition = 200 - (dayProgress * 200);
-        earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
-    }
-
     const modalTitle = document.getElementById('q-modal-title');
     if (modalTitle && modalTitle.innerText === 'DUAL-STATE TELEMETRY') {
         const telMean = document.getElementById('tel-mean');
