@@ -510,9 +510,17 @@ window.Q_OmniPlanner = {
             document.body.classList.remove('planner-quad-active');
         }
 
+        const labels = {
+            day: this.isLegacy ? "DAY" : "DEG",
+            sect: this.isLegacy ? "MONTH" : "SECT",
+            quad: this.isLegacy ? "QTR" : "QUAD",
+            cycle: this.isLegacy ? "YEAR" : "CYCL"
+        };
+
         ['day', 'sect', 'quad', 'cycle'].forEach(mode => {
             const btn = document.getElementById(`btn-view-${mode}`);
             if(btn) {
+                btn.innerText = labels[mode];
                 if(this.viewState === 'day' || this.viewState === 'hour') {
                     btn.classList.toggle('active', mode === 'day');
                 } else {
@@ -530,7 +538,7 @@ window.Q_OmniPlanner = {
 
         const fmtBtn = document.createElement('button'); 
         fmtBtn.className = 'back-btn'; 
-        fmtBtn.innerText = this.isLegacy ? "ORBITAL" : "LEGACY";
+        fmtBtn.innerText = this.isLegacy ? "BIOMETRIC" : "LEGACY";
         fmtBtn.onclick = () => this.toggleFormat(); 
 
         if (actionContainer) {
