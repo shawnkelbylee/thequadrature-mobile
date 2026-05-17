@@ -9,7 +9,7 @@
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
-    <script src="astrophysical.js?v=25.0"></script>
+    <script src="astrophysical.js?v=26.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
@@ -77,7 +77,7 @@
         
         #earth-system { position: absolute; width: 0; height: 0; z-index: 25; pointer-events: none; }
         .sys-earth { width: 2.5vh; height: 2.5vh; background: var(--cyan-glow); box-shadow: 0 0 20px var(--cyan-glow); pointer-events: auto; }
-        .sys-moon { position: absolute; width: 0.8vh; height: 0.8vh; background: var(--silver); box-shadow: 0 0 5px var(--silver); pointer-events: auto; transform: translate(-50%, -50%); }
+        .sys-moon { position: absolute; width: 0.8vh; height: 0.8vh; background: var(--silver); box-shadow: 0 0 5px var(--silver); pointer-events: auto; transform: translate(-50%, -50%); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
 
         .sys-mars { width: 1.8%; height: 1.8%; background: #ff4500; box-shadow: 0 0 12px #ff4500; z-index: 15; opacity: 0; transition: opacity 0.5s; }
         .sys-jupiter { width: 4.5%; height: 4.5%; background: #ff9933; box-shadow: 0 0 20px #ff9933; z-index: 15; opacity: 0; transition: opacity 0.5s; }
@@ -127,10 +127,10 @@
 
     <div class="solar-system-wrapper q-center-dial">
         
-        <div class="extra-solar es-1" style="top: 8%; left: 88%;" onmouseover="showNeedleHUD('VECTOR: Alpha Centauri System (~4.37 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
-        <div class="extra-solar es-2" style="top: 85%; left: 15%;" onmouseover="showNeedleHUD('VECTOR: Barnard\\'s Star (~5.96 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
-        <div class="extra-solar es-3" style="top: 12%; left: 12%;" onmouseover="showNeedleHUD('VECTOR: Wolf 359 (~7.86 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
-        <div class="extra-solar es-4" style="top: 80%; left: 90%;" onmouseover="showNeedleHUD('VECTOR: Lalande 21185 (~8.31 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
+        <div class="extra-solar es-1" style="top: 8%; left: 88%;" onmouseover="showNeedleHUD('Alpha Centauri System (~4.37 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
+        <div class="extra-solar es-2" style="top: 85%; left: 15%;" onmouseover="showNeedleHUD('Barnard\\'s Star (~5.96 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
+        <div class="extra-solar es-3" style="top: 12%; left: 12%;" onmouseover="showNeedleHUD('Wolf 359 (~7.86 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
+        <div class="extra-solar es-4" style="top: 80%; left: 90%;" onmouseover="showNeedleHUD('Lalande 21185 (~8.31 ly)', 'var(--starlight)')" onmouseout="hideNeedleHUD()">✦</div>
 
         <div class="solar-system-container" id="sys-container">
             

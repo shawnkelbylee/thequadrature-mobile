@@ -1,6 +1,6 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VII UI Engine. Top-Zero Clockwise Mapping & Logarithmic Macro.
+// STATUS: Phase VIII UI Engine. Lunar Macro Dilation.
 
 let isBooted = false;
 let currentOptTarget = '';
@@ -364,7 +364,7 @@ window.addEventListener('q-tick', (e) => {
         const ePos = p2c(ORBITS.EARTH, eDeg);
         elEarthSys.style.left = ePos.x + '%'; elEarthSys.style.top = ePos.y + '%';
         if (elMoon) {
-            const moonRad = 3.5; 
+            const moonRad = isMacroView ? 5.5 : 3.5; 
             const moonRadCalc = moonDeg * Math.PI / 180.0;
             elMoon.style.transform = `translate(calc(-50% + ${Math.sin(moonRadCalc) * moonRad}vh), calc(-50% - ${Math.cos(moonRadCalc) * moonRad}vh))`;
         }
