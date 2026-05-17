@@ -1,6 +1,6 @@
 // THE QUADRATURE: METAPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase V UI Engine. Predictive Modals & Planner Sync Injection.
+// STATUS: Phase VI UI Engine. Geometric Coupling & Legacy Formatting.
 
 window.Q_REGISTRY = {
     REL_DB: {
@@ -300,7 +300,7 @@ window.openNodeModal = function(eventObj) {
         pTime = window.ANCHOR_ALPHA_DYNAMIC + (pDays * window.MS_DAY);
     }
 
-    const formatted = window.formatLegacyDate(pTime);
+    const formatted = window.formatLegacyDate ? window.formatLegacyDate(pTime) : { dateStr: new Date(pTime).toLocaleDateString() };
     let nData = { quad: '--', sect: '--', day: '--' };
     if (window.getOrbitalData) {
         nData = window.getOrbitalData((pTime - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY);
@@ -343,15 +343,6 @@ window.openNodeModal = function(eventObj) {
     if (window.Q_ModalEngine) {
         window.Q_ModalEngine.render(eventObj.name.toUpperCase(), html, 'SAVE & CLOSE', saveOptions);
     }
-};
-
-window.openAnchorModal = function(nodeName) {
-    if (!window.Q_REGISTRY || !window.Q_REGISTRY.ANCHORS) return;
-    let anchorObj = window.Q_REGISTRY.ANCHORS.find(a => a.name.toUpperCase() === nodeName.toUpperCase());
-    if (!anchorObj) return;
-    
-    // Direct routing to the standard node modal parsing function
-    window.openNodeModal(anchorObj);
 };
 
 function renderNodes(renderedList, parentLayer, radius) {
@@ -418,7 +409,6 @@ function renderDynamicRing() {
         if (pArc < 0) pArc += 360;
         
         let oNode = document.createElement('div'); oNode.className = 'origin-node';
-        oNode.style.pointerEvents = "auto"; oNode.style.cursor = "help";
         let oAngle = (pArc - 90) * (Math.PI / 180); let oX = 50 + 27.5 * Math.cos(oAngle); let oY = 50 + 27.5 * Math.sin(oAngle);
         oNode.style.left = `${oX}%`; oNode.style.top = `${oY}%`; oNode.style.transform = `rotate(${pArc}deg)`;
         
@@ -447,10 +437,27 @@ function renderDynamicRing() {
         renderNodes(fannedOuter, nodeLayer, 42.5);
     }
     
-    if (activeAnchors) {
+    if (activeAnchors && window.Q_REGISTRY.ANCHORS) {
         let visibleAnchors = window.Q_REGISTRY.ANCHORS.filter(p => p.renderUI !== false);
-        let fannedAnchors = applyFanning(visibleAnchors);
-        renderNodes(fannedAnchors, nodeLayer, 35);
+        visibleAnchors.forEach(anchor => {
+            let node = document.createElement('div');
+            node.className = `event-node ${anchor.type}`;
+            node.dataset.coord = anchor.coord;
+            if(anchor.glyph) node.innerHTML = anchor.glyph;
+
+            let angle = (anchor.coord - 90) * (Math.PI / 180);
+            let x = 50 + 27.5 * Math.cos(angle);
+            let y = 50 + 27.5 * Math.sin(angle);
+            node.style.left = `${x}%`;
+            node.style.top = `${y}%`;
+
+            node.onclick = (e) => { e.stopPropagation(); window.openNodeModal(anchor); };
+            
+            node.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(anchor.name.toUpperCase(), 'var(--theme-main)'); };
+            node.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
+
+            nodeLayer.appendChild(node);
+        });
     }
 
     if (activeIntrospection && window.Q_REGISTRY.SOLAR_TERMS) {
@@ -459,7 +466,7 @@ function renderDynamicRing() {
             let angle = (term.start - 90) * (Math.PI / 180); 
             let x = 50 + 35 * Math.cos(angle); let y = 50 + 35 * Math.sin(angle);
             el.style.left = `${x}%`; el.style.top = `${y}%`; 
-            el.style.transform = `translate(-50%, -50%) rotate(45deg)`;
+            
             el.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(`${term.name.toUpperCase()} (JIÉQÌ)`, 'var(--copper)'); };
             el.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
             nodeLayer.appendChild(el);
@@ -471,6 +478,19 @@ function getNextEvent(currentArc, dbArray) {
     let next = dbArray.find(e => e.coord > currentArc);
     if(!next && dbArray.length > 0) next = dbArray[0]; 
     return next;
+}
+
+function getLegacyDateString(targetCoord, currentArc, currentTimeMs) {
+    if (!window.MS_DAY) window.MS_DAY = 86400000;
+    let degAhead = targetCoord - currentArc;
+    if (degAhead < 0) degAhead += 360;
+    let targetMs = currentTimeMs + (degAhead * (365.24219 / 360) * window.MS_DAY);
+    if (window.formatLegacyDate) {
+        return window.formatLegacyDate(targetMs).dateStr.substring(0,6);
+    }
+    const d = new Date(targetMs);
+    const mos = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    return `${mos[d.getUTCMonth()]} ${d.getUTCDate().toString().padStart(2,'0')}`;
 }
 
 window.openOptions = function(e, target) {
@@ -737,6 +757,8 @@ window.addEventListener('q-tick', (e) => {
         if (dist < 5.0) { node.classList.add('flare'); } else { node.classList.remove('flare'); }
     });
 
+    const activeTimeMs = isLive ? Date.now() : activeTime.getTime();
+
     let combinedRel = []; 
     activeFaiths.forEach(f => { 
         if(f === 'isl') combinedRel = combinedRel.concat(ISL_DB);
@@ -747,7 +769,12 @@ window.addEventListener('q-tick', (e) => {
     let nextRel = getNextEvent(trueArc, combinedRel);
     const relNextEl = document.getElementById('rel-next');
     if (relNextEl) {
-        relNextEl.innerText = nextRel ? `${nextRel.name.substring(0,8).toUpperCase()}.. (${nextRel.coord.toFixed(1)}°)` : "--";
+        if(nextRel) {
+            let dStr = getLegacyDateString(nextRel.coord, trueArc, activeTimeMs);
+            relNextEl.innerText = `${nextRel.name.substring(0,8).toUpperCase()}.. (${dStr})`;
+        } else {
+            relNextEl.innerText = "--";
+        }
     }
 
     const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
@@ -784,7 +811,12 @@ window.addEventListener('q-tick', (e) => {
     let nextCiv = getNextEvent(trueArc, globalCiv.concat(SYS_DB));
     const civNextEl = document.getElementById('civ-next');
     if (civNextEl) {
-        civNextEl.innerText = nextCiv ? `${nextCiv.name.substring(0,10).toUpperCase()}.. (${nextCiv.coord.toFixed(1)}°)` : "--";
+        if(nextCiv) {
+            let dStr = getLegacyDateString(nextCiv.coord, trueArc, activeTimeMs);
+            civNextEl.innerText = `${nextCiv.name.substring(0,10).toUpperCase()}.. (${dStr})`;
+        } else {
+            civNextEl.innerText = "--";
+        }
     }
 
     if (window.Q_REGISTRY.SOLAR_TERMS) {
