@@ -1,6 +1,6 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XLVIII. Restored Legacy Panels & Barycentric Engine integration.
+// STATUS: Phase XLIX. Restored Legacy Panels & Barycentric Engine integration.
 // REVISION: Dual-Targeting initialized via q-ui-mounted.
 
 let currentRadarStatus = 'STABLE';
@@ -65,7 +65,7 @@ window.injectVectorData = function() {
     if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'thermo'); }; optBL.style.color = 'var(--cyan-glow)'; }
     if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'civil'); }; optBR.style.color = 'var(--cyan-glow)'; }
 
-    // DUAL-ID Targeting: Binds successfully to legacy components OR Hollow Shell UI
+    // RESTORED LEGACY PANEL: ORBITAL POSITION
     const quadTL = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
     if (quadTL) {
         quadTL.innerHTML = `
@@ -82,6 +82,7 @@ window.injectVectorData = function() {
         `;
     }
 
+    // RESTORED LEGACY PANEL: TIME DRIFT / Q-DELTA
     const quadTR = document.getElementById('quad-tr') || document.getElementById('quad-COM');
     if (quadTR) {
         quadTR.innerHTML = `
@@ -95,6 +96,7 @@ window.injectVectorData = function() {
         `;
     }
 
+    // RESTORED LEGACY PANEL: THERMODYNAMICS
     const quadBL = document.getElementById('quad-bl') || document.getElementById('quad-ENV');
     if (quadBL) {
         quadBL.innerHTML = `
@@ -113,6 +115,7 @@ window.injectVectorData = function() {
         `;
     }
 
+    // RESTORED LEGACY PANEL: CIVIL TIME LAG
     const quadBR = document.getElementById('quad-br') || document.getElementById('quad-MEC');
     if (quadBR) {
         quadBR.innerHTML = `
@@ -133,21 +136,6 @@ window.injectVectorData = function() {
             </div>
         `;
     }
-};
-
-window.showNeedleHUD = function(text, color) { 
-    const hud = document.getElementById('needle-hud'); 
-    if (hud) {
-        hud.innerText = text; 
-        hud.style.borderColor = color; 
-        hud.style.color = color; 
-        hud.style.opacity = '1'; 
-    }
-};
-
-window.hideNeedleHUD = function() { 
-    const hud = document.getElementById('needle-hud');
-    if (hud) hud.style.opacity = '0'; 
 };
 
 window.openOptions = function(e, target) {
@@ -245,102 +233,10 @@ window.saveOptions = function() {
     if (window.Q_ModalEngine) window.Q_ModalEngine.close();
 };
 
-window.openAnchorModal = function(node) {
-    if (!window.Q_REGISTRY || !window.Q_REGISTRY.ANCHORS) return;
-    let anchorObj = window.Q_REGISTRY.ANCHORS.find(a => a.name.toUpperCase().includes(node));
-    if (!anchorObj) return;
-
-    let aName = anchorObj.name.toUpperCase();
-    let aEvent = anchorObj.event;
-    let aDesc = anchorObj.desc || "Seasonal inflection point.";
-    let aDegree = anchorObj.coord.toFixed(3) + '°';
-    
-    let aTime = window.ANCHOR_ALPHA_DYNAMIC || Date.now();
-    if (node !== 'ALPHA' && window.ANCHOR_ALPHA_DYNAMIC && window.MS_DAY) {
-        const currentDays = (Date.now() - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-        const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
-        const targetDays = cycleBaseDays + (anchorObj.coord / (360 / 365.24219));
-        aTime = window.ANCHOR_ALPHA_DYNAMIC + (targetDays * window.MS_DAY);
-    }
-    
-    let formatted = { dateStr: '--', timeStr: '--' };
-    if (window.formatLegacyDate) formatted = window.formatLegacyDate(aTime);
-    
-    let durHours = ((anchorObj.duration || 86400000) / 3600000).toFixed(4);
-
-    const html = `
-        <div style="font-family:'Orbitron'; color:var(--cyan-glow); font-size:0.8rem; margin-bottom:5px;">${aEvent}</div>
-        <div style="font-size:0.6rem; color:var(--steel); border-bottom:1px solid var(--cyan-glow); padding-bottom:10px; margin-bottom:10px;">${aDesc}<br><br><span style="color:var(--cyan-glow);">SETTLEMENT GEAR DURATION: ${durHours} HOURS</span></div>
-        <div class="data-grid" style="border-top:none; padding-top:0;">
-            <div class="data-col"><span class="data-lbl">Q COORDINATE</span><span class="data-val data-val-cy">Q${node==='ALPHA'?1:node==='BETA'?2:node==='GAMMA'?3:4} S1 DAY 1</span></div>
-            <div class="data-col"><span class="data-lbl">TRUE ELLIPSE</span><span class="data-val data-val-cy">${aDegree}</span></div>
-            <div class="data-col"><span class="data-lbl">LEGACY DATE</span><span class="data-val">${formatted.dateStr}</span></div>
-            <div class="data-col"><span class="data-lbl">LEGACY TIME</span><span class="data-val">${formatted.timeStr}</span></div>
-        </div>
-    `;
-    if (window.Q_ModalEngine) window.Q_ModalEngine.render('SEASONAL ANCHOR PROTOCOL', html, 'CLOSE PROTOCOL');
-};
-
 window.addEventListener('q-tick', (e) => {
     const { t, isLive, activeTime, daysElapsed, qData, lagDays, legacyDateStr, legacyTimeStr, activePostulate } = e.detail;
-    
-    // --- DYNAMIC Q-DELTA DIAMOND & RING SHIFT ---
-    const diamondArm = document.getElementById('transit-diamond-arm');
-    if (diamondArm) diamondArm.style.transform = `rotate(${qData.meanArc}deg)`;
-    
-    let diamond = document.getElementById('q-delta-diamond');
-    let gearMid = document.getElementById('kepler-ring');
-    
-    let radDist = (qData.trueArc - 14) * (Math.PI / 180);
-    let velocityMult = 1 + 0.0334 * Math.cos(radDist);
-    
-    let phase = (Math.cos(radDist) + 1) / 2;
-    
-    let r = Math.round(0 + (255 - 0) * phase);
-    let g = Math.round(240 + (0 - 240) * phase);
-    let b = Math.round(255 + (60 - 255) * phase);
-    
-    let interpColor = `rgb(${r}, ${g}, ${b})`;
-    let interpDim = `rgba(${r}, ${g}, ${b}, 0.2)`;
-    
-    if (gearMid) {
-        gearMid.style.transform = `rotate(${qData.trueArc * 15}deg)`;
-        gearMid.style.setProperty('--dyn-phase-color', interpColor);
-        gearMid.style.setProperty('--dyn-phase-dim', interpDim);
-    }
 
-    if (diamond) {
-        diamond.style.background = interpColor;
-        diamond.style.boxShadow = `0 0 15px ${interpColor}, inset 0 0 5px #fff`;
-
-        if (velocityMult > 1.015 || velocityMult < 0.985) {
-            diamond.style.animation = "diamond-pulse 0.8s infinite alternate";
-        } else {
-            diamond.style.animation = "none";
-            diamond.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
-        }
-    }
-
-    const earthSurface = document.querySelector('.earth-surface');
-    if (earthSurface) {
-        const siderealDayMs = 86164090;
-        const dayProgress = (t % siderealDayMs) / siderealDayMs;
-        const bgPosition = 200 - (dayProgress * 200);
-        earthSurface.style.backgroundPosition = `${bgPosition}% 0`;
-    }
-
-    const modalTitle = document.getElementById('q-modal-title');
-    if (modalTitle && modalTitle.innerText === 'DUAL-STATE TELEMETRY') {
-        const telMean = document.getElementById('tel-mean');
-        if (telMean) {
-            telMean.innerText = qData.meanArc.toFixed(4) + "°";
-            const telTrue = document.getElementById('tel-true');
-            if (telTrue) telTrue.innerText = qData.trueArc.toFixed(4) + "°";
-            const telDelta = document.getElementById('tel-delta');
-            if (telDelta) telDelta.innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
-        }
-    }
-
+    // --- RESTORED LEGACY PANEL LOGIC ---
     let anchorName = "SOUTHERN SOLSTICE";
     let progressToAnchor = 0;
     let driftDeg = 0;
@@ -383,6 +279,9 @@ window.addEventListener('q-tick', (e) => {
     let symLoss = Math.abs(qData.delta) / 180 * 100; 
     let symLossEl = document.getElementById('sym-loss');
     if (symLossEl) symLossEl.innerText = symLoss.toFixed(2) + "%";
+
+    let radDist = (qData.trueArc - 14) * (Math.PI / 180);
+    let velocityMult = 1 + 0.0334 * Math.cos(radDist);
 
     const waveEl = document.getElementById('resp-wave');
     const phaseTextEl = document.getElementById('resp-phase-text');
