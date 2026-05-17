@@ -1,6 +1,6 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VI. Dynamic HUD Telemetry & Macro Kinematics.
+// STATUS: Phase VII UI Engine. Top-Zero Clockwise Mapping & Logarithmic Macro.
 
 let isBooted = false;
 let currentOptTarget = '';
@@ -21,10 +21,10 @@ const ORBITS = {
     VENUS: 36.1,
     EARTH: 50.0,
     MARS: 76.0,
-    JUPITER: 260.0,
-    SATURN: 476.0,
-    URANUS: 950.0,
-    NEPTUNE: 1500.0
+    JUPITER: 160.0,
+    SATURN: 280.0,
+    URANUS: 400.0,
+    NEPTUNE: 520.0
 };
 
 // Orbital periods in Earth days
@@ -222,7 +222,12 @@ function injectAstroScrubber() {
 
     document.getElementById('btn-ast-live').addEventListener('click', () => {
         if(astroScrubInterval) clearInterval(astroScrubInterval);
-        if(window.setSimState) window.setSimState({ isLive: true, simTime: Date.now() });
+        
+        let payload = JSON.stringify({ isLive: true, simTime: Date.now(), scrubSpeed: 0 });
+        localStorage.setItem('Q_MASTER_CLOCK', payload);
+        window.dispatchEvent(new StorageEvent('storage', { key: 'Q_MASTER_CLOCK', newValue: payload }));
+        if(window.Q_STATE) { window.Q_STATE.isLive = true; window.Q_STATE.simTime = Date.now(); }
+        
         document.getElementById('btn-ast-live').classList.add('active');
     });
 
@@ -234,12 +239,17 @@ function injectAstroScrubber() {
     const runSim = (direction) => {
         if(astroScrubInterval) clearInterval(astroScrubInterval);
         document.getElementById('btn-ast-live').classList.remove('active');
-        let state = window.getSimState ? window.getSimState() : { simTime: Date.now() };
+        let state = window.getSimState ? window.getSimState() : { isLive: false, simTime: Date.now() };
         if(state.isLive) { state.isLive = false; state.simTime = Date.now(); }
         
         astroScrubInterval = setInterval(() => {
-            state.simTime += direction * 86400000; // 1 day per tick
-            if(window.setSimState) window.setSimState(state);
+            state.simTime += direction * 86400000; 
+            
+            let payload = JSON.stringify(state);
+            localStorage.setItem('Q_MASTER_CLOCK', payload);
+            window.dispatchEvent(new StorageEvent('storage', { key: 'Q_MASTER_CLOCK', newValue: payload }));
+            if(window.Q_STATE) { window.Q_STATE.isLive = false; window.Q_STATE.simTime = state.simTime; }
+            
         }, 33);
     };
 
@@ -253,9 +263,13 @@ function injectAstroScrubber() {
     });
 }
 
+// Top=0° Clockwise Progression Algorithm
 function p2c(radiusPct, angleDeg) {
-    const rad = (angleDeg - 90) * Math.PI / 180.0;
-    return { x: 50 + (radiusPct / 2 * Math.cos(rad)), y: 50 + (radiusPct / 2 * Math.sin(rad)) };
+    const rad = angleDeg * Math.PI / 180.0;
+    return { 
+        x: 50 + (radiusPct / 2 * Math.sin(rad)), 
+        y: 50 - (radiusPct / 2 * Math.cos(rad)) 
+    };
 }
 
 window.addEventListener('q-tick', (e) => {
@@ -303,8 +317,8 @@ window.addEventListener('q-tick', (e) => {
         else p3_bl.innerText = "NOMINAL TRANSIT";
     } else if (p1_bl) {
         p1_bl.innerText = (baseSpeedKmS * velocityMult).toFixed(2) + " KM/S";
-        p2_bl.innerText = "-5.24 KM/S"; // Approx avg delta to Venus (35.02)
-        p3_bl.innerText = "+5.71 KM/S"; // Approx avg delta to Mars (24.07)
+        p2_bl.innerText = "-5.24 KM/S"; 
+        p3_bl.innerText = "+5.71 KM/S"; 
     }
 
     const p1_br = document.getElementById('eq-p1');
@@ -316,7 +330,7 @@ window.addEventListener('q-tick', (e) => {
         p2_br.innerText = qData.trueArc.toFixed(4) + "°";
         p3_br.innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
     } else if (p1_br) {
-        let eotMins = qData.delta * 4; // Approx 4 mins per degree
+        let eotMins = qData.delta * 4; 
         let sign = eotMins > 0 ? "+" : "";
         p1_br.innerText = `12:00 ${sign}${eotMins.toFixed(1)}m`;
         p2_br.innerText = "12:00:00";
@@ -332,7 +346,7 @@ window.addEventListener('q-tick', (e) => {
     const uDeg = ((daysElapsed % PERIODS.URANUS) / PERIODS.URANUS) * 360;
     const nDeg = ((daysElapsed % PERIODS.NEPTUNE) / PERIODS.NEPTUNE) * 360;
     
-    // Moon orbits Earth (Synodic)
+    // Moon orbits Earth
     const moonDeg = (lunarPhase * 360);
 
     const elEarthSys = document.getElementById('earth-system');
@@ -350,9 +364,9 @@ window.addEventListener('q-tick', (e) => {
         const ePos = p2c(ORBITS.EARTH, eDeg);
         elEarthSys.style.left = ePos.x + '%'; elEarthSys.style.top = ePos.y + '%';
         if (elMoon) {
-            // Nested relative translation
             const moonRad = 3.5; 
-            elMoon.style.transform = `translate(calc(-50% + ${Math.cos((moonDeg - 90) * Math.PI/180) * moonRad}vh), calc(-50% + ${Math.sin((moonDeg - 90) * Math.PI/180) * moonRad}vh))`;
+            const moonRadCalc = moonDeg * Math.PI / 180.0;
+            elMoon.style.transform = `translate(calc(-50% + ${Math.sin(moonRadCalc) * moonRad}vh), calc(-50% - ${Math.cos(moonRadCalc) * moonRad}vh))`;
         }
     }
     if (elMerc) { const pos = p2c(ORBITS.MERCURY, mDeg); elMerc.style.left = pos.x + '%'; elMerc.style.top = pos.y + '%'; }
@@ -366,12 +380,23 @@ window.addEventListener('q-tick', (e) => {
     // Fixed Nodes on Earth Orbit
     const nodePeri = document.getElementById('node-peri');
     const nodeAph = document.getElementById('node-aph');
+    const nodeSouth = document.getElementById('node-south');
+    const nodeEq1 = document.getElementById('node-eq1');
+    const nodeNorth = document.getElementById('node-north');
+    const nodeEq2 = document.getElementById('node-eq2');
+
+    if (nodeSouth) { const pos = p2c(ORBITS.EARTH, 0); nodeSouth.style.left = pos.x + '%'; nodeSouth.style.top = pos.y + '%'; }
+    if (nodeEq1) { const pos = p2c(ORBITS.EARTH, 90); nodeEq1.style.left = pos.x + '%'; nodeEq1.style.top = pos.y + '%'; }
+    if (nodeNorth) { const pos = p2c(ORBITS.EARTH, 180); nodeNorth.style.left = pos.x + '%'; nodeNorth.style.top = pos.y + '%'; }
+    if (nodeEq2) { const pos = p2c(ORBITS.EARTH, 270); nodeEq2.style.left = pos.x + '%'; nodeEq2.style.top = pos.y + '%'; }
+
     if (nodePeri) { const pos = p2c(ORBITS.EARTH, 14); nodePeri.style.left = pos.x + '%'; nodePeri.style.top = pos.y + '%'; }
     if (nodeAph) { const pos = p2c(ORBITS.EARTH, 194); nodeAph.style.left = pos.x + '%'; nodeAph.style.top = pos.y + '%'; }
 
     // --- BARYCENTRIC WOBBLE ---
-    const jX = Math.cos((jDeg - 90) * Math.PI / 180); const jY = Math.sin((jDeg - 90) * Math.PI / 180);
-    const sX = Math.cos((sDeg - 90) * Math.PI / 180) * 0.3; const sY = Math.sin((sDeg - 90) * Math.PI / 180) * 0.3;
+    // Inverted to match the new 12-o'clock clockwise orientation
+    const jX = Math.sin(jDeg * Math.PI / 180); const jY = -Math.cos(jDeg * Math.PI / 180);
+    const sX = Math.sin(sDeg * Math.PI / 180) * 0.3; const sY = -Math.cos(sDeg * Math.PI / 180) * 0.3;
 
     const wobX = (jX + sX); const wobY = (jY + sY);
     const wobbleScale = isMacroView ? 0.3 : 1.5; 
