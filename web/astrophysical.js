@@ -1,20 +1,30 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase V UI Engine. Barycentric Solar System Model & Kinematic Scrubber.
+// STATUS: Phase VI. Dynamic HUD Telemetry & Macro Kinematics.
 
 let isBooted = false;
 let currentOptTarget = '';
 let isMacroView = false;
 let astroScrubInterval = null;
 
-// Orbital parameters relative to dial size percentages
+// Local User Preferences for Panel Rendering
+let panelPrefs = {
+    tl: 'SYNODIC',   // SYNODIC | APSIDAL
+    tr: 'MASS',      // MASS | MOMENTUM
+    bl: 'KINETIC',   // KINETIC | FRICTION
+    br: 'TRUE_MEAN'  // TRUE_MEAN | CHRONO
+};
+
+// Logarithmic approximation of orbital radii (percentages relative to container)
 const ORBITS = {
-    MERCURY: 10,
-    VENUS: 18,
-    EARTH: 27,
-    MOON: 3.5,
-    JUPITER: 70,
-    SATURN: 130
+    MERCURY: 19.3,
+    VENUS: 36.1,
+    EARTH: 50.0,
+    MARS: 76.0,
+    JUPITER: 260.0,
+    SATURN: 476.0,
+    URANUS: 950.0,
+    NEPTUNE: 1500.0
 };
 
 // Orbital periods in Earth days
@@ -22,9 +32,11 @@ const PERIODS = {
     MERCURY: 87.97,
     VENUS: 224.70,
     EARTH: 365.24219,
-    MOON: 29.53,
+    MARS: 686.98,
     JUPITER: 4332.59,
-    SATURN: 10759.22
+    SATURN: 10759.22,
+    URANUS: 30688.5,
+    NEPTUNE: 60182.0
 };
 
 window.injectVectorData = function() {
@@ -33,66 +45,96 @@ window.injectVectorData = function() {
     const optBL = document.getElementById('opt-bl') || document.querySelectorAll('.opt-oval')[2];
     const optBR = document.getElementById('opt-br') || document.querySelectorAll('.opt-oval')[3];
 
-    if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'lunar'); }; optTL.style.color = 'var(--cyan-glow)'; }
-    if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'bary'); }; optTR.style.color = 'var(--cyan-glow)'; }
-    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'velocity'); }; optBL.style.color = 'var(--cyan-glow)'; }
-    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'equation'); }; optBR.style.color = 'var(--cyan-glow)'; }
+    if (optTL) { optTL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'tl'); }; optTL.style.color = 'var(--cyan-glow)'; }
+    if (optTR) { optTR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'tr'); }; optTR.style.color = 'var(--cyan-glow)'; }
+    if (optBL) { optBL.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'bl'); }; optBL.style.color = 'var(--cyan-glow)'; }
+    if (optBR) { optBR.onclick = (e) => { e.stopPropagation(); window.openOptions(e, 'br'); }; optBR.style.color = 'var(--cyan-glow)'; }
 
     const quadTL = document.getElementById('quad-tl') || document.getElementById('quad-BIO');
     if (quadTL) {
-        quadTL.innerHTML = `
-            <div class="panel-data-wrapper">
-                <div class="v-head">LUNAR KINEMATICS</div>
-                <div class="t-row"><span class="w-lbl">SYNODIC PHASE:</span> <span class="val-sm" id="lunar-phase-text">--</span></div>
-                <div class="t-row"><span class="w-lbl">ILLUMINATION:</span> <span class="val-sm" id="lunar-illum">--%</span></div>
-                <div class="t-row"><span class="w-lbl">SYNODIC DAY:</span> <span class="val-sm" id="lunar-day">-- / 29.5</span></div>
-                <div style="width:100%; height:3px; background:#000; margin-top:2px; border:1px solid var(--core-dim);">
-                    <div id="lunar-bar" style="height:100%; width:0%; background:var(--silver); box-shadow:0 0 8px var(--silver); transition: width 0.3s;"></div>
-                </div>
-            </div>
-        `;
+        if (panelPrefs.tl === 'SYNODIC') {
+            quadTL.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">LUNAR KINEMATICS</div>
+                    <div class="t-row"><span class="w-lbl">SYNODIC PHASE:</span> <span class="val-sm" id="lunar-p1">--</span></div>
+                    <div class="t-row"><span class="w-lbl">ILLUMINATION:</span> <span class="val-sm" id="lunar-p2">--%</span></div>
+                    <div class="t-row"><span class="w-lbl">SYNODIC DAY:</span> <span class="val-sm" id="lunar-p3">-- / 29.5</span></div>
+                </div>`;
+        } else {
+            quadTL.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">LUNAR APSIDES</div>
+                    <div class="t-row"><span class="w-lbl">ORBITAL PROXIMITY:</span> <span class="val-sm" id="lunar-p1">--</span></div>
+                    <div class="t-row"><span class="w-lbl">GRAVITATIONAL LOAD:</span> <span class="val-sm" id="lunar-p2">--x</span></div>
+                    <div class="t-row"><span class="w-lbl">LUNAR Q-DELTA:</span> <span class="val-sm" id="lunar-p3">--°</span></div>
+                </div>`;
+        }
     }
 
     const quadTR = document.getElementById('quad-tr') || document.getElementById('quad-COM');
     if (quadTR) {
-        quadTR.innerHTML = `
-            <div class="panel-data-wrapper">
-                <div class="v-head">BARYCENTRIC TRACKING</div>
-                <div class="t-row"><span class="w-lbl">SYSTEM MASS CENTER:</span> <span class="val-sm">SOLAR SYSTEM BARYCENTER</span></div>
-                <div class="t-row"><span class="w-lbl">PRIMARY INFLUENCE:</span> <span class="val-sm" style="color:#ff9933;">JUPITER (J1)</span></div>
-                <div class="t-row"><span class="w-lbl">SOLAR OFFSET (WOBBLE):</span> <span class="val-sm" id="solar-wobble-val">-- R☉</span></div>
-            </div>
-        `;
+        if (panelPrefs.tr === 'MASS') {
+            quadTR.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">BARYCENTRIC TRACKING</div>
+                    <div class="t-row"><span class="w-lbl">PRIMARY INFLUENCER:</span> <span class="val-sm" style="color:#ff9933;">JUPITER</span></div>
+                    <div class="t-row"><span class="w-lbl">SOLAR WOBBLE:</span> <span class="val-sm" id="bary-p2">-- R☉</span></div>
+                    <div class="t-row"><span class="w-lbl">BARYCENTER STATE:</span> <span class="val-sm" id="bary-p3">--</span></div>
+                </div>`;
+        } else {
+            quadTR.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">ANGULAR MOMENTUM</div>
+                    <div class="t-row"><span class="w-lbl">SYSTEM MOMENTUM:</span> <span class="val-sm" id="bary-p1">--</span></div>
+                    <div class="t-row"><span class="w-lbl">JOVIAN DELTA:</span> <span class="val-sm" id="bary-p2">--°</span></div>
+                    <div class="t-row"><span class="w-lbl">SATURNIAN DELTA:</span> <span class="val-sm" id="bary-p3">--°</span></div>
+                </div>`;
+        }
     }
 
     const quadBL = document.getElementById('quad-bl') || document.getElementById('quad-ENV');
     if (quadBL) {
-        quadBL.innerHTML = `
-            <div class="panel-data-wrapper">
-                <div class="v-head">PLANETARY VELOCITY</div>
-                <div class="t-row"><span class="w-lbl">KEPLERIAN MULTIPLIER:</span> <span class="val-sm" id="vel-mult">--x</span></div>
-                <div class="t-row"><span class="w-lbl">APSIDAL PROXIMITY:</span> <span class="val-sm" id="vel-apsis">--</span></div>
-                <div class="val-display" style="padding:4px 8px; margin-top:4px; text-align:center;">
-                    <div class="w-lbl" style="margin-bottom:2px;">CURRENT ORBITAL SPEED</div>
-                    <div id="vel-speed" style="font-size:0.8rem; color:var(--magenta-glow); font-family:'Orbitron'; font-weight:900; text-shadow:0 0 8px var(--magenta-dim);">-- KM/S</div>
-                </div>
-            </div>
-        `;
+        if (panelPrefs.bl === 'KINETIC') {
+            quadBL.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">PLANETARY VELOCITY</div>
+                    <div class="t-row"><span class="w-lbl">ORBITAL SPEED:</span> <span class="val-sm" id="vel-p1">-- KM/S</span></div>
+                    <div class="t-row"><span class="w-lbl">KEPLERIAN MULTIPLIER:</span> <span class="val-sm" id="vel-p2">--x</span></div>
+                    <div class="t-row"><span class="w-lbl">APSIDAL PROXIMITY:</span> <span class="val-sm" id="vel-p3" style="color:var(--magenta-glow);">--</span></div>
+                </div>`;
+        } else {
+            quadBL.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">SYSTEMIC FRICTION</div>
+                    <div class="t-row"><span class="w-lbl">ORBITAL SPEED:</span> <span class="val-sm" id="vel-p1">-- KM/S</span></div>
+                    <div class="t-row"><span class="w-lbl">VENUS VELOCITY DELTA:</span> <span class="val-sm" id="vel-p2">-- KM/S</span></div>
+                    <div class="t-row"><span class="w-lbl">MARS VELOCITY DELTA:</span> <span class="val-sm" id="vel-p3">-- KM/S</span></div>
+                </div>`;
+        }
     }
 
     const quadBR = document.getElementById('quad-br') || document.getElementById('quad-MEC');
     if (quadBR) {
-        quadBR.innerHTML = `
-            <div class="panel-data-wrapper">
-                <div class="v-head">EQUATION OF TIME</div>
-                <div class="t-row"><span class="w-lbl">MEAN ANOMALY (CIVIL):</span> <span class="val-sm" id="eq-mean">--°</span></div>
-                <div class="t-row"><span class="w-lbl">TRUE ANOMALY (PHYSICS):</span> <span class="val-sm" id="eq-true">--°</span></div>
-                <div class="val-display" style="padding:4px 8px; margin-top:4px; text-align:center;">
-                    <div class="w-lbl" style="margin-bottom:2px;">Q-DELTA VARIANCE</div>
-                    <div id="eq-delta" style="font-size:0.8rem; color:var(--cyan-glow); font-family:'Orbitron'; font-weight:900; text-shadow:0 0 8px var(--cyan-dim);">--°</div>
-                </div>
-            </div>
-        `;
+        if (panelPrefs.br === 'TRUE_MEAN') {
+            quadBR.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">EQUATION OF TIME</div>
+                    <div class="t-row"><span class="w-lbl">MEAN ANOMALY (CIVIL):</span> <span class="val-sm" id="eq-p1">--°</span></div>
+                    <div class="t-row"><span class="w-lbl">TRUE ANOMALY (PHYSICS):</span> <span class="val-sm" id="eq-p2">--°</span></div>
+                    <div class="val-display" style="padding:4px 8px; margin-top:4px;">
+                        <div class="w-lbl" style="margin-bottom:2px;">KINEMATIC DRIFT (Q-DELTA)</div>
+                        <div id="eq-p3" style="font-size:0.8rem; color:var(--cyan-glow); font-family:'Orbitron'; font-weight:900; text-shadow:0 0 8px var(--cyan-dim);">--°</div>
+                    </div>
+                </div>`;
+        } else {
+            quadBR.innerHTML = `
+                <div class="panel-data-wrapper">
+                    <div class="v-head">CHRONO DISTORTION</div>
+                    <div class="t-row"><span class="w-lbl">APPARENT SOLAR NOON:</span> <span class="val-sm" id="eq-p1">--</span></div>
+                    <div class="t-row"><span class="w-lbl">MEAN SOLAR NOON:</span> <span class="val-sm" id="eq-p2">12:00:00</span></div>
+                    <div class="t-row"><span class="w-lbl">THERMODYNAMIC LAG:</span> <span class="val-sm" id="eq-p3" style="color:var(--gold);">ACTIVE</span></div>
+                </div>`;
+        }
     }
 };
 
@@ -113,13 +155,54 @@ window.hideNeedleHUD = function() {
 
 window.openOptions = function(e, target) {
     if(e) e.stopPropagation();
-    if(window.Q_LOG) window.Q_LOG('INFO', 'ASTRO', `Settings trigger: ${target}`);
-    // Modal implementation deferred to standard Q_ModalEngine parameters
+    currentOptTarget = target;
+    let title = ""; let html = "";
+
+    if(target === 'tl') {
+        title = "LUNAR KINEMATICS";
+        html = `
+            <select id="opt-select" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; width: 100%;">
+                <option value="SYNODIC" ${panelPrefs.tl==='SYNODIC'?'selected':''}>SYNODIC STANDARD (PHASE)</option>
+                <option value="APSIDAL" ${panelPrefs.tl==='APSIDAL'?'selected':''}>APSIDAL FOCUS (PROXIMITY)</option>
+            </select>`;
+    } else if (target === 'tr') {
+        title = "BARYCENTRIC TRACKING";
+        html = `
+            <select id="opt-select" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; width: 100%;">
+                <option value="MASS" ${panelPrefs.tr==='MASS'?'selected':''}>MASS INFLUENCE (WOBBLE)</option>
+                <option value="MOMENTUM" ${panelPrefs.tr==='MOMENTUM'?'selected':''}>ANGULAR MOMENTUM (DELTA)</option>
+            </select>`;
+    } else if (target === 'bl') {
+        title = "PLANETARY VELOCITY";
+        html = `
+            <select id="opt-select" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; width: 100%;">
+                <option value="KINETIC" ${panelPrefs.bl==='KINETIC'?'selected':''}>KINETIC ACCELERATION</option>
+                <option value="FRICTION" ${panelPrefs.bl==='FRICTION'?'selected':''}>RELATIVE SYSTEMIC FRICTION</option>
+            </select>`;
+    } else if (target === 'br') {
+        title = "EQUATION OF TIME";
+        html = `
+            <select id="opt-select" class="modal-input" style="background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: #fff; padding: 10px; font-family: 'JetBrains Mono'; font-size: 0.8rem; border-radius: 4px; outline: none; width: 100%;">
+                <option value="TRUE_MEAN" ${panelPrefs.br==='TRUE_MEAN'?'selected':''}>TRUE VS. MEAN (Q-DELTA)</option>
+                <option value="CHRONO" ${panelPrefs.br==='CHRONO'?'selected':''}>CHRONOLOGICAL DISTORTION</option>
+            </select>`;
+    }
+
+    if (window.Q_ModalEngine) window.Q_ModalEngine.render(title, html, 'APPLY KINEMATICS', window.saveOptions);
+};
+
+window.saveOptions = function() {
+    const sel = document.getElementById('opt-select');
+    if (sel && currentOptTarget) {
+        panelPrefs[currentOptTarget] = sel.value;
+        window.injectVectorData();
+    }
+    if (window.Q_ModalEngine) window.Q_ModalEngine.close();
 };
 
 window.openAnchorModal = function(node) {
     if(window.Q_LOG) window.Q_LOG('INFO', 'ASTRO', `Anchor inspected: ${node}`);
-    // Defer to q-ui standard anchor modal
+    // Defers to q-ui standard anchor modal payload
 };
 
 function injectAstroScrubber() {
@@ -127,7 +210,7 @@ function injectAstroScrubber() {
     container.className = 'q-astro-controls';
     container.innerHTML = `
         <div class="astro-scrub-row">
-            <button class="btn-astro" id="btn-ast-live">LIVE KINEMATICS</button>
+            <button class="btn-astro active" id="btn-ast-live">LIVE KINEMATICS</button>
             <div style="width: 1px; height: 15px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
             <button class="btn-astro" id="btn-ast-rev" title="Rewind Orbit">&lt;&lt;</button>
             <button class="btn-astro" id="btn-ast-stop">||</button>
@@ -157,7 +240,7 @@ function injectAstroScrubber() {
         astroScrubInterval = setInterval(() => {
             state.simTime += direction * 86400000; // 1 day per tick
             if(window.setSimState) window.setSimState(state);
-        }, 50);
+        }, 33);
     };
 
     document.getElementById('btn-ast-rev').addEventListener('click', () => runSim(-1));
@@ -172,147 +255,144 @@ function injectAstroScrubber() {
 
 function p2c(radiusPct, angleDeg) {
     const rad = (angleDeg - 90) * Math.PI / 180.0;
-    return {
-        x: 50 + (radiusPct * Math.cos(rad)),
-        y: 50 + (radiusPct * Math.sin(rad))
-    };
+    return { x: 50 + (radiusPct / 2 * Math.cos(rad)), y: 50 + (radiusPct / 2 * Math.sin(rad)) };
 }
 
 window.addEventListener('q-tick', (e) => {
     const { t, qData, daysElapsed } = e.detail;
 
-    // --- LUNAR KINEMATICS (Top Left) ---
-    const lunarPhase = qData.lunarPhase || 0; // 0 to 1
-    const lunarIllum = (1 - Math.cos(lunarPhase * Math.PI * 2)) / 2 * 100;
-    const lunarDay = lunarPhase * 29.53;
+    // --- DYNAMIC TELEMETRY POPULATION ---
+    const p1_tl = document.getElementById('lunar-p1');
+    const p2_tl = document.getElementById('lunar-p2');
+    const p3_tl = document.getElementById('lunar-p3');
+    const lunarPhase = qData.lunarPhase || 0; 
     
-    let phaseText = "NEW MOON";
-    if (lunarPhase > 0.03 && lunarPhase < 0.22) phaseText = "WAXING CRESCENT";
-    else if (lunarPhase >= 0.22 && lunarPhase <= 0.28) phaseText = "FIRST QUARTER";
-    else if (lunarPhase > 0.28 && lunarPhase < 0.47) phaseText = "WAXING GIBBOUS";
-    else if (lunarPhase >= 0.47 && lunarPhase <= 0.53) phaseText = "FULL MOON";
-    else if (lunarPhase > 0.53 && lunarPhase < 0.72) phaseText = "WANING GIBBOUS";
-    else if (lunarPhase >= 0.72 && lunarPhase <= 0.78) phaseText = "LAST QUARTER";
-    else if (lunarPhase > 0.78 && lunarPhase < 0.97) phaseText = "WANING CRESCENT";
-
-    const elLunarTxt = document.getElementById('lunar-phase-text');
-    const elLunarIllum = document.getElementById('lunar-illum');
-    const elLunarDay = document.getElementById('lunar-day');
-    const elLunarBar = document.getElementById('lunar-bar');
-    if (elLunarTxt) elLunarTxt.innerText = phaseText;
-    if (elLunarIllum) elLunarIllum.innerText = lunarIllum.toFixed(1) + "%";
-    if (elLunarDay) elLunarDay.innerText = lunarDay.toFixed(1) + " / 29.5";
-    if (elLunarBar) elLunarBar.style.width = (lunarPhase * 100) + "%";
-
-    // --- PLANETARY VELOCITY (Bottom Left) ---
-    let radDist = (qData.trueArc - 14) * (Math.PI / 180);
-    let velocityMult = 1 + 0.0334 * Math.cos(radDist);
-    let baseSpeedKmS = 29.78; // Mean orbital velocity of Earth
-    let currentSpeed = baseSpeedKmS * velocityMult;
-
-    const elVelMult = document.getElementById('vel-mult');
-    const elVelApsis = document.getElementById('vel-apsis');
-    const elVelSpeed = document.getElementById('vel-speed');
-    
-    if (elVelMult) elVelMult.innerText = velocityMult.toFixed(4) + "x";
-    if (elVelSpeed) elVelSpeed.innerText = currentSpeed.toFixed(2) + " KM/S";
-    if (elVelApsis) {
-        if (velocityMult > 1.015) elVelApsis.innerText = "APPROACHING PERIHELION";
-        else if (velocityMult < 0.985) elVelApsis.innerText = "APPROACHING APHELION";
-        else elVelApsis.innerText = "NOMINAL TRANSIT";
+    if (panelPrefs.tl === 'SYNODIC' && p1_tl) {
+        const lunarIllum = (1 - Math.cos(lunarPhase * Math.PI * 2)) / 2 * 100;
+        let phaseText = "NEW MOON";
+        if (lunarPhase > 0.03 && lunarPhase < 0.22) phaseText = "WAXING CRESCENT";
+        else if (lunarPhase >= 0.22 && lunarPhase <= 0.28) phaseText = "FIRST QUARTER";
+        else if (lunarPhase > 0.28 && lunarPhase < 0.47) phaseText = "WAXING GIBBOUS";
+        else if (lunarPhase >= 0.47 && lunarPhase <= 0.53) phaseText = "FULL MOON";
+        else if (lunarPhase > 0.53 && lunarPhase < 0.72) phaseText = "WANING GIBBOUS";
+        else if (lunarPhase >= 0.72 && lunarPhase <= 0.78) phaseText = "LAST QUARTER";
+        else if (lunarPhase > 0.78 && lunarPhase < 0.97) phaseText = "WANING CRESCENT";
+        p1_tl.innerText = phaseText;
+        p2_tl.innerText = lunarIllum.toFixed(1) + "%";
+        p3_tl.innerText = (lunarPhase * 29.53).toFixed(1) + " / 29.5";
+    } else if (p1_tl) {
+        const prox = Math.cos(lunarPhase * Math.PI * 2);
+        p1_tl.innerText = prox > 0 ? "APPROACHING PERIGEE" : "APPROACHING APOGEE";
+        p2_tl.innerText = (1 + (prox * 0.05)).toFixed(3) + "x";
+        p3_tl.innerText = ((lunarPhase * 360) % 360).toFixed(2) + "°";
     }
 
-    // --- EQUATION OF TIME (Bottom Right) ---
-    const elEqMean = document.getElementById('eq-mean');
-    const elEqTrue = document.getElementById('eq-true');
-    const elEqDelta = document.getElementById('eq-delta');
-    if (elEqMean) elEqMean.innerText = qData.meanArc.toFixed(4) + "°";
-    if (elEqTrue) elEqTrue.innerText = qData.trueArc.toFixed(4) + "°";
-    if (elEqDelta) elEqDelta.innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
+    let radDist = (qData.trueArc - 14) * (Math.PI / 180);
+    let velocityMult = 1 + 0.0334 * Math.cos(radDist);
+    let baseSpeedKmS = 29.78; 
+    
+    const p1_bl = document.getElementById('vel-p1');
+    const p2_bl = document.getElementById('vel-p2');
+    const p3_bl = document.getElementById('vel-p3');
+    
+    if (panelPrefs.bl === 'KINETIC' && p1_bl) {
+        p1_bl.innerText = (baseSpeedKmS * velocityMult).toFixed(2) + " KM/S";
+        p2_bl.innerText = velocityMult.toFixed(4) + "x";
+        if (velocityMult > 1.015) p3_bl.innerText = "APPROACHING PERIHELION";
+        else if (velocityMult < 0.985) p3_bl.innerText = "APPROACHING APHELION";
+        else p3_bl.innerText = "NOMINAL TRANSIT";
+    } else if (p1_bl) {
+        p1_bl.innerText = (baseSpeedKmS * velocityMult).toFixed(2) + " KM/S";
+        p2_bl.innerText = "-5.24 KM/S"; // Approx avg delta to Venus (35.02)
+        p3_bl.innerText = "+5.71 KM/S"; // Approx avg delta to Mars (24.07)
+    }
+
+    const p1_br = document.getElementById('eq-p1');
+    const p2_br = document.getElementById('eq-p2');
+    const p3_br = document.getElementById('eq-p3');
+    
+    if (panelPrefs.br === 'TRUE_MEAN' && p1_br) {
+        p1_br.innerText = qData.meanArc.toFixed(4) + "°";
+        p2_br.innerText = qData.trueArc.toFixed(4) + "°";
+        p3_br.innerText = (qData.delta > 0 ? "+" : "") + qData.delta.toFixed(4) + "°";
+    } else if (p1_br) {
+        let eotMins = qData.delta * 4; // Approx 4 mins per degree
+        let sign = eotMins > 0 ? "+" : "";
+        p1_br.innerText = `12:00 ${sign}${eotMins.toFixed(1)}m`;
+        p2_br.innerText = "12:00:00";
+    }
 
     // --- SOLAR SYSTEM KINEMATICS RENDERING ---
-    // Earth uses True Anomaly to reflect physics. Other planets use simplified mean calculation.
     const eDeg = qData.trueArc; 
-    
-    // Calculate raw degrees based on orbital periods
     const mDeg = ((daysElapsed % PERIODS.MERCURY) / PERIODS.MERCURY) * 360;
     const vDeg = ((daysElapsed % PERIODS.VENUS) / PERIODS.VENUS) * 360;
+    const marsDeg = ((daysElapsed % PERIODS.MARS) / PERIODS.MARS) * 360;
     const jDeg = ((daysElapsed % PERIODS.JUPITER) / PERIODS.JUPITER) * 360;
     const sDeg = ((daysElapsed % PERIODS.SATURN) / PERIODS.SATURN) * 360;
+    const uDeg = ((daysElapsed % PERIODS.URANUS) / PERIODS.URANUS) * 360;
+    const nDeg = ((daysElapsed % PERIODS.NEPTUNE) / PERIODS.NEPTUNE) * 360;
+    
+    // Moon orbits Earth (Synodic)
     const moonDeg = (lunarPhase * 360);
 
     const elEarthSys = document.getElementById('earth-system');
     const elMerc = document.getElementById('p-mercury');
     const elVen = document.getElementById('p-venus');
+    const elMars = document.getElementById('p-mars');
     const elJup = document.getElementById('p-jupiter');
     const elSat = document.getElementById('p-saturn');
+    const elUra = document.getElementById('p-uranus');
+    const elNep = document.getElementById('p-neptune');
     const elMoon = document.getElementById('p-moon');
-    const elSun = document.getElementById('sun-core');
+    const elSun = document.getElementById('sys-sun');
 
     if (elEarthSys) {
         const ePos = p2c(ORBITS.EARTH, eDeg);
-        elEarthSys.style.left = ePos.x + '%';
-        elEarthSys.style.top = ePos.y + '%';
+        elEarthSys.style.left = ePos.x + '%'; elEarthSys.style.top = ePos.y + '%';
+        if (elMoon) {
+            // Nested relative translation
+            const moonRad = 3.5; 
+            elMoon.style.transform = `translate(calc(-50% + ${Math.cos((moonDeg - 90) * Math.PI/180) * moonRad}vh), calc(-50% + ${Math.sin((moonDeg - 90) * Math.PI/180) * moonRad}vh))`;
+        }
     }
-    if (elMerc) {
-        const mPos = p2c(ORBITS.MERCURY, mDeg);
-        elMerc.style.left = mPos.x + '%'; elMerc.style.top = mPos.y + '%';
-    }
-    if (elVen) {
-        const vPos = p2c(ORBITS.VENUS, vDeg);
-        elVen.style.left = vPos.x + '%'; elVen.style.top = vPos.y + '%';
-    }
-    if (elJup) {
-        const jPos = p2c(ORBITS.JUPITER, jDeg);
-        elJup.style.left = jPos.x + '%'; elJup.style.top = jPos.y + '%';
-    }
-    if (elSat) {
-        const sPos = p2c(ORBITS.SATURN, sDeg);
-        elSat.style.left = sPos.x + '%'; elSat.style.top = sPos.y + '%';
-    }
-    if (elMoon) {
-        const moonPos = p2c(ORBITS.MOON, moonDeg);
-        elMoon.style.left = moonPos.x + '%'; elMoon.style.top = moonPos.y + '%';
-    }
+    if (elMerc) { const pos = p2c(ORBITS.MERCURY, mDeg); elMerc.style.left = pos.x + '%'; elMerc.style.top = pos.y + '%'; }
+    if (elVen) { const pos = p2c(ORBITS.VENUS, vDeg); elVen.style.left = pos.x + '%'; elVen.style.top = pos.y + '%'; }
+    if (elMars) { const pos = p2c(ORBITS.MARS, marsDeg); elMars.style.left = pos.x + '%'; elMars.style.top = pos.y + '%'; }
+    if (elJup) { const pos = p2c(ORBITS.JUPITER, jDeg); elJup.style.left = pos.x + '%'; elJup.style.top = pos.y + '%'; }
+    if (elSat) { const pos = p2c(ORBITS.SATURN, sDeg); elSat.style.left = pos.x + '%'; elSat.style.top = pos.y + '%'; }
+    if (elUra) { const pos = p2c(ORBITS.URANUS, uDeg); elUra.style.left = pos.x + '%'; elUra.style.top = pos.y + '%'; }
+    if (elNep) { const pos = p2c(ORBITS.NEPTUNE, nDeg); elNep.style.left = pos.x + '%'; elNep.style.top = pos.y + '%'; }
 
-    // Fixed Perihelion and Aphelion markers on Earth's orbit (14° and 194°)
+    // Fixed Nodes on Earth Orbit
     const nodePeri = document.getElementById('node-peri');
     const nodeAph = document.getElementById('node-aph');
-    if (nodePeri) {
-        const pPos = p2c(ORBITS.EARTH, 14);
-        nodePeri.style.left = pPos.x + '%'; nodePeri.style.top = pPos.y + '%';
-    }
-    if (nodeAph) {
-        const aPos = p2c(ORBITS.EARTH, 194);
-        nodeAph.style.left = aPos.x + '%'; nodeAph.style.top = aPos.y + '%';
-    }
+    if (nodePeri) { const pos = p2c(ORBITS.EARTH, 14); nodePeri.style.left = pos.x + '%'; nodePeri.style.top = pos.y + '%'; }
+    if (nodeAph) { const pos = p2c(ORBITS.EARTH, 194); nodeAph.style.left = pos.x + '%'; nodeAph.style.top = pos.y + '%'; }
 
-    // --- BARYCENTRIC WOBBLE (Top Right & Center Rendering) ---
-    // Simulate pull primarily from Jupiter (J1) and Saturn
-    const jX = Math.cos((jDeg - 90) * Math.PI / 180);
-    const jY = Math.sin((jDeg - 90) * Math.PI / 180);
-    const sX = Math.cos((sDeg - 90) * Math.PI / 180) * 0.3; // Saturn has ~30% gravitational influence relative to Jupiter
-    const sY = Math.sin((sDeg - 90) * Math.PI / 180) * 0.3;
+    // --- BARYCENTRIC WOBBLE ---
+    const jX = Math.cos((jDeg - 90) * Math.PI / 180); const jY = Math.sin((jDeg - 90) * Math.PI / 180);
+    const sX = Math.cos((sDeg - 90) * Math.PI / 180) * 0.3; const sY = Math.sin((sDeg - 90) * Math.PI / 180) * 0.3;
 
-    // Wobble displacement vector
-    const wobX = (jX + sX);
-    const wobY = (jY + sY);
-    
-    // In Macro view, displacement is visually scaled relative to the outer orbits
-    // In Micro view, the wobble is highly exaggerated so it's visible relative to inner planets
-    const wobbleScale = isMacroView ? 0.5 : 2.5; 
+    const wobX = (jX + sX); const wobY = (jY + sY);
+    const wobbleScale = isMacroView ? 0.3 : 1.5; 
     
     if (elSun) {
         elSun.style.transform = `translate(calc(-50% + ${wobX * wobbleScale}vh), calc(-50% + ${wobY * wobbleScale}vh))`;
     }
 
-    const elSolarWobble = document.getElementById('solar-wobble-val');
-    if (elSolarWobble) {
-        // Calculate abstract solar radii offset
+    const p1_tr = document.getElementById('bary-p1');
+    const p2_tr = document.getElementById('bary-p2');
+    const p3_tr = document.getElementById('bary-p3');
+    
+    if (panelPrefs.tr === 'MASS' && p2_tr) {
         const totalPull = Math.sqrt(wobX*wobX + wobY*wobY);
-        // Map abstract pull to 0.0 - 2.2 Solar Radii (approx Barycenter max offset)
         const offsetRadii = (totalPull / 1.3) * 2.2; 
-        elSolarWobble.innerText = offsetRadii.toFixed(2) + " R☉";
+        p2_tr.innerText = offsetRadii.toFixed(2) + " R☉";
+        p3_tr.innerText = offsetRadii > 1.0 ? "EXTRA-SOLAR" : "INTRA-SOLAR";
+    } else if (p1_tr) {
+        p1_tr.innerText = "+0.0042"; 
+        p2_tr.innerText = jDeg.toFixed(2) + "°";
+        p3_tr.innerText = sDeg.toFixed(2) + "°";
     }
 
 });
