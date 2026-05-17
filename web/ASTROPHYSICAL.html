@@ -9,7 +9,7 @@
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
-    <script src="astrophysical.js?v=26.0"></script>
+    <script src="astrophysical.js?v=27.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
@@ -69,7 +69,7 @@
         #barycenter-crosshair::before { top: 50%; left: -10px; width: 30px; height: 1px; transform: translateY(-50%); }
         #barycenter-crosshair::after { left: 50%; top: -10px; height: 30px; width: 1px; transform: translateX(-50%); }
         
-        #sys-sun { width: 6%; height: 6%; background: var(--gold); box-shadow: 0 0 40px var(--gold), 0 0 80px rgba(244, 208, 104, 0.5); z-index: 25; transition: top 0.1s, left 0.1s; }
+        #sys-sun { top: 50%; left: 50%; width: 6%; height: 6%; background: var(--gold); box-shadow: 0 0 40px var(--gold), 0 0 80px rgba(244, 208, 104, 0.5); z-index: 25; transition: transform 0.1s; }
         
         /* Solid Planets */
         .sys-mercury { width: 1.5%; height: 1.5%; background: var(--silver); box-shadow: 0 0 10px var(--silver); z-index: 20; }

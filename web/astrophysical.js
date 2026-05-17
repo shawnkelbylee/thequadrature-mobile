@@ -1,6 +1,6 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VIII UI Engine. Lunar Macro Dilation.
+// STATUS: Phase VIII UI Engine. Top-Zero Clockwise Mapping & Logarithmic Macro.
 
 let isBooted = false;
 let currentOptTarget = '';
@@ -37,6 +37,17 @@ const PERIODS = {
     SATURN: 10759.22,
     URANUS: 30688.5,
     NEPTUNE: 60182.0
+};
+
+// Baseline Heliocentric Offsets mapped for the May 17, 2026 Epoch
+const EPOCH_OFFSETS = {
+    MERCURY: 215.4,
+    VENUS: 118.2,
+    MARS: 45.6,
+    JUPITER: 112.3,
+    SATURN: 355.8,
+    URANUS: 68.4,
+    NEPTUNE: 350.1
 };
 
 window.injectVectorData = function() {
@@ -338,13 +349,13 @@ window.addEventListener('q-tick', (e) => {
 
     // --- SOLAR SYSTEM KINEMATICS RENDERING ---
     const eDeg = qData.trueArc; 
-    const mDeg = ((daysElapsed % PERIODS.MERCURY) / PERIODS.MERCURY) * 360;
-    const vDeg = ((daysElapsed % PERIODS.VENUS) / PERIODS.VENUS) * 360;
-    const marsDeg = ((daysElapsed % PERIODS.MARS) / PERIODS.MARS) * 360;
-    const jDeg = ((daysElapsed % PERIODS.JUPITER) / PERIODS.JUPITER) * 360;
-    const sDeg = ((daysElapsed % PERIODS.SATURN) / PERIODS.SATURN) * 360;
-    const uDeg = ((daysElapsed % PERIODS.URANUS) / PERIODS.URANUS) * 360;
-    const nDeg = ((daysElapsed % PERIODS.NEPTUNE) / PERIODS.NEPTUNE) * 360;
+    const mDeg = ((((daysElapsed % PERIODS.MERCURY) / PERIODS.MERCURY) * 360) + EPOCH_OFFSETS.MERCURY) % 360;
+    const vDeg = ((((daysElapsed % PERIODS.VENUS) / PERIODS.VENUS) * 360) + EPOCH_OFFSETS.VENUS) % 360;
+    const marsDeg = ((((daysElapsed % PERIODS.MARS) / PERIODS.MARS) * 360) + EPOCH_OFFSETS.MARS) % 360;
+    const jDeg = ((((daysElapsed % PERIODS.JUPITER) / PERIODS.JUPITER) * 360) + EPOCH_OFFSETS.JUPITER) % 360;
+    const sDeg = ((((daysElapsed % PERIODS.SATURN) / PERIODS.SATURN) * 360) + EPOCH_OFFSETS.SATURN) % 360;
+    const uDeg = ((((daysElapsed % PERIODS.URANUS) / PERIODS.URANUS) * 360) + EPOCH_OFFSETS.URANUS) % 360;
+    const nDeg = ((((daysElapsed % PERIODS.NEPTUNE) / PERIODS.NEPTUNE) * 360) + EPOCH_OFFSETS.NEPTUNE) % 360;
     
     // Moon orbits Earth
     const moonDeg = (lunarPhase * 360);
