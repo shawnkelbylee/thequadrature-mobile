@@ -1,7 +1,7 @@
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
 // PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
-// REVISION: Phase XIII - Biometric Waveform Pivot & Regression Restoration
+// REVISION: Phase XIV - Legacy Biometric Decoupling
 
 // --- DATA PERSISTENCE & UTILITIES ---
 window.qData = window.qData || JSON.parse(localStorage.getItem('q_planner_data_v2') || '{}');
@@ -224,7 +224,6 @@ window.Q_OmniPlanner = {
             
             #cal-title-container { display: flex; justify-content: center; width: 100%; }
             
-            /* REGRESSION RESTORED: Flexbox Center Alignment */
             .header-controls-row { display: flex; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; gap: 15px; }
             .step-nav-group { display: flex; justify-content: center; align-items: center; gap: 8px; }
             
@@ -290,15 +289,8 @@ window.Q_OmniPlanner = {
             
             .q-cal-jump { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: var(--theme-main, #ff003c); font-family: 'Orbitron'; font-size: 0.65rem; padding: 6px 10px; border-radius: 4px; outline: none; text-align: center; color-scheme: dark; margin-left: 15px; cursor: pointer; transition: 0.3s; }
 
-            /* BIOMETRIC WAVEFORM PIVOT CSS */
             .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'JetBrains Mono'; color: #fff; position: relative; overflow: hidden; transition: 0.3s; z-index: 1; }
             .time-block:hover { background: rgba(255,255,255,0.05); }
-            
-            .time-block.flow-state { border-left: 4px solid var(--env-green, #a7ff83); background: rgba(167, 255, 131, 0.05); }
-            .time-block.vent-state { border-left: 4px solid var(--sys-cyan, #00f0ff); background: rgba(0, 240, 255, 0.05); }
-            .time-block.sleep-state { border-left: 4px solid var(--bio-purple, #b829ff); background: rgba(184, 41, 255, 0.05); }
-            .time-block.inertia-state { border-left: 4px solid var(--chrono-amber, #B97A35); background: rgba(185, 122, 53, 0.05); }
-            .time-block.dlmo-state { border-left: 4px solid var(--bio-cobalt, #0055ff); background: rgba(0, 85, 255, 0.05); }
             
             .tension-dashboard { background: rgba(0,0,0,0.6); border: 1px dashed var(--magenta-glow, #ff003c); border-radius: 6px; padding: 15px; margin: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; }
             .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--magenta-glow, #ff003c); text-shadow: 0 0 15px var(--magenta-dim, rgba(255,0,60,0.3)); }
@@ -501,9 +493,6 @@ window.Q_OmniPlanner = {
         if (btnDayBack) btnDayBack.innerHTML = this.isLegacy ? "&#8249; DAY" : "&#8249; DEG";
         if (btnDayFwd) btnDayFwd.innerHTML = this.isLegacy ? "DAY &#8250;" : "DEG &#8250;";
 
-        const btnViewDay = document.getElementById('btn-view-day');
-        if (btnViewDay) btnViewDay.innerText = this.isLegacy ? "DAY" : "DEG";
-
         if (!this.isLegacy && this.viewState !== 'closed') {
             document.body.classList.add('planner-quad-active');
         } else {
@@ -635,7 +624,6 @@ window.Q_OmniPlanner = {
                 
                 d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:#fff; font-size: 1rem;">${i}</div>`;
                 
-                // SPATIAL ANCHORS (HOLIDAYS) RESTORED
                 this.injectHolidays(d, new Date(localTs));
 
                 d.onclick = () => { this.selectedDate = localTs; this.setViewMode('day'); };
@@ -673,7 +661,6 @@ window.Q_OmniPlanner = {
                      d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--theme-main, #ff003c); text-align:center;">DEG ${item.deg}</div>`;
                 }
                 
-                // SPATIAL ANCHORS (HOLIDAYS) RESTORED
                 this.injectHolidays(d, new Date(absStart));
                 
                 d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
@@ -961,11 +948,6 @@ window.Q_OmniPlanner = {
             dailyBlocksData.forEach(b => {
                 const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
                 let blockClass = '';
-                if (b.bioState === 'DEEP FLOW') blockClass = 'flow-state';
-                else if (b.bioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
-                else if (b.bioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
-                else if (b.bioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
-                else blockClass = 'vent-state';
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
@@ -974,19 +956,12 @@ window.Q_OmniPlanner = {
                 
                 let civilFmt = window.formatLegacyDate(b.ms);
                 
-                // REGRESSION RESTORED: Dynamic Font Colors
                 let hasData = b.text.trim() !== "";
                 let colorStr = hasData ? '#fff' : 'var(--theme-main, #00f0ff)';
                 let timeHeaderHtml = `<div class="time-header" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px #fff' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
                 
                 let badgeHtml = '';
-                if (b.bioState === 'DEEP FLOW') badgeHtml = `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>`;
-                else if (b.bioState === 'SLEEP / RECOVERY') badgeHtml = `<span style="color:var(--bio-purple, #b829ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP / RECOVERY</span>`;
-                else if (b.bioState === 'SLEEP INERTIA') badgeHtml = `<span style="color:var(--chrono-amber, #B97A35); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP INERTIA (CAR RAMP)</span>`;
-                else if (b.bioState === 'DLMO WIND-DOWN') badgeHtml = `<span style="color:var(--bio-cobalt, #0055ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DLMO WIND-DOWN</span>`;
-                else badgeHtml = `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
-
-                if (isCivilConstraint) badgeHtml += ` <span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
+                if (isCivilConstraint) badgeHtml += `<span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
 
                 block.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
@@ -1048,7 +1023,6 @@ window.Q_OmniPlanner = {
                 const block = document.createElement('div'); 
                 block.className = `slot-block time-block ${blockClass}`;
                 
-                // REGRESSION RESTORED: Dynamic Font Colors
                 let hasData = data.text.trim() !== "";
                 let colorStr = hasData ? '#fff' : 'var(--theme-main, #00f0ff)';
                 
@@ -1122,18 +1096,21 @@ window.Q_OmniPlanner = {
             
             const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
             let blockClass = '';
-            if (currentBioState === 'DEEP FLOW') blockClass = 'flow-state';
-            else if (currentBioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
-            else if (currentBioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
-            else if (currentBioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
-            else blockClass = 'vent-state';
             
-            if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
-            
+            if (this.isLegacy) {
+                if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
+            } else {
+                if (currentBioState === 'DEEP FLOW') blockClass = 'flow-state';
+                else if (currentBioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
+                else if (currentBioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
+                else if (currentBioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
+                else blockClass = 'vent-state';
+                if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
+            }
+
             const block = document.createElement('div'); 
             block.className = `slot-block time-block ${blockClass}`;
             
-            // REGRESSION RESTORED: Dynamic Font Colors
             let hasData = data.text.trim() !== "";
             let colorStr = hasData ? '#fff' : 'var(--theme-main, #ff003c)';
             
