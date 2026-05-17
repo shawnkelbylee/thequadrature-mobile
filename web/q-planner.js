@@ -1,7 +1,7 @@
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
 // PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
-// REVISION: Phase XIV - Legacy Biometric Decoupling
+// REVISION: Phase XV - Static Palette Decoupling (Titanium/Platinum/Cyan)
 
 // --- DATA PERSISTENCE & UTILITIES ---
 window.qData = window.qData || JSON.parse(localStorage.getItem('q_planner_data_v2') || '{}');
@@ -45,12 +45,12 @@ window.getDualTitle = function(ts, isLegacy) {
         let qStr = "";
         if (qBlock) {
             if (qBlock.isAnchor) {
-                qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:#fff;">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">Q</span><span style="color:#fff;">${qBlock.quad}</span> <span style="color:var(--gold, #F4D068);">S</span><span style="color:#fff;">${qBlock.sect}</span> <span style="color:var(--gold, #F4D068);">DEG</span> <span style="color:#fff;">${qBlock.deg}</span> <span style="color:var(--theme-main, #00f0ff); margin-left:4px;">[${qBlock.name}]</span>`;
+                qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:var(--omni-text);">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">Q</span><span style="color:var(--omni-text);">${qBlock.quad}</span> <span style="color:var(--gold, #F4D068);">S</span><span style="color:var(--omni-text);">${qBlock.sect}</span> <span style="color:var(--gold, #F4D068);">DEG</span> <span style="color:var(--omni-text);">${qBlock.deg}</span> <span style="color:var(--omni-main); margin-left:4px;">[${qBlock.name}]</span>`;
             } else {
-                qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:#fff;">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">Q</span><span style="color:#fff;">${qBlock.quad}</span> <span style="color:var(--gold, #F4D068);">S</span><span style="color:#fff;">${qBlock.sect}</span> <span style="color:var(--gold, #F4D068);">DEG</span> <span style="color:#fff;">${qBlock.deg}</span>`;
+                qStr = `<span style="color:var(--gold, #F4D068);">QC</span> <span style="color:var(--omni-text);">${qBlock.cycle}</span> <span style="color:var(--gold, #F4D068);">Q</span><span style="color:var(--omni-text);">${qBlock.quad}</span> <span style="color:var(--gold, #F4D068);">S</span><span style="color:var(--omni-text);">${qBlock.sect}</span> <span style="color:var(--gold, #F4D068);">DEG</span> <span style="color:var(--omni-text);">${qBlock.deg}</span>`;
             }
         } else {
-            qStr = "<span style='color:var(--theme-main, #ff003c);'>Q-SYNC PENDING</span>";
+            qStr = "<span style='color:var(--omni-warn);'>Q-SYNC PENDING</span>";
         }
         return `<div class="cal-title-wrapper show-quad"><div class="title-q">${qStr}</div></div>`;
     }
@@ -208,19 +208,29 @@ window.Q_OmniPlanner = {
     injectCSS: function() {
         const style = document.createElement('style');
         style.innerHTML = `
-            /* MODAL ENGINE CSS RESTORED */
-            .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 999999; display: none; justify-content: center; align-items: center; }
-            .modal-box { background: rgba(5,8,15,0.95); border: 1px solid var(--theme-main, #ff003c); border-radius: 8px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.9); min-width: 300px; max-width: 90vw; text-align: center; font-family: 'JetBrains Mono'; color: #fff; pointer-events: auto; }
-            .modal-head { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 900; color: var(--theme-main, #ff003c); margin-bottom: 15px; letter-spacing: 2px; }
-            .btn-close { background: rgba(0,0,0,0.6); border: 1px solid var(--theme-main, #ff003c); color: var(--theme-main, #ff003c); font-family: 'Orbitron'; font-weight: bold; padding: 10px 20px; cursor: pointer; border-radius: 4px; transition: 0.3s; margin-top: 20px; }
-            .btn-close:hover { background: var(--theme-main, #ff003c); color: #000; box-shadow: 0 0 15px var(--theme-main, #ff003c); }
+            /* STATIC OMNI PALETTE DECOUPLING */
+            .q-planner-overlay, .modal-overlay {
+                --omni-main: #00f0ff;
+                --omni-dim: rgba(0, 240, 255, 0.2);
+                --omni-bg: #334155;
+                --omni-bg-alpha: rgba(51, 65, 85, 0.95);
+                --omni-bg-light: rgba(51, 65, 85, 0.4);
+                --omni-text: #E5E4E2;
+                --omni-warn: #ff003c;
+            }
+
+            .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 36, 0.85); backdrop-filter: blur(10px); z-index: 999999; display: none; justify-content: center; align-items: center; }
+            .modal-box { background: var(--omni-bg-alpha); border: 1px solid var(--omni-main); border-radius: 8px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.9); min-width: 300px; max-width: 90vw; text-align: center; font-family: 'JetBrains Mono'; color: var(--omni-text); pointer-events: auto; }
+            .modal-head { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 900; color: var(--omni-main); margin-bottom: 15px; letter-spacing: 2px; }
+            .btn-close { background: var(--omni-bg); border: 1px solid var(--omni-main); color: var(--omni-main); font-family: 'Orbitron'; font-weight: bold; padding: 10px 20px; cursor: pointer; border-radius: 4px; transition: 0.3s; margin-top: 20px; }
+            .btn-close:hover { background: var(--omni-main); color: #000; box-shadow: 0 0 15px var(--omni-main); }
 
             /* PLANNER CSS */
-            .q-planner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10005; display: none; justify-content: center; align-items: center; }
+            .q-planner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 36, 0.85); backdrop-filter: blur(10px); z-index: 10005; display: none; justify-content: center; align-items: center; }
             .q-planner-overlay.active { display: flex; }
-            .q-planner-box { width: 95vw; height: 90vh; background: rgba(5, 5, 10, 0.95); border: 1px solid var(--theme-main, #ff003c); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.9); pointer-events: auto; }
+            .q-planner-box { width: 95vw; height: 90vh; background: rgba(15, 23, 36, 0.98); border: 1px solid var(--omni-bg); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.9); pointer-events: auto; }
             
-            .cal-header { display: flex; flex-direction: column; padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.6); gap: 15px; }
+            .cal-header { display: flex; flex-direction: column; padding: 20px; border-bottom: 1px solid var(--omni-bg); background: var(--omni-bg-light); gap: 15px; }
             
             #cal-title-container { display: flex; justify-content: center; width: 100%; }
             
@@ -230,74 +240,81 @@ window.Q_OmniPlanner = {
             #action-btn-container { display: flex; justify-content: center; align-items: center; gap: 8px; }
             
             .cal-title-wrapper { display: flex; justify-content: center; align-items: center; gap: 20px; font-family: 'Orbitron'; font-size: 1.3rem; font-weight: 900; }
-            .title-leg { color: #fff; letter-spacing: 2px; }
-            .title-divider { color: rgba(255,255,255,0.2); font-weight: normal; }
+            .title-leg { color: var(--omni-text); letter-spacing: 2px; }
+            .title-divider { color: rgba(229, 228, 226, 0.2); font-weight: normal; }
             .title-q { letter-spacing: 2px; }
 
             .planner-matrix { display: grid; gap: 4px; padding: 20px; flex-grow: 1; overflow-y: auto; }
             
             .q-planner-box *::-webkit-scrollbar { width: 6px; height: 6px; }
-            .q-planner-box *::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
-            .q-planner-box *::-webkit-scrollbar-thumb { background: var(--theme-main, #ff003c); border-radius: 4px; }
+            .q-planner-box *::-webkit-scrollbar-track { background: rgba(51, 65, 85, 0.2); border-radius: 4px; }
+            .q-planner-box *::-webkit-scrollbar-thumb { background: var(--omni-main); border-radius: 4px; }
             .q-planner-box *::-webkit-scrollbar-thumb:hover { filter: brightness(1.2); }
 
-            .macro-hierarchy-nav { display: flex; gap: 5px; background: rgba(0,0,0,0.6); padding: 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
-            .macro-btn { background: transparent; border: none; color: var(--platinum); font-family: 'Orbitron'; font-size: 0.65rem; padding: 6px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.3s; }
-            .macro-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-            .macro-btn.active { background: var(--theme-main, #ff003c) !important; color: #000 !important; box-shadow: 0 0 10px var(--theme-main, #ff003c); }
+            .macro-hierarchy-nav { display: flex; gap: 5px; background: var(--omni-bg-light); padding: 4px; border-radius: 6px; border: 1px solid var(--omni-bg); }
+            .macro-btn { background: transparent; border: 1px solid var(--omni-bg); color: var(--omni-text); font-family: 'Orbitron'; font-size: 0.65rem; padding: 6px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.3s; }
+            .macro-btn:hover { background: var(--omni-bg); color: var(--omni-text); }
+            .macro-btn.active { background: var(--omni-main) !important; color: #000 !important; box-shadow: 0 0 10px var(--omni-main); border-color: var(--omni-main); }
 
-            .p-day { background: rgba(255,255,255,0.03); border-radius: 4px; padding: 10px; cursor: pointer; min-height: 80px; transition: all 0.3s; border: 1px solid transparent; display: flex; flex-direction: column; justify-content: flex-start; }
-            .p-day:hover { background: rgba(255,255,255,0.08); border-color: var(--theme-main, #ff003c); }
-            .p-day.status-red { border-left: 3px solid #ff3333; }
+            .p-day { background: rgba(51, 65, 85, 0.2); border-radius: 4px; padding: 10px; cursor: pointer; min-height: 80px; transition: all 0.3s; border: 1px solid transparent; display: flex; flex-direction: column; justify-content: flex-start; color: var(--omni-text); }
+            .p-day:hover { background: rgba(51, 65, 85, 0.5); border-color: var(--omni-main); }
+            .p-day.status-red { border-left: 3px solid var(--omni-warn); }
             
-            .p-day.status-today { border: 1px dashed rgba(255,255,255,0.4); box-shadow: inset 0 0 10px rgba(255,255,255,0.05); }
-            .p-day.selected { border-color: var(--theme-main, #ff003c) !important; box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.4) !important; background: rgba(255,255,255,0.05); }
+            .p-day.status-today { border: 1px dashed var(--omni-text); box-shadow: inset 0 0 10px rgba(229, 228, 226, 0.1); }
+            .p-day.selected { border-color: var(--omni-main) !important; box-shadow: inset 0 0 20px var(--omni-dim) !important; background: rgba(51, 65, 85, 0.6); }
             
             .anchor-block { background: rgba(244, 208, 104, 0.05) !important; border: 1px solid rgba(244, 208, 104, 0.3) !important; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
             .anchor-block:hover { background: rgba(244, 208, 104, 0.15) !important; border-color: var(--gold, #F4D068) !important; box-shadow: 0 0 15px rgba(244, 208, 104, 0.2); }
             .anchor-block.selected { border-color: var(--gold, #F4D068) !important; box-shadow: inset 0 0 25px rgba(244, 208, 104, 0.5) !important; }
 
             .macro-grid-legacy { display: flex; flex-wrap: wrap; gap: 15px; padding: 20px; overflow-y: auto; justify-content: center; }
-            .macro-month-box { background: rgba(0,0,0,0.4); border-width: 1px; border-style: solid; border-radius: 8px; padding: 10px; width: calc(33.333% - 15px); min-width: 250px; box-sizing: border-box; }
-            .macro-month-title { font-family: 'Orbitron'; font-size: 0.75rem; margin-bottom: 8px; text-align: center; letter-spacing: 2px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+            .macro-month-box { background: rgba(51, 65, 85, 0.3); border-width: 1px; border-style: solid; border-color: var(--omni-bg); border-radius: 8px; padding: 10px; width: calc(33.333% - 15px); min-width: 250px; box-sizing: border-box; }
+            .macro-month-title { font-family: 'Orbitron'; font-size: 0.75rem; margin-bottom: 8px; text-align: center; letter-spacing: 2px; font-weight: bold; border-bottom: 1px solid var(--omni-bg); padding-bottom: 4px; color: var(--omni-text); }
             
-            .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid rgba(255,255,255,0.08); border-left: 1px solid rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
-            .q-sector-grid { display: grid; border-top: 1px solid rgba(255,255,255,0.08); border-left: 1px solid rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
-            .mini-day { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-family: 'JetBrains Mono'; font-size: 0.55rem; background: rgba(0,0,0,0.2); cursor: pointer; transition: 0.2s; border-right: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); color: #fff; box-sizing: border-box; }
+            .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--omni-bg); border-left: 1px solid var(--omni-bg); border-radius: 4px; overflow: hidden; }
+            .q-sector-grid { display: grid; border-top: 1px solid var(--omni-bg); border-left: 1px solid var(--omni-bg); border-radius: 4px; overflow: hidden; }
+            .mini-day { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-family: 'JetBrains Mono'; font-size: 0.55rem; background: rgba(51, 65, 85, 0.2); cursor: pointer; transition: 0.2s; border-right: 1px solid var(--omni-bg); border-bottom: 1px solid var(--omni-bg); color: var(--omni-text); box-sizing: border-box; }
             
-            .mini-day:hover { background: rgba(255,255,255,0.1); border-color: var(--theme-main, #ff003c); }
-            .mini-day.selected { border-color: var(--theme-main, #ff003c) !important; background: var(--theme-main, #ff003c); color: #000; font-weight: bold; box-shadow: 0 0 10px var(--theme-main, #ff003c); z-index: 2;}
-            .mini-day.status-today { border: 1px dashed #fff; z-index: 1;}
+            .mini-day:hover { background: rgba(51, 65, 85, 0.6); border-color: var(--omni-main); color: var(--omni-text); }
+            .mini-day.selected { border-color: var(--omni-main) !important; background: var(--omni-main); color: #000; font-weight: bold; box-shadow: 0 0 10px var(--omni-main); z-index: 2;}
+            .mini-day.status-today { border: 1px dashed var(--omni-text); z-index: 1;}
 
             .macro-grid-q { display: flex; flex-direction: column; gap: 15px; padding: 20px; overflow-y: auto; }
-            .macro-quad-box { background: rgba(0,0,0,0.4); border-width: 1px; border-style: solid; border-radius: 8px; padding: 15px; box-sizing: border-box; }
-            .macro-quad-title { font-family: 'Orbitron'; font-size: 0.85rem; margin-bottom: 10px; text-align: center; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid var(--theme-dim); padding-bottom: 6px; }
+            .macro-quad-box { background: rgba(51, 65, 85, 0.3); border-width: 1px; border-style: solid; border-color: var(--omni-bg); border-radius: 8px; padding: 15px; box-sizing: border-box; }
+            .macro-quad-title { font-family: 'Orbitron'; font-size: 0.85rem; margin-bottom: 10px; text-align: center; letter-spacing: 3px; font-weight: bold; border-bottom: 1px solid var(--omni-bg); padding-bottom: 6px; color: var(--omni-text); }
             
-            .nav-btn { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: var(--theme-main, #ff003c); padding: 6px 10px; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s; }
-            .nav-btn:hover { border-color: var(--theme-main, #ff003c); box-shadow: 0 0 10px rgba(255, 0, 60, 0.2); }
+            .nav-btn { background: var(--omni-bg-light); border: 1px solid var(--omni-bg); color: var(--omni-main); padding: 6px 10px; font-family: 'Orbitron'; font-size: 0.65rem; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s; }
+            .nav-btn:hover { border-color: var(--omni-main); box-shadow: 0 0 10px var(--omni-dim); background: var(--omni-bg); }
 
-            .planner-context { background: rgba(0,0,0,0.5); border: 1px solid var(--theme-dim); padding: 15px; margin: 15px 20px 10px 20px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; }
+            .planner-context { background: var(--omni-bg-light); border: 1px solid var(--omni-bg); padding: 15px; margin: 15px 20px 10px 20px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; }
             
-            .back-btn, .close-planner-btn { background: transparent; border: 1px solid #fff; color: #fff; padding: 6px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; border-radius: 4px; transition: 0.3s; font-weight: bold; letter-spacing: 1px; }
-            .back-btn:hover, .close-planner-btn:hover { background: rgba(255,255,255,0.1); }
-            .close-planner-btn { border-color: #ff3333; color: #ff3333; }
-            .close-planner-btn:hover { background: rgba(255,51,51,0.1); color: #fff; }
+            .back-btn, .close-planner-btn { background: transparent; border: 1px solid var(--omni-text); color: var(--omni-text); padding: 6px 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; border-radius: 4px; transition: 0.3s; font-weight: bold; letter-spacing: 1px; }
+            .back-btn:hover { background: var(--omni-bg); }
+            .close-planner-btn { border-color: var(--omni-warn); color: var(--omni-warn); }
+            .close-planner-btn:hover { background: rgba(255,0,60,0.1); color: var(--omni-text); }
             
             .editor-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; overflow-y: auto; }
-            .slot-block { padding: 15px; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-            .slot-block:focus-within { border-color: var(--theme-main, #ff003c); box-shadow: inset 0 0 10px rgba(255, 0, 60, 0.15); }
+            .slot-block { padding: 15px; background: var(--omni-bg-light); border-radius: 8px; border: 1px solid var(--omni-bg); transition: 0.3s; }
+            .slot-block:focus-within { border-color: var(--omni-main); box-shadow: inset 0 0 10px var(--omni-dim); }
             
-            .q-cal-jump { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: var(--theme-main, #ff003c); font-family: 'Orbitron'; font-size: 0.65rem; padding: 6px 10px; border-radius: 4px; outline: none; text-align: center; color-scheme: dark; margin-left: 15px; cursor: pointer; transition: 0.3s; }
+            .q-cal-jump { background: var(--omni-bg-light); border: 1px solid var(--omni-bg); color: var(--omni-main); font-family: 'Orbitron'; font-size: 0.65rem; padding: 6px 10px; border-radius: 4px; outline: none; text-align: center; color-scheme: dark; margin-left: 15px; cursor: pointer; transition: 0.3s; }
+            .q-cal-jump:focus { border-color: var(--omni-main); }
 
-            .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'JetBrains Mono'; color: #fff; position: relative; overflow: hidden; transition: 0.3s; z-index: 1; }
-            .time-block:hover { background: rgba(255,255,255,0.05); }
+            .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--omni-bg); font-family: 'JetBrains Mono'; color: var(--omni-text); position: relative; overflow: hidden; transition: 0.3s; z-index: 1; }
+            .time-block:hover { background: rgba(51, 65, 85, 0.6); }
             
-            .tension-dashboard { background: rgba(0,0,0,0.6); border: 1px dashed var(--magenta-glow, #ff003c); border-radius: 6px; padding: 15px; margin: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; }
-            .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--magenta-glow, #ff003c); text-shadow: 0 0 15px var(--magenta-dim, rgba(255,0,60,0.3)); }
-            .consultant-advice { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: #aaa; max-width: 60%; line-height: 1.4; }
+            .time-block.flow-state { border-left: 4px solid var(--env-green, #a7ff83); background: rgba(167, 255, 131, 0.05); }
+            .time-block.vent-state { border-left: 4px solid var(--sys-cyan, #00f0ff); background: rgba(0, 240, 255, 0.05); }
+            .time-block.sleep-state { border-left: 4px solid var(--bio-purple, #b829ff); background: rgba(184, 41, 255, 0.05); }
+            .time-block.inertia-state { border-left: 4px solid var(--chrono-amber, #B97A35); background: rgba(185, 122, 53, 0.05); }
+            .time-block.dlmo-state { border-left: 4px solid var(--bio-cobalt, #0055ff); background: rgba(0, 85, 255, 0.05); }
+            
+            .tension-dashboard { background: var(--omni-bg-light); border: 1px dashed var(--omni-warn); border-radius: 6px; padding: 15px; margin: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; }
+            .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--omni-warn); text-shadow: 0 0 15px rgba(255,0,60,0.3); }
+            .consultant-advice { font-family: 'JetBrains Mono'; font-size: 0.65rem; color: rgba(229, 228, 226, 0.6); max-width: 60%; line-height: 1.4; }
             
             /* THE CAGE: Visual Friction Mapping */
-            .fixed-civil-constraint { border: 2px dashed #ff003c !important; background: rgba(255,0,60,0.1) !important; box-shadow: inset 0 0 20px rgba(255,0,60,0.2), 0 0 10px rgba(255,0,60,0.4) !important; margin: 4px 10px; border-radius: 4px; position: relative; }
+            .fixed-civil-constraint { border: 2px dashed var(--omni-warn) !important; background: rgba(255,0,60,0.1) !important; box-shadow: inset 0 0 20px rgba(255,0,60,0.2), 0 0 10px rgba(255,0,60,0.4) !important; margin: 4px 10px; border-radius: 4px; position: relative; }
             .fixed-civil-constraint::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,0,60,0.05) 10px, rgba(255,0,60,0.05) 20px); z-index: 0; pointer-events: none; }
             .fixed-civil-constraint > * { position: relative; z-index: 2; }
             
@@ -322,7 +339,7 @@ window.Q_OmniPlanner = {
             .cal-title-wrapper.show-quad .title-divider { display: none; }
 
             .macro-hierarchy-nav { order: 2; display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; background: transparent; border: none; padding: 0; }
-            .macro-btn { padding: 12px 0; font-size: 0.65rem; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
+            .macro-btn { padding: 12px 0; font-size: 0.65rem; background: var(--omni-bg-light); border: 1px solid var(--omni-bg); }
 
             .step-nav-group { order: 3; display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; justify-content: stretch; }
             .nav-btn { padding: 12px 0; font-size: 0.55rem; margin: 0; text-align: center; white-space: nowrap; }
@@ -454,7 +471,7 @@ window.Q_OmniPlanner = {
                 let daysElapsed = (this.selectedDate - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
                 let oData = window.getOrbitalData(daysElapsed);
                 let driftDeg = oData.trueArc - oData.meanArc;
-                let driftColor = driftDeg > 0 ? '#ff003c' : '#00f0ff';
+                let driftColor = driftDeg > 0 ? 'var(--omni-warn)' : 'var(--omni-main)';
                 let driftState = driftDeg > 0 ? "AHEAD" : "BEHIND";
                 cDesc = `<span style="color:var(--gold);">DRIFT:</span> TRUE ELLIPSE ${driftState} <span style="color:${driftColor};">| ${(driftDeg>0?'+':'')}${driftDeg.toFixed(4)}°</span>`;
             }
@@ -462,11 +479,11 @@ window.Q_OmniPlanner = {
         
         let htmlStr = '';
         if (cTitle) {
-            let titleColor = (!this.isLegacy && cTitle.includes('NODE')) ? 'var(--gold)' : 'var(--theme-main)';
+            let titleColor = (!this.isLegacy && cTitle.includes('NODE')) ? 'var(--gold)' : 'var(--omni-main)';
             htmlStr += `<div style="font-family:'Orbitron'; font-size:0.9rem; color:${titleColor}; font-weight:bold; letter-spacing:1px;">${cTitle}</div>`;
         }
         if (cDesc) {
-            htmlStr += `<div style="font-family:'JetBrains Mono'; font-size:0.65rem; color:#aaa; line-height: 1.4; margin-bottom:6px;">${cDesc}</div>`;
+            htmlStr += `<div style="font-family:'JetBrains Mono'; font-size:0.65rem; color:rgba(229, 228, 226, 0.6); line-height: 1.4; margin-bottom:6px;">${cDesc}</div>`;
         }
         
         contextDiv.innerHTML = htmlStr;
@@ -611,7 +628,7 @@ window.Q_OmniPlanner = {
             const year = baseDate.getFullYear(); const month = baseDate.getMonth();
             matrix.style.gridTemplateColumns = 'repeat(7, 1fr)';
             const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-            days.forEach(d => { const h = document.createElement('div'); h.style.textAlign = 'center'; h.style.fontSize = '0.65rem'; h.style.color = '#aaa'; h.style.fontFamily = 'JetBrains Mono'; h.innerText = window.innerWidth <= 768 ? d[0] : d; matrix.appendChild(h); });
+            days.forEach(d => { const h = document.createElement('div'); h.style.textAlign = 'center'; h.style.fontSize = '0.65rem'; h.style.color = 'rgba(229, 228, 226, 0.6)'; h.style.fontFamily = 'JetBrains Mono'; h.innerText = window.innerWidth <= 768 ? d[0] : d; matrix.appendChild(h); });
 
             const firstDay = new Date(year, month, 1); const lastDay = new Date(year, month + 1, 0); const startPad = firstDay.getDay();
             for(let i=0; i<startPad; i++) { matrix.appendChild(document.createElement('div')); }
@@ -622,7 +639,7 @@ window.Q_OmniPlanner = {
                 if(new Date(localTs).setHours(0,0,0,0) === todayDateNum) d.classList.add('status-today');
                 if(new Date(localTs).setHours(0,0,0,0) === selectedDateNum) d.classList.add('selected');
                 
-                d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:#fff; font-size: 1rem;">${i}</div>`;
+                d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-text); font-size: 1rem;">${i}</div>`;
                 
                 this.injectHolidays(d, new Date(localTs));
 
@@ -656,9 +673,9 @@ window.Q_OmniPlanner = {
                 if (window.hasDataInBlock && window.hasDataInBlock(cCycle, item.absDeg)) d.classList.add('status-red');
                 
                 if (item.isAnchor) {
-                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--gold, #F4D068); font-size:0.75rem; text-align:center;">${item.name}</div><div style="font-size:0.55rem; color:#aaa; margin-top:4px; font-weight:bold;">DEG ${item.deg}</div>`;
+                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--gold, #F4D068); font-size:0.75rem; text-align:center;">${item.name}</div><div style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); margin-top:4px; font-weight:bold;">DEG ${item.deg}</div>`;
                 } else {
-                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--theme-main, #ff003c); text-align:center;">DEG ${item.deg}</div>`;
+                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-main); text-align:center;">DEG ${item.deg}</div>`;
                 }
                 
                 this.injectHolidays(d, new Date(absStart));
@@ -682,7 +699,6 @@ window.Q_OmniPlanner = {
             const currentMonth = baseDate.getMonth();
             const quarterStartMonth = Math.floor(currentMonth / 3) * 3;
             const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-            const mColors = ['#00f0ff', '#0ea5e9', '#38bdf8', '#a7ff83', '#4ade80', '#22c55e', '#F4D068', '#fbbf24', '#f59e0b', '#ff003c', '#f43f5e', '#e11d48'];
             const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
             
             const matrix = document.createElement('div');
@@ -691,16 +707,13 @@ window.Q_OmniPlanner = {
             for(let m = quarterStartMonth; m < quarterStartMonth + 3; m++) {
                 const monthBox = document.createElement('div');
                 monthBox.className = 'macro-month-box';
-                monthBox.style.borderColor = mColors[m];
-                monthBox.innerHTML = `<div class="macro-month-title" style="color:${mColors[m]}">${months[m]} ${year}</div>`;
+                monthBox.innerHTML = `<div class="macro-month-title">${months[m]} ${year}</div>`;
                 
                 const grid = document.createElement('div');
                 grid.className = 'mini-cal-grid';
                 daysOfWeek.forEach(dayName => {
                     const header = document.createElement('div');
                     header.className = 'mini-day';
-                    header.style.color = mColors[m];
-                    header.style.background = 'rgba(0,0,0,0.4)';
                     header.style.fontWeight = 'bold';
                     header.style.pointerEvents = 'none';
                     header.innerText = dayName;
@@ -727,8 +740,7 @@ window.Q_OmniPlanner = {
             }
             container.appendChild(matrix);
        } else {
-            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">ORBITAL LEDGER</span></div></div>`;
-            const qColors = ['', '#00f0ff', '#a7ff83', '#F4D068', '#ff003c'];
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:var(--omni-text);">ORBITAL LEDGER</span></div></div>`;
             
             let activeBlock = window.getQBlockByTime(this.plannerBase);
             if(!activeBlock) return;
@@ -740,8 +752,7 @@ window.Q_OmniPlanner = {
             
             const quadBox = document.createElement('div');
             quadBox.className = 'macro-quad-box';
-            quadBox.style.borderColor = qColors[aQuad];
-            quadBox.innerHTML = `<div class="macro-quad-title" style="color:${qColors[aQuad]}">QUADRANT ${aQuad}</div>`;
+            quadBox.innerHTML = `<div class="macro-quad-title">QUADRANT ${aQuad}</div>`;
             
             const sectorsWrapper = document.createElement('div');
             sectorsWrapper.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center;';
@@ -749,8 +760,7 @@ window.Q_OmniPlanner = {
             for(let s = 1; s <= 3; s++) {
                 const sectorBox = document.createElement('div');
                 sectorBox.className = 'macro-month-box';
-                sectorBox.style.borderColor = qColors[aQuad];
-                sectorBox.innerHTML = `<div class="macro-month-title" style="color:${qColors[aQuad]}">SECTOR ${s}</div>`;
+                sectorBox.innerHTML = `<div class="macro-month-title">SECTOR ${s}</div>`;
                 
                 const qGrid = document.createElement('div');
                 qGrid.className = 'q-sector-grid';
@@ -793,7 +803,6 @@ window.Q_OmniPlanner = {
             const baseDate = new Date(this.plannerBase);
             const year = baseDate.getFullYear();
             const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-            const mColors = ['#00f0ff', '#0ea5e9', '#38bdf8', '#a7ff83', '#4ade80', '#22c55e', '#F4D068', '#fbbf24', '#f59e0b', '#ff003c', '#f43f5e', '#e11d48'];
             const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
             
             const matrix = document.createElement('div');
@@ -802,16 +811,13 @@ window.Q_OmniPlanner = {
             for(let m = 0; m < 12; m++) {
                 const monthBox = document.createElement('div');
                 monthBox.className = 'macro-month-box';
-                monthBox.style.borderColor = mColors[m];
-                monthBox.innerHTML = `<div class="macro-month-title" style="color:${mColors[m]}">${months[m]}</div>`;
+                monthBox.innerHTML = `<div class="macro-month-title">${months[m]}</div>`;
                 
                 const grid = document.createElement('div');
                 grid.className = 'mini-cal-grid';
                 daysOfWeek.forEach(dayName => {
                     const header = document.createElement('div');
                     header.className = 'mini-day';
-                    header.style.color = mColors[m];
-                    header.style.background = 'rgba(0,0,0,0.4)';
                     header.style.fontWeight = 'bold';
                     header.style.pointerEvents = 'none';
                     header.innerText = dayName;
@@ -841,8 +847,7 @@ window.Q_OmniPlanner = {
             let activeBlock = window.getQBlockByTime(this.plannerBase);
             if(!activeBlock) return;
             let cCycle = activeBlock.cycle;
-            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:#fff;">CYCLE ${cCycle}</span></div></div>`;
-            const qColors = ['', '#00f0ff', '#a7ff83', '#F4D068', '#ff003c'];
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:var(--omni-text);">CYCLE ${cCycle}</span></div></div>`;
             
             const matrix = document.createElement('div');
             matrix.className = 'macro-grid-q';
@@ -850,8 +855,7 @@ window.Q_OmniPlanner = {
             for(let q = 1; q <= 4; q++) {
                 const quadBox = document.createElement('div');
                 quadBox.className = 'macro-quad-box';
-                quadBox.style.borderColor = qColors[q];
-                quadBox.innerHTML = `<div class="macro-quad-title" style="color:${qColors[q]}">QUADRANT ${q}</div>`;
+                quadBox.innerHTML = `<div class="macro-quad-title">QUADRANT ${q}</div>`;
                 
                 const sectorsWrapper = document.createElement('div');
                 sectorsWrapper.style.cssText = 'display:flex; flex-wrap:wrap; gap:15px; justify-content:center;';
@@ -859,8 +863,7 @@ window.Q_OmniPlanner = {
                 for(let s = 1; s <= 3; s++) {
                     const sectorBox = document.createElement('div');
                     sectorBox.className = 'macro-month-box';
-                    sectorBox.style.borderColor = qColors[q];
-                    sectorBox.innerHTML = `<div class="macro-month-title" style="color:${qColors[q]}">SECTOR ${s}</div>`;
+                    sectorBox.innerHTML = `<div class="macro-month-title">SECTOR ${s}</div>`;
                     
                     const qGrid = document.createElement('div');
                     qGrid.className = 'q-sector-grid';
@@ -937,7 +940,7 @@ window.Q_OmniPlanner = {
             dashboard.innerHTML = `
                 <div class="tension-dashboard">
                     <div style="display:flex; flex-direction:column;">
-                        <span style="font-family:'Orbitron'; font-size:0.6rem; color:#aaa;">CIVIL TENSION SCORE</span>
+                        <span style="font-family:'Orbitron'; font-size:0.6rem; color:rgba(229, 228, 226, 0.6);">CIVIL TENSION SCORE</span>
                         <span class="tension-score">${tensionData.score}%</span>
                     </div>
                     <div class="consultant-advice">${tensionData.advice}</div>
@@ -957,18 +960,18 @@ window.Q_OmniPlanner = {
                 let civilFmt = window.formatLegacyDate(b.ms);
                 
                 let hasData = b.text.trim() !== "";
-                let colorStr = hasData ? '#fff' : 'var(--theme-main, #00f0ff)';
-                let timeHeaderHtml = `<div class="time-header" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px #fff' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
+                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
+                let timeHeaderHtml = `<div class="time-header" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
                 
                 let badgeHtml = '';
-                if (isCivilConstraint) badgeHtml += `<span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
+                if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
 
                 block.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
                         ${timeHeaderHtml}
                         <div>${badgeHtml}</div>
                     </div>
-                    <div style="font-size:0.6rem; color:#aaa; font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; position: relative; z-index: 2;">
+                    <div style="font-size:0.6rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; position: relative; z-index: 2;">
                         ${b.text ? b.text : "..."}
                     </div>
                 `;
@@ -1024,9 +1027,9 @@ window.Q_OmniPlanner = {
                 block.className = `slot-block time-block ${blockClass}`;
                 
                 let hasData = data.text.trim() !== "";
-                let colorStr = hasData ? '#fff' : 'var(--theme-main, #00f0ff)';
+                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
-                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px #fff' : 'none'};">DEG ${activeBlock.absDeg}.${m}</span><span style="font-size:0.55rem; color:#aaa; font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}.${m}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
                 if (currentBioState === 'DEEP FLOW') badgeHtml = `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>`;
@@ -1035,14 +1038,14 @@ window.Q_OmniPlanner = {
                 else if (currentBioState === 'DLMO WIND-DOWN') badgeHtml = `<span style="color:var(--bio-cobalt, #0055ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DLMO WIND-DOWN</span>`;
                 else badgeHtml = `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
 
-                if (isCivilConstraint) badgeHtml += ` <span style="background:#ff003c; color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
+                if (isCivilConstraint) badgeHtml += ` <span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
 
                 block.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
                         ${timeHeaderHtml}
                         <div>${badgeHtml}</div>
                     </div>
-                    <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? '#ff003c' : '#fff'}; border:none; border-bottom:1px solid rgba(255,255,255,0.2); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
+                    <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? 'var(--omni-warn)' : 'var(--omni-text)'}; border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
                 
                 if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
                 matrix.appendChild(block);
@@ -1055,7 +1058,7 @@ window.Q_OmniPlanner = {
         let baseMs = this.selectedDate;
         let dualTitleHtml = window.getDualTitle(baseMs, this.isLegacy);
         
-        title.innerHTML = `${dualTitleHtml} <div style="font-size:0.75rem; color:#aaa; font-family:'Orbitron'; margin-top:6px; text-align:center;">@ LOCAL ${this.selectedHour.toString().padStart(2,'0')}:00</div>`;
+        title.innerHTML = `${dualTitleHtml} <div style="font-size:0.75rem; color:rgba(229, 228, 226, 0.6); font-family:'Orbitron'; margin-top:6px; text-align:center;">@ LOCAL ${this.selectedHour.toString().padStart(2,'0')}:00</div>`;
 
         const matrix = document.createElement('div'); matrix.className = 'editor-matrix';
         let totalMins = Math.ceil(this.selectedHourDur / 60000);
@@ -1112,18 +1115,18 @@ window.Q_OmniPlanner = {
             block.className = `slot-block time-block ${blockClass}`;
             
             let hasData = data.text.trim() !== "";
-            let colorStr = hasData ? '#fff' : 'var(--theme-main, #ff003c)';
+            let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
             
-            let timeHeaderHtml = `<div style="font-size:0.8rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px #fff' : 'none'};">:${m.toString().padStart(2,'0')} LOCAL</div>`;
+            let timeHeaderHtml = `<div style="font-size:0.8rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">:${m.toString().padStart(2,'0')} LOCAL</div>`;
 
             block.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
                     ${timeHeaderHtml}
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="font-size:0.5rem; color:#aaa; font-family:'JetBrains Mono';">COORD: ${orbital.trueArc.toFixed(2)}°</div>
+                        <div style="font-size:0.5rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono';">COORD: ${orbital.trueArc.toFixed(2)}°</div>
                     </div>
                 </div>
-                <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? '#ff003c' : '#fff'}; border:none; border-bottom:1px solid rgba(255,255,255,0.2); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent or [FIXED] civil event..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
+                <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? 'var(--omni-warn)' : 'var(--omni-text)'}; border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent or [FIXED] civil event..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
             
             if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
             matrix.appendChild(block);
