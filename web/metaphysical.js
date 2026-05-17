@@ -1,7 +1,6 @@
 // THE QUADRATURE: METAPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase IV UI Engine. Decoupled Logic & Math Engine.
-// REVISION: Critical DOM Targeting Fix. Hollow Shell IDs (tl/tr/bl/br) correctly mapped.
+// STATUS: Phase V UI Engine. Predictive Modals & Planner Sync Injection.
 
 window.Q_REGISTRY = {
     REL_DB: {
@@ -72,10 +71,10 @@ window.Q_REGISTRY = {
         ]
     },
     ANCHORS: [
-        { name: "Alpha Anchor", coord: 0, type: 'node-anc', glyph: '◓', event: 'SOUTHERN SOLSTICE' },
-        { name: "Beta Anchor", coord: 90, type: 'node-anc', glyph: '◐', event: '1ST EQUINOX' },
-        { name: "Gamma Anchor", coord: 180, type: 'node-anc', glyph: '◒', event: 'NORTHERN SOLSTICE' },
-        { name: "Delta Anchor", coord: 270, type: 'node-anc', glyph: '◑', event: '2ND EQUINOX' }
+        { name: "SOUTHERN SOLSTICE", coord: 0, type: 'node-anc', glyph: '◓' },
+        { name: "1ST EQUINOX", coord: 90, type: 'node-anc', glyph: '◐' },
+        { name: "NORTHERN SOLSTICE", coord: 180, type: 'node-anc', glyph: '◒' },
+        { name: "2ND EQUINOX", coord: 270, type: 'node-anc', glyph: '◑' }
     ],
     SOLAR_TERMS: Array.from({length: 24}).map((_,i) => ({ name: `Jiéqì ${i+1}`, start: i*15, theme: "Resonance" }))
 };
@@ -308,9 +307,9 @@ window.openNodeModal = function(eventObj) {
     }
 
     let descType = "Metaphysical integration point.";
-    if(eventObj.type.includes('jud')) descType = "Hebrew structural anchor.";
-    if(eventObj.type.includes('isl')) descType = "Islamic metadata marker.";
-    if(eventObj.type.includes('chr')) descType = "Christian transit event.";
+    if(eventObj.type.includes('jud')) descType = "Hebrew lunar-spring alignment (Judaic).";
+    if(eventObj.type.includes('isl')) descType = "Islamic lunar resonance marker.";
+    if(eventObj.type.includes('chr')) descType = "Christian transit & solar-rebirth event.";
     if(eventObj.type.includes('civ')) descType = "Static Civil observance matrix.";
     if(eventObj.type.includes('hin') || eventObj.type.includes('bud') || eventObj.type.includes('tao')) descType = "Eastern Traditional alignment node.";
     if(eventObj.type.includes('hol')) descType = "Societal Holiday resonance marker.";
@@ -344,6 +343,15 @@ window.openNodeModal = function(eventObj) {
     if (window.Q_ModalEngine) {
         window.Q_ModalEngine.render(eventObj.name.toUpperCase(), html, 'SAVE & CLOSE', saveOptions);
     }
+};
+
+window.openAnchorModal = function(nodeName) {
+    if (!window.Q_REGISTRY || !window.Q_REGISTRY.ANCHORS) return;
+    let anchorObj = window.Q_REGISTRY.ANCHORS.find(a => a.name.toUpperCase() === nodeName.toUpperCase());
+    if (!anchorObj) return;
+    
+    // Direct routing to the standard node modal parsing function
+    window.openNodeModal(anchorObj);
 };
 
 function renderNodes(renderedList, parentLayer, radius) {
@@ -410,9 +418,13 @@ function renderDynamicRing() {
         if (pArc < 0) pArc += 360;
         
         let oNode = document.createElement('div'); oNode.className = 'origin-node';
-        oNode.title = "NATAL ANCHOR (PERSONAL ARC)"; oNode.style.pointerEvents = "auto"; oNode.style.cursor = "help";
+        oNode.style.pointerEvents = "auto"; oNode.style.cursor = "help";
         let oAngle = (pArc - 90) * (Math.PI / 180); let oX = 50 + 27.5 * Math.cos(oAngle); let oY = 50 + 27.5 * Math.sin(oAngle);
         oNode.style.left = `${oX}%`; oNode.style.top = `${oY}%`; oNode.style.transform = `rotate(${pArc}deg)`;
+        
+        oNode.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(`NATAL ANCHOR: ${savedDob} (${pArc.toFixed(2)}°)`, 'var(--theme-main)'); };
+        oNode.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
+        
         nodeLayer.appendChild(oNode);
     }
 
@@ -444,8 +456,12 @@ function renderDynamicRing() {
     if (activeIntrospection && window.Q_REGISTRY.SOLAR_TERMS) {
         window.Q_REGISTRY.SOLAR_TERMS.forEach(term => {
             let el = document.createElement('div'); el.className = 'term-marker';
-            let angle = (term.start - 90) * (Math.PI / 180); let x = 50 + 35 * Math.cos(angle); let y = 50 + 35 * Math.sin(angle);
-            el.style.left = `${x}%`; el.style.top = `${y}%`; el.style.transform = `rotate(${term.start}deg)`;
+            let angle = (term.start - 90) * (Math.PI / 180); 
+            let x = 50 + 35 * Math.cos(angle); let y = 50 + 35 * Math.sin(angle);
+            el.style.left = `${x}%`; el.style.top = `${y}%`; 
+            el.style.transform = `translate(-50%, -50%) rotate(45deg)`;
+            el.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(`${term.name.toUpperCase()} (JIÉQÌ)`, 'var(--copper)'); };
+            el.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
             nodeLayer.appendChild(el);
         });
     }
@@ -463,6 +479,7 @@ window.openOptions = function(e, target) {
     
     if(target === 'rel') {
         title = "RELIGIOUS OVERLAY MULTI-SELECT";
+        const savedData = localStorage.getItem('q_journal_rel') || "";
         html = `
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label class="chk-row" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum);"><input type="checkbox" value="jud" id="chk-jud" ${activeFaiths.includes('jud')?'checked':''} style="accent-color:var(--gold-bright);"> HEBREW (JUD) - ✡</label>
@@ -471,11 +488,14 @@ window.openOptions = function(e, target) {
                 <label class="chk-row" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum);"><input type="checkbox" value="hin" id="chk-hin" ${activeFaiths.includes('hin')?'checked':''} style="accent-color:var(--gold-bright);"> HINDU (LUNISOLAR) - ॐ</label>
                 <label class="chk-row" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum);"><input type="checkbox" value="bud" id="chk-bud" ${activeFaiths.includes('bud')?'checked':''} style="accent-color:var(--gold-bright);"> BUDDHISM - ☸</label>
                 <label class="chk-row" style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--platinum);"><input type="checkbox" value="tao" id="chk-tao" ${activeFaiths.includes('tao')?'checked':''} style="accent-color:var(--gold-bright);"> TAOISM/ZEN - ☯</label>
-            </div>`;
+            </div>
+            <div style="font-size:0.6rem; color:var(--platinum); margin-top:10px; border-top:1px dashed var(--gold-dim); padding-top:10px;">PLANNER SYNC:</div>
+            <textarea id="rel-text" class="modal-textarea" placeholder="Log religious/cultural intent...">${savedData}</textarea>
+        `;
     } else if(target === 'zod') {
         title = "ZODIACAL CONFIGURATION";
-        
         const savedAnchor = localStorage.getItem('q_natal_anchor') || 'NONE';
+        const savedData = localStorage.getItem('q_journal_zod') || "";
         
         let ephStatus = 'STANDBY';
         if (window.Q_Plugin_Zodiacal && window.Q_Plugin_Zodiacal.engineState === 'ACTIVE') {
@@ -495,9 +515,14 @@ window.openOptions = function(e, target) {
                 <option value="CAPRICORN" ${savedAnchor==='CAPRICORN'?'selected':''}>CAPRICORN</option><option value="AQUARIUS" ${savedAnchor==='AQUARIUS'?'selected':''}>AQUARIUS</option><option value="PISCES" ${savedAnchor==='PISCES'?'selected':''}>PISCES</option>
             </select>
             <div style="font-size:0.5rem; color:var(--platinum); margin-top:5px; text-align:center;">UPDATE VIA PHYSIOLOGICAL VECTOR CALIBRATION FOR FULL SYNC</div>
+            
+            <div style="font-size:0.6rem; color:var(--platinum); margin-top:10px; border-top:1px dashed var(--gold-dim); padding-top:10px;">PLANNER SYNC:</div>
+            <textarea id="zod-text" class="modal-textarea" placeholder="Log transit intent...">${savedData}</textarea>
+            
             <div style="font-size:0.5rem; color:var(--gold-bright); margin-top:10px; text-align:center; padding-top:5px; border-top:1px dashed var(--gold-dim);" id="eph-api-status">EPHEMERIS API: ${ephStatus} (PHASE V)</div>`;
     } else if(target === 'civ') {
         title = "CIVIL ANCHOR LOCALE"; 
+        const savedData = localStorage.getItem('q_journal_civ') || "";
         html = `<label style="font-size:0.6rem; color:rgba(255,255,255,0.6); font-family:'Orbitron';">ORIGIN MATRIX:</label>
         <select class="modal-input"><option>US (STATIC)</option><option>GLOBAL (UN)</option><option>GEOLOCATION (AUTO)</option></select>
         <div style="margin-top:15px; border-top:1px dashed var(--copper); padding-top:10px;">
@@ -507,7 +532,10 @@ window.openOptions = function(e, target) {
                 <button class="opt-btn ${activeAnchors ? 'active' : ''}" onclick="toggleVisibility('anc', this)" id="btn-anc">ANCHORS</button>
                 <button class="opt-btn ${activeSys ? 'active' : ''}" onclick="toggleVisibility('sys', this)" id="btn-sys">SYS MARKS</button>
             </div>
-        </div>`;
+        </div>
+        <div style="font-size:0.6rem; color:var(--platinum); margin-top:10px; border-top:1px dashed var(--gold-dim); padding-top:10px;">PLANNER SYNC:</div>
+        <textarea id="civ-text" class="modal-textarea" placeholder="Log civil/systemic intent...">${savedData}</textarea>
+        `;
     } else if(target === 'int') {
         title = `PRO USER DIARY`;
         const savedData = localStorage.getItem('q_journal_' + activeTermName) || ""; 
@@ -549,6 +577,7 @@ window.openZodiacModal = function(clickedSign, clickedIndex) {
             <div style="font-size:0.7rem; color:var(--starlight); margin-top:15px; line-height:1.5; border-top:1px dashed rgba(255,215,0,0.3); padding-top:15px; text-align:center;">
                 ${aspectDesc}
             </div>
+            <button class="opt-btn" style="margin-top: 15px; width: 100%;" onclick="window.Q_ModalEngine.close(); syncToPlanner(Date.now(), 'TRANSIT', 'Active Aspect: ${aspect} (${savedAnchor} / ${clickedSign})')">COMMIT TO PLANNER</button>
         `;
     } else {
         relationshipHtml = `<div style="font-size:0.6rem; color:var(--warn-orange); margin-top:10px; text-align:center; padding:10px;">NO NATAL ANCHOR DETECTED.<br>CALIBRATE VIA PHYSIOLOGICAL VECTOR.</div>`;
@@ -598,6 +627,14 @@ function saveOptions() {
         });
         const relActive = document.getElementById('rel-active');
         if (relActive) relActive.innerText = activeFaiths.length > 1 ? "MULTI-FAITH" : (activeFaiths[0] ? activeFaiths[0].toUpperCase() : "NONE");
+        
+        const tEl = document.getElementById('rel-text');
+        if (tEl) {
+            localStorage.setItem('q_journal_rel', tEl.value);
+            if (window.getSimState) {
+                syncToPlanner(window.getSimState().isLive ? Date.now() : window.getSimState().simTime, "RELIGIOUS", tEl.value);
+            }
+        }
         renderDynamicRing();
     } else if (currentOptTarget === 'zod') {
         const chkShowZod = document.getElementById('chk-show-zod');
@@ -613,7 +650,23 @@ function saveOptions() {
             if (window.Q_UpdateState) window.Q_UpdateState('metaphysical_layer', 'natal_anchor', natal);
         }
         
+        const zEl = document.getElementById('zod-text');
+        if (zEl) {
+            localStorage.setItem('q_journal_zod', zEl.value);
+            if (window.getSimState) {
+                syncToPlanner(window.getSimState().isLive ? Date.now() : window.getSimState().simTime, "TRANSIT", zEl.value);
+            }
+        }
+        
         renderDynamicRing();
+    } else if(currentOptTarget === 'civ') {
+        const cEl = document.getElementById('civ-text');
+        if (cEl) {
+            localStorage.setItem('q_journal_civ', cEl.value);
+            if (window.getSimState) {
+                syncToPlanner(window.getSimState().isLive ? Date.now() : window.getSimState().simTime, "CIVIL", cEl.value);
+            }
+        }
     } else if(currentOptTarget === 'int') {
         const jTextEl = document.getElementById('journal-text');
         if (jTextEl) {
