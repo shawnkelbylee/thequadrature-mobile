@@ -2,40 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>THE QUADRATURE // ASTROPHYSICAL VECTOR</title>
     
     <script src="q-ui.js"></script>
     <script src="q-core.js"></script>
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
-    <script src="astrophysical.js?v=22.8"></script>
+    <script src="astrophysical.js?v=23.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700;800&display=swap');
 
         :root {
             --void: #030406; --core-plat: #e2e8f0; --core-dim: rgba(226, 232, 240, 0.15); --core-glow: rgba(226, 232, 240, 0.4);
-            --cyan-glow: #00f0ff; --cyan-dim: rgba(0, 240, 255, 0.2); --cyan-dark: #0088aa;
-            --magenta-glow: #ff003c; --magenta-dim: rgba(255, 0, 60, 0.2); --magenta-dark: #880020;
+            --cyan-glow: #00f0ff; --cyan-dim: rgba(0, 240, 255, 0.2);
+            --magenta-glow: #ff003c; --magenta-dim: rgba(255, 0, 60, 0.2);
             --titanium: #334155; --carbon: #0f172a; --steel: #64748b;
-            --blur-heavy: blur(20px);
-            --theme-main: var(--cyan-glow); --theme-dim: var(--cyan-dim); --gold: #F4D068;
+            --gold: #F4D068; --silver: #e0e0e0;
+            --theme-main: var(--cyan-glow); --theme-dim: var(--cyan-dim);
             --starlight: rgba(255, 255, 255, 0.6);
-            
-            /* Dynamic variables updated via JS */
-            --dyn-phase-color: var(--magenta-glow);
-            --dyn-phase-dim: var(--magenta-dim);
+            --dial-size: 65vh;
         }
 
         body { margin: 0; padding: 0; height: 100vh; width: 100vw; overflow: hidden; background-color: var(--void); background: radial-gradient(circle at center, #0a0f1a 0%, var(--void) 85%); color: var(--core-plat); font-family: 'JetBrains Mono', monospace; display: flex; justify-content: center; align-items: center; user-select: none; color-scheme: dark; perspective: 1500px; transform-style: preserve-3d; touch-action: manipulation; }
         
-        /* --- HAPTIC & MODAL Z-INDEX OVERRIDES --- */
         #q-universal-modal { z-index: 999999 !important; }
-        .radar-box, .opt-btn, .globe, .fmt-toggle { pointer-events: auto !important; position: relative; z-index: 100 !important; }
+        .radar-box, .opt-btn, .fmt-toggle { pointer-events: auto !important; position: relative; z-index: 100 !important; }
 
         .matrix-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background-image: linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
-        #stars { z-index: 1; }
+        #stars { z-index: 1; opacity: 0.4; } /* Reduced starfield opacity per directive */
 
         .global-header {
             position: absolute; top: 4vh; left: 0; width: 100vw;
@@ -45,62 +41,112 @@
             text-shadow: 0 0 15px var(--theme-dim), 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
-        /* Headers bound strictly to the 280px text wrapper edge, shifted outwards by 1 character (8px) */
-        .v-head { 
-            position: absolute; white-space: nowrap;
-            font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; 
-            margin: 0; padding: 0; z-index: 25; border: none;
-            color: var(--theme-main);
-            text-shadow: 0 0 10px var(--theme-dim);
-            transition: color 0.3s, text-shadow 0.3s;
-        }
-        
-        /* Top Panels: Headers tight BELOW the frame */
+        .v-head { position: absolute; white-space: nowrap; font-family: 'Orbitron'; font-weight: 900; font-size: 0.75rem; letter-spacing: 2px; margin: 0; padding: 0; z-index: 25; border: none; color: var(--theme-main); text-shadow: 0 0 10px var(--theme-dim); transition: color 0.3s, text-shadow 0.3s; }
         #quad-BIO .v-head, #quad-tl .v-head { bottom: -16px; right: 0; text-align: right; transform: translateX(8px); }
         #quad-COM .v-head, #quad-tr .v-head { bottom: -16px; left: 0; text-align: left; transform: translateX(-8px); }
-        
-        /* Bottom Panels: Headers tight ABOVE the frame */
         #quad-ENV .v-head, #quad-bl .v-head { top: -16px; right: 0; text-align: right; transform: translateX(8px); }
         #quad-MEC .v-head, #quad-br .v-head { top: -16px; left: 0; text-align: left; transform: translateX(-8px); }
 
         .t-row { display: flex; justify-content: space-between; width: 100%; font-size: 0.55rem; font-family: 'JetBrains Mono'; font-weight: 700; align-items: center;}
-        
         .val-sm { font-family: 'Orbitron'; font-weight: 900; font-size: 0.6rem; z-index: 20; text-align: right; white-space: nowrap; color: var(--theme-main); text-shadow: 0 0 8px var(--theme-dim); text-transform: uppercase; }
-
         .panel-data-wrapper { position: relative; width: 280px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 4px; margin: 0 auto; z-index: 20; }
-        
-        .val-display { background: rgba(0,0,0,0.8); border: 1px solid var(--titanium); padding: 4px 8px; border-radius: 4px; box-shadow: inset 0 0 15px rgba(0,0,0,0.9); margin-bottom: 2px; }
-
-        .respiration-wave { position: absolute; width: 200%; height: 100%; transition: background 1s ease, border 1s ease; left: 0; }
-        @keyframes wave-shift { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
-
-        .radar-box { width: 100%; height: 2.5vh; min-height: 20px; background: rgba(0,0,0,0.8); border: 1px solid var(--titanium); border-radius: 4px; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 15px rgba(0,240,255,0.1); cursor: pointer; transition: 0.3s; }
-        .radar-box:hover { border-color: var(--cyan-glow); box-shadow: inset 0 0 20px rgba(0,240,255,0.3), 0 0 15px var(--cyan-dim); }
-        .radar-sweep { position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4)); animation: sweep 2.5s linear infinite; }
-        .radar-text { font-family: 'Orbitron'; font-size: 0.55rem; font-weight: 900; color: var(--core-plat); z-index: 2; text-shadow: 0 0 5px #000; }
-        @keyframes sweep { 0% { left: -100%; } 100% { left: 200%; } }
-
-        .variance-container { width: 100%; height: 2vh; min-height: 16px; background: #000; border: 1px inset var(--titanium); position: relative; overflow: hidden; display: flex; align-items: center; }
-        .variance-wave { position: absolute; height: 100%; width: 200%; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0, 240, 255, 0.4) 5px, rgba(0, 240, 255, 0.4) 10px); transition: opacity 0.3s; animation: variance-shift 0.5s linear infinite; }
-        .variance-val { font-family: 'JetBrains Mono'; font-size: 0.55rem; color: #fff; width: 100%; text-align: center; z-index: 2; text-shadow: 0 0 5px #000; font-weight: bold; }
-        @keyframes variance-shift { 0% { transform: translateX(0); } 100% { transform: translateX(-50px); } }
         
         #needle-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); border: 1px solid var(--titanium); padding: 8px 18px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 100; opacity: 0; transition: opacity 0.3s ease, border-color 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 1px; color: #fff; }
 
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px dashed var(--titanium); padding-top: 10px; }
-        .data-col { display: flex; flex-direction: column; }
-        .data-lbl { font-family: 'Orbitron'; font-size: 0.5rem; color: var(--steel); letter-spacing: 1px; }
-        .data-val { font-size: 0.8rem; font-weight: bold; color: var(--core-plat); text-shadow: 0 0 5px var(--core-glow); }
-        .data-val-cy { color: var(--cyan-glow); text-shadow: 0 0 8px var(--cyan-dim); }
+        /* --- SOLAR SYSTEM ARCHITECTURE --- */
+        .solar-system-wrapper { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: var(--dial-size); height: var(--dial-size); display: flex; justify-content: center; align-items: center; z-index: 5; pointer-events: none; }
+        .solar-system-container { position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center center; }
+        
+        .orbit-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 1px dashed rgba(255,255,255,0.15); pointer-events: none; }
+        .orbit-earth { border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05), 0 0 20px rgba(0, 240, 255, 0.05); }
+
+        .celestial-body { position: absolute; border-radius: 50%; background: #000; display: flex; justify-content: center; align-items: center; pointer-events: auto; cursor: help; transform: translate(-50%, -50%); }
+        
+        /* Sun & Barycenter */
+        #barycenter-crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; pointer-events: auto; cursor: help; z-index: 30;}
+        #barycenter-crosshair::before, #barycenter-crosshair::after { content: ''; position: absolute; background: var(--starlight); }
+        #barycenter-crosshair::before { top: 50%; left: 0; width: 100%; height: 1px; transform: translateY(-50%); }
+        #barycenter-crosshair::after { left: 50%; top: 0; height: 100%; width: 1px; transform: translateX(-50%); }
+        
+        #sun-core { width: 4.5%; height: 4.5%; border: 2px solid var(--gold); box-shadow: 0 0 25px var(--gold), inset 0 0 10px var(--gold); z-index: 25; transition: top 0.1s, left 0.1s; }
+        
+        /* Inner Planets */
+        .sys-mercury { width: 1.5%; height: 1.5%; border: 1px solid var(--silver); box-shadow: 0 0 8px var(--silver); z-index: 20; }
+        .sys-venus { width: 2.2%; height: 2.2%; border: 1px solid var(--magenta-glow); box-shadow: 0 0 12px var(--magenta-glow); z-index: 20; }
+        
+        /* Earth-Moon System */
+        #earth-system { position: absolute; width: 0; height: 0; z-index: 25; pointer-events: none; }
+        .sys-earth { width: 2.5vh; height: 2.5vh; border: 2px solid var(--cyan-glow); box-shadow: 0 0 15px var(--cyan-glow), inset 0 0 8px var(--cyan-glow); pointer-events: auto; }
+        .sys-moon { width: 0.8vh; height: 0.8vh; border: 1px solid var(--silver); box-shadow: 0 0 5px var(--silver); pointer-events: auto; }
+
+        /* Outer Planets (Revealed in Macro) */
+        .sys-jupiter { width: 4.0%; height: 4.0%; border: 2px solid #ff9933; box-shadow: 0 0 15px #ff9933; z-index: 15; opacity: 0; transition: opacity 0.5s; }
+        .sys-saturn { width: 3.5%; height: 3.5%; border: 2px solid #b829ff; box-shadow: 0 0 15px #b829ff; z-index: 15; opacity: 0; transition: opacity 0.5s; }
+        .saturn-rings { position: absolute; width: 200%; height: 40%; border-radius: 50%; border: 1px solid rgba(184, 41, 255, 0.6); transform: rotate(15deg); pointer-events: none; }
+
+        /* Earth Orbital Nodes */
+        .seasonal-anchor { position: absolute; width: 10px; height: 10px; border-radius: 50%; z-index: 10; cursor: help; pointer-events: auto; transform: translate(-50%, -50%); border: 1px solid; }
+        .anchor-alpha { background: var(--cyan-dark); border-color: var(--cyan-glow); box-shadow: 0 0 10px var(--cyan-glow); }
+        .anchor-beta { background: var(--magenta-dark); border-color: var(--magenta-glow); box-shadow: 0 0 10px var(--magenta-glow); }
+        .anchor-peri { width: 6px; height: 6px; background: #fff; border: none; box-shadow: 0 0 8px #fff; }
+
+        /* MACRO STATE CSS */
+        .macro-active .solar-system-container { transform: scale(0.25); }
+        .macro-active .sys-jupiter { opacity: 1; }
+        .macro-active .sys-saturn { opacity: 1; }
+        .macro-active .sys-earth { width: 4vh; height: 4vh; border-width: 3px; }
+        .macro-active #sun-core { width: 8%; height: 8%; }
+
+        /* SCRUBBER */
+        .q-astro-controls { position: fixed; bottom: calc(2.5vh + 60px); left: 50%; transform: translateX(-50%); z-index: 9995; background: rgba(10, 12, 18, 0.95); backdrop-filter: blur(20px); padding: 10px 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: auto; }
+        .astro-scrub-row { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; }
+        .btn-astro { background: rgba(0,0,0,0.6); border: 1px solid var(--cyan-glow); color: var(--cyan-glow); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 6px 12px; cursor: pointer; border-radius: 4px; transition: all 0.2s; font-weight: bold; }
+        .btn-astro:hover { background: var(--cyan-dim); color: #fff; }
+        .btn-astro.active { background: var(--cyan-glow); color: #000; }
+        .btn-macro-zoom { border-color: var(--gold); color: var(--gold); margin-left: 15px; }
+        .btn-macro-zoom:hover { background: rgba(244, 208, 104, 0.2); }
+        .btn-macro-zoom.active { background: var(--gold); color: #000; }
     </style>
 </head>
 <body class="mode-q">
 
     <div class="global-header desktop-only">ASTROPHYSICAL</div>
-
     <div class="matrix-layer"></div>
     <div class="star-container" id="stars"></div>
     <div id="needle-hud">SYSTEMIC CONTEXT</div>
+
+    <div class="solar-system-wrapper q-center-dial">
+        <div class="solar-system-container" id="sys-container">
+            
+            <div class="orbit-ring" style="width: 20%; height: 20%;"></div>
+            <div class="orbit-ring" style="width: 36%; height: 36%;"></div>
+            <div class="orbit-ring orbit-earth" style="width: 54%; height: 54%;"></div>
+            <div class="orbit-ring" style="width: 140%; height: 140%; border-color: rgba(255, 153, 51, 0.2);"></div>
+            <div class="orbit-ring" style="width: 260%; height: 260%; border-color: rgba(184, 41, 255, 0.2);"></div>
+
+            <div class="seasonal-anchor anchor-alpha" id="node-south" style="top: 100%; left: 50%;" onmouseover="showNeedleHUD('SOUTHERN SOLSTICE (0.000°)', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('ALPHA')"></div>
+            <div class="seasonal-anchor anchor-beta" id="node-eq1" style="top: 50%; left: 100%;" onmouseover="showNeedleHUD('1ST EQUINOX (90.000°)', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('BETA')"></div>
+            <div class="seasonal-anchor anchor-alpha" id="node-north" style="top: 0%; left: 50%;" onmouseover="showNeedleHUD('NORTHERN SOLSTICE (180.000°)', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('GAMMA')"></div>
+            <div class="seasonal-anchor anchor-beta" id="node-eq2" style="top: 50%; left: 0%;" onmouseover="showNeedleHUD('2ND EQUINOX (270.000°)', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()" onclick="openAnchorModal('DELTA')"></div>
+            <div class="seasonal-anchor anchor-peri" id="node-peri" onmouseover="showNeedleHUD('PERIHELION (14.00°): Maximum Orbital Velocity.', '#fff')" onmouseout="hideNeedleHUD()"></div>
+            <div class="seasonal-anchor anchor-peri" id="node-aph" onmouseover="showNeedleHUD('APHELION (194.00°): Minimum Orbital Velocity.', '#fff')" onmouseout="hideNeedleHUD()"></div>
+
+            <div id="barycenter-crosshair" onmouseover="showNeedleHUD('SSB: SOLAR SYSTEM BARYCENTER', 'var(--starlight)')" onmouseout="hideNeedleHUD()"></div>
+            <div class="celestial-body" id="sun-core" onmouseover="showNeedleHUD('SOLAR MASS (WOBBLE)', 'var(--gold)')" onmouseout="hideNeedleHUD()"></div>
+            
+            <div class="celestial-body sys-mercury" id="p-mercury" onmouseover="showNeedleHUD('MERCURY: τ=88 Days', 'var(--silver)')" onmouseout="hideNeedleHUD()"></div>
+            <div class="celestial-body sys-venus" id="p-venus" onmouseover="showNeedleHUD('VENUS: τ=225 Days', 'var(--magenta-glow)')" onmouseout="hideNeedleHUD()"></div>
+            
+            <div class="celestial-body sys-jupiter" id="p-jupiter" onmouseover="showNeedleHUD('JUPITER: Primary Barycentric Influencer', '#ff9933')" onmouseout="hideNeedleHUD()"></div>
+            <div class="celestial-body sys-saturn" id="p-saturn" onmouseover="showNeedleHUD('SATURN: Secondary Barycentric Influencer', '#b829ff')" onmouseout="hideNeedleHUD()"><div class="saturn-rings"></div></div>
+
+            <div id="earth-system">
+                <div class="celestial-body sys-earth" id="p-earth" onmouseover="showNeedleHUD('THE TRUE ELLIPSE: Earth', 'var(--cyan-glow)')" onmouseout="hideNeedleHUD()"></div>
+                <div class="celestial-body sys-moon" id="p-moon" onmouseover="showNeedleHUD('LUNA: Synodic Resonance', 'var(--silver)')" onmouseout="hideNeedleHUD()"></div>
+            </div>
+
+        </div>
+    </div>
 
 </body>
 </html>
