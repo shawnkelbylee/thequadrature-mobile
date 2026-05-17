@@ -13,7 +13,7 @@
     <script src="q-planner.js"></script>
     <script src="q-hub.js"></script>
     <script src="q-plugin-zodiacal.js"></script>
-    <script src="metaphysical.js?v=30.0"></script>
+    <script src="metaphysical.js?v=31.0"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=JetBrains+Mono:wght@100;400;700&display=swap');
@@ -98,13 +98,16 @@
         .node-hol { color: #ff66b2; border-color: rgba(255,102,178,0.3); box-shadow: inset 0 0 10px rgba(255,102,178,0.2); }
         .node-sys { color: #00f0ff; border-color: rgba(0,240,255,0.3); box-shadow: inset 0 0 10px rgba(0,240,255,0.2); }
         .node-cluster { color: #000; background: var(--theme-main); border-color: var(--theme-main); box-shadow: 0 0 15px var(--theme-main); font-weight: 900; font-family:'JetBrains Mono'; }
-        .node-anc { color: var(--theme-main); border-color: var(--theme-main); box-shadow: inset 0 0 10px var(--theme-dim); font-size: 1rem; z-index: 55; }
+        
+        /* SOLID SEASONAL ANCHORS */
+        .node-anc { color: #000; background: var(--theme-main); border-color: var(--theme-main); box-shadow: 0 0 15px var(--theme-main); font-size: 0.8rem; z-index: 65; font-weight: 900; pointer-events: auto; }
 
         .event-label { position: absolute; font-family: 'JetBrains Mono'; font-size: 0.6rem; width: auto; white-space: nowrap; text-align: center; margin-top: 25px; transition: 0.3s; opacity: 0; font-weight: 700; color: var(--platinum); text-shadow: 0 0 8px #000, 0 0 15px var(--brass); background: rgba(0,0,0,0.8); border: 1px solid rgba(255,215,0,0.3); padding: 4px 8px; border-radius: 4px; pointer-events: none; z-index: 50; }
-        .event-node:hover { transform: scale(1.6); border-color: #fff; box-shadow: 0 0 25px #fff; z-index: 60; }
+        .event-node:hover { transform: scale(1.6); border-color: #fff; box-shadow: 0 0 25px #fff; z-index: 80; }
         .event-node.flare { transform: scale(1.4); border-color: #fff; box-shadow: 0 0 20px #fff; z-index: 40; }
-        .event-node:hover + .event-label { opacity: 1; transform: scale(1.1); z-index: 60; color: #fff; border-color: #fff; }
+        .event-node:hover + .event-label { opacity: 1; transform: scale(1.1); z-index: 80; color: #fff; border-color: #fff; }
         
+        /* SOLID COPPER JIEQI */
         .term-marker { position: absolute; width: 8px; height: 8px; border: 1px solid var(--copper); background: var(--copper); transform: translate(-50%, -50%) rotate(45deg); z-index: 50; pointer-events: auto; cursor: help; transition: 0.2s; }
         .term-marker:hover { box-shadow: 0 0 10px var(--copper); transform: translate(-50%, -50%) rotate(45deg) scale(1.5); }
         
@@ -122,12 +125,15 @@
 
         .modal-textarea { width: 100%; min-height: 60px; background: rgba(0,0,0,0.6); border: 1px solid var(--theme-dim); color: #fff; font-family: 'JetBrains Mono'; font-size: 0.7rem; padding: 8px; margin-top: 5px; outline: none; resize: vertical; box-sizing: border-box; border-radius: 4px; }
         .modal-textarea:focus { border-color: var(--theme-main); box-shadow: 0 0 10px var(--theme-dim); }
+
+        #needle-hud { position: absolute; top: 12vh; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.9); border: 1px solid var(--brass); padding: 8px 18px; font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.8); z-index: 100; opacity: 0; transition: opacity 0.3s ease, border-color 0.3s ease; text-align: center; pointer-events: none; letter-spacing: 1px; color: #fff; }
     </style>
 </head>
 <body class="mode-q">
 
     <div class="global-header desktop-only">METAPHYSICAL</div>
-<div id="needle-hud">SYSTEMIC CONTEXT</div>
+    <div id="needle-hud">SYSTEMIC CONTEXT</div>
+
     <div class="astrolabe q-center-dial">
         <div class="ring ring-outer"></div>
         <div class="ring ring-dynamic" id="dynamic-ring"></div>
