@@ -1,6 +1,6 @@
 // THE QUADRATURE: ASTROPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase IX UI Engine. True Epoch Kinematics & Jovian Scaling.
+// STATUS: Phase X UI Engine. Terminator Shadows, Fireball Anchors & True Dilation.
 
 let isBooted = false;
 let currentOptTarget = '';
@@ -378,6 +378,11 @@ window.addEventListener('q-tick', (e) => {
             const moonRad = isMacroView ? 5.5 : 3.5; 
             const moonRadCalc = moonDeg * Math.PI / 180.0;
             elMoon.style.transform = `translate(calc(-50% + ${Math.sin(moonRadCalc) * moonRad}vh), calc(-50% - ${Math.cos(moonRadCalc) * moonRad}vh))`;
+            
+            // Dynamic Lunar Phase Terminator Mask
+            let shadowX = Math.cos(lunarPhase * Math.PI * 2) * 1.5; 
+            let shadowBlur = Math.abs(Math.sin(lunarPhase * Math.PI * 2)) * 0.4;
+            elMoon.style.boxShadow = `inset ${shadowX}vh 0 ${shadowBlur}vh rgba(0,0,0,0.95), 0 0 4px #ffffff`;
         }
     }
     if (elMerc) { const pos = p2c(ORBITS.MERCURY, mDeg); elMerc.style.left = pos.x + '%'; elMerc.style.top = pos.y + '%'; }
