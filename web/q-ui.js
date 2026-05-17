@@ -427,8 +427,8 @@ window.injectUniversalUI = function() {
                     <a href="METAPHYSICAL.html" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">METAPHYSICAL</a>
                     <a href="METEOROLOGICAL.html" class="q-nav-btn env-btn vector-link ${eActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">METEOROLOGICAL</a>
                     <a href="ASTROPHYSICAL.html" class="q-nav-btn mec-btn vector-link ${mActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">ASTROPHYSICAL</a>
-                    <button class="q-nav-btn omni desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()">[ PLANNER ]</button>
-                    <button class="q-nav-btn special desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()">[ DASHBOARD ]</button>
+                    <button class="q-nav-btn omni desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_OmniPlanner !== 'undefined') window.Q_OmniPlanner.openPlanner()"> PLANNER </button>
+                    <button class="q-nav-btn special desktop-only" style="border-color: var(--chrono-amber); color: var(--chrono-amber); display: inline-block;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()"> DASHBOARD </button>
                 </div>
             </div>
             <button class="mobile-only-flex" style="background:transparent; border:none; color:var(--theme-main, #00f0ff); font-size:1.5rem; padding:0; margin:0; position:absolute; right:15px; cursor:pointer;" onclick="if(typeof window.Q_IntegrationHub !== 'undefined') window.Q_IntegrationHub.openHub()">☰</button>
