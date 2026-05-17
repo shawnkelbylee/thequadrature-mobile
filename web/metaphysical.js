@@ -1,6 +1,6 @@
 // THE QUADRATURE: METAPHYSICAL VECTOR ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase VII UI Engine. Fail-Safe Hover Telemetry & True Axis Anchors.
+// STATUS: Phase VIII UI Engine. Strict Diagnostic & Failsafe DOM Layering.
 
 window.Q_REGISTRY = {
     REL_DB: {
@@ -198,7 +198,7 @@ function toggleVisibility(type, btn) {
 }
 
 function recalculateDynamicHolidays(year) {
-    if (!window.ANCHOR_ALPHA_DYNAMIC) return;
+    if (!window.ANCHOR_ALPHA_DYNAMIC || isNaN(year)) return;
     const yearDiff = year - 2026;
     const shiftDays = yearDiff * -10.87; 
     
@@ -213,10 +213,12 @@ function recalculateDynamicHolidays(year) {
     ];
 
     ISL_DB.forEach(ev => {
-        if (window.getOrbitalData) {
+        if (window.getOrbitalData && !isNaN(ev.time)) {
             let diff = ev.time - window.ANCHOR_ALPHA_DYNAMIC;
             let days = diff / window.MS_DAY;
             ev.coord = window.getOrbitalData(days).meanArc;
+        } else {
+            ev.coord = 0;
         }
     });
 }
@@ -362,6 +364,11 @@ function renderNodes(renderedList, parentLayer, radius) {
             node.onclick = (e) => { e.stopPropagation(); window.openNodeModal(event); };
         }
         
+        // Strip native tooltips to prevent conflicts
+        const labelStr = event.name.toUpperCase();
+        node.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(labelStr, 'var(--platinum)'); };
+        node.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
+
         let label = document.createElement('div'); label.className = 'event-label'; label.innerText = event.name.toUpperCase();
         let lx = 50 + (radius + 8) * Math.cos(angle); let ly = 50 + (radius + 8) * Math.sin(angle);
         label.style.left = `calc(${lx}% - 60px)`; label.style.top = `calc(${ly}% - 10px)`;
@@ -412,8 +419,8 @@ function renderDynamicRing() {
         let oAngle = (pArc - 90) * (Math.PI / 180); let oX = 50 + 27.5 * Math.cos(oAngle); let oY = 50 + 27.5 * Math.sin(oAngle);
         oNode.style.left = `${oX}%`; oNode.style.top = `${oY}%`; oNode.style.transform = `rotate(${pArc}deg)`;
         
-        oNode.title = `NATAL ANCHOR: ${savedDob} (${pArc.toFixed(2)}°)`;
-        oNode.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(oNode.title, 'var(--theme-main)'); };
+        const labelStr = `NATAL ANCHOR: ${savedDob} (${pArc.toFixed(2)}°)`;
+        oNode.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(labelStr, 'var(--theme-main)'); };
         oNode.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
         
         nodeLayer.appendChild(oNode);
@@ -454,11 +461,10 @@ function renderDynamicRing() {
             node.style.left = `${x}%`;
             node.style.top = `${y}%`;
             
-            node.title = anchor.name.toUpperCase();
-
             node.onclick = (e) => { e.stopPropagation(); window.openNodeModal(anchor); };
             
-            node.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(node.title, 'var(--theme-main)'); };
+            const labelStr = anchor.name.toUpperCase();
+            node.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(labelStr, 'var(--theme-main)'); };
             node.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
 
             nodeLayer.appendChild(node);
@@ -472,8 +478,8 @@ function renderDynamicRing() {
             let x = 50 + 35 * Math.cos(angle); let y = 50 + 35 * Math.sin(angle);
             el.style.left = `${x}%`; el.style.top = `${y}%`; 
             
-            el.title = `${term.name.toUpperCase()} (JIÉQÌ)`;
-            el.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(el.title, 'var(--copper)'); };
+            const labelStr = `${term.name.toUpperCase()} (JIÉQÌ)`;
+            el.onmouseover = () => { if(window.showNeedleHUD) window.showNeedleHUD(labelStr, 'var(--copper)'); };
             el.onmouseout = () => { if(window.hideNeedleHUD) window.hideNeedleHUD(); };
             nodeLayer.appendChild(el);
         });
@@ -486,13 +492,13 @@ window.showNeedleHUD = function(text, color) {
         hud.innerText = text; 
         hud.style.borderColor = color; 
         hud.style.color = color; 
-        hud.style.opacity = '1'; 
+        hud.style.setProperty('opacity', '1', 'important'); 
     }
 };
 
 window.hideNeedleHUD = function() { 
     const hud = document.getElementById('needle-hud');
-    if (hud) hud.style.opacity = '0'; 
+    if (hud) hud.style.setProperty('opacity', '0', 'important'); 
 };
 
 function getNextEvent(currentArc, dbArray) {
@@ -591,6 +597,74 @@ window.openOptions = function(e, target) {
     }
 };
 
+window.openZodiacModal = function(clickedSign, clickedIndex) {
+    const savedAnchor = localStorage.getItem('q_natal_anchor') || 'NONE';
+    let relationshipHtml = "";
+    
+    if (savedAnchor !== 'NONE') {
+        const signNames = ['CAPRICORN','AQUARIUS','PISCES','ARIES','TAURUS','GEMINI','CANCER','LEO','VIRGO','LIBRA','SCORPIO','SAGITTARIUS'];
+        let natalIndex = signNames.indexOf(savedAnchor);
+        
+        let currentGlobalIndex = Math.floor(window.CURRENT_TRUE_ARC / 30);
+        let diff = Math.abs(currentGlobalIndex - natalIndex);
+        if (diff > 6) diff = 12 - diff; 
+        
+        let aspect = ""; let aspectDesc = "";
+        if (diff === 0) { aspect = "CONJUNCTION (0°)"; aspectDesc = "Intense amplification of base energy. Rebirth cycle."; }
+        else if (diff === 1) { aspect = "SEMI-SEXTILE (30°)"; aspectDesc = "Subtle shift. Gathering resources and integration."; }
+        else if (diff === 2) { aspect = "SEXTILE (60°)"; aspectDesc = "Harmonic flow. Favorable conditions for growth."; }
+        else if (diff === 3) { aspect = "SQUARE (90°)"; aspectDesc = "Friction and tension. Requires structural adjustment."; }
+        else if (diff === 4) { aspect = "TRINE (120°)"; aspectDesc = "High resonance. Natural alignment and ease."; }
+        else if (diff === 5) { aspect = "QUINCUNX (150°)"; aspectDesc = "Asymmetrical adjustment. Requires conscious adaptation."; }
+        else if (diff === 6) { aspect = "OPPOSITION (180°)"; aspectDesc = "Maximum polarity. Culmination, reflection, and balance."; }
+        
+        relationshipHtml = `
+            <div style="font-size:0.6rem; color:var(--platinum); margin-top:5px;">NATAL ANCHOR: <span style="color:var(--gold-bright);">${savedAnchor}</span></div>
+            <div style="font-size:0.6rem; color:var(--platinum); margin-top:5px;">GEOMETRIC ASPECT: <span style="color:var(--gold-bright); text-shadow: 0 0 10px var(--gold-dim);">${aspect}</span></div>
+            <div style="font-size:0.7rem; color:var(--starlight); margin-top:15px; line-height:1.5; border-top:1px dashed rgba(255,215,0,0.3); padding-top:15px; text-align:center;">
+                ${aspectDesc}
+            </div>
+            <button class="opt-btn" style="margin-top: 15px; width: 100%;" onclick="window.Q_ModalEngine.close(); syncToPlanner(Date.now(), 'TRANSIT', 'Active Aspect: ${aspect} (${savedAnchor} / ${clickedSign})')">COMMIT TO PLANNER</button>
+        `;
+    } else {
+        relationshipHtml = `<div style="font-size:0.6rem; color:var(--warn-orange); margin-top:10px; text-align:center; padding:10px;">NO NATAL ANCHOR DETECTED.<br>CALIBRATE VIA PHYSIOLOGICAL VECTOR.</div>`;
+    }
+    
+    const html = `
+        <div style="font-size:0.65rem; color:var(--platinum); border-bottom:1px solid rgba(255,215,0,0.3); padding-bottom:10px; margin-bottom:10px; text-align:center;">
+            Astrological Transit Node
+        </div>
+        ${relationshipHtml}
+    `;
+    if (window.Q_ModalEngine) {
+        window.Q_ModalEngine.render(`TRANSIT: ${clickedSign}`, html, 'ACKNOWLEDGE');
+    }
+};
+
+function syncToPlanner(absoluteTimeMs, prefix, content) {
+    if(!window.ANCHOR_ALPHA_DYNAMIC || !absoluteTimeMs) return; 
+    const pDate = new Date(absoluteTimeMs);
+    const y = pDate.getFullYear();
+    const mo = (pDate.getMonth()+1).toString().padStart(2,'0');
+    const d = pDate.getDate().toString().padStart(2,'0');
+    
+    const key = `${y}-${mo}-${d}-12-00`; 
+
+    if (window.loadPlannerData) window.loadPlannerData();
+    if(!window.qData) window.qData = {};
+    if(!window.qData[key]) window.qData[key] = { text: "", link: "" };
+
+    if(content.trim() !== "") {
+        window.qData[key].text = `[${prefix}] ${content}`;
+    } else {
+        if (window.qData[key].text.startsWith(`[${prefix}]`)) {
+            window.qData[key].text = "";
+        }
+    }
+    if (window.savePlannerData) window.savePlannerData();
+    window.dispatchEvent(new Event('storage'));
+}
+
 function saveOptions() {
     if(currentOptTarget === 'rel') {
         activeFaiths = [];
@@ -642,149 +716,3 @@ function saveOptions() {
         }
     } else if(currentOptTarget === 'int') {
         const jTextEl = document.getElementById('journal-text');
-        if (jTextEl) {
-            const jText = jTextEl.value;
-            localStorage.setItem('q_journal_' + activeTermName, jText);
-            
-            if (window.getSimState) {
-                const state = window.getSimState();
-                const activeTimeMs = state.isLive ? Date.now() : state.simTime;
-                syncToPlanner(activeTimeMs, "DIARY", jText);
-            }
-        }
-    } else if(currentOptTarget === 'node') {
-        const nTextEl = document.getElementById('node-text');
-        if (nTextEl) {
-            const nText = nTextEl.value;
-            localStorage.setItem('q_note_' + currentNodeFocus, nText);
-            let combinedDb = [];
-            ['jud','chr','hin','bud','tao'].forEach(f => { if(window.Q_REGISTRY.REL_DB[f]) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB[f]); });
-            
-            let globalCiv = [];
-            if (window.Q_REGISTRY.REL_DB['civ']) {
-                globalCiv = globalCiv.concat(window.Q_REGISTRY.REL_DB['civ']);
-            }
-            if (window.Q_REGISTRY.REL_DB['hol']) {
-                globalCiv = globalCiv.concat(window.Q_REGISTRY.REL_DB['hol']);
-            }
-            
-            combinedDb = combinedDb.concat(ISL_DB, globalCiv, SYS_DB);
-            const ev = combinedDb.find(e => e.name === currentNodeFocus);
-            if(ev) {
-                let absoluteTimeMs = ev.time;
-                if (!absoluteTimeMs) {
-                    const currentDays = (Date.now() - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-                    const cycleBaseDays = Math.floor(currentDays / 365.24219) * 365.24219;
-                    const evDays = cycleBaseDays + (ev.coord / (360 / 365.24219));
-                    absoluteTimeMs = window.ANCHOR_ALPHA_DYNAMIC + (evDays * window.MS_DAY);
-                }
-                syncToPlanner(absoluteTimeMs, ev.name.toUpperCase(), nText);
-            }
-        }
-    }
-    if (window.Q_ModalEngine) window.Q_ModalEngine.close();
-}
-
-window.addEventListener('q-tick', (e) => {
-    const { t, isLive, activeTime, daysElapsed, qData } = e.detail;
-    
-    // Safety wrap: Force activeTime into a Date object to prevent TypeErrors from crashing the listener
-    const activeDateObj = new Date(activeTime);
-    
-    if (activeDateObj.getUTCFullYear() !== currentRenderedYear || document.getElementById('node-layer').children.length === 0) {
-        currentRenderedYear = activeDateObj.getUTCFullYear();
-        recalculateDynamicHolidays(currentRenderedYear);
-        renderDynamicRing();
-    }
-    
-    window.CURRENT_TRUE_ARC = qData.trueArc;
-    const trueArc = qData.trueArc;
-    const continuousMeanDeg = daysElapsed * (360 / 365.24219);
-    
-    const transitArm = document.getElementById('transit-arm');
-    if (transitArm) {
-        transitArm.style.transform = `rotate(${continuousMeanDeg + qData.delta}deg)`;
-    }
-    
-    document.querySelectorAll('.event-node').forEach(node => {
-        let nodeDeg = parseFloat(node.dataset.coord); 
-        let dist = Math.abs(nodeDeg - trueArc); 
-        if (dist > 180) dist = 360 - dist; 
-        if (dist < 5.0) { node.classList.add('flare'); } else { node.classList.remove('flare'); }
-    });
-
-    const activeTimeMs = isLive ? Date.now() : activeDateObj.getTime();
-
-    let combinedRel = []; 
-    activeFaiths.forEach(f => { 
-        if(f === 'isl') combinedRel = combinedRel.concat(ISL_DB);
-        else if(window.Q_REGISTRY.REL_DB[f]) combinedRel = combinedRel.concat(window.Q_REGISTRY.REL_DB[f]); 
-    }); 
-    combinedRel.sort((a,b)=>a.coord-b.coord);
-    
-    let nextRel = getNextEvent(trueArc, combinedRel);
-    const relNextEl = document.getElementById('rel-next');
-    if (relNextEl) {
-        if(nextRel) {
-            let dStr = getLegacyDateString(nextRel.coord, trueArc, activeTimeMs);
-            relNextEl.innerText = `${nextRel.name.substring(0,8).toUpperCase()}.. (${dStr})`;
-        } else {
-            relNextEl.innerText = "--";
-        }
-    }
-
-    const zodiacNames = ["CAPRICORN", "AQUARIUS", "PISCES", "ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS"];
-    const savedAnchor = localStorage.getItem('q_natal_anchor') || 'NONE';
-    
-    const zodHouseEl = document.getElementById('zod-house');
-    if (zodHouseEl) zodHouseEl.innerText = savedAnchor !== 'NONE' ? savedAnchor : "UNASSIGNED";
-    
-    const zodPhaseEl = document.getElementById('zod-phase');
-    if (savedAnchor !== 'NONE') {
-        let natalIndex = zodiacNames.indexOf(savedAnchor);
-        let currentIndex = Math.floor(trueArc / 30);
-        let diff = Math.abs(currentIndex - natalIndex);
-        if (diff > 6) diff = 12 - diff; 
-        
-        let aspect = "";
-        if (diff === 0) aspect = "CONJUNCTION (0°)";
-        else if (diff === 1) aspect = "SEMI-SEXTILE (30°)";
-        else if (diff === 2) aspect = "SEXTILE (60°)";
-        else if (diff === 3) aspect = "SQUARE (90°)";
-        else if (diff === 4) aspect = "TRINE (120°)";
-        else if (diff === 5) aspect = "QUINCUNX (150°)";
-        else if (diff === 6) aspect = "OPPOSITION (180°)";
-        if (zodPhaseEl) zodPhaseEl.innerText = aspect;
-    } else {
-        if (zodPhaseEl) zodPhaseEl.innerText = "PENDING CALIBRATION";
-    }
-
-    let globalCiv = [];
-    if (window.Q_REGISTRY.REL_DB['civ']) {
-        globalCiv = globalCiv.concat(window.Q_REGISTRY.REL_DB['civ']);
-    }
-
-    let nextCiv = getNextEvent(trueArc, globalCiv.concat(SYS_DB));
-    const civNextEl = document.getElementById('civ-next');
-    if (civNextEl) {
-        if(nextCiv) {
-            let dStr = getLegacyDateString(nextCiv.coord, trueArc, activeTimeMs);
-            civNextEl.innerText = `${nextCiv.name.substring(0,10).toUpperCase()}.. (${dStr})`;
-        } else {
-            civNextEl.innerText = "--";
-        }
-    }
-
-    if (window.Q_REGISTRY.SOLAR_TERMS) {
-        const termIndex = Math.floor(trueArc / 15); 
-        const activeTerm = window.Q_REGISTRY.SOLAR_TERMS[termIndex]; 
-        if (activeTerm) {
-            activeTermName = activeTerm.name; 
-            const termProgress = ((trueArc - activeTerm.start) / 15) * 100;
-            const intTermEl = document.getElementById('int-term');
-            const intPctEl = document.getElementById('int-pct');
-            if (intTermEl) intTermEl.innerText = activeTermName.substring(0,10).toUpperCase(); 
-            if (intPctEl) intPctEl.innerText = `${termProgress.toFixed(1)}% REALIZED`;
-        }
-    }
-});
