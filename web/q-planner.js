@@ -614,16 +614,41 @@ window.Q_OmniPlanner = {
 
         this.renderContextBanner();
 
-      if (this.plannerFormat === 'unified') {
-            this.renderUnified(body, title);
+     // --- TRUTH TABLE ROUTING MATRIX ---
+        const L = this.showLegacyBase;
+        const O = this.showOrbitalBase;
+        const B = this.showBiometricBase;
+        
+        this.showBioWave = B; // Sync wave state for micro-views
+
+        if (!L && !O && !B) {
+            // 000: THE VOID
+            title.innerHTML = `<div class="cal-title-wrapper"><div class="title-q" style="color:rgba(229,228,226,0.3);">METROLOGICAL VOID</div></div>`;
+            body.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:rgba(229, 228, 226, 0.2); font-family:'Orbitron'; font-size:1.5rem; letter-spacing:4px; font-weight:bold;">NO SUBSTRATE SELECTED</div>`;
+            return;
         }
-        else if(this.viewState === 'planner') { 
-            if (this.plannerMacroMode === 'sect') this.renderSector(body, title); 
-            else if (this.plannerMacroMode === 'quad') this.renderQuad(body, title);
-            else this.renderCycle(body, title);
-        } 
-        else if(this.viewState === 'day') this.renderDay(body, title); 
-        else this.renderHour(body, title); 
+
+        if (L && O && B) {
+            // 111: UNIFIED MACRO
+            this.renderUnified(body, title);
+        } else if (L && O && !B) {
+            // 110: STRUCTURAL COMPARISON (OPTION B)
+            this.renderStructuralComparison(body, title);
+        } else if (!L && !O && B) {
+            // 001: PURE BIOMETRIC ISOLATION
+            this.renderUnified(body, title);
+        } else {
+            // 100, 010, 101, 011: MICRO-VIEWS
+            this.isLegacy = L; 
+            
+            if(this.viewState === 'planner') { 
+                if (this.plannerMacroMode === 'sect') this.renderSector(body, title); 
+                else if (this.plannerMacroMode === 'quad') this.renderQuad(body, title);
+                else this.renderCycle(body, title);
+            } 
+            else if(this.viewState === 'day') this.renderDay(body, title); 
+            else this.renderHour(body, title); 
+        }
     },
 
     injectHolidays: function(element, date) {
@@ -941,7 +966,59 @@ window.Q_OmniPlanner = {
             container.appendChild(matrix);
         }
     },
+renderStructuralComparison: function(container, title) {
+        title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-warn);">STRUCTURAL COMPARISON</span> <span style="color:var(--omni-text);">[ L + O METROLOGY ]</span></div></div>`;
+        const baseDate = new Date(this.plannerBase);
+        const year = baseDate.getFullYear();
+        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        
+        const matrix = document.createElement('div');
+        matrix.className = 'macro-grid-legacy';
+        
+        const quadColors = { 1: 'rgba(0,240,255,0.15)', 2: 'rgba(167,255,131,0.15)', 3: 'rgba(184,41,255,0.15)', 4: 'rgba(244,208,104,0.15)' };
 
+        for(let m = 0; m < 12; m++) {
+            const monthBox = document.createElement('div');
+            monthBox.className = 'macro-month-box';
+            monthBox.innerHTML = `<div class="macro-month-title">${months[m]} ${year}</div>`;
+            
+            const grid = document.createElement('div');
+            grid.className = 'mini-cal-grid';
+            daysOfWeek.forEach(dayName => {
+                const header = document.createElement('div');
+                header.className = 'mini-day';
+                header.style.fontWeight = 'bold';
+                header.style.pointerEvents = 'none';
+                header.innerText = dayName;
+                grid.appendChild(header);
+            });
+            
+            const firstDay = new Date(year, m, 1); 
+            const lastDay = new Date(year, m + 1, 0); 
+            const startPad = firstDay.getDay();
+            
+            for(let i=0; i<startPad; i++) { grid.appendChild(document.createElement('div')); }
+            for(let i=1; i<=lastDay.getDate(); i++) {
+                const d = document.createElement('div'); 
+                d.className = 'mini-day'; 
+                d.innerText = i;
+                const localTs = new Date(year, m, i).getTime();
+                
+                let diff = (localTs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
+                let oData = window.getOrbitalData(diff);
+                if (oData && oData.quad) {
+                    d.style.background = quadColors[oData.quad] || '';
+                }
+
+                d.onclick = () => { this.selectedDate = localTs; this.setViewMode('day'); };
+                grid.appendChild(d);
+            }
+            monthBox.appendChild(grid);
+            matrix.appendChild(monthBox);
+        }
+        container.appendChild(matrix);
+    },
     renderDay: function(container, title) {
         title.innerHTML = window.getDualTitle(this.selectedDate, this.isLegacy);
         
@@ -1221,9 +1298,11 @@ window.Q_OmniPlanner = {
 
         const orbitalLayer = document.createElement('div');
         orbitalLayer.style.cssText = 'position:absolute; width:100%; height:4px; top:50%; background:var(--omni-main); transform:translateY(-50%); box-shadow:0 0 15px var(--omni-main);';
+        if (!this.showOrbitalBase) orbitalLayer.style.display = 'none';
 
         const legacyLayer = document.createElement('div');
         legacyLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none;';
+        if (!this.showLegacyBase) legacyLayer.style.display = 'none';
         
         for(let i=0; i<=365; i++) {
             let isMonth = (i % 30 === 0);
