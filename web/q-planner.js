@@ -1431,10 +1431,10 @@ renderStructuralComparison: function(container, title) {
         waveSvg.appendChild(wavePath);
         bioLayer.appendChild(waveSvg);
 
-        track.appendChild(orbitalLayer);
+       track.appendChild(orbitalLayer);
         track.appendChild(legacyLayer);
         track.appendChild(bioLayer);
         wrapper.appendChild(track);
         container.appendChild(wrapper);
     }
-  };
+};
