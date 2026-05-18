@@ -968,7 +968,7 @@ window.Q_OmniPlanner = {
             }
             
             const tensionData = this.calculateCivilTension(dailyBlocksData);
-            const dashboard = document.createElement('div');
+           const dashboard = document.createElement('div');
             dashboard.innerHTML = `
                 <div class="tension-dashboard">
                     <div style="display:flex; flex-direction:column;">
@@ -979,6 +979,10 @@ window.Q_OmniPlanner = {
                 </div>
             `;
             list.appendChild(dashboard);
+
+            const matrix = document.createElement('div');
+            matrix.className = 'editor-matrix';
+            matrix.style.paddingTop = '10px';
 
            dailyBlocksData.forEach(b => {
                 const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
@@ -1015,14 +1019,15 @@ window.Q_OmniPlanner = {
                         ${b.text ? b.text : "..."}
                     </div>
                 `;
-                block.onclick = () => { 
+               block.onclick = () => { 
                     this.selectedHour = b.hour; 
                     this.selectedHourDur = 3600000; 
                     this.viewState = 'hour'; 
                     this.refreshView(); 
                 };
-                list.appendChild(block);
+                matrix.appendChild(block);
             });
+            list.appendChild(matrix);
             container.appendChild(list);
         } else {
             let activeBlock = window.getQBlockByTime(this.selectedDate);
