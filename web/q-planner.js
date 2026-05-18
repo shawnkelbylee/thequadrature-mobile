@@ -1025,12 +1025,12 @@ window.Q_OmniPlanner = {
             if (!activeBlock) return;
             let cCycle = activeBlock.cycle;
             let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + activeBlock.relStart;
-            let subDur = activeBlock.dur / 10;
+            let subDur = activeBlock.dur / 20;
             
             const matrix = document.createElement('div'); 
             matrix.className = 'editor-matrix';
 
-            for(let m=0; m<10; m++) {
+            for(let m=0; m<20; m++) {
                 let targetMs = baseMs + (m * subDur);
                 const key = `Q-${cCycle}-${activeBlock.absDeg}-${m}`;
                 const data = window.qData[key] || { text: "", link: "" };
@@ -1068,23 +1068,27 @@ window.Q_OmniPlanner = {
                 let hasData = data.text.trim() !== "";
                 let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
-                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}.${m}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+               let currentFraction = (m * 0.05).toFixed(2).substring(1); // Formats to .00, .05, .10
+                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
+                
                 block.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
                         ${timeHeaderHtml}
                         <div>${badgeHtml}</div>
                     </div>
-                    <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? 'var(--omni-warn)' : 'var(--omni-text)'}; border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
+                    <div style="font-size:0.6rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; position: relative; z-index: 2;">
+                        ${data.text ? data.text : "..."}
+                    </div>
+                `;
                 
                 if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
                 
                // OS OVERRIDE: Nearest-Hour Snapping (Orbital to Legacy Floor Routing)
                 block.onclick = (e) => {
                     if (this.plannerFormat === 'unified') return; // STRICT MACRO LOCK
-                    if (e.target.tagName === 'TEXTAREA') return; 
                     
                     const snapDate = new Date(targetMs);
                     this.selectedDate = new Date(snapDate.getFullYear(), snapDate.getMonth(), snapDate.getDate()).getTime();
