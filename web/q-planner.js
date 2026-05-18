@@ -425,7 +425,8 @@ window.Q_OmniPlanner = {
         this.viewState = 'closed';
         sessionStorage.setItem('Q_PLANNER_ACTIVE', 'false');
         document.body.classList.remove('planner-quad-active'); 
-        document.getElementById('unified-omni-planner').classList.remove('active'); 
+        const dom = document.getElementById('unified-omni-planner');
+        if (dom) dom.classList.remove('active'); 
     },
 
     jumpToDate: function(val) {
