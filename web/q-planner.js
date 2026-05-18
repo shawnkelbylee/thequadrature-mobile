@@ -95,9 +95,10 @@ window.Q_OmniPlanner = {
     selectedAnchor: null,
     selectedHour: 0,
     selectedHourDur: 3600000,
-    isLegacy: true,
+    plannerFormat: 'legacy',
+    isLegacy: true, 
 
-    init: function() { 
+    init: function() {
         this.injectCSS(); 
         this.injectDOM(); 
         window.Q_ModalEngine.init(); 
@@ -442,7 +443,9 @@ window.Q_OmniPlanner = {
     },
 
     toggleFormat: function() { 
-        this.isLegacy = !this.isLegacy; 
+        const modeCycle = { 'legacy': 'orbital', 'orbital': 'unified', 'unified': 'legacy' };
+        this.plannerFormat = modeCycle[this.plannerFormat] || 'legacy';
+        this.isLegacy = (this.plannerFormat === 'legacy'); 
         this.plannerBase = this.selectedDate; 
         this.refreshView(); 
     },
@@ -544,7 +547,9 @@ window.Q_OmniPlanner = {
 
         const fmtBtn = document.createElement('button'); 
         fmtBtn.className = 'back-btn'; 
-        fmtBtn.innerText = this.isLegacy ? "ORBITAL" : "LEGACY";
+        if (this.plannerFormat === 'legacy') fmtBtn.innerText = "MODE: LEGACY";
+        else if (this.plannerFormat === 'orbital') fmtBtn.innerText = "MODE: ORBITAL";
+        else fmtBtn.innerText = "MODE: UNIFIED";
         fmtBtn.onclick = () => this.toggleFormat(); 
 
         if (actionContainer) {
