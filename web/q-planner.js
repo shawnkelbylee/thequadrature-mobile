@@ -968,58 +968,68 @@ window.Q_OmniPlanner = {
     },
 renderStructuralComparison: function(container, title) {
         title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-warn);">STRUCTURAL COMPARISON</span> <span style="color:var(--omni-text);">[ L + O METROLOGY ]</span></div></div>`;
-        const baseDate = new Date(this.plannerBase);
-        const year = baseDate.getFullYear();
-        const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-        const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-        
-        const matrix = document.createElement('div');
-        matrix.className = 'macro-grid-legacy';
-        
-        const quadColors = { 1: 'rgba(0,240,255,0.15)', 2: 'rgba(167,255,131,0.15)', 3: 'rgba(184,41,255,0.15)', 4: 'rgba(244,208,104,0.15)' };
 
-        for(let m = 0; m < 12; m++) {
-            const monthBox = document.createElement('div');
-            monthBox.className = 'macro-month-box';
-            monthBox.innerHTML = `<div class="macro-month-title">${months[m]} ${year}</div>`;
-            
-            const grid = document.createElement('div');
-            grid.className = 'mini-cal-grid';
-            daysOfWeek.forEach(dayName => {
-                const header = document.createElement('div');
-                header.className = 'mini-day';
-                header.style.fontWeight = 'bold';
-                header.style.pointerEvents = 'none';
-                header.innerText = dayName;
-                grid.appendChild(header);
-            });
-            
-            const firstDay = new Date(year, m, 1); 
-            const lastDay = new Date(year, m + 1, 0); 
-            const startPad = firstDay.getDay();
-            
-            for(let i=0; i<startPad; i++) { grid.appendChild(document.createElement('div')); }
-            for(let i=1; i<=lastDay.getDate(); i++) {
-                const d = document.createElement('div'); 
-                d.className = 'mini-day'; 
-                d.innerText = i;
-                const localTs = new Date(year, m, i).getTime();
-                
-                let diff = (localTs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-                let oData = window.getOrbitalData(diff);
-                if (oData && oData.quad) {
-                    d.style.background = quadColors[oData.quad] || '';
-                }
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'padding: 20px 40px; height: 100%; display: flex; flex-direction: column; gap: 60px; overflow-x: auto; align-items: flex-start;';
 
-                d.onclick = () => { this.selectedDate = localTs; this.setViewMode('day'); };
-                grid.appendChild(d);
+        const trackWidth = 3650; // 10px per day 
+        
+        // --- TRACK 1: ORBITAL LEDGER (TRUE BASE) ---
+        const orbContainer = document.createElement('div');
+        orbContainer.style.cssText = `width: ${trackWidth}px; position: relative;`;
+        orbContainer.innerHTML = `<div style="font-family:'Orbitron'; color:var(--sys-cyan); font-weight:bold; margin-bottom: 8px; font-size: 0.8rem; letter-spacing: 1px;">ORBITAL LEDGER (12 SYMMETRICAL 30° SECTORS)</div>`;
+
+        const orbTrack = document.createElement('div');
+        orbTrack.style.cssText = 'display: flex; width: 100%; height: 60px; border: 1px solid var(--sys-cyan); border-radius: 4px; box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);';
+
+        for(let s=1; s<=12; s++) {
+            let sector = document.createElement('div');
+            sector.style.cssText = `flex: 1; border-right: 1px solid var(--sys-cyan); background: rgba(0, 240, 255, 0.05); display: flex; justify-content: center; align-items: center; font-family: 'Orbitron'; font-size: 0.85rem; color: var(--sys-cyan); font-weight: bold;`;
+            sector.innerText = `SECTOR ${s}`;
+            
+            // Drop alignment vectors
+            if(s < 12) {
+                let vector = document.createElement('div');
+                vector.style.cssText = `position: absolute; right: -1px; top: 60px; height: 80px; width: 1px; border-right: 1px dashed var(--sys-cyan); z-index: 0;`;
+                sector.appendChild(vector);
             }
-            monthBox.appendChild(grid);
-            matrix.appendChild(monthBox);
+            
+            orbTrack.appendChild(sector);
         }
-        container.appendChild(matrix);
-    },
-    renderDay: function(container, title) {
+        orbContainer.appendChild(orbTrack);
+
+        // --- TRACK 2: LEGACY OS (IRREGULAR CAGE) ---
+        const legContainer = document.createElement('div');
+        legContainer.style.cssText = `width: ${trackWidth}px; position: relative; z-index: 1; margin-top: -30px;`;
+        legContainer.innerHTML = `<div style="font-family:'Orbitron'; color:var(--omni-warn); font-weight:bold; margin-bottom: 8px; font-size: 0.8rem; letter-spacing: 1px;">LEGACY OS (IRREGULAR GREGORIAN MONTHS)</div>`;
+
+        const legTrack = document.createElement('div');
+        legTrack.style.cssText = 'display: flex; width: 100%; height: 60px; border: 1px solid var(--omni-warn); border-radius: 4px; background: rgba(2, 6, 15, 0.8); box-shadow: 0 0 15px rgba(255, 0, 60, 0.1);';
+
+        const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+        monthDays.forEach((days, i) => {
+            let widthPct = (days / 365) * 100;
+            let monthBlock = document.createElement('div');
+            monthBlock.style.cssText = `width: ${widthPct}%; border-right: 1px solid var(--omni-warn); background: rgba(255, 0, 60, 0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'JetBrains Mono'; color: var(--omni-warn);`;
+            monthBlock.innerHTML = `<span style="font-weight:bold; font-size:0.85rem;">${monthNames[i]}</span><span style="font-size:0.5rem; opacity:0.8;">${days} DAYS</span>`;
+            legTrack.appendChild(monthBlock);
+        });
+
+        legContainer.appendChild(legTrack);
+
+        wrapper.appendChild(orbContainer);
+        wrapper.appendChild(legContainer);
+
+        // --- DIAGNOSTIC HUD ---
+        const exp = document.createElement('div');
+        exp.style.cssText = `width: ${trackWidth}px; padding: 15px; background: rgba(255,0,60,0.05); border: 1px dashed var(--omni-warn); border-radius: 4px; color: var(--omni-text); font-family: 'JetBrains Mono'; font-size: 0.65rem; text-align: center; line-height: 1.6;`;
+        exp.innerHTML = `<span style="color:var(--omni-warn); font-weight:bold; font-size:0.75rem;">STRUCTURAL ALIGNMENT FRACTURE:</span> The dashed cyan vectors represent true 30° spatial boundaries. The red blocks below represent mechanical civil months. Observe how the legacy blocks perpetually drift out of phase with true planetary geometry, compounding tension until leap corrections are forced.`;
+        wrapper.appendChild(exp);
+
+        container.appendChild(wrapper);
+    },    renderDay: function(container, title) {
         title.innerHTML = window.getDualTitle(this.selectedDate, this.isLegacy);
         
         let savedAnchor = localStorage.getItem('q_bio_anchor');
