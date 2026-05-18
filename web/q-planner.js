@@ -1438,9 +1438,3 @@ renderStructuralComparison: function(container, title) {
         container.appendChild(wrapper);
     }
 };
-// --- SYSTEM MOUNT ---
-window.addEventListener('DOMContentLoaded', () => {
-    if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.init === 'function') {
-        window.Q_OmniPlanner.init();
-    }
-});
