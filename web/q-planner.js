@@ -442,8 +442,8 @@ window.Q_OmniPlanner = {
         this.refreshView();
     },
 
-    toggleFormat: function() { 
-        const modeCycle = { 'legacy': 'orbital', 'orbital': 'unified', 'unified': 'legacy' };
+   toggleFormat: function() { 
+        const modeCycle = { 'legacy': 'orbital', 'orbital': 'biometric', 'biometric': 'unified', 'unified': 'legacy' };
         this.plannerFormat = modeCycle[this.plannerFormat] || 'legacy';
         this.isLegacy = (this.plannerFormat === 'legacy'); 
         this.plannerBase = this.selectedDate; 
@@ -545,10 +545,11 @@ window.Q_OmniPlanner = {
         body.innerHTML = ''; 
         if (actionContainer) actionContainer.innerHTML = '';
 
-        const fmtBtn = document.createElement('button'); 
+       const fmtBtn = document.createElement('button'); 
         fmtBtn.className = 'back-btn'; 
         if (this.plannerFormat === 'legacy') fmtBtn.innerText = "MODE: LEGACY";
         else if (this.plannerFormat === 'orbital') fmtBtn.innerText = "MODE: ORBITAL";
+        else if (this.plannerFormat === 'biometric') fmtBtn.innerText = "MODE: BIOMETRIC";
         else fmtBtn.innerText = "MODE: UNIFIED";
         fmtBtn.onclick = () => this.toggleFormat(); 
 
@@ -1080,9 +1081,11 @@ window.Q_OmniPlanner = {
                 
                 if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
                 
-                // OS OVERRIDE: Nearest-Hour Snapping (Orbital to Legacy Floor Routing)
+               // OS OVERRIDE: Nearest-Hour Snapping (Orbital to Legacy Floor Routing)
                 block.onclick = (e) => {
+                    if (this.plannerFormat === 'unified') return; // STRICT MACRO LOCK
                     if (e.target.tagName === 'TEXTAREA') return; 
+                    
                     const snapDate = new Date(targetMs);
                     this.selectedDate = new Date(snapDate.getFullYear(), snapDate.getMonth(), snapDate.getDate()).getTime();
                     this.selectedHour = snapDate.getHours();
