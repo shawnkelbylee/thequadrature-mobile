@@ -1048,6 +1048,18 @@ window.Q_OmniPlanner = {
                     <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? 'var(--omni-warn)' : 'var(--omni-text)'}; border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
                 
                 if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
+                
+                // OS OVERRIDE: Nearest-Hour Snapping (Biometric to Legacy Floor Routing)
+                block.onclick = (e) => {
+                    if (e.target.tagName === 'TEXTAREA') return; 
+                    const snapDate = new Date(targetMs);
+                    this.selectedDate = new Date(snapDate.getFullYear(), snapDate.getMonth(), snapDate.getDate()).getTime();
+                    this.selectedHour = snapDate.getHours();
+                    this.selectedHourDur = 3600000;
+                    this.viewState = 'hour';
+                    this.refreshView();
+                };
+
                 matrix.appendChild(block);
             }
             container.appendChild(matrix);
