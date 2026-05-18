@@ -95,9 +95,10 @@ window.Q_OmniPlanner = {
     selectedAnchor: null,
     selectedHour: 0,
     selectedHourDur: 3600000,
-    plannerFormat: 'legacy',
-    isLegacy: true, 
-    showBioWave: false,
+   showLegacyBase: true,
+    showOrbitalBase: false,
+    showBiometricBase: false,
+    isLegacy: true, // Maintained as a reactive visual indicator for legacy micro-views
     init: function() {
         this.injectCSS(); 
         this.injectDOM(); 
@@ -446,10 +447,14 @@ window.Q_OmniPlanner = {
         this.refreshView();
     },
 
-   toggleFormat: function() { 
-        const modeCycle = { 'legacy': 'orbital', 'orbital': 'biometric', 'biometric': 'unified', 'unified': 'legacy' };
-        this.plannerFormat = modeCycle[this.plannerFormat] || 'legacy';
-        this.isLegacy = (this.plannerFormat === 'legacy'); 
+   toggleSubstrate: function(target) {
+        if (target === 'legacy') this.showLegacyBase = !this.showLegacyBase;
+        if (target === 'orbital') this.showOrbitalBase = !this.showOrbitalBase;
+        if (target === 'biometric') this.showBiometricBase = !this.showBiometricBase;
+
+        // Automatically preserve structural logic for standard single-view states
+        this.isLegacy = this.showLegacyBase; 
+        
         this.plannerBase = this.selectedDate; 
         this.refreshView(); 
     },
@@ -549,27 +554,43 @@ window.Q_OmniPlanner = {
         body.innerHTML = ''; 
         if (actionContainer) actionContainer.innerHTML = '';
 
-       const fmtBtn = document.createElement('button'); 
-        fmtBtn.className = 'back-btn'; 
-        if (this.plannerFormat === 'legacy') fmtBtn.innerText = "MODE: LEGACY";
-        else if (this.plannerFormat === 'orbital') fmtBtn.innerText = "MODE: ORBITAL";
-        else if (this.plannerFormat === 'biometric') fmtBtn.innerText = "MODE: BIOMETRIC";
-        else fmtBtn.innerText = "MODE: UNIFIED";
-        fmtBtn.onclick = () => this.toggleFormat(); 
+       if (actionContainer) {
+            const createToggle = (label, active, clickTarget, activeColor) => {
+                const btn = document.createElement('button');
+                btn.className = 'back-btn';
+                btn.style.color = active ? '#000' : activeColor;
+                btn.style.backgroundColor = active ? activeColor : 'transparent';
+                btn.style.borderColor = activeColor;
+                btn.style.marginRight = '4px';
+                btn.innerText = label;
+                btn.onclick = () => this.toggleSubstrate(clickTarget);
+                return btn;
+            };
 
-        const bioBtn = document.createElement('button');
-        bioBtn.className = 'back-btn';
-        bioBtn.style.color = this.showBioWave ? '#000' : 'var(--env-green, #a7ff83)';
-        bioBtn.style.backgroundColor = this.showBioWave ? 'var(--env-green, #a7ff83)' : 'transparent';
-        bioBtn.style.borderColor = 'var(--env-green, #a7ff83)';
-        bioBtn.innerText = this.showBioWave ? "BIO-WAVE: ON" : "BIO-WAVE: OFF";
-        bioBtn.onclick = () => { this.showBioWave = !this.showBioWave; this.refreshView(); };
+            const legBtn = createToggle('LEGACY Base', this.showLegacyBase, 'legacy', 'var(--omni-text)');
+            const orbBtn = createToggle('ORBITAL Base', this.showOrbitalBase, 'orbital', 'var(--sys-cyan, #00f0ff)');
+            const bioBtn = createToggle('BIOMETRIC Base', this.showBiometricBase, 'biometric', 'var(--env-green, #a7ff83)');
 
-        if (actionContainer) {
-            actionContainer.appendChild(fmtBtn);
+            actionContainer.appendChild(legBtn);
+            actionContainer.appendChild(orbBtn);
             actionContainer.appendChild(bioBtn);
 
-            if (this.showBioWave) {
+            // Reconstruct view routing logic conditions based on the truth-table rules
+            const activeCount = (this.showLegacyBase?1:0) + (this.showOrbitalBase?1:0) + (this.showBiometricBase?1:0);
+            
+            // Re-mount the legend strictly when Biometric is running in any view state
+            if (this.showBiometricBase) {
+                const legend = document.createElement('div');
+                legend.style.cssText = 'display:flex; gap:10px; margin-left:15px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
+                legend.innerHTML = `
+                    <span style="color:var(--env-green, #a7ff83);">DEEP FLOW</span>
+                    <span style="color:var(--sys-cyan, #00f0ff);">VENT/RECOVERY</span>
+                    <span style="color:var(--bio-purple, #b829ff);">SLEEP</span>
+                    <span style="color:var(--chrono-amber, #B97A35);">INERTIA</span>
+                    <span style="color:var(--bio-cobalt, #0055ff);">DLMO</span>
+                `;
+                actionContainer.appendChild(legend);
+            }
                 const legend = document.createElement('div');
                 legend.style.cssText = 'display:flex; gap:10px; margin-left:15px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
                 legend.innerHTML = `
