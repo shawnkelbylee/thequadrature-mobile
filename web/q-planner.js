@@ -563,6 +563,19 @@ window.Q_OmniPlanner = {
         if (actionContainer) {
             actionContainer.appendChild(fmtBtn);
             actionContainer.appendChild(bioBtn);
+
+            if (this.showBioWave) {
+                const legend = document.createElement('div');
+                legend.style.cssText = 'display:flex; gap:10px; margin-left:15px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
+                legend.innerHTML = `
+                    <span style="color:var(--env-green, #a7ff83);">DEEP FLOW</span>
+                    <span style="color:var(--sys-cyan, #00f0ff);">VENT/RECOVERY</span>
+                    <span style="color:var(--bio-purple, #b829ff);">SLEEP</span>
+                    <span style="color:var(--chrono-amber, #B97A35);">INERTIA</span>
+                    <span style="color:var(--bio-cobalt, #0055ff);">DLMO</span>
+                `;
+                actionContainer.appendChild(legend);
+            }
             
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
@@ -1057,14 +1070,7 @@ window.Q_OmniPlanner = {
                 let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}.${m}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
-                if (currentBioState === 'DEEP FLOW') badgeHtml = `<span style="color:var(--env-green, #a7ff83); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DEEP FLOW</span>`;
-                else if (currentBioState === 'SLEEP / RECOVERY') badgeHtml = `<span style="color:var(--bio-purple, #b829ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP / RECOVERY</span>`;
-                else if (currentBioState === 'SLEEP INERTIA') badgeHtml = `<span style="color:var(--chrono-amber, #B97A35); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">SLEEP INERTIA</span>`;
-                else if (currentBioState === 'DLMO WIND-DOWN') badgeHtml = `<span style="color:var(--bio-cobalt, #0055ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">DLMO WIND-DOWN</span>`;
-                else badgeHtml = `<span style="color:var(--sys-cyan, #00f0ff); font-size:0.5rem; font-weight:bold; font-family:'Orbitron';">VENT / RECOVERY</span>`;
-
-                if (isCivilConstraint) badgeHtml += ` <span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
-
+                if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
                 block.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
                         ${timeHeaderHtml}
