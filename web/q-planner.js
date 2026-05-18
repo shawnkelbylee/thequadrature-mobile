@@ -999,7 +999,7 @@ window.Q_OmniPlanner = {
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
                 const block = document.createElement('div');
-                block.className = `time-block ${blockClass}`;
+                block.className = `slot-block time-block ${blockClass}`;
                 
                 let civilFmt = window.formatLegacyDate(b.ms);
                 
@@ -1020,7 +1020,7 @@ window.Q_OmniPlanner = {
                         <div>${badgeHtml}</div>
                     </div>
                     <div style="font-size:0.6rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; position: relative; z-index: 2;">
-                        ${b.text ? b.text : "..."}
+                        ${b.text ? b.text : ""}
                     </div>
                 `;
                block.onclick = () => { 
@@ -1093,7 +1093,7 @@ window.Q_OmniPlanner = {
                         <div>${badgeHtml}</div>
                     </div>
                     <div style="font-size:0.6rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; position: relative; z-index: 2;">
-                        ${data.text ? data.text : "..."}
+                        ${data.text ? data.text : ""}
                     </div>
                 `;
                 
