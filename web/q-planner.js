@@ -1421,7 +1421,7 @@ renderStructuralComparison: function(container, title) {
             pathData += `L ${x} ${y} `;
         }
         
-        const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+       const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         wavePath.setAttribute("d", pathData);
         wavePath.setAttribute("stroke", "var(--env-green, #a7ff83)");
         wavePath.setAttribute("stroke-width", "2");
@@ -1431,7 +1431,7 @@ renderStructuralComparison: function(container, title) {
         waveSvg.appendChild(wavePath);
         bioLayer.appendChild(waveSvg);
 
-       track.appendChild(orbitalLayer);
+        track.appendChild(orbitalLayer);
         track.appendChild(legacyLayer);
         track.appendChild(bioLayer);
         wrapper.appendChild(track);
