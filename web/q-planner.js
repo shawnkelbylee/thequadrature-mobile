@@ -962,9 +962,17 @@ window.Q_OmniPlanner = {
             `;
             list.appendChild(dashboard);
 
-            dailyBlocksData.forEach(b => {
+           dailyBlocksData.forEach(b => {
                 const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
                 let blockClass = '';
+                
+                if (this.showBioWave) {
+                    if (b.bioState === 'DEEP FLOW') blockClass += ' flow-state';
+                    else if (b.bioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
+                    else if (b.bioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
+                    else if (b.bioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
+                    else blockClass += ' vent-state';
+                }
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
