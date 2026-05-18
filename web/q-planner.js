@@ -544,7 +544,7 @@ window.Q_OmniPlanner = {
 
         const fmtBtn = document.createElement('button'); 
         fmtBtn.className = 'back-btn'; 
-        fmtBtn.innerText = this.isLegacy ? "BIOMETRIC" : "LEGACY";
+        fmtBtn.innerText = this.isLegacy ? "ORBITAL" : "LEGACY";
         fmtBtn.onclick = () => this.toggleFormat(); 
 
         if (actionContainer) {
