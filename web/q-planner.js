@@ -604,7 +604,10 @@ window.Q_OmniPlanner = {
 
         this.renderContextBanner();
 
-        if(this.viewState === 'planner') { 
+      if (this.plannerFormat === 'unified') {
+            this.renderUnified(body, title);
+        }
+        else if(this.viewState === 'planner') { 
             if (this.plannerMacroMode === 'sect') this.renderSector(body, title); 
             else if (this.plannerMacroMode === 'quad') this.renderQuad(body, title);
             else this.renderCycle(body, title);
@@ -1190,10 +1193,66 @@ window.Q_OmniPlanner = {
                 </div>
                 <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? 'var(--omni-warn)' : 'var(--omni-text)'}; border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent or [FIXED] civil event..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
             
-            if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
+           if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
             matrix.appendChild(block);
         }
         container.appendChild(matrix);
+    },
+
+    renderUnified: function(container, title) {
+        title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ MACRO-TIMELINE ]</span></div></div>`;
+
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'width:100%; height:100%; overflow-x:auto; overflow-y:hidden; position:relative; background:var(--omni-bg); padding-top:40px;';
+
+        const trackWidth = 12000; 
+        const track = document.createElement('div');
+        track.style.cssText = `width:${trackWidth}px; height:80%; position:relative; margin:auto; background:linear-gradient(to right, #0f1724, #334155, #0f1724, #334155, #0f1724);`; 
+
+        const orbitalLayer = document.createElement('div');
+        orbitalLayer.style.cssText = 'position:absolute; width:100%; height:4px; top:50%; background:var(--omni-main); transform:translateY(-50%); box-shadow:0 0 15px var(--omni-main);';
+
+        const legacyLayer = document.createElement('div');
+        legacyLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none;';
+        
+        for(let i=0; i<=365; i++) {
+            let isMonth = (i % 30 === 0);
+            let hash = document.createElement('div');
+            hash.style.cssText = `position:absolute; left:${(i/365)*100}%; height:${isMonth ? '100%' : '20%'}; top:${isMonth ? '0' : '40%'}; width:${isMonth ? '2px' : '1px'}; background:${isMonth ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.3)'}; z-index:1;`;
+            legacyLayer.appendChild(hash);
+        }
+
+        const bioLayer = document.createElement('div');
+        bioLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none; z-index:2;';
+        
+        if (this.showBioWave) {
+            const waveSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            waveSvg.setAttribute("width", "100%");
+            waveSvg.setAttribute("height", "100%");
+            waveSvg.style.position = "absolute";
+            
+            let pathData = "M 0 50 ";
+            for(let w=1; w<=365; w++) {
+                let y = 50 + (Math.sin(w * 0.5) * 30); 
+                pathData += `L ${(w/365)*trackWidth} ${y} `;
+            }
+            
+            const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            wavePath.setAttribute("d", pathData);
+            wavePath.setAttribute("stroke", "var(--env-green, #a7ff83)");
+            wavePath.setAttribute("stroke-width", "3");
+            wavePath.setAttribute("fill", "none");
+            wavePath.style.filter = "drop-shadow(0px 0px 8px rgba(167, 255, 131, 0.8))";
+            
+            waveSvg.appendChild(wavePath);
+            bioLayer.appendChild(waveSvg);
+        }
+
+        track.appendChild(orbitalLayer);
+        track.appendChild(legacyLayer);
+        track.appendChild(bioLayer);
+        wrapper.appendChild(track);
+        container.appendChild(wrapper);
     }
 };
 
