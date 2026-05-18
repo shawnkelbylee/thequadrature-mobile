@@ -97,7 +97,7 @@ window.Q_OmniPlanner = {
     selectedHourDur: 3600000,
     plannerFormat: 'legacy',
     isLegacy: true, 
-
+    showBioWave: false,
     init: function() {
         this.injectCSS(); 
         this.injectDOM(); 
@@ -552,8 +552,17 @@ window.Q_OmniPlanner = {
         else fmtBtn.innerText = "MODE: UNIFIED";
         fmtBtn.onclick = () => this.toggleFormat(); 
 
+        const bioBtn = document.createElement('button');
+        bioBtn.className = 'back-btn';
+        bioBtn.style.color = this.showBioWave ? '#000' : 'var(--env-green, #a7ff83)';
+        bioBtn.style.backgroundColor = this.showBioWave ? 'var(--env-green, #a7ff83)' : 'transparent';
+        bioBtn.style.borderColor = 'var(--env-green, #a7ff83)';
+        bioBtn.innerText = this.showBioWave ? "BIO-WAVE: ON" : "BIO-WAVE: OFF";
+        bioBtn.onclick = () => { this.showBioWave = !this.showBioWave; this.refreshView(); };
+
         if (actionContainer) {
             actionContainer.appendChild(fmtBtn);
+            actionContainer.appendChild(bioBtn);
             
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
@@ -1020,11 +1029,14 @@ window.Q_OmniPlanner = {
                 
                 const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
                 let blockClass = '';
-                if (currentBioState === 'DEEP FLOW') blockClass = 'flow-state';
-                else if (currentBioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
-                else if (currentBioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
-                else if (currentBioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
-                else blockClass = 'vent-state';
+                
+                if (this.showBioWave) {
+                    if (currentBioState === 'DEEP FLOW') blockClass += ' flow-state';
+                    else if (currentBioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
+                    else if (currentBioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
+                    else if (currentBioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
+                    else blockClass += ' vent-state';
+                }
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
@@ -1114,19 +1126,18 @@ window.Q_OmniPlanner = {
                 currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
             }
             
-            const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
+           const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
             let blockClass = '';
             
-            if (this.isLegacy) {
-                if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
-            } else {
-                if (currentBioState === 'DEEP FLOW') blockClass = 'flow-state';
-                else if (currentBioState === 'SLEEP / RECOVERY') blockClass = 'sleep-state';
-                else if (currentBioState === 'SLEEP INERTIA') blockClass = 'inertia-state';
-                else if (currentBioState === 'DLMO WIND-DOWN') blockClass = 'dlmo-state';
-                else blockClass = 'vent-state';
-                if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
+            if (this.showBioWave) {
+                if (currentBioState === 'DEEP FLOW') blockClass += ' flow-state';
+                else if (currentBioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
+                else if (currentBioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
+                else if (currentBioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
+                else blockClass += ' vent-state';
             }
+            
+            if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
 
             const block = document.createElement('div'); 
             block.className = `slot-block time-block ${blockClass}`;
