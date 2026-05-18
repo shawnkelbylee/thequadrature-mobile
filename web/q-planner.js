@@ -111,7 +111,9 @@ window.Q_OmniPlanner = {
             if (e.key === '>' || e.key === '.') { if (this.viewState === 'closed' && window.Q_IntegrationHub) window.Q_IntegrationHub.step(1); else this.stepDay(1); }
         });
 
-        if (sessionStorage.getItem('Q_PLANNER_ACTIVE') === 'true') {
+        const isAperture = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html') || window.location.href.toUpperCase().includes('APERTURE');
+
+        if (!isAperture && sessionStorage.getItem('Q_PLANNER_ACTIVE') === 'true') {
             const savedTime = parseInt(sessionStorage.getItem('Q_PLANNER_TIME'));
             if (savedTime) this.plannerBase = savedTime;
             const savedState = sessionStorage.getItem('Q_PLANNER_STATE');
@@ -122,6 +124,10 @@ window.Q_OmniPlanner = {
             if (savedSelected) this.selectedDate = new Date(savedSelected).getTime();
 
             this.openPlanner(true); 
+        } else if (isAperture) {
+            // Cleanse stale memory on home index to prevent forced overlays
+            sessionStorage.setItem('Q_PLANNER_ACTIVE', 'false');
+            this.viewState = 'closed';
         }
     },
 
@@ -1439,3 +1445,9 @@ renderStructuralComparison: function(container, title) {
         container.appendChild(wrapper);
     }
 };
+// --- SYSTEM MOUNT ---
+window.addEventListener('DOMContentLoaded', () => {
+    if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.init === 'function') {
+        window.Q_OmniPlanner.init();
+    }
+});
