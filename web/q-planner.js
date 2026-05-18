@@ -304,11 +304,15 @@ window.Q_OmniPlanner = {
             .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--omni-bg); font-family: 'JetBrains Mono'; color: var(--omni-text); position: relative; overflow: hidden; transition: 0.3s; z-index: 1; }
             .time-block:hover { background: rgba(51, 65, 85, 0.6); }
             
-            .time-block.flow-state { border-left: 4px solid var(--env-green, #a7ff83); background: rgba(167, 255, 131, 0.05); }
-            .time-block.vent-state { border-left: 4px solid var(--sys-cyan, #00f0ff); background: rgba(0, 240, 255, 0.05); }
-            .time-block.sleep-state { border-left: 4px solid var(--bio-purple, #b829ff); background: rgba(184, 41, 255, 0.05); }
-            .time-block.inertia-state { border-left: 4px solid var(--chrono-amber, #B97A35); background: rgba(185, 122, 53, 0.05); }
-            .time-block.dlmo-state { border-left: 4px solid var(--bio-cobalt, #0055ff); background: rgba(0, 85, 255, 0.05); }
+           /* BIO-WAVE TYPOGRAPHY ABSTRACTION */
+            .time-block.flow-state, .time-block.vent-state, .time-block.sleep-state, .time-block.inertia-state, .time-block.dlmo-state { 
+                border-left: none; background: transparent; 
+            }
+            .time-block.flow-state .wave-label { color: var(--env-green, #a7ff83) !important; text-shadow: 0 0 12px rgba(167, 255, 131, 0.6) !important; }
+            .time-block.vent-state .wave-label { color: var(--sys-cyan, #00f0ff) !important; text-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important; }
+            .time-block.sleep-state .wave-label { color: var(--bio-purple, #b829ff) !important; text-shadow: 0 0 12px rgba(184, 41, 255, 0.6) !important; }
+            .time-block.inertia-state .wave-label { color: var(--chrono-amber, #B97A35) !important; text-shadow: 0 0 12px rgba(185, 122, 53, 0.6) !important; }
+            .time-block.dlmo-state .wave-label { color: var(--bio-cobalt, #0055ff) !important; text-shadow: 0 0 12px rgba(0, 85, 255, 0.6) !important; }
             
             .tension-dashboard { background: var(--omni-bg-light); border: 1px dashed var(--omni-warn); border-radius: 6px; padding: 15px; margin: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; }
             .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--omni-warn); text-shadow: 0 0 15px rgba(255,0,60,0.3); }
@@ -997,7 +1001,7 @@ window.Q_OmniPlanner = {
                 
                 let hasData = b.text.trim() !== "";
                 let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                let timeHeaderHtml = `<div class="time-header" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
+                let timeHeaderHtml = `<div class="time-header wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
                 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
@@ -1069,7 +1073,7 @@ window.Q_OmniPlanner = {
                 let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
                let currentFraction = (m * 0.05).toFixed(2).substring(1); // Formats to .00, .05, .10
-                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
@@ -1166,7 +1170,7 @@ window.Q_OmniPlanner = {
             let hasData = data.text.trim() !== "";
             let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
             
-            let timeHeaderHtml = `<div style="font-size:0.8rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">:${m.toString().padStart(2,'0')} LOCAL</div>`;
+           let timeHeaderHtml = `<div class="wave-label" style="font-size:0.8rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">:${m.toString().padStart(2,'0')} LOCAL</div>`;
 
             block.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
