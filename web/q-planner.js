@@ -1049,7 +1049,7 @@ window.Q_OmniPlanner = {
                 
                 if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
                 
-                // OS OVERRIDE: Nearest-Hour Snapping (Biometric to Legacy Floor Routing)
+                // OS OVERRIDE: Nearest-Hour Snapping (Orbital to Legacy Floor Routing)
                 block.onclick = (e) => {
                     if (e.target.tagName === 'TEXTAREA') return; 
                     const snapDate = new Date(targetMs);
