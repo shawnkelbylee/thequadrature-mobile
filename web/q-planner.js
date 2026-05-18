@@ -1437,5 +1437,4 @@ renderStructuralComparison: function(container, title) {
         wrapper.appendChild(track);
         container.appendChild(wrapper);
     }
-    }, 50);
-});
+  };
