@@ -1005,7 +1005,11 @@ window.Q_OmniPlanner = {
                 
                 let hasData = b.text.trim() !== "";
                 let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                let timeHeaderHtml = `<div class="time-header wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</div>`;
+                
+                let diff = (b.ms - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
+                let orbital = window.getOrbitalData(diff);
+                
+                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="time-header wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(DEG ${orbital.trueArc.toFixed(2)})</span></div>`;
                 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
