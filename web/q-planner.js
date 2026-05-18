@@ -1316,7 +1316,7 @@ renderStructuralComparison: function(container, title) {
         container.appendChild(matrix);
     },
 
-    renderUnified: function(container, title) {
+   renderUnified: function(container, title) {
         title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ MACRO-TIMELINE ]</span></div></div>`;
 
         const wrapper = document.createElement('div');
@@ -1324,48 +1324,112 @@ renderStructuralComparison: function(container, title) {
 
         const trackWidth = 12000; 
         const track = document.createElement('div');
-        track.style.cssText = `width:${trackWidth}px; height:80%; position:relative; margin:auto; background:linear-gradient(to right, #0f1724, #334155, #0f1724, #334155, #0f1724);`; 
+        track.style.cssText = `width:${trackWidth}px; height:80%; position:relative; margin:auto; background:#0f1724; display:flex; align-items:center; box-shadow: 0 0 20px rgba(0,0,0,0.8);`; 
 
+        // 1. ORBITAL LAYER (PHOTOPERIOD RIBBON)
         const orbitalLayer = document.createElement('div');
-        orbitalLayer.style.cssText = 'position:absolute; width:100%; height:4px; top:50%; background:var(--omni-main); transform:translateY(-50%); box-shadow:0 0 15px var(--omni-main);';
+        orbitalLayer.style.cssText = 'position:absolute; width:100%; height:80px; top:50%; transform:translateY(-50%); display:flex;';
         if (!this.showOrbitalBase) orbitalLayer.style.display = 'none';
 
+        const lat = window.Q_STATE?.location?.lat || 27.97;
+        for(let d=0; d<365; d++) {
+            let delta = 23.44 * Math.sin((360 / 365) * (d - 80) * Math.PI / 180);
+            let tanLat = Math.tan(lat * Math.PI / 180);
+            let tanDelta = Math.tan(delta * Math.PI / 180);
+            let cosOmega = -tanLat * tanDelta;
+            if(cosOmega > 1) cosOmega = 1; if(cosOmega < -1) cosOmega = -1;
+            let omega = Math.acos(cosOmega) * 180 / Math.PI;
+            let daylightHours = (2 * omega) / 15;
+            let nightHours = 24 - daylightHours;
+            let halfNight = ((nightHours / 24) * 100) / 2;
+            
+            let slice = document.createElement('div');
+            slice.style.cssText = `flex-grow:1; height:100%; background:linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.95) ${halfNight}%, var(--sys-cyan) ${halfNight}%, var(--sys-cyan) ${100-halfNight}%, rgba(0,0,0,0.95) ${100-halfNight}%, rgba(0,0,0,0.95) 100%); opacity:0.6;`;
+            orbitalLayer.appendChild(slice);
+        }
+
+        // 2. LEGACY LAYER (GREGORIAN HASHES)
         const legacyLayer = document.createElement('div');
         legacyLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none;';
         if (!this.showLegacyBase) legacyLayer.style.display = 'none';
         
-        for(let i=0; i<=365; i++) {
-            let isMonth = (i % 30 === 0);
-            let hash = document.createElement('div');
-            hash.style.cssText = `position:absolute; left:${(i/365)*100}%; height:${isMonth ? '100%' : '20%'}; top:${isMonth ? '0' : '40%'}; width:${isMonth ? '2px' : '1px'}; background:${isMonth ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.3)'}; z-index:1;`;
-            legacyLayer.appendChild(hash);
+        const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
+        let currentDay = 0;
+        let dayOfWeek = 4; // 2026 starts on Thursday
+
+        for(let m=0; m<12; m++) {
+            for(let d=0; d<monthDays[m]; d++) {
+                let xPos = (currentDay / 365) * 100;
+                let isEndOfMonth = (d === monthDays[m] - 1);
+                
+                let hash = document.createElement('div');
+                hash.style.cssText = `position:absolute; left:${xPos}%; height:${isEndOfMonth ? '30%' : '15%'}; top:${isEndOfMonth ? '35%' : '42.5%'}; width:${isEndOfMonth ? '2px' : '1px'}; background:${isEndOfMonth ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.4)'}; z-index:1;`;
+                legacyLayer.appendChild(hash);
+                
+                let letter = document.createElement('div');
+                letter.style.cssText = `position:absolute; left:calc(${xPos}% + 4px); top:60%; font-size:0.45rem; color:rgba(229, 228, 226, 0.4); font-family:'JetBrains Mono';`;
+                letter.innerText = dayLetters[dayOfWeek % 7];
+                legacyLayer.appendChild(letter);
+                
+                if (d === Math.floor(monthDays[m]/2)) {
+                    let mLabel = document.createElement('div');
+                    mLabel.style.cssText = `position:absolute; left:${xPos}%; top:25%; font-size:0.9rem; font-weight:bold; color:var(--omni-text); font-family:'Orbitron'; transform:translateX(-50%); text-shadow:0 0 5px #000;`;
+                    mLabel.innerText = monthNames[m];
+                    legacyLayer.appendChild(mLabel);
+                }
+                currentDay++; dayOfWeek++;
+            }
         }
 
+        // 3. BIOMETRIC LAYER (CIRCADIAN SINE WAVE)
         const bioLayer = document.createElement('div');
         bioLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none; z-index:2;';
+        if (!this.showBiometricBase) bioLayer.style.display = 'none';
         
-        if (this.showBioWave) {
-            const waveSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            waveSvg.setAttribute("width", "100%");
-            waveSvg.setAttribute("height", "100%");
-            waveSvg.style.position = "absolute";
+        let savedAnchor = localStorage.getItem('q_bio_anchor');
+        let anchorMins = (savedAnchor === null || savedAnchor === "") ? 420 : parseInt(savedAnchor); // Fallback: 7 AM wake
+        let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
+        let wakeDuration = 1440 - sleepDuration;
+
+        const waveSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        waveSvg.setAttribute("width", "100%");
+        waveSvg.setAttribute("height", "100%");
+        waveSvg.style.position = "absolute";
+        
+        let pathData = "M 0 50 ";
+        for(let x=0; x<=trackWidth; x+=3) {
+            let dayFloat = (x / trackWidth) * 365;
+            let hoursFloat = (dayFloat % 1) * 24;
+            let minsFloat = hoursFloat * 60;
             
-            let pathData = "M 0 50 ";
-            for(let w=1; w<=365; w++) {
-                let y = 50 + (Math.sin(w * 0.5) * 30); 
-                pathData += `L ${(w/365)*trackWidth} ${y} `;
+            let minsSinceWake = (minsFloat - anchorMins + 1440) % 1440;
+            let y;
+            
+            if (minsSinceWake >= wakeDuration) {
+                // Sleep Phase (Recovery Trough)
+                let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
+                y = 65 + (Math.sin(sleepProgress * Math.PI) * 20); 
+            } else {
+                // Waking Phase (Ultradian Oscillations)
+                let wakeProgress = minsSinceWake / wakeDuration;
+                let ultradianCycles = wakeDuration / 90; 
+                y = 45 - (Math.sin(wakeProgress * Math.PI * ultradianCycles * 2) * 15); 
             }
             
-            const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            wavePath.setAttribute("d", pathData);
-            wavePath.setAttribute("stroke", "var(--env-green, #a7ff83)");
-            wavePath.setAttribute("stroke-width", "3");
-            wavePath.setAttribute("fill", "none");
-            wavePath.style.filter = "drop-shadow(0px 0px 8px rgba(167, 255, 131, 0.8))";
-            
-            waveSvg.appendChild(wavePath);
-            bioLayer.appendChild(waveSvg);
+            pathData += `L ${x} ${y} `;
         }
+        
+        const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        wavePath.setAttribute("d", pathData);
+        wavePath.setAttribute("stroke", "var(--env-green, #a7ff83)");
+        wavePath.setAttribute("stroke-width", "2");
+        wavePath.setAttribute("fill", "none");
+        wavePath.style.filter = "drop-shadow(0px 0px 8px rgba(167, 255, 131, 0.8))";
+        
+        waveSvg.appendChild(wavePath);
+        bioLayer.appendChild(waveSvg);
 
         track.appendChild(orbitalLayer);
         track.appendChild(legacyLayer);
@@ -1373,15 +1437,5 @@ renderStructuralComparison: function(container, title) {
         wrapper.appendChild(track);
         container.appendChild(wrapper);
     }
-};
-
-window.addEventListener('DOMContentLoaded', () => {
-    // Ensure Q_GEAR_CONSTANTS is loaded from q-core before initializing planner
-    const checkCore = setInterval(() => {
-        if (window.Q_GEAR_CONSTANTS) {
-            clearInterval(checkCore);
-            window.initQBlocks();
-            window.Q_OmniPlanner.init();
-        }
     }, 50);
 });
