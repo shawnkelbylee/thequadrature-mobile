@@ -365,9 +365,20 @@ window.Q_OmniPlanner = {
             .vector-context-mobile-hide { display: none !important; }
             .macro-month-box { width: 100%; min-width: 0; } 
             
-            .tension-dashboard { flex-direction: column; text-align: center; gap: 10px; margin: 10px; }
+           .tension-dashboard { flex-direction: column; text-align: center; gap: 10px; margin: 10px; }
             .consultant-advice { max-width: 100%; }
             .time-block { padding: 10px; }
+        }
+
+        /* --- VECTOR HUD QUARANTINE --- */
+        body.planner-quad-active .q-nav-bar,
+        body.planner-quad-active .q-control-strip,
+        body.planner-quad-active #mobile-telemetry-ribbon,
+        body.planner-quad-active #q-mic-fab,
+        body.planner-quad-active #q-mic-fab-desktop {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
         `;
         document.head.appendChild(style);
@@ -1323,80 +1334,114 @@ renderStructuralComparison: function(container, title) {
         container.appendChild(matrix);
     },
 
-   renderUnified: function(container, title) {
-        title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ MACRO-TIMELINE ]</span></div></div>`;
+  renderUnified: function(container, title) {
+        // 1. ZOOM MECHANICS (TRACK SCALING)
+        let dayCount = 365;
+        let trackWidth = 12000;
+        let startOffsetMs = window.ANCHOR_ALPHA_DYNAMIC;
+
+        if (this.viewState === 'day' || this.viewState === 'hour' || this.plannerMacroMode === 'day') {
+            dayCount = 7;
+            trackWidth = 3000;
+            startOffsetMs = this.selectedDate - (3 * window.MS_DAY); // Center the selected day
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ MICRO-TIMELINE : 7 DAYS ]</span></div></div>`;
+        } else if (this.plannerMacroMode === 'sect') {
+            dayCount = 30;
+            trackWidth = 6000;
+            startOffsetMs = this.plannerBase;
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ SUB-MACRO : 30 DAYS ]</span></div></div>`;
+        } else if (this.plannerMacroMode === 'quad') {
+            dayCount = 90;
+            trackWidth = 9000;
+            startOffsetMs = this.plannerBase;
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ MACRO-TIMELINE : 90 DAYS ]</span></div></div>`;
+        } else {
+            let activeBlock = window.getQBlockByTime(this.plannerBase);
+            let cCycle = activeBlock ? activeBlock.cycle : 0;
+            startOffsetMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS);
+            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ ABSOLUTE TIMELINE : 365 DAYS ]</span></div></div>`;
+        }
 
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'width:100%; height:100%; overflow-x:auto; overflow-y:hidden; position:relative; background:var(--omni-bg); padding-top:40px;';
 
-        const trackWidth = 12000; 
         const track = document.createElement('div');
         track.style.cssText = `width:${trackWidth}px; height:80%; position:relative; margin:auto; background:#0f1724; display:flex; align-items:center; box-shadow: 0 0 20px rgba(0,0,0,0.8);`; 
 
-        // 1. ORBITAL LAYER (PHOTOPERIOD RIBBON)
+        // 2. ORBITAL LAYER (HORIZONTAL EoT SHIFT)
         const orbitalLayer = document.createElement('div');
-        orbitalLayer.style.cssText = 'position:absolute; width:100%; height:80px; top:50%; transform:translateY(-50%); display:flex;';
+        orbitalLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; left:0; display:flex; pointer-events:none;';
         if (!this.showOrbitalBase) orbitalLayer.style.display = 'none';
 
         const lat = window.Q_STATE?.location?.lat || 27.97;
-        for(let d=0; d<365; d++) {
-            let delta = 23.44 * Math.sin((360 / 365) * (d - 80) * Math.PI / 180);
+        for (let i = 0; i < dayCount; i++) {
+            let targetMs = startOffsetMs + (i * window.MS_DAY);
+            let dObj = new Date(targetMs);
+            let dayOfYear = Math.floor((targetMs - new Date(dObj.getFullYear(), 0, 0).getTime()) / window.MS_DAY);
+
+            let B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
+            let eotMins = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+            let solarNoonDec = 12 - (eotMins / 60); // Shift noon away from 12:00 based on EoT
+
+            let delta = 23.44 * Math.sin((360 / 365) * (dayOfYear - 80) * Math.PI / 180);
             let tanLat = Math.tan(lat * Math.PI / 180);
             let tanDelta = Math.tan(delta * Math.PI / 180);
             let cosOmega = -tanLat * tanDelta;
             if(cosOmega > 1) cosOmega = 1; if(cosOmega < -1) cosOmega = -1;
             let omega = Math.acos(cosOmega) * 180 / Math.PI;
-            let daylightHours = (2 * omega) / 15;
-            let nightHours = 24 - daylightHours;
-            let halfNight = ((nightHours / 24) * 100) / 2;
             
+            let daylightHours = (2 * omega) / 15;
+            let halfLight = daylightHours / 2;
+
+            let sunrisePct = ((solarNoonDec - halfLight) / 24) * 100;
+            let sunsetPct = ((solarNoonDec + halfLight) / 24) * 100;
+
             let slice = document.createElement('div');
-            slice.style.cssText = `flex-grow:1; height:100%; background:linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.95) ${halfNight}%, var(--sys-cyan) ${halfNight}%, var(--sys-cyan) ${100-halfNight}%, rgba(0,0,0,0.95) ${100-halfNight}%, rgba(0,0,0,0.95) 100%); opacity:0.6;`;
+            // Horizontal left-to-right gradient representing dawn, true noon drift, and dusk
+            slice.style.cssText = `flex-grow:1; height:80px; margin-top:auto; margin-bottom:auto; background:linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.95) ${sunrisePct}%, var(--sys-cyan) ${sunrisePct}%, var(--sys-cyan) ${sunsetPct}%, rgba(0,0,0,0.95) ${sunsetPct}%, rgba(0,0,0,0.95) 100%); opacity:0.6;`;
             orbitalLayer.appendChild(slice);
         }
 
-        // 2. LEGACY LAYER (GREGORIAN HASHES)
+        // 3. LEGACY LAYER (GREGORIAN HASHES)
         const legacyLayer = document.createElement('div');
         legacyLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none;';
         if (!this.showLegacyBase) legacyLayer.style.display = 'none';
         
-        const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
-        let currentDay = 0;
-        let dayOfWeek = 4; // 2026 starts on Thursday
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
-        for(let m=0; m<12; m++) {
-            for(let d=0; d<monthDays[m]; d++) {
-                let xPos = (currentDay / 365) * 100;
-                let isEndOfMonth = (d === monthDays[m] - 1);
-                
-                let hash = document.createElement('div');
-                hash.style.cssText = `position:absolute; left:${xPos}%; height:${isEndOfMonth ? '30%' : '15%'}; top:${isEndOfMonth ? '35%' : '42.5%'}; width:${isEndOfMonth ? '2px' : '1px'}; background:${isEndOfMonth ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.4)'}; z-index:1;`;
-                legacyLayer.appendChild(hash);
-                
-                let letter = document.createElement('div');
-                letter.style.cssText = `position:absolute; left:calc(${xPos}% + 4px); top:60%; font-size:0.45rem; color:rgba(229, 228, 226, 0.4); font-family:'JetBrains Mono';`;
-                letter.innerText = dayLetters[dayOfWeek % 7];
-                legacyLayer.appendChild(letter);
-                
-                if (d === Math.floor(monthDays[m]/2)) {
-                    let mLabel = document.createElement('div');
-                    mLabel.style.cssText = `position:absolute; left:${xPos}%; top:25%; font-size:0.9rem; font-weight:bold; color:var(--omni-text); font-family:'Orbitron'; transform:translateX(-50%); text-shadow:0 0 5px #000;`;
-                    mLabel.innerText = monthNames[m];
-                    legacyLayer.appendChild(mLabel);
-                }
-                currentDay++; dayOfWeek++;
+        for (let i = 0; i < dayCount; i++) {
+            let targetMs = startOffsetMs + (i * window.MS_DAY);
+            let dObj = new Date(targetMs);
+            let xPos = (i / dayCount) * 100;
+            
+            let isEndOfMonth = (dObj.getDate() === new Date(dObj.getFullYear(), dObj.getMonth() + 1, 0).getDate());
+            
+            let hash = document.createElement('div');
+            hash.style.cssText = `position:absolute; left:${xPos}%; height:${isEndOfMonth ? '30%' : '15%'}; top:${isEndOfMonth ? '35%' : '42.5%'}; width:${isEndOfMonth ? '2px' : '1px'}; background:${isEndOfMonth ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.4)'}; z-index:1;`;
+            legacyLayer.appendChild(hash);
+            
+            let letter = document.createElement('div');
+            letter.style.cssText = `position:absolute; left:calc(${xPos}% + 4px); top:60%; font-size:0.5rem; color:rgba(229, 228, 226, 0.4); font-family:'JetBrains Mono';`;
+            letter.innerText = dayLetters[dObj.getDay()];
+            legacyLayer.appendChild(letter);
+            
+            // Render month label at mid-month, or on the first day if zoomed in heavily
+            if (dObj.getDate() === 15 || (dayCount <= 7 && dObj.getDay() === 3)) {
+                let mLabel = document.createElement('div');
+                mLabel.style.cssText = `position:absolute; left:${xPos}%; top:25%; font-size:1rem; font-weight:bold; color:var(--omni-text); font-family:'Orbitron'; transform:translateX(-50%); text-shadow:0 0 5px #000;`;
+                mLabel.innerText = monthNames[dObj.getMonth()] + " " + dObj.getDate();
+                legacyLayer.appendChild(mLabel);
             }
         }
 
-        // 3. BIOMETRIC LAYER (CIRCADIAN SINE WAVE)
+        // 4. BIOMETRIC LAYER (DIURNAL ENVELOPE)
         const bioLayer = document.createElement('div');
         bioLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none; z-index:2;';
         if (!this.showBiometricBase) bioLayer.style.display = 'none';
         
         let savedAnchor = localStorage.getItem('q_bio_anchor');
-        let anchorMins = (savedAnchor === null || savedAnchor === "") ? 420 : parseInt(savedAnchor); // Fallback: 7 AM wake
+        let anchorMins = (savedAnchor === null || savedAnchor === "") ? 420 : parseInt(savedAnchor);
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
         let wakeDuration = 1440 - sleepDuration;
 
@@ -1406,29 +1451,33 @@ renderStructuralComparison: function(container, title) {
         waveSvg.style.position = "absolute";
         
         let pathData = "M 0 50 ";
-        for(let x=0; x<=trackWidth; x+=3) {
-            let dayFloat = (x / trackWidth) * 365;
-            let hoursFloat = (dayFloat % 1) * 24;
-            let minsFloat = hoursFloat * 60;
+        // Step density tied to zoom level for maximum geometric fidelity
+        let step = trackWidth >= 9000 ? 5 : 2; 
+
+        for(let x = 0; x <= trackWidth; x += step) {
+            let pct = x / trackWidth;
+            let targetMs = startOffsetMs + (pct * dayCount * window.MS_DAY);
+            let dObj = new Date(targetMs);
             
+            let hoursFloat = dObj.getHours() + (dObj.getMinutes() / 60) + (dObj.getSeconds() / 3600);
+            let minsFloat = hoursFloat * 60;
             let minsSinceWake = (minsFloat - anchorMins + 1440) % 1440;
             let y;
             
             if (minsSinceWake >= wakeDuration) {
-                // Sleep Phase (Recovery Trough)
+                // True Sleep Phase: Deep, isolated recovery trough
                 let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
                 y = 65 + (Math.sin(sleepProgress * Math.PI) * 20); 
             } else {
-                // Waking Phase (Ultradian Oscillations)
+                // True Waking Phase: Smooth diurnal apex arching across daylight
                 let wakeProgress = minsSinceWake / wakeDuration;
-                let ultradianCycles = wakeDuration / 90; 
-                y = 45 - (Math.sin(wakeProgress * Math.PI * ultradianCycles * 2) * 15); 
+                y = 45 - (Math.sin(wakeProgress * Math.PI) * 15); 
             }
             
             pathData += `L ${x} ${y} `;
         }
         
-       const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         wavePath.setAttribute("d", pathData);
         wavePath.setAttribute("stroke", "var(--env-green, #a7ff83)");
         wavePath.setAttribute("stroke-width", "2");
