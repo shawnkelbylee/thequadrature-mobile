@@ -55,8 +55,10 @@ window.openPhysioModal = function(target) {
     if (target === 'tl') {
         title.innerText = 'INTERNAL CLOCK SETTINGS';
         const currentAnchor = localStorage.getItem('q_bio_anchor_time') || '06:00';
+        const currentInertia = localStorage.getItem('q_sleep_inertia_mins') || '45';
         html = `
             <div class="physio-row"><span class="physio-label">WAKE ANCHOR:</span><input type="time" id="m-wake" class="physio-input" value="${currentAnchor}"></div>
+            <div class="physio-row"><span class="physio-label">SLEEP INERTIA (MIN):</span><input type="number" id="m-inertia" class="physio-input" value="${currentInertia}"></div>
             <div class="physio-row"><span class="physio-label">HARDWARE PAIRING:</span>
                 <select id="m-hw" class="physio-input">
                     <option value="NONE">NONE</option>
@@ -66,6 +68,7 @@ window.openPhysioModal = function(target) {
                 </select>
             </div>
         `;
+    
     } else if (target === 'tr') {
         title.innerText = 'ENERGY CYCLE SETTINGS';
         const currentDur = localStorage.getItem('q_bio_duration') || '90';
@@ -112,6 +115,7 @@ window.savePhysioModal = function() {
         let timeParts = timeVal.split(':');
         let mins = (parseInt(timeParts[0]) * 60) + parseInt(timeParts[1]);
         localStorage.setItem('q_bio_anchor', mins);
+        localStorage.setItem('q_sleep_inertia_mins', document.getElementById('m-inertia').value);
     } else if (currentModalTarget === 'tr') {
         localStorage.setItem('q_bio_duration', document.getElementById('m-brac').value);
         localStorage.setItem('q_bio_load', document.getElementById('m-load').value);
