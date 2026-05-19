@@ -402,6 +402,22 @@ window.injectUniversalUI = function() {
             .scrub-row-1 { order: 2 !important; justify-content: space-around; width: 100%; }
             .scrub-row-2 { order: 3 !important; width: 100%; flex-wrap: wrap; justify-content: center; }
         }
+
+        /* --- OMNI-PLANNER QUARANTINE (GLOBAL UI SUPPRESSION) --- */
+        body.planner-quad-active .q-nav-bar,
+        body.planner-quad-active .q-control-strip,
+        body.planner-quad-active #mobile-telemetry-ribbon,
+        body.planner-quad-active #mobile-telemetry-viewport,
+        body.planner-quad-active #q-universal-controls,
+        body.planner-quad-active #q-mic-fab,
+        body.planner-quad-active #q-mic-fab-desktop,
+        body.planner-quad-active .telemetry-node,
+        body.planner-quad-active .q-global-controls {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
     `;
     document.head.appendChild(style);
 
