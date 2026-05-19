@@ -605,7 +605,6 @@ window.Q_OmniPlanner = {
             actionContainer.appendChild(bioBtn);
 
            
-        wrapper.appendChild(waveKey);
             
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
