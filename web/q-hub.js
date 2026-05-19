@@ -114,31 +114,17 @@ window.Q_IntegrationHub = {
         const tob = document.getElementById('cal-tob').value;
         const isUnknown = document.getElementById('cal-tob-unknown').checked;
         const loc = document.getElementById('cal-loc').value;
-        const anchor = document.getElementById('cal-anchor').value;
-        const sleepHrs = document.getElementById('cal-sleep').value;
-        const inertia = parseInt(document.getElementById('cal-inertia').value) || 45;
-        const dlmo = parseInt(document.getElementById('cal-dlmo').value) || 90;
-
-        if (!dob || !loc || !anchor || !sleepHrs) {
-            alert("DOB, GEOLOCATION, WAKE ANCHOR, AND TARGET SLEEP ARE REQUIRED.");
+        if (!dob || !loc) {
+            alert("DOB AND GEOLOCATION ARE REQUIRED.");
             return;
         }
-
-        // 1. Calculate derived time values unconditionally
-        const parts = anchor.split(':');
-        const mins = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
-        const sleepMins = Math.floor(parseFloat(sleepHrs) * 60);
 
         // 2. PERSISTENCE FIX: Write directly to browser memory immediately
         localStorage.setItem('q_dob', dob);
         localStorage.setItem('q_tob', isUnknown ? '12:00' : tob);
         localStorage.setItem('q_tob_unknown', isUnknown);
         localStorage.setItem('q_loc_name', loc.toUpperCase());
-        localStorage.setItem('q_sleep_hrs', sleepHrs);
-        localStorage.setItem('q_bio_anchor', mins);
-        localStorage.setItem('q_sleep_cycle_duration', sleepMins);
-        localStorage.setItem('q_sleep_inertia_mins', inertia);
-        localStorage.setItem('q_dlmo_offset_mins', dlmo);
+        
 
         // 3. Update dynamic state matrix only if the module is active
         if (window.Q_UpdateState) {
@@ -146,10 +132,7 @@ window.Q_IntegrationHub = {
             window.Q_UpdateState('metaphysical_layer', 'tob', isUnknown ? '12:00' : tob);
             window.Q_UpdateState('metaphysical_layer', 'tob_unknown', isUnknown);
             window.Q_UpdateState('location', 'name', loc.toUpperCase());
-            window.Q_UpdateState('metaphysical_layer', 'wake_anchor_mins', mins);
-            window.Q_UpdateState('metaphysical_layer', 'sleep_cycle_duration', sleepMins);
-            window.Q_UpdateState('metaphysical_layer', 'sleep_inertia_mins', inertia);
-            window.Q_UpdateState('metaphysical_layer', 'dlmo_offset_mins', dlmo);
+            
         }
 
         // 4. BROADCAST: Force immediate re-render across all active vectors
@@ -205,14 +188,6 @@ window.Q_IntegrationHub = {
         let sLoc = window.Q_STATE?.location?.name || localStorage.getItem('q_loc_name') || "CLEARWATER, FL";
         if (sLoc.toUpperCase().includes('LOS ANGELES')) sLoc = "CLEARWATER, FL";
 
-        const savedAnchorMins = window.Q_STATE?.metaphysical_layer?.wake_anchor_mins !== undefined ? window.Q_STATE?.metaphysical_layer?.wake_anchor_mins : (parseInt(localStorage.getItem('q_bio_anchor')) || 0);
-        const sAnchorStr = `${Math.floor(savedAnchorMins / 60).toString().padStart(2, '0')}:${(savedAnchorMins % 60).toString().padStart(2, '0')}`;
-        
-        const savedSleepMins = window.Q_STATE?.metaphysical_layer?.sleep_cycle_duration !== undefined ? window.Q_STATE?.metaphysical_layer?.sleep_cycle_duration : (parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450);
-        const sSleepHrs = (savedSleepMins / 60).toFixed(1);
-
-        const sInertia = window.Q_STATE?.metaphysical_layer?.sleep_inertia_mins !== undefined ? window.Q_STATE?.metaphysical_layer?.sleep_inertia_mins : (parseInt(localStorage.getItem('q_sleep_inertia_mins')) || 45);
-        const sDlmo = window.Q_STATE?.metaphysical_layer?.dlmo_offset_mins !== undefined ? window.Q_STATE?.metaphysical_layer?.dlmo_offset_mins : (parseInt(localStorage.getItem('q_dlmo_offset_mins')) || 90);
         
         const sAi = window.Q_STATE?.logic_layer?.preferred_ai_diplomat || 'DEFAULT';
         const sDeepFlowEnforcement = window.Q_STATE?.logic_layer?.deep_flow_enforcement !== false;
@@ -283,27 +258,7 @@ window.Q_IntegrationHub = {
                         <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
                     </div>
 
-                    <div style="display:flex; gap:10px;">
-                        <div class="hub-input-group" style="flex:1;">
-                            <label class="hub-input-lbl">WAKE ANCHOR (LOCAL TIME)</label>
-                            <input type="time" id="cal-anchor" class="hub-input" value="${sAnchorStr}">
-                        </div>
-                        <div class="hub-input-group" style="flex:1;">
-                            <label class="hub-input-lbl">TARGET SLEEP (HRS)</label>
-                            <input type="number" id="cal-sleep" class="hub-input" value="${sSleepHrs}" step="0.5" min="4" max="12">
-                        </div>
-                    </div>
-
-                    <div style="display:flex; gap:10px;">
-                        <div class="hub-input-group" style="flex:1;">
-                            <label class="hub-input-lbl">SLEEP INERTIA (MINS)</label>
-                            <input type="number" id="cal-inertia" class="hub-input" value="${sInertia}" min="0" max="180">
-                        </div>
-                        <div class="hub-input-group" style="flex:1;">
-                            <label class="hub-input-lbl">DLMO WIND-DOWN (MINS)</label>
-                            <input type="number" id="cal-dlmo" class="hub-input" value="${sDlmo}" min="0" max="180">
-                        </div>
-                    </div>
+                    
 
                     <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
                 </div>
