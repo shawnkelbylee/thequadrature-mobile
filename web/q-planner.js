@@ -1,7 +1,7 @@
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
 // PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
-// REVISION: Phase XV - Static Palette Decoupling (Titanium/Platinum/Cyan)
+// REVISION: Phase XVI - Resonance Matrix & Tri-Wave Oscilloscope
 
 // --- DATA PERSISTENCE & UTILITIES ---
 window.qData = window.qData || JSON.parse(localStorage.getItem('q_planner_data_v2') || '{}');
@@ -95,10 +95,11 @@ window.Q_OmniPlanner = {
     selectedAnchor: null,
     selectedHour: 0,
     selectedHourDur: 3600000,
-   showLegacyBase: true,
+    showLegacyBase: true,
     showOrbitalBase: false,
     showBiometricBase: false,
-    isLegacy: true, // Maintained as a reactive visual indicator for legacy micro-views
+    isLegacy: true, 
+    
     init: function() {
         this.injectCSS(); 
         this.injectDOM(); 
@@ -125,7 +126,6 @@ window.Q_OmniPlanner = {
 
             this.openPlanner(true); 
         } else if (isAperture) {
-            // Cleanse stale memory on home index to prevent forced overlays
             sessionStorage.setItem('Q_PLANNER_ACTIVE', 'false');
             this.viewState = 'closed';
         }
@@ -187,7 +187,6 @@ window.Q_OmniPlanner = {
         let tensionScore = 0;
         let constraintsCount = 0;
         
-        // Predictive Tension Algorithm - Friction Coefficient Array
         const friction_coefficient = {
             'SLEEP / RECOVERY': 50,
             'SLEEP INERTIA': 40,
@@ -421,7 +420,7 @@ window.Q_OmniPlanner = {
 
     openPlanner: function(isResume = false) {
         if(!isResume) {
-            const state = window.getSimState();
+            const state = window.getSimState ? window.getSimState() : { simTime: Date.now() };
             this.selectedDate = window.ANCHOR_ALPHA_DYNAMIC ? state.simTime : Date.now();
             this.plannerBase = this.selectedDate;
             this.viewState = 'planner';
@@ -465,14 +464,12 @@ window.Q_OmniPlanner = {
         this.refreshView();
     },
 
-   toggleSubstrate: function(target) {
+    toggleSubstrate: function(target) {
         if (target === 'legacy') this.showLegacyBase = !this.showLegacyBase;
         if (target === 'orbital') this.showOrbitalBase = !this.showOrbitalBase;
         if (target === 'biometric') this.showBiometricBase = !this.showBiometricBase;
 
-        // Automatically preserve structural logic for standard single-view states
         this.isLegacy = this.showLegacyBase; 
-        
         this.plannerBase = this.selectedDate; 
         this.refreshView(); 
     },
@@ -492,14 +489,14 @@ window.Q_OmniPlanner = {
         if (this.isLegacy) {
             cTitle = ""; cDesc = "";
         } else {
-            let activeBlock = window.getQBlockByTime(this.selectedDate);
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.selectedDate) : null;
             if(activeBlock && activeBlock.isAnchor) {
                 cTitle = `[ SETTLEMENT NODE: ${activeBlock.name} ]`;
                 cDesc = `OPERATIONAL BUFFER. Actively resolving accumulated physical drift. Q-Delta interpolating to 0.0000° across ${(activeBlock.dur / 3600000).toFixed(4)} hours.`;
                 contextDiv.style.borderColor = 'var(--gold)';
             } else if (activeBlock) {
                 let daysElapsed = (this.selectedDate - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-                let oData = window.getOrbitalData(daysElapsed);
+                let oData = window.getOrbitalData ? window.getOrbitalData(daysElapsed) : { trueArc: 0, meanArc: 0 };
                 let driftDeg = oData.trueArc - oData.meanArc;
                 let driftColor = driftDeg > 0 ? 'var(--omni-warn)' : 'var(--omni-main)';
                 let driftState = driftDeg > 0 ? "AHEAD" : "BEHIND";
@@ -552,14 +549,14 @@ window.Q_OmniPlanner = {
         const B = this.showBiometricBase;
         const isUnified = (L && O && B) || (!L && !O && B);
         
-        this.showBioWave = B; // Sync wave state for micro-views
+        this.showBioWave = B; 
 
         // Dynamic State-Aware Labeling
         const labels = isUnified ? {
-            day: "ZOOM: 7D",
-            sect: "ZOOM: 30D",
-            quad: "ZOOM: 90D",
-            cycle: "ZOOM: 365D"
+            day: "ZOOM: 3D",
+            sect: "ZOOM: 7D",
+            quad: "ZOOM: 14D",
+            cycle: "ZOOM: 30D"
         } : {
             day: this.isLegacy ? "DAY" : "DEG",
             sect: this.isLegacy ? "MONTH" : "SECT",
@@ -600,14 +597,13 @@ window.Q_OmniPlanner = {
             };
 
             const legBtn = createToggle('LEGACY Base', this.showLegacyBase, 'legacy', 'var(--omni-text)');
-            const orbBtn = createToggle('ORBITAL Base', this.showOrbitalBase, 'orbital', 'var(--sys-cyan, #00f0ff)');
+            const orbBtn = createToggle('ORBITAL Base', this.showOrbitalBase, 'orbital', 'var(--gold, #F4D068)');
             const bioBtn = createToggle('BIOMETRIC Base', this.showBiometricBase, 'biometric', 'var(--env-green, #a7ff83)');
 
             actionContainer.appendChild(legBtn);
             actionContainer.appendChild(orbBtn);
             actionContainer.appendChild(bioBtn);
 
-            // Re-mount the legend strictly when Biometric is running in any view state
             if (this.showBiometricBase) {
                 const legend = document.createElement('div');
                 legend.style.cssText = 'display:flex; gap:10px; margin-left:15px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
@@ -645,23 +641,18 @@ window.Q_OmniPlanner = {
 
         // --- TRUTH TABLE ROUTING MATRIX ---
         if (!L && !O && !B) {
-            // 000: THE VOID
             title.innerHTML = `<div class="cal-title-wrapper"><div class="title-q" style="color:rgba(229,228,226,0.3);">METROLOGICAL VOID</div></div>`;
             body.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100%; color:rgba(229, 228, 226, 0.2); font-family:'Orbitron'; font-size:1.5rem; letter-spacing:4px; font-weight:bold;">NO SUBSTRATE SELECTED</div>`;
             return;
         }
 
         if (L && O && B) {
-            // 111: UNIFIED MACRO
             this.renderUnified(body, title);
         } else if (L && O && !B) {
-            // 110: STRUCTURAL COMPARISON (OPTION B)
             this.renderStructuralComparison(body, title);
         } else if (!L && !O && B) {
-            // 001: PURE BIOMETRIC ISOLATION
             this.renderUnified(body, title);
         } else {
-            // 100, 010, 101, 011: MICRO-VIEWS
             this.isLegacy = L; 
             
             if(this.viewState === 'planner') { 
@@ -683,7 +674,7 @@ window.Q_OmniPlanner = {
         const utcNoonMs = Date.UTC(year, month, day, 12, 0, 0);
         
         const daysElapsed = (utcNoonMs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-        const o = window.getOrbitalData(daysElapsed);
+        const o = window.getOrbitalData ? window.getOrbitalData(daysElapsed) : { meanArc: 0 };
         const dayArc = o.meanArc;
         
         const allEvents = window.getGlobalHolidays(year);
@@ -741,7 +732,7 @@ window.Q_OmniPlanner = {
             }
         } else {
             matrix.style.gridTemplateColumns = 'repeat(5, 1fr)'; 
-            let activeBlock = window.getQBlockByTime(this.plannerBase);
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.plannerBase) : null;
             if(!activeBlock) return;
             
             let aQuad = activeBlock.quad || 1;
@@ -835,7 +826,7 @@ window.Q_OmniPlanner = {
        } else {
             title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:var(--omni-text);">ORBITAL LEDGER</span></div></div>`;
             
-            let activeBlock = window.getQBlockByTime(this.plannerBase);
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.plannerBase) : null;
             if(!activeBlock) return;
             let aQuad = activeBlock.quad || 1;
             let cCycle = activeBlock.cycle;
@@ -937,7 +928,7 @@ window.Q_OmniPlanner = {
             }
             container.appendChild(matrix);
         } else {
-            let activeBlock = window.getQBlockByTime(this.plannerBase);
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.plannerBase) : null;
             if(!activeBlock) return;
             let cCycle = activeBlock.cycle;
             title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--gold, #F4D068);">QUADRATURE:</span> <span style="color:var(--omni-text);">CYCLE ${cCycle}</span></div></div>`;
@@ -989,10 +980,11 @@ window.Q_OmniPlanner = {
             container.appendChild(matrix);
         }
     },
-renderStructuralComparison: function(container, title) {
+
+    renderStructuralComparison: function(container, title) {
         title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-warn);">STRUCTURAL COMPARISON</span> <span style="color:var(--omni-text);">[ L + O METROLOGY ]</span></div></div>`;
 
-        let activeBlock = window.getQBlockByTime(this.plannerBase);
+        let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.plannerBase) : null;
         if(!activeBlock) return;
         let cCycle = activeBlock.cycle;
 
@@ -1002,20 +994,19 @@ renderStructuralComparison: function(container, title) {
         matrix.style.flexWrap = 'wrap';
         matrix.style.justifyContent = 'center';
 
-        // High-contrast, low-opacity palette to differentiate the 12 irregular months
         const monthColors = [
-            'rgba(255, 0, 60, 0.45)',   // JAN
-            'rgba(255, 165, 0, 0.45)',  // FEB
-            'rgba(244, 208, 104, 0.45)',// MAR
-            'rgba(167, 255, 131, 0.45)',// APR
-            'rgba(0, 240, 255, 0.45)',  // MAY
-            'rgba(0, 85, 255, 0.45)',   // JUN
-            'rgba(184, 41, 255, 0.45)', // JUL
-            'rgba(255, 0, 255, 0.45)',  // AUG
-            'rgba(255, 105, 180, 0.45)',// SEP
-            'rgba(185, 122, 53, 0.45)', // OCT
-            'rgba(128, 128, 128, 0.45)',// NOV
-            'rgba(255, 255, 255, 0.35)' // DEC
+            'rgba(255, 0, 60, 0.45)',   
+            'rgba(255, 165, 0, 0.45)',  
+            'rgba(244, 208, 104, 0.45)',
+            'rgba(167, 255, 131, 0.45)',
+            'rgba(0, 240, 255, 0.45)',  
+            'rgba(0, 85, 255, 0.45)',   
+            'rgba(184, 41, 255, 0.45)', 
+            'rgba(255, 0, 255, 0.45)',  
+            'rgba(255, 105, 180, 0.45)',
+            'rgba(185, 122, 53, 0.45)', 
+            'rgba(128, 128, 128, 0.45)',
+            'rgba(255, 255, 255, 0.35)' 
         ];
         
         const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
@@ -1072,7 +1063,9 @@ renderStructuralComparison: function(container, title) {
             }
         }
         container.appendChild(matrix);
-    },   renderDay: function(container, title) {
+    },   
+    
+    renderDay: function(container, title) {
         title.innerHTML = window.getDualTitle(this.selectedDate, this.isLegacy);
         
         let savedAnchor = localStorage.getItem('q_bio_anchor');
@@ -1144,13 +1137,13 @@ renderStructuralComparison: function(container, title) {
                 const block = document.createElement('div');
                 block.className = `slot-block time-block ${blockClass}`;
                 
-                let civilFmt = window.formatLegacyDate(b.ms);
+                let civilFmt = window.formatLegacyDate ? window.formatLegacyDate(b.ms) : { timeStr: new Date(b.ms).toLocaleTimeString() };
                 
                 let hasData = b.text.trim() !== "";
                 let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
                 let diff = (b.ms - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-                let orbital = window.getOrbitalData(diff);
+                let orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
                 
                 let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="time-header wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(DEG ${orbital.trueArc.toFixed(2)})</span></div>`;
                 
@@ -1177,7 +1170,7 @@ renderStructuralComparison: function(container, title) {
             list.appendChild(matrix);
             container.appendChild(list);
         } else {
-            let activeBlock = window.getQBlockByTime(this.selectedDate);
+            let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.selectedDate) : null;
             if (!activeBlock) return;
             let cCycle = activeBlock.cycle;
             let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + activeBlock.relStart;
@@ -1224,7 +1217,7 @@ renderStructuralComparison: function(container, title) {
                 let hasData = data.text.trim() !== "";
                 let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
-               let currentFraction = (m * 0.05).toFixed(2).substring(1); // Formats to .00, .05, .10
+               let currentFraction = (m * 0.05).toFixed(2).substring(1); 
                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
@@ -1242,10 +1235,7 @@ renderStructuralComparison: function(container, title) {
                 
                 if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
                 
-               // OS OVERRIDE: Nearest-Hour Snapping (Orbital to Legacy Floor Routing)
                 block.onclick = (e) => {
-                    if (this.plannerFormat === 'unified') return; // STRICT MACRO LOCK
-                    
                     const snapDate = new Date(targetMs);
                     this.selectedDate = new Date(snapDate.getFullYear(), snapDate.getMonth(), snapDate.getDate()).getTime();
                     this.selectedHour = snapDate.getHours();
@@ -1283,7 +1273,7 @@ renderStructuralComparison: function(container, title) {
             const key = window.getDataKey(new Date(targetMs), this.selectedHour, m);
             const data = window.qData[key] || { text: "", link: "" };
             const diff = (targetMs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY; 
-            const orbital = window.getOrbitalData(diff);
+            const orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
             
             let d = new Date(targetMs);
             let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
@@ -1339,166 +1329,143 @@ renderStructuralComparison: function(container, title) {
         container.appendChild(matrix);
     },
 
-  renderUnified: function(container, title) {
-        // 1. ZOOM MECHANICS (TRACK SCALING)
-        let dayCount = 365;
-        let trackWidth = 12000;
-        let startOffsetMs = window.ANCHOR_ALPHA_DYNAMIC;
+    renderUnified: function(container, title) {
+        // --- ABSOLUTE METROLOGICAL ZOOM LOGIC ---
+        let dayCount = 7; // Default 7 Absolute Pulses
+        if (this.plannerMacroMode === 'sect') dayCount = 7;
+        if (this.plannerMacroMode === 'quad') dayCount = 14;
+        if (this.plannerMacroMode === 'cycle') dayCount = 30;
+        if (this.viewState === 'day' || this.viewState === 'hour' || this.plannerMacroMode === 'day') dayCount = 3;
 
-        if (this.viewState === 'day' || this.viewState === 'hour' || this.plannerMacroMode === 'day') {
-            dayCount = 7;
-            trackWidth = 3000;
-            startOffsetMs = this.selectedDate - (3 * window.MS_DAY); // Center the selected day
-            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ MICRO-TIMELINE : 7 DAYS ]</span></div></div>`;
-        } else if (this.plannerMacroMode === 'sect') {
-            dayCount = 30;
-            trackWidth = 6000;
-            startOffsetMs = this.plannerBase;
-            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ SUB-MACRO : 30 DAYS ]</span></div></div>`;
-        } else if (this.plannerMacroMode === 'quad') {
-            dayCount = 90;
-            trackWidth = 9000;
-            startOffsetMs = this.plannerBase;
-            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ MACRO-TIMELINE : 90 DAYS ]</span></div></div>`;
-        } else {
-            let activeBlock = window.getQBlockByTime(this.plannerBase);
-            let cCycle = activeBlock ? activeBlock.cycle : 0;
-            startOffsetMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS);
-            title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE UNIFIED MATRIX</span> <span style="color:var(--gold, #F4D068);">[ ABSOLUTE TIMELINE : 365 DAYS ]</span></div></div>`;
-        }
+        let titleStr = `ZOOM: ${dayCount} PULSES`;
+        title.innerHTML = `<div class="cal-title-wrapper show-quad"><div class="title-q"><span style="color:var(--omni-text);">THE RESONANCE MATRIX</span> <span style="color:var(--gold, #F4D068);">[ ${titleStr} ]</span></div></div>`;
 
+        // Absolute T=0 Anchor (Dec 21, 2025 15:03:00 UTC)
+        let alphaAnchor = window.ANCHOR_ALPHA_DYNAMIC || new Date("2025-12-21T15:03:00Z").getTime();
+        let currentViewMs = this.plannerBase; 
+        
+        // Calculate the absolute pulse index (P001, P002, etc.)
+        let elapsedMs = currentViewMs - alphaAnchor;
+        let pulseIndex = Math.floor(elapsedMs / 86400000);
+        
+        // Center the physical timeline on the active pulse
+        let startPulse = pulseIndex - Math.floor(dayCount / 2);
+        let startMs = alphaAnchor + (startPulse * 86400000);
+        let endMs = startMs + (dayCount * 86400000);
+        
+        // --- 100% STRICT VIEWPORT CONTAINER (NO OVERFLOW) ---
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'width:100%; height:100%; overflow-x:auto; overflow-y:hidden; position:relative; background:var(--omni-bg); padding-top:40px;';
+        wrapper.style.cssText = 'width:100%; height:100%; position:relative; background:var(--omni-bg); overflow:hidden; padding: 20px 0; border: 1px solid var(--omni-bg); border-radius: 8px; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);';
 
-        const track = document.createElement('div');
-        track.style.cssText = `width:${trackWidth}px; height:80%; position:relative; margin:auto; background:#0f1724; display:flex; align-items:center; box-shadow: 0 0 20px rgba(0,0,0,0.8);`; 
-
-        // 2. ORBITAL LAYER (HORIZONTAL EoT SHIFT)
-        const orbitalLayer = document.createElement('div');
-        orbitalLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; left:0; display:flex; pointer-events:none;';
-        if (!this.showOrbitalBase) orbitalLayer.style.display = 'none';
-
-        const lat = window.Q_STATE?.location?.lat || 27.97;
-        for (let i = 0; i < dayCount; i++) {
-            let targetMs = startOffsetMs + (i * window.MS_DAY);
-            let dObj = new Date(targetMs);
-            let dayOfYear = Math.floor((targetMs - new Date(dObj.getFullYear(), 0, 0).getTime()) / window.MS_DAY);
-
-            let B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
-            let eotMins = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-            let solarNoonDec = 12 - (eotMins / 60); // Shift noon away from 12:00 based on EoT
-
-            let delta = 23.44 * Math.sin((360 / 365) * (dayOfYear - 80) * Math.PI / 180);
-            let tanLat = Math.tan(lat * Math.PI / 180);
-            let tanDelta = Math.tan(delta * Math.PI / 180);
-            let cosOmega = -tanLat * tanDelta;
-            if(cosOmega > 1) cosOmega = 1; if(cosOmega < -1) cosOmega = -1;
-            let omega = Math.acos(cosOmega) * 180 / Math.PI;
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+        svg.setAttribute("viewBox", `0 0 1000 100`);
+        svg.setAttribute("preserveAspectRatio", "none");
+        
+        // Y=0 Axis (The Continuous Temporal Thread)
+        const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        axis.setAttribute("x1", "0"); axis.setAttribute("y1", "50");
+        axis.setAttribute("x2", "1000"); axis.setAttribute("y2", "50");
+        axis.setAttribute("stroke", "rgba(229, 228, 226, 0.4)");
+        axis.setAttribute("stroke-width", "0.5");
+        svg.appendChild(axis);
+        
+        // The Civil Cage (24-Hour Hashes overlaying the thread)
+        for (let i = 0; i <= dayCount; i++) {
+            let xPos = (i / dayCount) * 1000;
             
-            let daylightHours = (2 * omega) / 15;
-            let halfLight = daylightHours / 2;
-
-            let sunrisePct = ((solarNoonDec - halfLight) / 24) * 100;
-            let sunsetPct = ((solarNoonDec + halfLight) / 24) * 100;
-
-            let slice = document.createElement('div');
-            // Horizontal left-to-right gradient representing dawn, true noon drift, and dusk
-            slice.style.cssText = `flex-grow:1; height:80px; margin-top:auto; margin-bottom:auto; background:linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.95) ${sunrisePct}%, var(--sys-cyan) ${sunrisePct}%, var(--sys-cyan) ${sunsetPct}%, rgba(0,0,0,0.95) ${sunsetPct}%, rgba(0,0,0,0.95) 100%); opacity:0.6;`;
-            orbitalLayer.appendChild(slice);
+            let hash = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            hash.setAttribute("x1", xPos); hash.setAttribute("y1", "45");
+            hash.setAttribute("x2", xPos); hash.setAttribute("y2", "55");
+            hash.setAttribute("stroke", "var(--omni-warn)");
+            hash.setAttribute("stroke-width", "0.5");
+            svg.appendChild(hash);
+            
+            // Pulse Metrology Label (P001, P002) - Purging Gregorian Names
+            let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            label.setAttribute("x", xPos + 2); label.setAttribute("y", "42");
+            label.setAttribute("fill", "rgba(229, 228, 226, 0.4)");
+            label.setAttribute("font-size", "2");
+            label.setAttribute("font-family", "Orbitron");
+            label.textContent = `P${startPulse + i}`;
+            svg.appendChild(label);
         }
 
-        // 3. LEGACY LAYER (GREGORIAN HASHES)
-        const legacyLayer = document.createElement('div');
-        legacyLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none;';
-        if (!this.showLegacyBase) legacyLayer.style.display = 'none';
-        
-        const dayLetters = ["S", "M", "T", "W", "T", "F", "S"];
-        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const msRange = endMs - startMs;
+        const resolution = 1000; // Micro-step rendering to prevent path aliasing
 
-        for (let i = 0; i < dayCount; i++) {
-            let targetMs = startOffsetMs + (i * window.MS_DAY);
-            let dObj = new Date(targetMs);
-            let xPos = (i / dayCount) * 100;
-            
-            let isEndOfMonth = (dObj.getDate() === new Date(dObj.getFullYear(), dObj.getMonth() + 1, 0).getDate());
-            
-            let hash = document.createElement('div');
-            hash.style.cssText = `position:absolute; left:${xPos}%; height:${isEndOfMonth ? '30%' : '15%'}; top:${isEndOfMonth ? '35%' : '42.5%'}; width:${isEndOfMonth ? '2px' : '1px'}; background:${isEndOfMonth ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.4)'}; z-index:1;`;
-            legacyLayer.appendChild(hash);
-            
-            let letter = document.createElement('div');
-            letter.style.cssText = `position:absolute; left:calc(${xPos}% + 4px); top:60%; font-size:0.5rem; color:rgba(229, 228, 226, 0.4); font-family:'JetBrains Mono';`;
-            letter.innerText = dayLetters[dObj.getDay()];
-            legacyLayer.appendChild(letter);
-            
-            // Render month label at mid-month, or on the first day if zoomed in heavily
-            if (dObj.getDate() === 15 || (dayCount <= 7 && dObj.getDay() === 3)) {
-                let mLabel = document.createElement('div');
-                mLabel.style.cssText = `position:absolute; left:${xPos}%; top:25%; font-size:1rem; font-weight:bold; color:var(--omni-text); font-family:'Orbitron'; transform:translateX(-50%); text-shadow:0 0 5px #000;`;
-                mLabel.innerText = monthNames[dObj.getMonth()] + " " + dObj.getDate();
-                legacyLayer.appendChild(mLabel);
-            }
-        }
+        // --- TRI-WAVE OSCILLOSCOPE GENERATION ---
+        let pathOrbital = "M 0 50 ";
+        let pathPhoto = "M 0 50 ";
+        let pathBio = "M 0 50 ";
 
-        // 4. BIOMETRIC LAYER (DIURNAL ENVELOPE)
-        const bioLayer = document.createElement('div');
-        bioLayer.style.cssText = 'position:absolute; width:100%; height:100%; top:0; pointer-events:none; z-index:2;';
-        if (!this.showBiometricBase) bioLayer.style.display = 'none';
-        
-        let savedAnchor = localStorage.getItem('q_bio_anchor');
-        let anchorMins = (savedAnchor === null || savedAnchor === "") ? 420 : parseInt(savedAnchor);
+        let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 420;
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
         let wakeDuration = 1440 - sleepDuration;
 
-        const waveSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        waveSvg.setAttribute("width", "100%");
-        waveSvg.setAttribute("height", "100%");
-        waveSvg.style.position = "absolute";
-        
-        let pathData = "M 0 50 ";
-        // Step density tied to zoom level for maximum geometric fidelity
-        let step = trackWidth >= 9000 ? 5 : 2; 
+        for(let i=0; i<=resolution; i++) {
+            let pct = i / resolution;
+            let pointMs = startMs + (pct * msRange);
+            let x = pct * 1000;
 
-        for(let x = 0; x <= trackWidth; x += step) {
-            let pct = x / trackWidth;
-            let targetMs = startOffsetMs + (pct * dayCount * window.MS_DAY);
-            let dObj = new Date(targetMs);
-            
-            let hoursFloat = dObj.getHours() + (dObj.getMinutes() / 60) + (dObj.getSeconds() / 3600);
-            let minsFloat = hoursFloat * 60;
-            let minsSinceWake = (minsFloat - anchorMins + 1440) % 1440;
-            let y;
-            
+            let daysSinceSolstice = (pointMs - alphaAnchor) / 86400000;
+            let dObj = new Date(pointMs);
+            let localDec = dObj.getHours() + (dObj.getMinutes() / 60) + (dObj.getSeconds() / 3600);
+
+            // 1. Fluid Degree Wave (Gold)
+            let meanArc = (daysSinceSolstice / 365.24219) * 360;
+            let M = (meanArc - 14) * Math.PI / 180; 
+            let trueArc = meanArc + (1.914 * Math.sin(M)); 
+            // Scaled amplitude to visualize spatial bleeding across civil hashes
+            let orbitalY = 50 - (Math.sin(trueArc * Math.PI * 2) * 15); 
+            pathOrbital += `L ${x} ${orbitalY} `;
+
+            // 2. Photoperiod Wave (Cyan) - True Solar Noon Peak
+            let dayOfYear = daysSinceSolstice + 355; 
+            let B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
+            let eotMins = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+            let solarNoonDec = 12 - (eotMins / 60); 
+            let timeFromNoon = localDec - solarNoonDec;
+            // Massive amplitude to dominate the visual hierarchy
+            let photoY = 50 - (Math.cos((timeFromNoon / 24) * Math.PI * 2) * 35);
+            pathPhoto += `L ${x} ${photoY} `;
+
+            // 3. Biological Diurnal Envelope (Green)
+            let minsFloat = localDec * 60;
+            let minsSinceWake = (minsFloat - savedAnchor + 1440) % 1440;
+            let bioY = 50;
             if (minsSinceWake >= wakeDuration) {
-                // True Sleep Phase: Deep, isolated recovery trough
                 let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
-                y = 65 + (Math.sin(sleepProgress * Math.PI) * 20); 
+                bioY = 50 + (Math.sin(sleepProgress * Math.PI) * 25); 
             } else {
-                // True Waking Phase: Smooth diurnal apex arching across daylight
                 let wakeProgress = minsSinceWake / wakeDuration;
-                y = 45 - (Math.sin(wakeProgress * Math.PI) * 15); 
+                bioY = 50 - (Math.sin(wakeProgress * Math.PI) * 25); 
             }
-            
-            pathData += `L ${x} ${y} `;
+            pathBio += `L ${x} ${bioY} `;
         }
-        
-        const wavePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        wavePath.setAttribute("d", pathData);
-        wavePath.setAttribute("stroke", "var(--env-green, #a7ff83)");
-        wavePath.setAttribute("stroke-width", "2");
-        wavePath.setAttribute("fill", "none");
-        wavePath.style.filter = "drop-shadow(0px 0px 8px rgba(167, 255, 131, 0.8))";
-        
-        waveSvg.appendChild(wavePath);
-        bioLayer.appendChild(waveSvg);
 
-        track.appendChild(orbitalLayer);
-        track.appendChild(legacyLayer);
-        track.appendChild(bioLayer);
-        wrapper.appendChild(track);
+        const addPath = (pathData, color, width, dash = "") => {
+            let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("d", pathData);
+            p.setAttribute("stroke", color);
+            p.setAttribute("stroke-width", width);
+            p.setAttribute("fill", "none");
+            if (dash) p.setAttribute("stroke-dasharray", dash);
+            p.style.filter = `drop-shadow(0px 0px 4px ${color})`;
+            svg.appendChild(p);
+        };
+
+        // Render the layered physics
+        if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
+        if (this.showBiometricBase) addPath(pathBio, "var(--env-green, #a7ff83)", "1.5");
+        if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1"); 
+
+        wrapper.appendChild(svg);
         container.appendChild(wrapper);
     }
 };
+
 // --- SYSTEM MOUNT ---
 window.addEventListener('DOMContentLoaded', () => {
     if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.init === 'function') {
