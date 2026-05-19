@@ -608,10 +608,18 @@ window.Q_OmniPlanner = {
         const waveKey = document.createElement('div');
         waveKey.style.cssText = 'position:absolute; bottom:15px; left:15px; display:flex; gap:12px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold; z-index:100;';
         waveKey.innerHTML = `
-            <span style="color:rgba(229, 228, 226, 0.6); cursor:help;">— CIVIL GRID</span>
-            <span style="color:var(--sys-cyan, #00f0ff); cursor:help;">~ PHOTOPERIOD</span>
-            <span style="color:var(--env-green, #a7ff83); cursor:help;">~ BIOLOGICAL</span>
-            <span style="color:var(--gold, #F4D068); cursor:help;">~ FLUID DEGREE</span>
+            <span style="color:rgba(229, 228, 226, 0.6); cursor:help;" 
+                  onmouseover="window.showNeedleHUD('CIVIL GRID: The continuous uninterrupted count of 365 static 24-hour days.', 'rgba(229, 228, 226, 0.6)')" 
+                  onmouseout="window.hideNeedleHUD()">— CIVIL GRID</span>
+            <span style="color:var(--sys-cyan, #00f0ff); cursor:help;" 
+                  onmouseover="window.showNeedleHUD('PHOTOPERIOD: Shifting duration of sunlight. Above axis: Daylight. Below axis: Nighttime.', 'var(--sys-cyan)')" 
+                  onmouseout="window.hideNeedleHUD()">~ PHOTOPERIOD</span>
+            <span style="color:var(--env-green, #a7ff83); cursor:help;" 
+                  onmouseover="window.showNeedleHUD('BIOLOGICAL: User-calibrated circadian cycle via 5 biometric phases.', 'var(--env-green)')" 
+                  onmouseout="window.hideNeedleHUD()">~ BIOLOGICAL</span>
+            <span style="color:var(--gold, #F4D068); cursor:help;" 
+                  onmouseover="window.showNeedleHUD('FLUID DEGREE: Time to cross 1 degree of orbital path. Intersects at 1 spatial degree intervals.', 'var(--gold)')" 
+                  onmouseout="window.hideNeedleHUD()">~ FLUID DEGREE</span>
         `;
         wrapper.appendChild(waveKey);
             
