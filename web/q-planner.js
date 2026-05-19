@@ -604,18 +604,16 @@ window.Q_OmniPlanner = {
             actionContainer.appendChild(orbBtn);
             actionContainer.appendChild(bioBtn);
 
-            if (this.showBiometricBase) {
-                const legend = document.createElement('div');
-                legend.style.cssText = 'display:flex; gap:10px; margin-left:15px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
-                legend.innerHTML = `
-                    <span style="color:var(--env-green, #a7ff83);">DEEP FLOW</span>
-                    <span style="color:var(--sys-cyan, #00f0ff);">VENT/RECOVERY</span>
-                    <span style="color:var(--bio-purple, #b829ff);">SLEEP</span>
-                    <span style="color:var(--chrono-amber, #B97A35);">INERTIA</span>
-                    <span style="color:var(--bio-cobalt, #0055ff);">DLMO</span>
-                `;
-                actionContainer.appendChild(legend);
-            }
+           // 4-part Legend Key: Contextual Wave Mapping
+            const waveKey = document.createElement('div');
+            waveKey.style.cssText = 'display:flex; gap:12px; margin-left:15px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
+            waveKey.innerHTML = `
+                <span style="color:rgba(229, 228, 226, 0.6);">— CIVIL GRID</span>
+                <span style="color:var(--sys-cyan, #00f0ff);">~ PHOTOPERIOD</span>
+                <span style="color:var(--env-green, #a7ff83);">~ BIOLOGICAL</span>
+                <span style="color:var(--gold, #F4D068);">~ FLUID DEGREE</span>
+            `;
+            actionContainer.appendChild(waveKey);
             
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
