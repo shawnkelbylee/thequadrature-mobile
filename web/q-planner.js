@@ -1394,7 +1394,8 @@ window.Q_OmniPlanner = {
 
         const msRange = endMs - startMs;
         const resolution = 1000; // Micro-step rendering to prevent path aliasing
-
+// Lock static timezone offset to prevent mid-wave browser DST bleed
+        const baseTzOffsetMs = new Date(startMs).getTimezoneOffset() * 60000;
         // --- TRI-WAVE OSCILLOSCOPE GENERATION ---
         let pathOrbital = "M 0 50 ";
         let pathPhoto = "M 0 50 ";
@@ -1410,8 +1411,9 @@ window.Q_OmniPlanner = {
             let x = pct * 1000;
 
             let daysSinceSolstice = (pointMs - alphaAnchor) / 86400000;
-            let dObj = new Date(pointMs);
-            let localDec = dObj.getHours() + (dObj.getMinutes() / 60) + (dObj.getSeconds() / 3600);
+            // Extract absolute continuous diurnal phase (bypassing native Date object drift)
+            let localPointMs = pointMs - baseTzOffsetMs;
+            let localDec = (((localPointMs % 86400000) + 86400000) % 86400000) / 3600000;
 
             // 1. Fluid Degree Wave (Gold)
             let meanArc = (daysSinceSolstice / 365.24219) * 360;
