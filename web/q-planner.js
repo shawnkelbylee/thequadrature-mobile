@@ -99,6 +99,7 @@ window.Q_OmniPlanner = {
     showOrbitalBase: false,
     showBiometricBase: false,
     isLegacy: true, 
+    civilDistortionActive: false,
     
     init: function() {
         this.injectCSS(); 
@@ -603,7 +604,7 @@ window.Q_OmniPlanner = {
             actionContainer.appendChild(legBtn);
             actionContainer.appendChild(orbBtn);
             actionContainer.appendChild(bioBtn);
-if (this.showBiometricBase) {
+            if (this.showBiometricBase) {
                 const distBtn = document.createElement('button');
                 distBtn.className = 'back-btn';
                 distBtn.style.color = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
@@ -1362,8 +1363,8 @@ if (this.showBiometricBase) {
         let startPulse = pulseIndex - Math.floor(dayCount / 2);
         let startMs = alphaAnchor + (startPulse * 86400000);
         let endMs = startMs + (dayCount * 86400000);
-let endMs = startMs + (dayCount * 86400000);
         const msRange = endMs - startMs; // MOVED TO TOP
+
         // --- 100% STRICT VIEWPORT CONTAINER (NO OVERFLOW) ---
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'width:100%; height:100%; position:relative; background:var(--omni-bg); overflow:hidden; padding: 20px 0; border: 1px solid var(--omni-bg); border-radius: 8px; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);';
@@ -1373,7 +1374,8 @@ let endMs = startMs + (dayCount * 86400000);
         svg.setAttribute("height", "100%");
         svg.setAttribute("viewBox", `0 0 1000 100`);
         svg.setAttribute("preserveAspectRatio", "none");
-const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
         grad.setAttribute("id", "bioGradient");
         grad.setAttribute("gradientUnits", "userSpaceOnUse");
@@ -1401,8 +1403,6 @@ const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         axis.setAttribute("stroke", "rgba(229, 228, 226, 0.4)");
         axis.setAttribute("stroke-width", "0.5");
         svg.appendChild(axis);
-
-        
 
         // 1. Dynamic Civil Cage & 2. DST Tension Zones
         let d = new Date(startMs);
