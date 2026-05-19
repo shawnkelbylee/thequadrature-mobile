@@ -403,16 +403,16 @@ window.injectUniversalUI = function() {
             .scrub-row-2 { order: 3 !important; width: 100%; flex-wrap: wrap; justify-content: center; }
         }
 
-        /* --- OMNI-PLANNER QUARANTINE (GLOBAL UI SUPPRESSION) --- */
-        body.planner-quad-active .q-nav-bar,
-        body.planner-quad-active .q-control-strip,
-        body.planner-quad-active #mobile-telemetry-ribbon,
-        body.planner-quad-active #mobile-telemetry-viewport,
-        body.planner-quad-active #q-universal-controls,
-        body.planner-quad-active #q-mic-fab,
-        body.planner-quad-active #q-mic-fab-desktop,
-        body.planner-quad-active .telemetry-node,
-        body.planner-quad-active .q-global-controls {
+       /* --- OMNI-PLANNER QUARANTINE (GLOBAL UI SUPPRESSION) --- */
+        body:has(#unified-omni-planner.active) .q-nav-bar,
+        body:has(#unified-omni-planner.active) .q-control-strip,
+        body:has(#unified-omni-planner.active) #mobile-telemetry-ribbon,
+        body:has(#unified-omni-planner.active) #mobile-telemetry-viewport,
+        body:has(#unified-omni-planner.active) #q-universal-controls,
+        body:has(#unified-omni-planner.active) #q-mic-fab,
+        body:has(#unified-omni-planner.active) #q-mic-fab-desktop,
+        body:has(#unified-omni-planner.active) .telemetry-node,
+        body:has(#unified-omni-planner.active) .q-global-controls {
             display: none !important;
             opacity: 0 !important;
             visibility: hidden !important;
