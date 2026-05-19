@@ -546,7 +546,21 @@ window.Q_OmniPlanner = {
             document.body.classList.remove('planner-quad-active');
         }
 
-        const labels = {
+        // --- DEFINE TRUTH TABLE CONSTANTS EARLY ---
+        const L = this.showLegacyBase;
+        const O = this.showOrbitalBase;
+        const B = this.showBiometricBase;
+        const isUnified = (L && O && B) || (!L && !O && B);
+        
+        this.showBioWave = B; // Sync wave state for micro-views
+
+        // Dynamic State-Aware Labeling
+        const labels = isUnified ? {
+            day: "ZOOM: 7D",
+            sect: "ZOOM: 30D",
+            quad: "ZOOM: 90D",
+            cycle: "ZOOM: 365D"
+        } : {
             day: this.isLegacy ? "DAY" : "DEG",
             sect: this.isLegacy ? "MONTH" : "SECT",
             quad: this.isLegacy ? "QTR" : "QUAD",
@@ -593,9 +607,6 @@ window.Q_OmniPlanner = {
             actionContainer.appendChild(orbBtn);
             actionContainer.appendChild(bioBtn);
 
-            // Reconstruct view routing logic conditions based on the truth-table rules
-            const activeCount = (this.showLegacyBase?1:0) + (this.showOrbitalBase?1:0) + (this.showBiometricBase?1:0);
-            
             // Re-mount the legend strictly when Biometric is running in any view state
             if (this.showBiometricBase) {
                 const legend = document.createElement('div');
@@ -632,13 +643,7 @@ window.Q_OmniPlanner = {
 
         this.renderContextBanner();
 
-     // --- TRUTH TABLE ROUTING MATRIX ---
-        const L = this.showLegacyBase;
-        const O = this.showOrbitalBase;
-        const B = this.showBiometricBase;
-        
-        this.showBioWave = B; // Sync wave state for micro-views
-
+        // --- TRUTH TABLE ROUTING MATRIX ---
         if (!L && !O && !B) {
             // 000: THE VOID
             title.innerHTML = `<div class="cal-title-wrapper"><div class="title-q" style="color:rgba(229,228,226,0.3);">METROLOGICAL VOID</div></div>`;
