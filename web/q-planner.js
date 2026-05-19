@@ -1362,7 +1362,8 @@ if (this.showBiometricBase) {
         let startPulse = pulseIndex - Math.floor(dayCount / 2);
         let startMs = alphaAnchor + (startPulse * 86400000);
         let endMs = startMs + (dayCount * 86400000);
-
+let endMs = startMs + (dayCount * 86400000);
+        const msRange = endMs - startMs; // MOVED TO TOP
         // --- 100% STRICT VIEWPORT CONTAINER (NO OVERFLOW) ---
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'width:100%; height:100%; position:relative; background:var(--omni-bg); overflow:hidden; padding: 20px 0; border: 1px solid var(--omni-bg); border-radius: 8px; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);';
@@ -1401,7 +1402,7 @@ const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
         axis.setAttribute("stroke-width", "0.5");
         svg.appendChild(axis);
 
-        const msRange = endMs - startMs;
+        
 
         // 1. Dynamic Civil Cage & 2. DST Tension Zones
         let d = new Date(startMs);
