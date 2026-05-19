@@ -604,8 +604,6 @@ window.Q_OmniPlanner = {
             actionContainer.appendChild(orbBtn);
             actionContainer.appendChild(bioBtn);
 
-           
-            
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
                 hardBackBtn.className = 'back-btn';
@@ -1342,17 +1340,17 @@ window.Q_OmniPlanner = {
 
         // Absolute T=0 Anchor (Dec 21, 2025 15:03:00 UTC)
         let alphaAnchor = window.ANCHOR_ALPHA_DYNAMIC || new Date("2025-12-21T15:03:00Z").getTime();
-        let currentViewMs = this.plannerBase; 
-        
+        let currentViewMs = this.plannerBase;
+
         // Calculate the absolute pulse index (P001, P002, etc.)
         let elapsedMs = currentViewMs - alphaAnchor;
         let pulseIndex = Math.floor(elapsedMs / 86400000);
-        
+
         // Center the physical timeline on the active pulse
         let startPulse = pulseIndex - Math.floor(dayCount / 2);
         let startMs = alphaAnchor + (startPulse * 86400000);
         let endMs = startMs + (dayCount * 86400000);
-        
+
         // --- 100% STRICT VIEWPORT CONTAINER (NO OVERFLOW) ---
         const wrapper = document.createElement('div');
         wrapper.style.cssText = 'width:100%; height:100%; position:relative; background:var(--omni-bg); overflow:hidden; padding: 20px 0; border: 1px solid var(--omni-bg); border-radius: 8px; box-shadow: inset 0 0 30px rgba(0,0,0,0.5);';
@@ -1362,7 +1360,7 @@ window.Q_OmniPlanner = {
         svg.setAttribute("height", "100%");
         svg.setAttribute("viewBox", `0 0 1000 100`);
         svg.setAttribute("preserveAspectRatio", "none");
-        
+
         // Y=0 Axis (The Continuous Temporal Thread)
         const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
         axis.setAttribute("x1", "0"); axis.setAttribute("y1", "50");
@@ -1370,40 +1368,68 @@ window.Q_OmniPlanner = {
         axis.setAttribute("stroke", "rgba(229, 228, 226, 0.4)");
         axis.setAttribute("stroke-width", "0.5");
         svg.appendChild(axis);
-        
-        // The Civil Cage (24-Hour Hashes overlaying the thread)
-        for (let i = 0; i <= dayCount; i++) {
-            let xPos = (i / dayCount) * 1000;
-            
+
+        const msRange = endMs - startMs;
+
+        // 1. Dynamic Civil Cage & 2. DST Tension Zones
+        let d = new Date(startMs);
+        d.setHours(0, 0, 0, 0); // Geolocation-aware local midnight
+        if (d.getTime() < startMs) d.setDate(d.getDate() + 1);
+
+        while (d.getTime() <= endMs) {
+            let hashMs = d.getTime();
+            let xPos = ((hashMs - startMs) / msRange) * 1000;
+
             let hash = document.createElementNS("http://www.w3.org/2000/svg", "line");
             hash.setAttribute("x1", xPos); hash.setAttribute("y1", "45");
             hash.setAttribute("x2", xPos); hash.setAttribute("y2", "55");
-            hash.setAttribute("stroke", "var(--omni-warn)");
-            hash.setAttribute("stroke-width", "0.5");
+            hash.setAttribute("stroke", "rgba(229, 228, 226, 0.6)");
+            hash.setAttribute("stroke-width", "0.8");
             svg.appendChild(hash);
-            
-            // Pulse Metrology Label (P001, P002) - Purging Gregorian Names
+
             let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
             label.setAttribute("x", xPos + 2); label.setAttribute("y", "42");
             label.setAttribute("fill", "rgba(229, 228, 226, 0.4)");
             label.setAttribute("font-size", "2");
             label.setAttribute("font-family", "Orbitron");
-            label.textContent = `P${startPulse + i}`;
+            label.textContent = `00:00`;
             svg.appendChild(label);
+
+            let nextDay = new Date(d);
+            nextDay.setDate(nextDay.getDate() + 1);
+            let nextHashMs = nextDay.getTime();
+            let dayDurationMs = nextHashMs - hashMs;
+
+            if (dayDurationMs !== 86400000 && nextHashMs <= endMs) {
+                // Timezone Shift / DST Tension Zone
+                let tensionWidth = Math.abs(dayDurationMs - 86400000) / msRange * 1000;
+                let tensionX = xPos;
+                let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", tensionX); rect.setAttribute("y", "0");
+                rect.setAttribute("width", tensionWidth); rect.setAttribute("height", "100");
+                // Spring Forward (Missing 1Hr) is lighter. Fall Back (Extra 1Hr) is darker friction.
+                rect.setAttribute("fill", dayDurationMs < 86400000 ? "rgba(255, 0, 60, 0.2)" : "rgba(255, 0, 60, 0.4)");
+                svg.appendChild(rect);
+            }
+            d = nextDay;
         }
 
-        const msRange = endMs - startMs;
-        const resolution = 1000; // Micro-step rendering to prevent path aliasing
-// Lock static timezone offset to prevent mid-wave browser DST bleed
+        const resolution = 1000;
+
+        // Lock static timezone offset to prevent mid-wave browser DST bleed
         const baseTzOffsetMs = new Date(startMs).getTimezoneOffset() * 60000;
-        // --- TRI-WAVE OSCILLOSCOPE GENERATION ---
+
         let pathOrbital = "M 0 50 ";
         let pathPhoto = "M 0 50 ";
-        let pathBio = "M 0 50 ";
+        let pathBio = "";
 
         let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 420;
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
         let wakeDuration = 1440 - sleepDuration;
+
+        // 3. Biological Event Horizon
+        let userInitMs = parseInt(localStorage.getItem('q_init_ms')) || alphaAnchor;
+        let bioPathStarted = false;
 
         for(let i=0; i<=resolution; i++) {
             let pct = i / resolution;
@@ -1411,43 +1437,51 @@ window.Q_OmniPlanner = {
             let x = pct * 1000;
 
             let daysSinceSolstice = (pointMs - alphaAnchor) / 86400000;
+
             // Extract absolute continuous diurnal phase (bypassing native Date object drift)
             let localPointMs = pointMs - baseTzOffsetMs;
             let localDec = (((localPointMs % 86400000) + 86400000) % 86400000) / 3600000;
 
             // 1. Fluid Degree Wave (Gold)
             let meanArc = (daysSinceSolstice / 365.24219) * 360;
-            let M = (meanArc - 14) * Math.PI / 180; 
-            let trueArc = meanArc + (1.914 * Math.sin(M)); 
-            // Scaled amplitude to visualize spatial bleeding across civil hashes
-            let orbitalY = 50 - (Math.sin(trueArc * Math.PI * 2) * 15); 
+            let M = (meanArc - 14) * Math.PI / 180;
+            let trueArc = meanArc + (1.914 * Math.sin(M));
+            let orbitalY = 50 - (Math.sin(trueArc * Math.PI * 2) * 15);
             pathOrbital += `L ${x} ${orbitalY} `;
 
-            // 2. Photoperiod Wave (Cyan) - True Solar Noon Peak
-            let dayOfYear = daysSinceSolstice + 355; 
+            // 2. Photoperiod Wave (Cyan)
+            let dayOfYear = daysSinceSolstice + 355;
             let B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
             let eotMins = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
-            let solarNoonDec = 12 - (eotMins / 60); 
+            let solarNoonDec = 12 - (eotMins / 60);
             let timeFromNoon = localDec - solarNoonDec;
-            // Massive amplitude to dominate the visual hierarchy
             let photoY = 50 - (Math.cos((timeFromNoon / 24) * Math.PI * 2) * 35);
             pathPhoto += `L ${x} ${photoY} `;
 
-            // 3. Biological Diurnal Envelope (Green)
-            let minsFloat = localDec * 60;
-            let minsSinceWake = (minsFloat - savedAnchor + 1440) % 1440;
-            let bioY = 50;
-            if (minsSinceWake >= wakeDuration) {
-                let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
-                bioY = 50 + (Math.sin(sleepProgress * Math.PI) * 25); 
-            } else {
-                let wakeProgress = minsSinceWake / wakeDuration;
-                bioY = 50 - (Math.sin(wakeProgress * Math.PI) * 25); 
+            // 3. Biological Diurnal Envelope (Green) with Initialization Clipping
+            if (pointMs >= userInitMs) {
+                let minsFloat = localDec * 60;
+                let minsSinceWake = (minsFloat - savedAnchor + 1440) % 1440;
+                let bioY = 50;
+                if (minsSinceWake >= wakeDuration) {
+                    let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
+                    bioY = 50 + (Math.sin(sleepProgress * Math.PI) * 25);
+                } else {
+                    let wakeProgress = minsSinceWake / wakeDuration;
+                    bioY = 50 - (Math.sin(wakeProgress * Math.PI) * 25);
+                }
+
+                if (!bioPathStarted) {
+                    pathBio += `M ${x} ${bioY} `;
+                    bioPathStarted = true;
+                } else {
+                    pathBio += `L ${x} ${bioY} `;
+                }
             }
-            pathBio += `L ${x} ${bioY} `;
         }
 
         const addPath = (pathData, color, width, dash = "") => {
+            if (!pathData) return; // Prevent render block if bio wave is totally clipped
             let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute("d", pathData);
             p.setAttribute("stroke", color);
@@ -1458,14 +1492,13 @@ window.Q_OmniPlanner = {
             svg.appendChild(p);
         };
 
-        // Render the layered physics
         if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
         if (this.showBiometricBase) addPath(pathBio, "var(--env-green, #a7ff83)", "1.5");
-        if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1"); 
-// 4-part Legend Key: Contextual Wave Mapping
+        if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
+
         const waveKey = document.createElement('div');
         waveKey.style.cssText = 'position:absolute; bottom:15px; left:15px; display:flex; gap:12px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold; z-index:100;';
-       waveKey.innerHTML = `
+        waveKey.innerHTML = `
             <span style="color:rgba(229, 228, 226, 0.6); cursor:help;" title="CIVIL GRID: The continuous uninterrupted count of 365 static 24-hour days.">— CIVIL GRID</span>
             <span style="color:var(--sys-cyan, #00f0ff); cursor:help;" title="PHOTOPERIOD: Shifting duration of sunlight. Above axis: Daylight. Below axis: Nighttime.">~ PHOTOPERIOD</span>
             <span style="color:var(--env-green, #a7ff83); cursor:help;" title="BIOLOGICAL: User-calibrated circadian cycle via 5 biometric phases.">~ BIOLOGICAL</span>
