@@ -603,7 +603,19 @@ window.Q_OmniPlanner = {
             actionContainer.appendChild(legBtn);
             actionContainer.appendChild(orbBtn);
             actionContainer.appendChild(bioBtn);
-
+if (this.showBiometricBase) {
+                const distBtn = document.createElement('button');
+                distBtn.className = 'back-btn';
+                distBtn.style.color = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.borderColor = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.marginLeft = '10px';
+                distBtn.innerText = this.civilDistortionActive ? '[ DISTORTION: ON ]' : '[ DISTORTION: OFF ]';
+                distBtn.onclick = () => {
+                    this.civilDistortionActive = !this.civilDistortionActive;
+                    this.refreshView();
+                };
+                actionContainer.appendChild(distBtn);
+            }
             if(this.viewState !== 'planner') {
                 const hardBackBtn = document.createElement('button');
                 hardBackBtn.className = 'back-btn';
@@ -1360,6 +1372,26 @@ window.Q_OmniPlanner = {
         svg.setAttribute("height", "100%");
         svg.setAttribute("viewBox", `0 0 1000 100`);
         svg.setAttribute("preserveAspectRatio", "none");
+const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+        grad.setAttribute("id", "bioGradient");
+        grad.setAttribute("gradientUnits", "userSpaceOnUse");
+        grad.setAttribute("x1", "0");
+        grad.setAttribute("x2", ((86400000 / msRange) * 1000).toString()); // One absolute day width
+        grad.setAttribute("y1", "0");
+        grad.setAttribute("y2", "0");
+        grad.setAttribute("spreadMethod", "repeat");
+        
+        grad.innerHTML = `
+            <stop offset="0%" stop-color="var(--env-green, #a7ff83)" />
+            <stop offset="40%" stop-color="var(--sys-cyan, #00f0ff)" />
+            <stop offset="60%" stop-color="var(--bio-cobalt, #0055ff)" />
+            <stop offset="70%" stop-color="var(--bio-purple, #b829ff)" />
+            <stop offset="95%" stop-color="var(--chrono-amber, #B97A35)" />
+            <stop offset="100%" stop-color="var(--env-green, #a7ff83)" />
+        `;
+        defs.appendChild(grad);
+        svg.appendChild(defs);
 
         // Y=0 Axis (The Continuous Temporal Thread)
         const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -1458,17 +1490,29 @@ window.Q_OmniPlanner = {
             let photoY = 50 - (Math.cos((timeFromNoon / 24) * Math.PI * 2) * 35);
             pathPhoto += `L ${x} ${photoY} `;
 
-            // 3. Biological Diurnal Envelope (Green) with Initialization Clipping
+           // 3. Biological Diurnal Envelope (Continuous Phase vs. Modulo Fracture)
             if (pointMs >= userInitMs) {
-                let minsFloat = localDec * 60;
-                let minsSinceWake = (minsFloat - savedAnchor + 1440) % 1440;
                 let bioY = 50;
-                if (minsSinceWake >= wakeDuration) {
-                    let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
-                    bioY = 50 + (Math.sin(sleepProgress * Math.PI) * 25);
+                
+                if (this.civilDistortionActive) {
+                    // FORCED CAGE: Jagged derivative, piecewise fracture, crushed amplitude
+                    let minsFloat = localDec * 60;
+                    let minsSinceWake = (minsFloat - savedAnchor + 1440) % 1440;
+                    let tensionScalar = 0.3; // Amplitude crushed by 70%
+                    
+                    if (minsSinceWake >= wakeDuration) {
+                        let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
+                        bioY = 50 + (Math.sin(sleepProgress * Math.PI) * (25 * tensionScalar));
+                    } else {
+                        let wakeProgress = minsSinceWake / wakeDuration;
+                        bioY = 50 - (Math.sin(wakeProgress * Math.PI) * (25 * tensionScalar));
+                    }
                 } else {
-                    let wakeProgress = minsSinceWake / wakeDuration;
-                    bioY = 50 - (Math.sin(wakeProgress * Math.PI) * 25);
+                    // FREE WAVE: Smooth, uninterrupted kinetic phase
+                    let physicalMinsSinceInit = (pointMs - userInitMs) / 60000;
+                    let tTotal = wakeDuration + sleepDuration; 
+                    let phase = (physicalMinsSinceInit % tTotal) / tTotal;
+                    bioY = 50 - (Math.sin(phase * Math.PI * 2) * 25);
                 }
 
                 if (!bioPathStarted) {
@@ -1493,7 +1537,7 @@ window.Q_OmniPlanner = {
         };
 
         if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
-        if (this.showBiometricBase) addPath(pathBio, "var(--env-green, #a7ff83)", "1.5");
+        if (this.showBiometricBase) addPath(pathBio, "url(#bioGradient)", "1.5");
         if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
 
         const waveKey = document.createElement('div');
