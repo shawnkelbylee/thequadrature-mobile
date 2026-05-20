@@ -1479,6 +1479,7 @@ window.Q_OmniPlanner = {
                 prevBioX = x;
                 prevBioY = bioY;
             }
+}
 
         const addPath = (pathData, color, width, dash = "") => {
             if (!pathData) return; // Prevent render block if bio wave is totally clipped
