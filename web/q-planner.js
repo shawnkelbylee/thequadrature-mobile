@@ -1,14 +1,7 @@
-## RED TEAM AUDIT
-
-* **Sycophancy:** 0% (Direct architectural refactoring).
-* **Genre Bloat:** 0% (Zero filler).
-* **Logic/Physics Inconsistencies:** 0% (Monolithic class breaks eradicated; mathematical gradient transitions implemented).
-
-```javascript
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
 // PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
-// REVISION: Phase XIX - Fluid Biological Gradient Mapping
+// REVISION: Phase XVIII - Complete Continuous Kinematics (Array-Free)
 
 // --- DATA PERSISTENCE & UTILITIES ---
 window.qData = window.qData || JSON.parse(localStorage.getItem('q_planner_data_v2') || '{}');
@@ -39,56 +32,6 @@ window.hasDataInBlock = function(cycle, absDeg) {
         if(window.qData[key] && window.qData[key].text && window.qData[key].text.trim() !== "") return true;
     }
     return false;
-};
-
-// --- DYNAMIC BIOLOGICAL GRADIENT CALCULATORS ---
-window.getMinsSinceWake = function(ts, anchorMins) {
-    let d = new Date(ts);
-    let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
-    return (currentMinsFromMidnight - anchorMins + 1440) % 1440;
-};
-
-window.getBioPhase = function(minsSinceWake, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration) {
-    if (minsSinceWake >= wakingDurationMins) return { name: "SLEEP / RECOVERY", color: "var(--bio-purple, #b829ff)", opColor: "rgba(184, 41, 255, 0.15)" };
-    if (minsSinceWake < inertiaMins) return { name: "SLEEP INERTIA", color: "var(--chrono-amber, #B97A35)", opColor: "rgba(185, 122, 53, 0.15)" };
-    if (minsSinceWake >= wakingDurationMins - dlmoMins) return { name: "DLMO WIND-DOWN", color: "var(--bio-cobalt, #0055ff)", opColor: "rgba(0, 85, 255, 0.15)" };
-    
-    let coreMins = minsSinceWake - inertiaMins;
-    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
-    if (cyclePosFloat < 0.77) return { name: "DEEP FLOW", color: "var(--env-green, #a7ff83)", opColor: "rgba(167, 255, 131, 0.15)" };
-    return { name: "VENT/RECOVERY", color: "var(--sys-cyan, #00f0ff)", opColor: "rgba(0, 240, 255, 0.15)" };
-};
-
-window.getBlockStyleInfo = function(startMs, endMs, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, hasData) {
-    let startState = window.getBioPhase(window.getMinsSinceWake(startMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
-    let endState = window.getBioPhase(window.getMinsSinceWake(endMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
-
-    let bgStyle = '';
-    let textStyle = '';
-    let filterStyle = hasData ? `filter: drop-shadow(0 0 8px var(--omni-text));` : `filter: drop-shadow(0 0 8px ${startState.opColor});`;
-
-    if (startState.name === endState.name) {
-        bgStyle = `background: ${startState.opColor}; border-left: 3px solid ${startState.color};`;
-        textStyle = `color: ${startState.color}; ${filterStyle}`;
-        return { bgStyle, textStyle, startStateName: startState.name };
-    }
-
-    let shiftPct = 0.5;
-    let totalMins = (endMs - startMs) / 60000;
-    for (let i = 1; i <= totalMins; i++) {
-        let sampleMs = startMs + (i * 60000);
-        let sampleState = window.getBioPhase(window.getMinsSinceWake(sampleMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
-        if (sampleState.name !== startState.name) {
-            shiftPct = i / totalMins;
-            break;
-        }
-    }
-
-    let pctStr = (shiftPct * 100).toFixed(1) + "%";
-    bgStyle = `background: linear-gradient(to right, ${startState.opColor} 0%, ${startState.opColor} ${pctStr}, ${endState.opColor} ${pctStr}, ${endState.opColor} 100%); border-left: 3px solid transparent; border-image: linear-gradient(to bottom, ${startState.color} ${pctStr}, ${endState.color} ${pctStr}) 1 100%;`;
-    textStyle = `background: linear-gradient(to right, ${startState.color} 0%, ${startState.color} ${pctStr}, ${endState.color} ${pctStr}, ${endState.color} 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; ${filterStyle}`;
-
-    return { bgStyle, textStyle, startStateName: startState.name };
 };
 
 // DUAL-FORMAT TITLE GENERATOR
@@ -367,8 +310,18 @@ window.Q_OmniPlanner = {
             .q-cal-jump { background: var(--omni-bg-light); border: 1px solid var(--omni-bg); color: var(--omni-main); font-family: 'Orbitron'; font-size: 0.65rem; padding: 6px 10px; border-radius: 4px; outline: none; text-align: center; color-scheme: dark; margin-left: 15px; cursor: pointer; transition: 0.3s; }
             .q-cal-jump:focus { border-color: var(--omni-main); }
 
-            .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--omni-bg); font-family: 'JetBrains Mono'; color: var(--omni-text); position: relative; overflow: hidden; transition: 0.3s; z-index: 1; border-left: 3px solid transparent; }
-            .time-block:hover { filter: brightness(1.2); }
+            .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--omni-bg); font-family: 'JetBrains Mono'; color: var(--omni-text); position: relative; overflow: hidden; transition: 0.3s; z-index: 1; }
+            .time-block:hover { background: rgba(51, 65, 85, 0.6); }
+            
+           /* BIO-WAVE TYPOGRAPHY ABSTRACTION */
+            .time-block.flow-state, .time-block.vent-state, .time-block.sleep-state, .time-block.inertia-state, .time-block.dlmo-state { 
+                border-left: none; background: transparent; 
+            }
+            .time-block.flow-state .wave-label { color: var(--env-green, #a7ff83) !important; text-shadow: 0 0 12px rgba(167, 255, 131, 0.6) !important; }
+            .time-block.vent-state .wave-label { color: var(--sys-cyan, #00f0ff) !important; text-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important; }
+            .time-block.sleep-state .wave-label { color: var(--bio-purple, #b829ff) !important; text-shadow: 0 0 12px rgba(184, 41, 255, 0.6) !important; }
+            .time-block.inertia-state .wave-label { color: var(--chrono-amber, #B97A35) !important; text-shadow: 0 0 12px rgba(185, 122, 53, 0.6) !important; }
+            .time-block.dlmo-state .wave-label { color: var(--bio-cobalt, #0055ff) !important; text-shadow: 0 0 12px rgba(0, 85, 255, 0.6) !important; }
             
             .tension-dashboard { background: var(--omni-bg-light); border: 1px dashed var(--omni-warn); border-radius: 6px; padding: 15px; margin: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; }
             .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--omni-warn); text-shadow: 0 0 15px rgba(255,0,60,0.3); }
@@ -1134,8 +1087,8 @@ window.Q_OmniPlanner = {
             const bioLegend = document.createElement('div');
             bioLegend.style.cssText = 'display:flex; gap:10px; margin: 10px; justify-content:center; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
             bioLegend.innerHTML = `
-                <span style="color:var(--env-green, #a7ff83);">DEEP FLOW</span>
-                <span style="color:var(--sys-cyan, #00f0ff);">VENT/REC</span>
+                <span style="color:var(--sys-cyan, #00f0ff);">DEEP FLOW</span>
+                <span style="color:var(--silver-vent, #e0e0e0);">VENT/REC</span>
                 <span style="color:var(--bio-purple, #b829ff);">SLEEP</span>
                 <span style="color:var(--chrono-amber, #B97A35);">INERTIA</span>
                 <span style="color:var(--bio-cobalt, #0055ff);">DLMO</span>
@@ -1161,12 +1114,20 @@ window.Q_OmniPlanner = {
                 const key = window.getDataKey(selectedDateObj, h, 0);
                 const data = window.qData[key] || { text: "" };
                 
-                let styleInfo = { startStateName: "UNKNOWN" };
-                if (this.showBioWave) {
-                    styleInfo = window.getBlockStyleInfo(blockMs, blockMs + 3600000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
-                }
+                let d = new Date(blockMs);
+                let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
+                let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
                 
-                dailyBlocksData.push({ hour: h, text: data.text, bioState: styleInfo.startStateName, key: key, ms: blockMs });
+                let currentBioState;
+                if (minsSinceWake >= wakingDurationMins) currentBioState = "SLEEP / RECOVERY";
+                else if (minsSinceWake < inertiaMins) currentBioState = "SLEEP INERTIA";
+                else if (minsSinceWake >= wakingDurationMins - dlmoMins) currentBioState = "DLMO WIND-DOWN";
+                else {
+                    let coreMins = minsSinceWake - inertiaMins;
+                    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+                    currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+                }
+                dailyBlocksData.push({ hour: h, text: data.text, bioState: currentBioState, key: key, ms: blockMs });
             }
             
             const tensionData = this.calculateCivilTension(dailyBlocksData);
@@ -1189,31 +1150,29 @@ window.Q_OmniPlanner = {
            dailyBlocksData.forEach(b => {
                 const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
                 let blockClass = '';
-                let customStyle = '';
-                let textStyle = '';
                 
                 if (this.showBioWave) {
-                    let styleInfo = window.getBlockStyleInfo(b.ms, b.ms + 3600000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, b.text.trim() !== "");
-                    customStyle = styleInfo.bgStyle;
-                    textStyle = styleInfo.textStyle;
-                } else {
-                    let hasData = b.text.trim() !== "";
-                    let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                    textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
+                    if (b.bioState === 'DEEP FLOW') blockClass += ' flow-state';
+                    else if (b.bioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
+                    else if (b.bioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
+                    else if (b.bioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
+                    else blockClass += ' vent-state';
                 }
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
                 const block = document.createElement('div');
                 block.className = `slot-block time-block ${blockClass}`;
-                if (customStyle) block.style.cssText += customStyle;
                 
                 let civilFmt = window.formatLegacyDate ? window.formatLegacyDate(b.ms) : { timeStr: new Date(b.ms).toLocaleTimeString() };
+                
+                let hasData = b.text.trim() !== "";
+                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
                 let diff = (b.ms - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
                 let orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
                 
-                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="time-header wave-label" style="font-size:0.9rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">${civilFmt.timeStr.split(' ')[0]} LOCAL</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(DEG ${orbital.trueArc.toFixed(2)})</span></div>`;
+                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="time-header wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(DEG ${orbital.trueArc.toFixed(2)})</span></div>`;
                 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
@@ -1256,29 +1215,41 @@ window.Q_OmniPlanner = {
                 const key = `Q-${cCycle}-${absDeg}-${m}`;
                 const data = window.qData[key] || { text: "", link: "" };
                 
+                let d = new Date(targetMs);
+                let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
+                let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
+                
+                let currentBioState;
+                if (minsSinceWake >= wakingDurationMins) currentBioState = "SLEEP / RECOVERY";
+                else if (minsSinceWake < inertiaMins) currentBioState = "SLEEP INERTIA";
+                else if (minsSinceWake >= wakingDurationMins - dlmoMins) currentBioState = "DLMO WIND-DOWN";
+                else {
+                    let coreMins = minsSinceWake - inertiaMins;
+                    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+                    currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+                }
+                
                 const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
                 let blockClass = '';
-                let customStyle = '';
-                let textStyle = '';
                 
                 if (this.showBioWave) {
-                    let styleInfo = window.getBlockStyleInfo(targetMs, targetMs + subDur, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
-                    customStyle = styleInfo.bgStyle;
-                    textStyle = styleInfo.textStyle;
-                } else {
-                    let hasData = data.text.trim() !== "";
-                    let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                    textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
+                    if (currentBioState === 'DEEP FLOW') blockClass += ' flow-state';
+                    else if (currentBioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
+                    else if (currentBioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
+                    else if (currentBioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
+                    else blockClass += ' vent-state';
                 }
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
                 const block = document.createElement('div'); 
                 block.className = `slot-block time-block ${blockClass}`;
-                if (customStyle) block.style.cssText += customStyle;
+                
+                let hasData = data.text.trim() !== "";
+                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
                let currentFraction = (m * 0.05).toFixed(2).substring(1); 
-               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">DEG ${absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
@@ -1335,28 +1306,44 @@ window.Q_OmniPlanner = {
             const diff = (targetMs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY; 
             const orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
             
+            let d = new Date(targetMs);
+            let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
+            let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
+            
+            let currentBioState;
+
+            if (minsSinceWake >= wakingDurationMins) {
+                currentBioState = "SLEEP / RECOVERY";
+            } else if (minsSinceWake < inertiaMins) {
+                currentBioState = "SLEEP INERTIA";
+            } else if (minsSinceWake >= wakingDurationMins - dlmoMins) {
+                currentBioState = "DLMO WIND-DOWN";
+            } else {
+                let coreMins = minsSinceWake - inertiaMins;
+                let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+                currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+            }
+            
            const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
             let blockClass = '';
-            let customStyle = '';
-            let textStyle = '';
             
             if (this.showBioWave) {
-                let styleInfo = window.getBlockStyleInfo(targetMs, targetMs + 300000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
-                customStyle = styleInfo.bgStyle;
-                textStyle = styleInfo.textStyle;
-            } else {
-                let hasData = data.text.trim() !== "";
-                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
+                if (currentBioState === 'DEEP FLOW') blockClass += ' flow-state';
+                else if (currentBioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
+                else if (currentBioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
+                else if (currentBioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
+                else blockClass += ' vent-state';
             }
             
             if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
 
             const block = document.createElement('div'); 
             block.className = `slot-block time-block ${blockClass}`;
-            if (customStyle) block.style.cssText += customStyle;
             
-           let timeHeaderHtml = `<div class="wave-label" style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">:${m.toString().padStart(2,'0')} LOCAL</div>`;
+            let hasData = data.text.trim() !== "";
+            let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
+            
+           let timeHeaderHtml = `<div class="wave-label" style="font-size:0.8rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">:${m.toString().padStart(2,'0')} LOCAL</div>`;
 
             block.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
@@ -1606,5 +1593,3 @@ window.addEventListener('DOMContentLoaded', () => {
         window.Q_OmniPlanner.init();
     }
 });
-
-```
