@@ -1,7 +1,7 @@
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
 // PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
-// REVISION: Phase XVI - Resonance Matrix & Tri-Wave Oscilloscope
+// REVISION: Phase XVIII - Complete Continuous Kinematics (Array-Free)
 
 // --- DATA PERSISTENCE & UTILITIES ---
 window.qData = window.qData || JSON.parse(localStorage.getItem('q_planner_data_v2') || '{}');
@@ -41,7 +41,7 @@ window.getDualTitle = function(ts, isLegacy) {
         const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         return `<div class="cal-title-wrapper show-legacy"><div class="title-leg">${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}</div></div>`;
     } else {
-        const qBlock = window.getQBlockByTime(ts);
+        const qBlock = window.getQBlockByTime ? window.getQBlockByTime(ts) : null;
         let qStr = "";
         if (qBlock) {
             if (qBlock.isAnchor) {
@@ -214,7 +214,9 @@ window.Q_OmniPlanner = {
     },
 
     injectCSS: function() {
+        if (document.getElementById('q-planner-css')) return;
         const style = document.createElement('style');
+        style.id = 'q-planner-css';
         style.innerHTML = `
             /* STATIC OMNI PALETTE DECOUPLING */
             .q-planner-overlay, .modal-overlay {
@@ -739,27 +741,26 @@ window.Q_OmniPlanner = {
             let aSect = activeBlock.sect || 1;
             let cCycle = activeBlock.cycle;
             
-            // REPLACE WITH THIS CONTINUOUS TRAVERSAL
-let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
-let sectorDuration = window.TROPICAL_YEAR_MS / 12;
-let sectorStart = baseMs + ((aQuad - 1) * 3 * sectorDuration) + ((aSect - 1) * sectorDuration);
+            let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+            let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+            let sectorStart = baseMs + ((aQuad - 1) * 3 * sectorDuration) + ((aSect - 1) * sectorDuration);
 
-// Step through the sector in 1-degree increments
-for (let d = 0; d < 30; d++) {
-    let absDeg = ((aQuad - 1) * 90) + ((aSect - 1) * 30) + d;
-    let targetTs = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
-    
-    const dEl = document.createElement('div');
-    dEl.className = 'p-day';
-    
-    let isToday = (Date.now() >= targetTs && Date.now() < targetTs + (window.TROPICAL_YEAR_MS / 360));
-    if (isToday) dEl.classList.add('status-today');
-    if (this.selectedDate >= targetTs && this.selectedDate < targetTs + (window.TROPICAL_YEAR_MS / 360)) dEl.classList.add('selected');
-    
-    dEl.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-main); text-align:center;">DEG ${absDeg}</div>`;
-    dEl.onclick = () => { this.selectedDate = targetTs; this.setViewMode('day'); };
-    matrix.appendChild(dEl);
-}
+            // Step through the sector in 1-degree increments
+            for (let d = 0; d < 30; d++) {
+                let absDeg = ((aQuad - 1) * 90) + ((aSect - 1) * 30) + d;
+                let targetTs = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                
+                const dEl = document.createElement('div');
+                dEl.className = 'p-day';
+                
+                let isToday = (Date.now() >= targetTs && Date.now() < targetTs + (window.TROPICAL_YEAR_MS / 360));
+                if (isToday) dEl.classList.add('status-today');
+                if (this.selectedDate >= targetTs && this.selectedDate < targetTs + (window.TROPICAL_YEAR_MS / 360)) dEl.classList.add('selected');
+                
+                dEl.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-main); text-align:center;">DEG ${absDeg}</div>`;
+                dEl.onclick = () => { this.selectedDate = targetTs; this.setViewMode('day'); };
+                matrix.appendChild(dEl);
+            }
         }
         container.appendChild(matrix);
     },
@@ -843,24 +844,32 @@ for (let d = 0; d < 30; d++) {
                 qGrid.className = 'q-sector-grid';
                 qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                 
-                let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === aQuad && b.sect === s);
-                dayBlocks.forEach(item => {
-                    const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                    const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
-                    const d = document.createElement('div'); 
-                    d.className = 'mini-day'; 
-                    if (item.isAnchor) {
-                        d.style.background = 'rgba(244, 208, 104, 0.2)';
-                        d.style.color = '#F4D068';
-                        d.innerText = "A";
+                let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+                let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+                let sectorStart = baseMs + ((aQuad - 1) * 3 * sectorDuration) + ((s - 1) * sectorDuration);
+                
+                for(let d=0; d<30; d++) {
+                    let absDeg = ((aQuad - 1) * 90) + ((s - 1) * 30) + d;
+                    let absStart = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                    let dur = window.TROPICAL_YEAR_MS / 360;
+                    
+                    const isToday = (nowMs >= absStart && nowMs < absStart + dur);
+                    const dEl = document.createElement('div'); 
+                    dEl.className = 'mini-day'; 
+                    
+                    if (absDeg % 90 === 0) {
+                        dEl.style.background = 'rgba(244, 208, 104, 0.2)';
+                        dEl.style.color = '#F4D068';
+                        dEl.innerText = "A";
                     } else {
-                        d.innerText = item.deg;
+                        dEl.innerText = d + 1;
                     }
-                    if(isToday) d.classList.add('status-today');
-                    if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                    qGrid.appendChild(d);
-                });
+                    if(isToday) dEl.classList.add('status-today');
+                    if(this.selectedDate >= absStart && this.selectedDate < absStart + dur) dEl.classList.add('selected');
+                    dEl.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
+                    qGrid.appendChild(dEl);
+                }
+
                 sectorBox.appendChild(qGrid);
                 sectorsWrapper.appendChild(sectorBox);
             }
@@ -946,24 +955,32 @@ for (let d = 0; d < 30; d++) {
                     qGrid.className = 'q-sector-grid';
                     qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                     
-                    let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === q && b.sect === s);
-                    dayBlocks.forEach(item => {
-                        const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                        const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
-                        const d = document.createElement('div'); 
-                        d.className = 'mini-day'; 
-                        if (item.isAnchor) {
-                            d.style.background = 'rgba(244, 208, 104, 0.2)';
-                            d.style.color = '#F4D068';
-                            d.innerText = "A";
+                    let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+                    let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+                    let sectorStart = baseMs + ((q - 1) * 3 * sectorDuration) + ((s - 1) * sectorDuration);
+                    
+                    for(let d=0; d<30; d++) {
+                        let absDeg = ((q - 1) * 90) + ((s - 1) * 30) + d;
+                        let absStart = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                        let dur = window.TROPICAL_YEAR_MS / 360;
+                        
+                        const isToday = (nowMs >= absStart && nowMs < absStart + dur);
+                        const dEl = document.createElement('div'); 
+                        dEl.className = 'mini-day'; 
+                        
+                        if (absDeg % 90 === 0) {
+                            dEl.style.background = 'rgba(244, 208, 104, 0.2)';
+                            dEl.style.color = '#F4D068';
+                            dEl.innerText = "A";
                         } else {
-                            d.innerText = item.deg;
+                            dEl.innerText = d + 1;
                         }
-                        if(isToday) d.classList.add('status-today');
-                        if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                        d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                        qGrid.appendChild(d);
-                    });
+                        if(isToday) dEl.classList.add('status-today');
+                        if(this.selectedDate >= absStart && this.selectedDate < absStart + dur) dEl.classList.add('selected');
+                        dEl.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
+                        qGrid.appendChild(dEl);
+                    }
+
                     sectorBox.appendChild(qGrid);
                     sectorsWrapper.appendChild(sectorBox);
                 }
@@ -1023,34 +1040,40 @@ for (let d = 0; d < 30; d++) {
                 qGrid.className = 'q-sector-grid';
                 qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                 
-                let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === q && b.sect === s);
-                dayBlocks.forEach(item => {
-                    const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
+                let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+                let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+                let sectorStart = baseMs + ((q - 1) * 3 * sectorDuration) + ((s - 1) * sectorDuration);
+                
+                for(let d=0; d<30; d++) {
+                    let absDeg = ((q - 1) * 90) + ((s - 1) * 30) + d;
+                    let absStart = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                    let dur = window.TROPICAL_YEAR_MS / 360;
                     const blockDate = new Date(absStart);
                     const gMonth = blockDate.getMonth();
                     
-                    const d = document.createElement('div'); 
-                    d.className = 'mini-day'; 
-                    d.style.background = monthColors[gMonth];
-                    d.style.color = '#fff';
-                    d.style.fontWeight = 'bold';
-                    d.style.textShadow = '0 0 6px #000';
-                    d.style.borderRight = '1px solid rgba(255,255,255,0.1)';
-                    d.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                    const dEl = document.createElement('div'); 
+                    dEl.className = 'mini-day'; 
+                    dEl.style.background = monthColors[gMonth];
+                    dEl.style.color = '#fff';
+                    dEl.style.fontWeight = 'bold';
+                    dEl.style.textShadow = '0 0 6px #000';
+                    dEl.style.borderRight = '1px solid rgba(255,255,255,0.1)';
+                    dEl.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
                     
-                    if (item.isAnchor) {
-                        d.style.border = '2px solid var(--gold, #F4D068)';
-                        d.innerText = "A";
+                    if (absDeg % 90 === 0) {
+                        dEl.style.border = '2px solid var(--gold, #F4D068)';
+                        dEl.innerText = "A";
                     } else {
-                        d.innerText = item.deg;
+                        dEl.innerText = d + 1;
                     }
                     
-                    if(Date.now() >= absStart && Date.now() < absStart + item.dur) d.classList.add('status-today');
-                    if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
+                    if(Date.now() >= absStart && Date.now() < absStart + dur) dEl.classList.add('status-today');
+                    if(this.selectedDate >= absStart && this.selectedDate < absStart + dur) dEl.classList.add('selected');
+                    dEl.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                     
-                    qGrid.appendChild(d);
-                });
+                    qGrid.appendChild(dEl);
+                }
+
                 sectorBox.appendChild(qGrid);
                 matrix.appendChild(sectorBox);
             }
@@ -1177,15 +1200,19 @@ for (let d = 0; d < 30; d++) {
             let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.selectedDate) : null;
             if (!activeBlock) return;
             let cCycle = activeBlock.cycle;
-            let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + activeBlock.relStart;
-            let subDur = activeBlock.dur / 20;
+            
+            // Continuous spatial base calculation
+            let absDeg = activeBlock.absDeg;
+            let relStart = absDeg * (window.TROPICAL_YEAR_MS / 360);
+            let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS) + relStart;
+            let subDur = (window.TROPICAL_YEAR_MS / 360) / 20; // 0.05 degree increments
             
             const matrix = document.createElement('div'); 
             matrix.className = 'editor-matrix';
 
             for(let m=0; m<20; m++) {
                 let targetMs = baseMs + (m * subDur);
-                const key = `Q-${cCycle}-${activeBlock.absDeg}-${m}`;
+                const key = `Q-${cCycle}-${absDeg}-${m}`;
                 const data = window.qData[key] || { text: "", link: "" };
                 
                 let d = new Date(targetMs);
@@ -1222,7 +1249,7 @@ for (let d = 0; d < 30; d++) {
                 let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
                let currentFraction = (m * 0.05).toFixed(2).substring(1); 
-               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
