@@ -1413,11 +1413,11 @@ window.Q_OmniPlanner = {
             let hashMs = d.getTime();
             let xPos = ((hashMs - startMs) / msRange) * 1000;
 
-            let hash = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            hash.setAttribute("x1", xPos); hash.setAttribute("y1", "45");
-            hash.setAttribute("x2", xPos); hash.setAttribute("y2", "55");
-            hash.setAttribute("stroke", "rgba(229, 228, 226, 0.6)");
-            hash.setAttribute("stroke-width", "0.8");
+           let hash = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            hash.setAttribute("x1", xPos); hash.setAttribute("y1", "35");
+            hash.setAttribute("x2", xPos); hash.setAttribute("y2", "65");
+            hash.setAttribute("stroke", "rgba(229, 228, 226, 1.0)");
+            hash.setAttribute("stroke-width", "1.5");
             svg.appendChild(hash);
 
             let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -1434,15 +1434,25 @@ window.Q_OmniPlanner = {
             let dayDurationMs = nextHashMs - hashMs;
 
             if (dayDurationMs !== 86400000 && nextHashMs <= endMs) {
-                // Timezone Shift / DST Tension Zone
                 let tensionWidth = Math.abs(dayDurationMs - 86400000) / msRange * 1000;
                 let tensionX = xPos;
+                
+                // Band: Slightly larger than hash marks (Hash is 35-65, Band is 30-70)
                 let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                rect.setAttribute("x", tensionX); rect.setAttribute("y", "0");
-                rect.setAttribute("width", tensionWidth); rect.setAttribute("height", "100");
-                // Spring Forward (Missing 1Hr) is lighter. Fall Back (Extra 1Hr) is darker friction.
-                rect.setAttribute("fill", dayDurationMs < 86400000 ? "rgba(255, 0, 60, 0.2)" : "rgba(255, 0, 60, 0.4)");
+                rect.setAttribute("x", tensionX); rect.setAttribute("y", "30");
+                rect.setAttribute("width", tensionWidth); rect.setAttribute("height", "40");
+                rect.setAttribute("fill", dayDurationMs < 86400000 ? "rgba(255, 0, 60, 0.3)" : "rgba(255, 0, 60, 0.5)");
                 svg.appendChild(rect);
+
+                // DST Label
+                let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute("x", tensionX + (tensionWidth / 2)); label.setAttribute("y", "28");
+                label.setAttribute("fill", "var(--omni-warn)");
+                label.setAttribute("font-size", "2.5");
+                label.setAttribute("font-family", "Orbitron");
+                label.setAttribute("text-anchor", "middle");
+                label.textContent = "DST";
+                svg.appendChild(label);
             }
             d = nextDay;
         }
