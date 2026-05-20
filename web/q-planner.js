@@ -1336,24 +1336,7 @@ window.Q_OmniPlanner = {
         svg.setAttribute("viewBox", `0 0 1000 100`);
         svg.setAttribute("preserveAspectRatio", "none");
         
-        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-        const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
-        grad.setAttribute("id", "bioGradient");
-        grad.setAttribute("gradientUnits", "userSpaceOnUse");
-        grad.setAttribute("x1", "0");
-        grad.setAttribute("x2", ((86400000 / msRange) * 1000).toString()); // One absolute day width
-        grad.setAttribute("y1", "0");
-        grad.setAttribute("y2", "0");
-        grad.setAttribute("spreadMethod", "repeat");
         
-        grad.innerHTML = `
-            <stop offset="0%" stop-color="var(--sys-cyan, #00f0ff)" />
-            <stop offset="50%" stop-color="var(--env-green, #a7ff83)" />
-            <stop offset="100%" stop-color="var(--sys-cyan, #00f0ff)" />
-        `;
-        grad.setAttribute("x2", (((parseInt(localStorage.getItem('q_bio_duration')) || 90) * 60000 / msRange) * 1000).toString());
-        defs.appendChild(grad);
-        svg.appendChild(defs);
 
         // Y=0 Axis (The Continuous Temporal Thread)
         const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -1423,9 +1406,17 @@ window.Q_OmniPlanner = {
         // Lock static timezone offset to prevent mid-wave browser DST bleed
         const baseTzOffsetMs = new Date(startMs).getTimezoneOffset() * 60000;
 
-        let pathOrbital = "M 0 50 ";
+       let pathOrbital = "M 0 50 ";
         let pathPhoto = "M 0 50 ";
-        let pathBio = "";
+        
+        let bioPaths = {
+            "SLEEP / RECOVERY": { path: "", color: "var(--bio-purple, #b829ff)", active: false },
+            "SLEEP INERTIA": { path: "", color: "var(--chrono-amber, #B97A35)", active: false },
+            "DEEP FLOW": { path: "", color: "var(--env-green, #a7ff83)", active: false },
+            "VENT/RECOVERY": { path: "", color: "var(--sys-cyan, #00f0ff)", active: false },
+            "DLMO WIND-DOWN": { path: "", color: "var(--bio-cobalt, #0055ff)", active: false }
+        };
+        let prevBioX = undefined; let prevBioY = undefined;
 
         let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 420;
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
@@ -1436,8 +1427,6 @@ window.Q_OmniPlanner = {
 
         // 3. Biological Event Horizon
         let userInitMs = parseInt(localStorage.getItem('q_init_ms')) || alphaAnchor;
-        let bioPathStarted = false;
-
         for(let i=0; i<=resolution; i++) {
             let pct = i / resolution;
             let pointMs = startMs + (pct * msRange);
@@ -1465,21 +1454,31 @@ window.Q_OmniPlanner = {
             let photoY = 50 - (Math.cos((timeFromNoon / 24) * Math.PI * 2) * 35);
             pathPhoto += `L ${x} ${photoY} `;
 
-           // 3. Biological Diurnal Envelope (Oscillating Phase)
-            let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
-            if (pointMs >= userInitMs && minsSinceWake >= inertiaMins && minsSinceWake < (wakeDuration - dlmoMins)) {
-                let bioY = 50 - (Math.sin((minsSinceWake / cycleDuration) * Math.PI * 2) * 15);
+           // 3. Biological Diurnal Envelope (Segmented Mathematical State)
+            if (pointMs >= userInitMs) {
+                let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
+                let state = window.getBioPhase(minsSinceWake, wakeDuration, inertiaMins, dlmoMins, cycleDuration);
+                
+                let phase = minsSinceWake / 1440;
+                let bioY = 50 - (Math.cos(phase * Math.PI * 2) * 20);
 
-                if (!bioPathStarted) {
-                    pathBio += `M ${x} ${bioY} `;
-                    bioPathStarted = true;
-                } else {
-                    pathBio += `L ${x} ${bioY} `;
+                if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
+
+                for (let key in bioPaths) {
+                    if (key === state.name) {
+                        if (!bioPaths[key].active) {
+                            bioPaths[key].path += `M ${prevBioX} ${prevBioY} L ${x} ${bioY} `;
+                            bioPaths[key].active = true;
+                        } else {
+                            bioPaths[key].path += `L ${x} ${bioY} `;
+                        }
+                    } else {
+                        bioPaths[key].active = false;
+                    }
                 }
-            } else {
-                bioPathStarted = false;
+                prevBioX = x;
+                prevBioY = bioY;
             }
-        }
 
         const addPath = (pathData, color, width, dash = "") => {
             if (!pathData) return; // Prevent render block if bio wave is totally clipped
@@ -1493,10 +1492,13 @@ window.Q_OmniPlanner = {
             svg.appendChild(p);
         };
 
-        if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
-        if (this.showBiometricBase) addPath(pathBio, "url(#bioGradient)", "1.5");
+if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
+        if (this.showBiometricBase) {
+            for (let key in bioPaths) {
+                if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+            }
+        }
         if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
-
         const waveKey = document.createElement('div');
         waveKey.style.cssText = 'position:absolute; bottom:15px; left:15px; display:flex; gap:12px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold; z-index:100;';
         waveKey.innerHTML = `
