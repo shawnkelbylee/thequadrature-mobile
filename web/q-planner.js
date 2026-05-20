@@ -1447,13 +1447,14 @@ window.Q_OmniPlanner = {
 
                 // DST Label
                 let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                label.setAttribute("x", tensionX + (tensionWidth / 2)); label.setAttribute("y", "28");
-                label.setAttribute("fill", "var(--omni-warn)");
-                label.setAttribute("font-size", "2.5");
-                label.setAttribute("font-family", "Orbitron");
-                label.setAttribute("text-anchor", "middle");
-                label.textContent = "DST";
-                svg.appendChild(label);
+            label.setAttribute("x", xPos);
+            label.setAttribute("y", "32");
+            label.setAttribute("fill", "black");
+            label.setAttribute("font-size", "8");
+            label.setAttribute("font-family", "Orbitron");
+            label.setAttribute("text-anchor", "middle");
+            label.textContent = `D${dayCounter++}`;
+            svg.appendChild(label);
             }
             d = nextDay;
         }
