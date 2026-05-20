@@ -1439,19 +1439,26 @@ window.Q_OmniPlanner = {
             let localDec = (((localPointMs % 86400000) + 86400000) % 86400000) / 3600000;
 
             // 1. Fluid Degree Wave (Gold)
+            // Constant Amplitude, Variable Frequency (Keplerian Velocity)
             let meanArc = (daysSinceSolstice / 365.24219) * 360;
             let M = (meanArc - 14) * Math.PI / 180;
             let trueArc = meanArc + (1.914 * Math.sin(M));
-            let orbitalY = 50 - (Math.sin(trueArc * Math.PI * 2) * 15);
+            let orbitalY = 50 - (Math.cos(trueArc * Math.PI * 2) * 15);
             pathOrbital += `L ${x} ${orbitalY} `;
 
             // 2. Photoperiod Wave (Cyan)
-            let dayOfYear = daysSinceSolstice + 355;
-            let B = (360 / 365) * (dayOfYear - 81) * Math.PI / 180;
+            // Constant Frequency (24h), Variable Offset (Axial Declination), Variable Amplitude (Solar Intensity)
+            let dayOfYear = (daysSinceSolstice + 355) % 365.24;
+            let B = (360 / 365.24) * (dayOfYear - 81) * Math.PI / 180;
+            let declination = 23.44 * Math.sin(B);
+            
             let eotMins = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
             let solarNoonDec = 12 - (eotMins / 60);
             let timeFromNoon = localDec - solarNoonDec;
-            let photoY = 50 - (Math.cos((timeFromNoon / 24) * Math.PI * 2) * 35);
+            
+            let photoOffset = 50 - (declination * 0.6); // DC Bias shifts ratio of day/night
+            let photoAmp = 25 + (Math.abs(declination) * 0.2); // Intensity scales slightly with season
+            let photoY = photoOffset - (Math.cos((timeFromNoon / 24) * Math.PI * 2) * photoAmp);
             pathPhoto += `L ${x} ${photoY} `;
 
            // 3. Biological Diurnal Envelope (Segmented Mathematical State)
@@ -1459,26 +1466,16 @@ window.Q_OmniPlanner = {
                 let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
                 let state = window.getBioPhase(minsSinceWake, wakeDuration, inertiaMins, dlmoMins, cycleDuration);
                 
-                let phase = minsSinceWake / 1440;
-                let bioY = 50 - (Math.cos(phase * Math.PI * 2) * 20);
+                // Variable Frequency (Circadian Drift) & Variable Offset (Photic Alignment)
+                let circadianLength = 1440 + (declination * 0.5); 
+                let phase = minsSinceWake / circadianLength;
+                
+                let bioOffset = 50 - (declination * 0.4); // Photic alignment alters wake/sleep ratio
+                let bioAmp = 18 + (Math.abs(declination) * 0.15); // Systemic load scaling
+                
+                let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
 
                 if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
-
-                for (let key in bioPaths) {
-                    if (key === state.name) {
-                        if (!bioPaths[key].active) {
-                            bioPaths[key].path += `M ${prevBioX} ${prevBioY} L ${x} ${bioY} `;
-                            bioPaths[key].active = true;
-                        } else {
-                            bioPaths[key].path += `L ${x} ${bioY} `;
-                        }
-                    } else {
-                        bioPaths[key].active = false;
-                    }
-                }
-                prevBioX = x;
-                prevBioY = bioY;
-            }
 }
 
         const addPath = (pathData, color, width, dash = "") => {
