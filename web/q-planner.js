@@ -739,34 +739,27 @@ window.Q_OmniPlanner = {
             let aSect = activeBlock.sect || 1;
             let cCycle = activeBlock.cycle;
             
-            let gridItems = window.Q_BLOCKS.filter(b => b.quad === aQuad && b.sect === aSect);
+            // REPLACE WITH THIS CONTINUOUS TRAVERSAL
+let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+let sectorStart = baseMs + ((aQuad - 1) * 3 * sectorDuration) + ((aSect - 1) * sectorDuration);
 
-            gridItems.forEach(item => {
-                const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                const d = document.createElement('div');
-                const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
-                
-                if (item.isAnchor) {
-                    d.className = 'p-day anchor-block';
-                } else {
-                    d.className = 'p-day';
-                }
-                
-                if (isToday) d.classList.add('status-today');
-                if (this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                if (window.hasDataInBlock && window.hasDataInBlock(cCycle, item.absDeg)) d.classList.add('status-red');
-                
-                if (item.isAnchor) {
-                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--gold, #F4D068); font-size:0.75rem; text-align:center;">${item.name}</div><div style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); margin-top:4px; font-weight:bold;">DEG ${item.deg}</div>`;
-                } else {
-                     d.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-main); text-align:center;">DEG ${item.deg}</div>`;
-                }
-                
-                this.injectHolidays(d, new Date(absStart));
-                
-                d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                matrix.appendChild(d);
-            });
+// Step through the sector in 1-degree increments
+for (let d = 0; d < 30; d++) {
+    let absDeg = ((aQuad - 1) * 90) + ((aSect - 1) * 30) + d;
+    let targetTs = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+    
+    const dEl = document.createElement('div');
+    dEl.className = 'p-day';
+    
+    let isToday = (Date.now() >= targetTs && Date.now() < targetTs + (window.TROPICAL_YEAR_MS / 360));
+    if (isToday) dEl.classList.add('status-today');
+    if (this.selectedDate >= targetTs && this.selectedDate < targetTs + (window.TROPICAL_YEAR_MS / 360)) dEl.classList.add('selected');
+    
+    dEl.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-main); text-align:center;">DEG ${absDeg}</div>`;
+    dEl.onclick = () => { this.selectedDate = targetTs; this.setViewMode('day'); };
+    matrix.appendChild(dEl);
+}
         }
         container.appendChild(matrix);
     },
