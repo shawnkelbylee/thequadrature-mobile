@@ -1213,13 +1213,7 @@ window.Q_OmniPlanner = {
                 let textStyle = '';
                 
                 if (this.showBioWave) {
-                    let styleInfo = window.getBlockStyleInfo(targetMs, targetMs + subDur, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
-                    customStyle = styleInfo.bgStyle;
-                    textStyle = styleInfo.textStyle;
-                } else {
-                    let hasData = data.text.trim() !== "";
-                    let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                    textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
+                    customStyle = window.getBlockStyleInfo(targetMs, targetMs + subDur, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
                 }
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
