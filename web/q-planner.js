@@ -1173,10 +1173,17 @@ window.Q_OmniPlanner = {
                 if (style) block.style.cssText += style;
                 
                 let timeStr = new Date(b.ms).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                // Calculate Degree Metadata for Dual Notation
+                let diff = (b.ms - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
+                let orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
+                
                 block.innerHTML = `
-                    <div style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; color:var(--omni-text);">${timeStr} LOCAL</div>
-                    <textarea style="width:100%; min-height:60px; background:transparent; color:var(--omni-text); border:none; border-bottom:1px solid var(--omni-bg); margin-top:8px; font-family:'JetBrains Mono'; outline:none;" oninput="window.qData['${b.key}'].text=this.value; window.savePlannerData();" placeholder="Intent...">${b.text}</textarea>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                        <div style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; color:var(--omni-text);">${timeStr} LOCAL</div>
+                        <div style="font-size:0.5rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono';">${orbital.trueArc.toFixed(2)}°</div>
+                    </div>
                 `;
+                block.onclick = () => { this.selectedHour = b.hour; this.selectedHourDur = 3600000; this.viewState = 'hour'; this.refreshView(); };
                 matrix.appendChild(block);
             });
          
@@ -1278,14 +1285,20 @@ window.Q_OmniPlanner = {
             const data = window.qData[key] || { text: "", link: "" };
             
             let style = this.showBioWave ? window.getBlockStyleInfo(targetMs, targetMs + 300000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration) : '';
-            const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
             
+            // Calculate Degree Metadata for Dual Notation
+            let diff = (targetMs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
+            let orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
+
             const block = document.createElement('div'); 
-            block.className = `slot-block time-block ${isCivilConstraint ? 'fixed-civil-constraint' : ''}`;
+            block.className = 'slot-block time-block';
             if (style) block.style.cssText += style;
 
             block.innerHTML = `
-                <div style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; color:var(--omni-text);">:${m.toString().padStart(2,'0')} LOCAL</div>
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <div style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; color:var(--omni-text);">:${m.toString().padStart(2,'0')} LOCAL</div>
+                    <div style="font-size:0.5rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono';">${orbital.trueArc.toFixed(2)}°</div>
+                </div>
                 <textarea style="width:100%; min-height: 60px; background:transparent; color:var(--omni-text); border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; outline:none;" placeholder="Intent..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>
             `;
             if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
