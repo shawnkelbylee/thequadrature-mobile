@@ -42,28 +42,21 @@ window.getMinsSinceWake = function(ts, anchorMins) {
 };
 
 window.getBioPhase = function(minsSinceWake, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration) {
-    if (minsSinceWake >= wakingDurationMins) return { name: "SLEEP / RECOVERY", color: "var(--bio-purple, #b829ff)", opColor: "rgba(184, 41, 255, 0.15)" };
-    if (minsSinceWake < inertiaMins) return { name: "SLEEP INERTIA", color: "var(--chrono-amber, #B97A35)", opColor: "rgba(185, 122, 53, 0.15)" };
-    if (minsSinceWake >= wakingDurationMins - dlmoMins) return { name: "DLMO WIND-DOWN", color: "var(--bio-cobalt, #0055ff)", opColor: "rgba(0, 85, 255, 0.15)" };
+    if (minsSinceWake >= wakingDurationMins) return { name: "SLEEP / RECOVERY", color: "rgba(184, 41, 255, 0.15)" };
+    if (minsSinceWake < inertiaMins) return { name: "SLEEP INERTIA", color: "rgba(185, 122, 53, 0.15)" };
+    if (minsSinceWake >= wakingDurationMins - dlmoMins) return { name: "DLMO WIND-DOWN", color: "rgba(0, 85, 255, 0.15)" };
     
     let coreMins = minsSinceWake - inertiaMins;
     let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
-    if (cyclePosFloat < 0.77) return { name: "DEEP FLOW", color: "var(--env-green, #a7ff83)", opColor: "rgba(167, 255, 131, 0.15)" };
-    return { name: "VENT/RECOVERY", color: "var(--sys-cyan, #00f0ff)", opColor: "rgba(0, 240, 255, 0.15)" };
-};
-
-window.getBlockStyleInfo = function(startMs, endMs, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, hasData) {
+    // DEEP FLOW now Green, VENT/RECOVERY now Cyan
+    if (cyclePosFloat < 0.77) return { name: "DEEP FLOW", color: "rgba(167, 255, 131, 0.15)" }; 
+    return { name: "VENT/RECOVERY", color: "rgba(0, 240, 255, 0.15)" };
+};window.getBlockStyleInfo = function(startMs, endMs, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration) {
     let startState = window.getBioPhase(window.getMinsSinceWake(startMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
     let endState = window.getBioPhase(window.getMinsSinceWake(endMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
 
-    let bgStyle = '';
-    let textStyle = '';
-    let filterStyle = hasData ? `filter: drop-shadow(0 0 8px var(--omni-text));` : `filter: drop-shadow(0 0 8px ${startState.opColor});`;
-
     if (startState.name === endState.name) {
-        bgStyle = `background: ${startState.opColor}; border-left: 3px solid ${startState.color};`;
-        textStyle = `color: ${startState.color}; ${filterStyle}`;
-        return { bgStyle, textStyle, startStateName: startState.name };
+        return `background: ${startState.color};`;
     }
 
     let shiftPct = 0.5;
@@ -76,14 +69,9 @@ window.getBlockStyleInfo = function(startMs, endMs, anchorMins, wakingDurationMi
             break;
         }
     }
-
     let pctStr = (shiftPct * 100).toFixed(1) + "%";
-    bgStyle = `background: linear-gradient(to right, ${startState.opColor} 0%, ${startState.opColor} ${pctStr}, ${endState.opColor} ${pctStr}, ${endState.opColor} 100%); border-left: 3px solid transparent; border-image: linear-gradient(to bottom, ${startState.color} ${pctStr}, ${endState.color} ${pctStr}) 1 100%;`;
-    textStyle = `background: linear-gradient(to right, ${startState.color} 0%, ${startState.color} ${pctStr}, ${endState.color} ${pctStr}, ${endState.color} 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; ${filterStyle}`;
-
-    return { bgStyle, textStyle, startStateName: startState.name };
+    return `background: linear-gradient(to right, ${startState.color} 0%, ${startState.color} ${pctStr}, ${endState.color} ${pctStr}, ${endState.color} 100%);`;
 };
-
 // DUAL-FORMAT TITLE GENERATOR
 window.getDualTitle = function(ts, isLegacy) {
     if (isLegacy) {
@@ -1179,55 +1167,7 @@ window.Q_OmniPlanner = {
             matrix.className = 'editor-matrix';
             matrix.style.paddingTop = '10px';
 
-           dailyBlocksData.forEach(b => {
-                const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
-                let blockClass = '';
-                let customStyle = '';
-                let textStyle = '';
-                
-                if (this.showBioWave) {
-                    let styleInfo = window.getBlockStyleInfo(b.ms, b.ms + 3600000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, b.text.trim() !== "");
-                    customStyle = styleInfo.bgStyle;
-                    textStyle = styleInfo.textStyle;
-                } else {
-                    let hasData = b.text.trim() !== "";
-                    let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                    textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
-                }
-                
-                if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
-                
-                const block = document.createElement('div');
-                block.className = `slot-block time-block ${blockClass}`;
-                if (customStyle) block.style.cssText += customStyle;
-                
-                let civilFmt = window.formatLegacyDate ? window.formatLegacyDate(b.ms) : { timeStr: new Date(b.ms).toLocaleTimeString() };
-                
-                let diff = (b.ms - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-                let orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
-                
-                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="time-header wave-label" style="font-size:0.9rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">${civilFmt.timeStr.split(' ')[0]} LOCAL</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(DEG ${orbital.trueArc.toFixed(2)})</span></div>`;
-                
-                let badgeHtml = '';
-                if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
-
-                block.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
-                        ${timeHeaderHtml}
-                        <div>${badgeHtml}</div>
-                    </div>
-                    <div style="font-size:0.6rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono'; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0.8; position: relative; z-index: 2;">
-                        ${b.text ? b.text : ""}
-                    </div>
-                `;
-               block.onclick = () => { 
-                    this.selectedHour = b.hour; 
-                    this.selectedHourDur = 3600000; 
-                    this.viewState = 'hour'; 
-                    this.refreshView(); 
-                };
-                matrix.appendChild(block);
-            });
+         
             list.appendChild(matrix);
             container.appendChild(list);
         } else {
@@ -1325,42 +1265,19 @@ window.Q_OmniPlanner = {
             let targetMs = baseMs + (this.selectedHour * 3600000) + (m * 60000);
             const key = window.getDataKey(new Date(targetMs), this.selectedHour, m);
             const data = window.qData[key] || { text: "", link: "" };
-            const diff = (targetMs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY; 
-            const orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
             
-           const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
-            let blockClass = '';
-            let customStyle = '';
-            let textStyle = '';
+            let style = this.showBioWave ? window.getBlockStyleInfo(targetMs, targetMs + 300000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration) : '';
+            const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
             
-            if (this.showBioWave) {
-                let styleInfo = window.getBlockStyleInfo(targetMs, targetMs + 300000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
-                customStyle = styleInfo.bgStyle;
-                textStyle = styleInfo.textStyle;
-            } else {
-                let hasData = data.text.trim() !== "";
-                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-                textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
-            }
-            
-            if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
-
             const block = document.createElement('div'); 
-            block.className = `slot-block time-block ${blockClass}`;
-            if (customStyle) block.style.cssText += customStyle;
-            
-           let timeHeaderHtml = `<div class="wave-label" style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">:${m.toString().padStart(2,'0')} LOCAL</div>`;
+            block.className = `slot-block time-block ${isCivilConstraint ? 'fixed-civil-constraint' : ''}`;
+            if (style) block.style.cssText += style;
 
             block.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
-                    ${timeHeaderHtml}
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="font-size:0.5rem; color:rgba(229, 228, 226, 0.6); font-family:'JetBrains Mono';">COORD: ${orbital.trueArc.toFixed(2)}°</div>
-                    </div>
-                </div>
-                <textarea style="width:100%; min-height: 60px; background:transparent; color:${isCivilConstraint ? 'var(--omni-warn)' : 'var(--omni-text)'}; border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; resize:vertical; outline:none; position:relative; z-index:2;" placeholder="Enter quadrature intent or [FIXED] civil event..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>`;
-            
-           if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
+                <div style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; color:var(--omni-text);">:${m.toString().padStart(2,'0')} LOCAL</div>
+                <textarea style="width:100%; min-height: 60px; background:transparent; color:var(--omni-text); border:none; border-bottom:1px solid var(--omni-bg); margin-top: 8px; font-family:'JetBrains Mono'; outline:none;" placeholder="Intent..." oninput="window.qData['${key}'].text=this.value; window.savePlannerData();">${data.text}</textarea>
+            `;
+            if(!window.qData[key]) window.qData[key] = { text: "", link: "" }; 
             matrix.appendChild(block);
         }
         container.appendChild(matrix);
