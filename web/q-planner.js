@@ -1406,6 +1406,7 @@ window.Q_OmniPlanner = {
 
         // 1. Dynamic Civil Cage & 2. DST Tension Zones
         let d = new Date(startMs);
+        let dayCounter = 1;
         d.setHours(0, 0, 0, 0); // Geolocation-aware local midnight
         if (d.getTime() < startMs) d.setDate(d.getDate() + 1);
 
@@ -1416,16 +1417,16 @@ window.Q_OmniPlanner = {
            let hash = document.createElementNS("http://www.w3.org/2000/svg", "line");
             hash.setAttribute("x1", xPos); hash.setAttribute("y1", "35");
             hash.setAttribute("x2", xPos); hash.setAttribute("y2", "65");
-            hash.setAttribute("stroke", "rgba(229, 228, 226, 1.0)");
+            hash.setAttribute("stroke", "black");
             hash.setAttribute("stroke-width", "1.5");
             svg.appendChild(hash);
 
             let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
             label.setAttribute("x", xPos + 2); label.setAttribute("y", "42");
-            label.setAttribute("fill", "rgba(229, 228, 226, 0.4)");
-            label.setAttribute("font-size", "2");
+            label.setAttribute("fill", "black");
+            label.setAttribute("font-size", "8");
             label.setAttribute("font-family", "Orbitron");
-            label.textContent = `00:00`;
+            label.textContent = `D${dayCounter++}`;
             svg.appendChild(label);
 
             let nextDay = new Date(d);
