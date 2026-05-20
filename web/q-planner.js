@@ -1347,13 +1347,11 @@ window.Q_OmniPlanner = {
         grad.setAttribute("spreadMethod", "repeat");
         
         grad.innerHTML = `
-            <stop offset="0%" stop-color="var(--env-green, #a7ff83)" />
-            <stop offset="40%" stop-color="var(--sys-cyan, #00f0ff)" />
-            <stop offset="60%" stop-color="var(--bio-cobalt, #0055ff)" />
-            <stop offset="70%" stop-color="var(--bio-purple, #b829ff)" />
-            <stop offset="95%" stop-color="var(--chrono-amber, #B97A35)" />
-            <stop offset="100%" stop-color="var(--env-green, #a7ff83)" />
+            <stop offset="0%" stop-color="var(--sys-cyan, #00f0ff)" />
+            <stop offset="50%" stop-color="var(--env-green, #a7ff83)" />
+            <stop offset="100%" stop-color="var(--sys-cyan, #00f0ff)" />
         `;
+        grad.setAttribute("x2", (((parseInt(localStorage.getItem('q_bio_duration')) || 90) * 60000 / msRange) * 1000).toString());
         defs.appendChild(grad);
         svg.appendChild(defs);
 
@@ -1468,22 +1466,9 @@ window.Q_OmniPlanner = {
             pathPhoto += `L ${x} ${photoY} `;
 
            // 3. Biological Diurnal Envelope (Oscillating Phase)
-            if (pointMs >= userInitMs) {
-                let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
-                let state = window.getBioPhase(minsSinceWake, wakeDuration, inertiaMins, dlmoMins, cycleDuration);
-                let bioY = 50;
-
-                if (state.name === "DEEP FLOW") {
-                    let coreMins = (minsSinceWake - inertiaMins) % cycleDuration;
-                    bioY = 40 + (Math.sin((coreMins / cycleDuration) * Math.PI) * 10);
-                } else if (state.name === "VENT/RECOVERY") {
-                    let coreMins = (minsSinceWake - inertiaMins) % cycleDuration;
-                    bioY = 60 - (Math.sin((coreMins / cycleDuration) * Math.PI) * 10);
-                } else if (state.name === "SLEEP INERTIA" || state.name === "DLMO WIND-DOWN") {
-                    bioY = 50; // Neutral transition
-                } else {
-                    bioY = 50; // Sleep
-                }
+            let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
+            if (pointMs >= userInitMs && minsSinceWake >= inertiaMins && minsSinceWake < (wakeDuration - dlmoMins)) {
+                let bioY = 50 - (Math.sin((minsSinceWake / cycleDuration) * Math.PI * 2) * 15);
 
                 if (!bioPathStarted) {
                     pathBio += `M ${x} ${bioY} `;
@@ -1491,6 +1476,8 @@ window.Q_OmniPlanner = {
                 } else {
                     pathBio += `L ${x} ${bioY} `;
                 }
+            } else {
+                bioPathStarted = false;
             }
         }
 
