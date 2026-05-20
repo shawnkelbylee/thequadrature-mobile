@@ -1,7 +1,7 @@
 // THE QUADRATURE: OMNI-PLANNER & UI ABSTRACTION (ZERO-REDUNDANCY ENGINE)
 // Architect: Kelby | Builder: Kairos
 // PROTOCOL: Pragmatic Interoperability, Strict Phase Bordering, & Civil Tension Scoring
-// REVISION: Phase XVI - Resonance Matrix & Tri-Wave Oscilloscope
+// REVISION: Phase XIX - Fluid Biological Gradient Mapping
 
 // --- DATA PERSISTENCE & UTILITIES ---
 window.qData = window.qData || JSON.parse(localStorage.getItem('q_planner_data_v2') || '{}');
@@ -34,6 +34,56 @@ window.hasDataInBlock = function(cycle, absDeg) {
     return false;
 };
 
+// --- DYNAMIC BIOLOGICAL GRADIENT CALCULATORS ---
+window.getMinsSinceWake = function(ts, anchorMins) {
+    let d = new Date(ts);
+    let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
+    return (currentMinsFromMidnight - anchorMins + 1440) % 1440;
+};
+
+window.getBioPhase = function(minsSinceWake, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration) {
+    if (minsSinceWake >= wakingDurationMins) return { name: "SLEEP / RECOVERY", color: "var(--bio-purple, #b829ff)", opColor: "rgba(184, 41, 255, 0.15)" };
+    if (minsSinceWake < inertiaMins) return { name: "SLEEP INERTIA", color: "var(--chrono-amber, #B97A35)", opColor: "rgba(185, 122, 53, 0.15)" };
+    if (minsSinceWake >= wakingDurationMins - dlmoMins) return { name: "DLMO WIND-DOWN", color: "var(--bio-cobalt, #0055ff)", opColor: "rgba(0, 85, 255, 0.15)" };
+    
+    let coreMins = minsSinceWake - inertiaMins;
+    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
+    if (cyclePosFloat < 0.77) return { name: "DEEP FLOW", color: "var(--env-green, #a7ff83)", opColor: "rgba(167, 255, 131, 0.15)" };
+    return { name: "VENT/RECOVERY", color: "var(--sys-cyan, #00f0ff)", opColor: "rgba(0, 240, 255, 0.15)" };
+};
+
+window.getBlockStyleInfo = function(startMs, endMs, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, hasData) {
+    let startState = window.getBioPhase(window.getMinsSinceWake(startMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
+    let endState = window.getBioPhase(window.getMinsSinceWake(endMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
+
+    let bgStyle = '';
+    let textStyle = '';
+    let filterStyle = hasData ? `filter: drop-shadow(0 0 8px var(--omni-text));` : `filter: drop-shadow(0 0 8px ${startState.opColor});`;
+
+    if (startState.name === endState.name) {
+        bgStyle = `background: ${startState.opColor}; border-left: 3px solid ${startState.color};`;
+        textStyle = `color: ${startState.color}; ${filterStyle}`;
+        return { bgStyle, textStyle, startStateName: startState.name };
+    }
+
+    let shiftPct = 0.5;
+    let totalMins = (endMs - startMs) / 60000;
+    for (let i = 1; i <= totalMins; i++) {
+        let sampleMs = startMs + (i * 60000);
+        let sampleState = window.getBioPhase(window.getMinsSinceWake(sampleMs, anchorMins), wakingDurationMins, inertiaMins, dlmoMins, cycleDuration);
+        if (sampleState.name !== startState.name) {
+            shiftPct = i / totalMins;
+            break;
+        }
+    }
+
+    let pctStr = (shiftPct * 100).toFixed(1) + "%";
+    bgStyle = `background: linear-gradient(to right, ${startState.opColor} 0%, ${startState.opColor} ${pctStr}, ${endState.opColor} ${pctStr}, ${endState.opColor} 100%); border-left: 3px solid transparent; border-image: linear-gradient(to bottom, ${startState.color} ${pctStr}, ${endState.color} ${pctStr}) 1 100%;`;
+    textStyle = `background: linear-gradient(to right, ${startState.color} 0%, ${startState.color} ${pctStr}, ${endState.color} ${pctStr}, ${endState.color} 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; ${filterStyle}`;
+
+    return { bgStyle, textStyle, startStateName: startState.name };
+};
+
 // DUAL-FORMAT TITLE GENERATOR
 window.getDualTitle = function(ts, isLegacy) {
     if (isLegacy) {
@@ -41,7 +91,7 @@ window.getDualTitle = function(ts, isLegacy) {
         const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         return `<div class="cal-title-wrapper show-legacy"><div class="title-leg">${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}</div></div>`;
     } else {
-        const qBlock = window.getQBlockByTime(ts);
+        const qBlock = window.getQBlockByTime ? window.getQBlockByTime(ts) : null;
         let qStr = "";
         if (qBlock) {
             if (qBlock.isAnchor) {
@@ -214,7 +264,9 @@ window.Q_OmniPlanner = {
     },
 
     injectCSS: function() {
+        if (document.getElementById('q-planner-css')) return;
         const style = document.createElement('style');
+        style.id = 'q-planner-css';
         style.innerHTML = `
             /* STATIC OMNI PALETTE DECOUPLING */
             .q-planner-overlay, .modal-overlay {
@@ -308,18 +360,8 @@ window.Q_OmniPlanner = {
             .q-cal-jump { background: var(--omni-bg-light); border: 1px solid var(--omni-bg); color: var(--omni-main); font-family: 'Orbitron'; font-size: 0.65rem; padding: 6px 10px; border-radius: 4px; outline: none; text-align: center; color-scheme: dark; margin-left: 15px; cursor: pointer; transition: 0.3s; }
             .q-cal-jump:focus { border-color: var(--omni-main); }
 
-            .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--omni-bg); font-family: 'JetBrains Mono'; color: var(--omni-text); position: relative; overflow: hidden; transition: 0.3s; z-index: 1; }
-            .time-block:hover { background: rgba(51, 65, 85, 0.6); }
-            
-           /* BIO-WAVE TYPOGRAPHY ABSTRACTION */
-            .time-block.flow-state, .time-block.vent-state, .time-block.sleep-state, .time-block.inertia-state, .time-block.dlmo-state { 
-                border-left: none; background: transparent; 
-            }
-            .time-block.flow-state .wave-label { color: var(--env-green, #a7ff83) !important; text-shadow: 0 0 12px rgba(167, 255, 131, 0.6) !important; }
-            .time-block.vent-state .wave-label { color: var(--sys-cyan, #00f0ff) !important; text-shadow: 0 0 12px rgba(0, 240, 255, 0.6) !important; }
-            .time-block.sleep-state .wave-label { color: var(--bio-purple, #b829ff) !important; text-shadow: 0 0 12px rgba(184, 41, 255, 0.6) !important; }
-            .time-block.inertia-state .wave-label { color: var(--chrono-amber, #B97A35) !important; text-shadow: 0 0 12px rgba(185, 122, 53, 0.6) !important; }
-            .time-block.dlmo-state .wave-label { color: var(--bio-cobalt, #0055ff) !important; text-shadow: 0 0 12px rgba(0, 85, 255, 0.6) !important; }
+            .time-block { display: flex; flex-direction: column; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--omni-bg); font-family: 'JetBrains Mono'; color: var(--omni-text); position: relative; overflow: hidden; transition: 0.3s; z-index: 1; border-left: 3px solid transparent; }
+            .time-block:hover { filter: brightness(1.2); }
             
             .tension-dashboard { background: var(--omni-bg-light); border: 1px dashed var(--omni-warn); border-radius: 6px; padding: 15px; margin: 15px 20px 0 20px; display: flex; justify-content: space-between; align-items: center; }
             .tension-score { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--omni-warn); text-shadow: 0 0 15px rgba(255,0,60,0.3); }
@@ -739,27 +781,26 @@ window.Q_OmniPlanner = {
             let aSect = activeBlock.sect || 1;
             let cCycle = activeBlock.cycle;
             
-            // REPLACE WITH THIS CONTINUOUS TRAVERSAL
-let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
-let sectorDuration = window.TROPICAL_YEAR_MS / 12;
-let sectorStart = baseMs + ((aQuad - 1) * 3 * sectorDuration) + ((aSect - 1) * sectorDuration);
+            let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+            let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+            let sectorStart = baseMs + ((aQuad - 1) * 3 * sectorDuration) + ((aSect - 1) * sectorDuration);
 
-// Step through the sector in 1-degree increments
-for (let d = 0; d < 30; d++) {
-    let absDeg = ((aQuad - 1) * 90) + ((aSect - 1) * 30) + d;
-    let targetTs = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
-    
-    const dEl = document.createElement('div');
-    dEl.className = 'p-day';
-    
-    let isToday = (Date.now() >= targetTs && Date.now() < targetTs + (window.TROPICAL_YEAR_MS / 360));
-    if (isToday) dEl.classList.add('status-today');
-    if (this.selectedDate >= targetTs && this.selectedDate < targetTs + (window.TROPICAL_YEAR_MS / 360)) dEl.classList.add('selected');
-    
-    dEl.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-main); text-align:center;">DEG ${absDeg}</div>`;
-    dEl.onclick = () => { this.selectedDate = targetTs; this.setViewMode('day'); };
-    matrix.appendChild(dEl);
-}
+            // Step through the sector in 1-degree increments
+            for (let d = 0; d < 30; d++) {
+                let absDeg = ((aQuad - 1) * 90) + ((aSect - 1) * 30) + d;
+                let targetTs = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                
+                const dEl = document.createElement('div');
+                dEl.className = 'p-day';
+                
+                let isToday = (Date.now() >= targetTs && Date.now() < targetTs + (window.TROPICAL_YEAR_MS / 360));
+                if (isToday) dEl.classList.add('status-today');
+                if (this.selectedDate >= targetTs && this.selectedDate < targetTs + (window.TROPICAL_YEAR_MS / 360)) dEl.classList.add('selected');
+                
+                dEl.innerHTML = `<div style="font-family:Orbitron; font-weight:bold; color:var(--omni-main); text-align:center;">DEG ${absDeg}</div>`;
+                dEl.onclick = () => { this.selectedDate = targetTs; this.setViewMode('day'); };
+                matrix.appendChild(dEl);
+            }
         }
         container.appendChild(matrix);
     },
@@ -843,24 +884,32 @@ for (let d = 0; d < 30; d++) {
                 qGrid.className = 'q-sector-grid';
                 qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                 
-                let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === aQuad && b.sect === s);
-                dayBlocks.forEach(item => {
-                    const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                    const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
-                    const d = document.createElement('div'); 
-                    d.className = 'mini-day'; 
-                    if (item.isAnchor) {
-                        d.style.background = 'rgba(244, 208, 104, 0.2)';
-                        d.style.color = '#F4D068';
-                        d.innerText = "A";
+                let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+                let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+                let sectorStart = baseMs + ((aQuad - 1) * 3 * sectorDuration) + ((s - 1) * sectorDuration);
+                
+                for(let d=0; d<30; d++) {
+                    let absDeg = ((aQuad - 1) * 90) + ((s - 1) * 30) + d;
+                    let absStart = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                    let dur = window.TROPICAL_YEAR_MS / 360;
+                    
+                    const isToday = (nowMs >= absStart && nowMs < absStart + dur);
+                    const dEl = document.createElement('div'); 
+                    dEl.className = 'mini-day'; 
+                    
+                    if (absDeg % 90 === 0) {
+                        dEl.style.background = 'rgba(244, 208, 104, 0.2)';
+                        dEl.style.color = '#F4D068';
+                        dEl.innerText = "A";
                     } else {
-                        d.innerText = item.deg;
+                        dEl.innerText = d + 1;
                     }
-                    if(isToday) d.classList.add('status-today');
-                    if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                    qGrid.appendChild(d);
-                });
+                    if(isToday) dEl.classList.add('status-today');
+                    if(this.selectedDate >= absStart && this.selectedDate < absStart + dur) dEl.classList.add('selected');
+                    dEl.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
+                    qGrid.appendChild(dEl);
+                }
+
                 sectorBox.appendChild(qGrid);
                 sectorsWrapper.appendChild(sectorBox);
             }
@@ -946,24 +995,32 @@ for (let d = 0; d < 30; d++) {
                     qGrid.className = 'q-sector-grid';
                     qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                     
-                    let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === q && b.sect === s);
-                    dayBlocks.forEach(item => {
-                        const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
-                        const isToday = (nowMs >= absStart && nowMs < absStart + item.dur);
-                        const d = document.createElement('div'); 
-                        d.className = 'mini-day'; 
-                        if (item.isAnchor) {
-                            d.style.background = 'rgba(244, 208, 104, 0.2)';
-                            d.style.color = '#F4D068';
-                            d.innerText = "A";
+                    let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+                    let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+                    let sectorStart = baseMs + ((q - 1) * 3 * sectorDuration) + ((s - 1) * sectorDuration);
+                    
+                    for(let d=0; d<30; d++) {
+                        let absDeg = ((q - 1) * 90) + ((s - 1) * 30) + d;
+                        let absStart = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                        let dur = window.TROPICAL_YEAR_MS / 360;
+                        
+                        const isToday = (nowMs >= absStart && nowMs < absStart + dur);
+                        const dEl = document.createElement('div'); 
+                        dEl.className = 'mini-day'; 
+                        
+                        if (absDeg % 90 === 0) {
+                            dEl.style.background = 'rgba(244, 208, 104, 0.2)';
+                            dEl.style.color = '#F4D068';
+                            dEl.innerText = "A";
                         } else {
-                            d.innerText = item.deg;
+                            dEl.innerText = d + 1;
                         }
-                        if(isToday) d.classList.add('status-today');
-                        if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                        d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
-                        qGrid.appendChild(d);
-                    });
+                        if(isToday) dEl.classList.add('status-today');
+                        if(this.selectedDate >= absStart && this.selectedDate < absStart + dur) dEl.classList.add('selected');
+                        dEl.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
+                        qGrid.appendChild(dEl);
+                    }
+
                     sectorBox.appendChild(qGrid);
                     sectorsWrapper.appendChild(sectorBox);
                 }
@@ -1023,34 +1080,40 @@ for (let d = 0; d < 30; d++) {
                 qGrid.className = 'q-sector-grid';
                 qGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
                 
-                let dayBlocks = window.Q_BLOCKS.filter(b => b.quad === q && b.sect === s);
-                dayBlocks.forEach(item => {
-                    const absStart = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + item.relStart;
+                let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS);
+                let sectorDuration = window.TROPICAL_YEAR_MS / 12;
+                let sectorStart = baseMs + ((q - 1) * 3 * sectorDuration) + ((s - 1) * sectorDuration);
+                
+                for(let d=0; d<30; d++) {
+                    let absDeg = ((q - 1) * 90) + ((s - 1) * 30) + d;
+                    let absStart = sectorStart + (d * (window.TROPICAL_YEAR_MS / 360));
+                    let dur = window.TROPICAL_YEAR_MS / 360;
                     const blockDate = new Date(absStart);
                     const gMonth = blockDate.getMonth();
                     
-                    const d = document.createElement('div'); 
-                    d.className = 'mini-day'; 
-                    d.style.background = monthColors[gMonth];
-                    d.style.color = '#fff';
-                    d.style.fontWeight = 'bold';
-                    d.style.textShadow = '0 0 6px #000';
-                    d.style.borderRight = '1px solid rgba(255,255,255,0.1)';
-                    d.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+                    const dEl = document.createElement('div'); 
+                    dEl.className = 'mini-day'; 
+                    dEl.style.background = monthColors[gMonth];
+                    dEl.style.color = '#fff';
+                    dEl.style.fontWeight = 'bold';
+                    dEl.style.textShadow = '0 0 6px #000';
+                    dEl.style.borderRight = '1px solid rgba(255,255,255,0.1)';
+                    dEl.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
                     
-                    if (item.isAnchor) {
-                        d.style.border = '2px solid var(--gold, #F4D068)';
-                        d.innerText = "A";
+                    if (absDeg % 90 === 0) {
+                        dEl.style.border = '2px solid var(--gold, #F4D068)';
+                        dEl.innerText = "A";
                     } else {
-                        d.innerText = item.deg;
+                        dEl.innerText = d + 1;
                     }
                     
-                    if(Date.now() >= absStart && Date.now() < absStart + item.dur) d.classList.add('status-today');
-                    if(this.selectedDate >= absStart && this.selectedDate < absStart + item.dur) d.classList.add('selected');
-                    d.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
+                    if(Date.now() >= absStart && Date.now() < absStart + dur) dEl.classList.add('status-today');
+                    if(this.selectedDate >= absStart && this.selectedDate < absStart + dur) dEl.classList.add('selected');
+                    dEl.onclick = () => { this.selectedDate = absStart; this.setViewMode('day'); };
                     
-                    qGrid.appendChild(d);
-                });
+                    qGrid.appendChild(dEl);
+                }
+
                 sectorBox.appendChild(qGrid);
                 matrix.appendChild(sectorBox);
             }
@@ -1064,8 +1127,8 @@ for (let d = 0; d < 30; d++) {
             const bioLegend = document.createElement('div');
             bioLegend.style.cssText = 'display:flex; gap:10px; margin: 10px; justify-content:center; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
             bioLegend.innerHTML = `
-                <span style="color:var(--sys-cyan, #00f0ff);">DEEP FLOW</span>
-                <span style="color:var(--silver-vent, #e0e0e0);">VENT/REC</span>
+                <span style="color:var(--env-green, #a7ff83);">DEEP FLOW</span>
+                <span style="color:var(--sys-cyan, #00f0ff);">VENT/REC</span>
                 <span style="color:var(--bio-purple, #b829ff);">SLEEP</span>
                 <span style="color:var(--chrono-amber, #B97A35);">INERTIA</span>
                 <span style="color:var(--bio-cobalt, #0055ff);">DLMO</span>
@@ -1091,20 +1154,12 @@ for (let d = 0; d < 30; d++) {
                 const key = window.getDataKey(selectedDateObj, h, 0);
                 const data = window.qData[key] || { text: "" };
                 
-                let d = new Date(blockMs);
-                let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
-                let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
-                
-                let currentBioState;
-                if (minsSinceWake >= wakingDurationMins) currentBioState = "SLEEP / RECOVERY";
-                else if (minsSinceWake < inertiaMins) currentBioState = "SLEEP INERTIA";
-                else if (minsSinceWake >= wakingDurationMins - dlmoMins) currentBioState = "DLMO WIND-DOWN";
-                else {
-                    let coreMins = minsSinceWake - inertiaMins;
-                    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
-                    currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
+                let styleInfo = { startStateName: "UNKNOWN" };
+                if (this.showBioWave) {
+                    styleInfo = window.getBlockStyleInfo(blockMs, blockMs + 3600000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
                 }
-                dailyBlocksData.push({ hour: h, text: data.text, bioState: currentBioState, key: key, ms: blockMs });
+                
+                dailyBlocksData.push({ hour: h, text: data.text, bioState: styleInfo.startStateName, key: key, ms: blockMs });
             }
             
             const tensionData = this.calculateCivilTension(dailyBlocksData);
@@ -1127,29 +1182,31 @@ for (let d = 0; d < 30; d++) {
            dailyBlocksData.forEach(b => {
                 const isCivilConstraint = b.text.includes('[FIXED]') || b.text.includes('[CIVIL]');
                 let blockClass = '';
+                let customStyle = '';
+                let textStyle = '';
                 
                 if (this.showBioWave) {
-                    if (b.bioState === 'DEEP FLOW') blockClass += ' flow-state';
-                    else if (b.bioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
-                    else if (b.bioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
-                    else if (b.bioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
-                    else blockClass += ' vent-state';
+                    let styleInfo = window.getBlockStyleInfo(b.ms, b.ms + 3600000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, b.text.trim() !== "");
+                    customStyle = styleInfo.bgStyle;
+                    textStyle = styleInfo.textStyle;
+                } else {
+                    let hasData = b.text.trim() !== "";
+                    let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
+                    textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
                 }
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
                 const block = document.createElement('div');
                 block.className = `slot-block time-block ${blockClass}`;
+                if (customStyle) block.style.cssText += customStyle;
                 
                 let civilFmt = window.formatLegacyDate ? window.formatLegacyDate(b.ms) : { timeStr: new Date(b.ms).toLocaleTimeString() };
-                
-                let hasData = b.text.trim() !== "";
-                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
                 
                 let diff = (b.ms - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
                 let orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
                 
-                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="time-header wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">${civilFmt.timeStr.split(' ')[0]} LOCAL</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(DEG ${orbital.trueArc.toFixed(2)})</span></div>`;
+                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="time-header wave-label" style="font-size:0.9rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">${civilFmt.timeStr.split(' ')[0]} LOCAL</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(DEG ${orbital.trueArc.toFixed(2)})</span></div>`;
                 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
@@ -1177,52 +1234,44 @@ for (let d = 0; d < 30; d++) {
             let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.selectedDate) : null;
             if (!activeBlock) return;
             let cCycle = activeBlock.cycle;
-            let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + activeBlock.relStart;
-            let subDur = activeBlock.dur / 20;
+            
+            // Continuous spatial base calculation
+            let absDeg = activeBlock.absDeg;
+            let relStart = absDeg * (window.TROPICAL_YEAR_MS / 360);
+            let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS) + relStart;
+            let subDur = (window.TROPICAL_YEAR_MS / 360) / 20; // 0.05 degree increments
             
             const matrix = document.createElement('div'); 
             matrix.className = 'editor-matrix';
 
             for(let m=0; m<20; m++) {
                 let targetMs = baseMs + (m * subDur);
-                const key = `Q-${cCycle}-${activeBlock.absDeg}-${m}`;
+                const key = `Q-${cCycle}-${absDeg}-${m}`;
                 const data = window.qData[key] || { text: "", link: "" };
-                
-                let d = new Date(targetMs);
-                let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
-                let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
-                
-                let currentBioState;
-                if (minsSinceWake >= wakingDurationMins) currentBioState = "SLEEP / RECOVERY";
-                else if (minsSinceWake < inertiaMins) currentBioState = "SLEEP INERTIA";
-                else if (minsSinceWake >= wakingDurationMins - dlmoMins) currentBioState = "DLMO WIND-DOWN";
-                else {
-                    let coreMins = minsSinceWake - inertiaMins;
-                    let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
-                    currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
-                }
                 
                 const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
                 let blockClass = '';
+                let customStyle = '';
+                let textStyle = '';
                 
                 if (this.showBioWave) {
-                    if (currentBioState === 'DEEP FLOW') blockClass += ' flow-state';
-                    else if (currentBioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
-                    else if (currentBioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
-                    else if (currentBioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
-                    else blockClass += ' vent-state';
+                    let styleInfo = window.getBlockStyleInfo(targetMs, targetMs + subDur, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
+                    customStyle = styleInfo.bgStyle;
+                    textStyle = styleInfo.textStyle;
+                } else {
+                    let hasData = data.text.trim() !== "";
+                    let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
+                    textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
                 }
                 
                 if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
                 
                 const block = document.createElement('div'); 
                 block.className = `slot-block time-block ${blockClass}`;
-                
-                let hasData = data.text.trim() !== "";
-                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
+                if (customStyle) block.style.cssText += customStyle;
                 
                let currentFraction = (m * 0.05).toFixed(2).substring(1); 
-               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">DEG ${activeBlock.absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">DEG ${absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
@@ -1279,44 +1328,28 @@ for (let d = 0; d < 30; d++) {
             const diff = (targetMs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY; 
             const orbital = window.getOrbitalData ? window.getOrbitalData(diff) : { trueArc: 0 };
             
-            let d = new Date(targetMs);
-            let currentMinsFromMidnight = (d.getHours() * 60) + d.getMinutes();
-            let minsSinceWake = (currentMinsFromMidnight - anchorMins + 1440) % 1440;
-            
-            let currentBioState;
-
-            if (minsSinceWake >= wakingDurationMins) {
-                currentBioState = "SLEEP / RECOVERY";
-            } else if (minsSinceWake < inertiaMins) {
-                currentBioState = "SLEEP INERTIA";
-            } else if (minsSinceWake >= wakingDurationMins - dlmoMins) {
-                currentBioState = "DLMO WIND-DOWN";
-            } else {
-                let coreMins = minsSinceWake - inertiaMins;
-                let cyclePosFloat = (coreMins % cycleDuration) / cycleDuration;
-                currentBioState = (cyclePosFloat < 0.77) ? "DEEP FLOW" : "VENT/RECOVERY";
-            }
-            
            const isCivilConstraint = data.text.includes('[FIXED]') || data.text.includes('[CIVIL]');
             let blockClass = '';
+            let customStyle = '';
+            let textStyle = '';
             
             if (this.showBioWave) {
-                if (currentBioState === 'DEEP FLOW') blockClass += ' flow-state';
-                else if (currentBioState === 'SLEEP / RECOVERY') blockClass += ' sleep-state';
-                else if (currentBioState === 'SLEEP INERTIA') blockClass += ' inertia-state';
-                else if (currentBioState === 'DLMO WIND-DOWN') blockClass += ' dlmo-state';
-                else blockClass += ' vent-state';
+                let styleInfo = window.getBlockStyleInfo(targetMs, targetMs + 300000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration, data.text.trim() !== "");
+                customStyle = styleInfo.bgStyle;
+                textStyle = styleInfo.textStyle;
+            } else {
+                let hasData = data.text.trim() !== "";
+                let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
+                textStyle = `color: ${colorStr}; text-shadow: ${hasData ? '0 0 8px var(--omni-text)' : 'none'};`;
             }
             
             if (isCivilConstraint) blockClass += ' fixed-civil-constraint';
 
             const block = document.createElement('div'); 
             block.className = `slot-block time-block ${blockClass}`;
+            if (customStyle) block.style.cssText += customStyle;
             
-            let hasData = data.text.trim() !== "";
-            let colorStr = hasData ? 'var(--omni-text)' : 'var(--omni-main)';
-            
-           let timeHeaderHtml = `<div class="wave-label" style="font-size:0.8rem; color:${colorStr}; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; text-shadow:${hasData ? '0 0 8px var(--omni-text)' : 'none'};">:${m.toString().padStart(2,'0')} LOCAL</div>`;
+           let timeHeaderHtml = `<div class="wave-label" style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">:${m.toString().padStart(2,'0')} LOCAL</div>`;
 
             block.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 8px;">
