@@ -1432,6 +1432,9 @@ window.Q_OmniPlanner = {
         let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 420;
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
         let wakeDuration = 1440 - sleepDuration;
+        let inertiaMins = 45;
+        let dlmoMins = 90;
+        let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90;
 
         // 3. Biological Event Horizon
         let userInitMs = parseInt(localStorage.getItem('q_init_ms')) || alphaAnchor;
@@ -1464,29 +1467,22 @@ window.Q_OmniPlanner = {
             let photoY = 50 - (Math.cos((timeFromNoon / 24) * Math.PI * 2) * 35);
             pathPhoto += `L ${x} ${photoY} `;
 
-           // 3. Biological Diurnal Envelope (Continuous Phase vs. Modulo Fracture)
+           // 3. Biological Diurnal Envelope (Oscillating Phase)
             if (pointMs >= userInitMs) {
+                let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
+                let state = window.getBioPhase(minsSinceWake, wakeDuration, inertiaMins, dlmoMins, cycleDuration);
                 let bioY = 50;
-                
-                if (this.civilDistortionActive) {
-                    // FORCED CAGE: Jagged derivative, piecewise fracture, crushed amplitude
-                    let minsFloat = localDec * 60;
-                    let minsSinceWake = (minsFloat - savedAnchor + 1440) % 1440;
-                    let tensionScalar = 0.3; // Amplitude crushed by 70%
-                    
-                    if (minsSinceWake >= wakeDuration) {
-                        let sleepProgress = (minsSinceWake - wakeDuration) / sleepDuration;
-                        bioY = 50 + (Math.sin(sleepProgress * Math.PI) * (25 * tensionScalar));
-                    } else {
-                        let wakeProgress = minsSinceWake / wakeDuration;
-                        bioY = 50 - (Math.sin(wakeProgress * Math.PI) * (25 * tensionScalar));
-                    }
+
+                if (state.name === "DEEP FLOW") {
+                    let coreMins = (minsSinceWake - inertiaMins) % cycleDuration;
+                    bioY = 40 + (Math.sin((coreMins / cycleDuration) * Math.PI) * 10);
+                } else if (state.name === "VENT/RECOVERY") {
+                    let coreMins = (minsSinceWake - inertiaMins) % cycleDuration;
+                    bioY = 60 - (Math.sin((coreMins / cycleDuration) * Math.PI) * 10);
+                } else if (state.name === "SLEEP INERTIA" || state.name === "DLMO WIND-DOWN") {
+                    bioY = 50; // Neutral transition
                 } else {
-                    // FREE WAVE: Smooth, uninterrupted kinetic phase
-                    let physicalMinsSinceInit = (pointMs - userInitMs) / 60000;
-                    let tTotal = wakeDuration + sleepDuration; 
-                    let phase = (physicalMinsSinceInit % tTotal) / tTotal;
-                    bioY = 50 - (Math.sin(phase * Math.PI * 2) * 25);
+                    bioY = 50; // Sleep
                 }
 
                 if (!bioPathStarted) {
