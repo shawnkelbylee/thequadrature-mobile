@@ -1,6 +1,6 @@
 // THE QUADRATURE: CORE PHYSICS & METROLOGY ENGINE
 // Architect: Kelby | Engineer: Kairos
-// STATUS: Phase XII Physics Engine. Pure Spatial Kinematics & Orbital Ledger Arrays.
+// STATUS: Phase XIII Physics Engine. Pure Spatial Kinematics & Continuous Respiration.
 
 (function() {
     if (window.Q_CORE_LOADED) return;
@@ -14,19 +14,11 @@
     document.addEventListener('DOMContentLoaded', () => { window.initQCore(); });
 
     window.initQCore = function() {
-        console.log("[Q-CORE] V25 System Initialized...");
+        console.log("[Q-CORE] V26 System Initialized: Continuous Respiration Active...");
         
         window.ANCHOR_ALPHA_DYNAMIC = Date.UTC(2025, 11, 21, 15, 3, 0); 
         window.MS_DAY = 86400000;
         window.TROPICAL_YEAR_MS = 31556925216;
-
-        window.Q_GEAR_CONSTANTS = {
-            ALPHA: 86400000,
-            BETA: 84600000,
-            GAMMA: 89662680,
-            DELTA: 102599640,
-            EPSILON: 89662680
-        };
 
         window.EPHEMERIS_ANCHORS = [
             Date.UTC(2025, 11, 21, 15, 3, 0), Date.UTC(2026, 2, 20, 14, 46, 0), Date.UTC(2026, 5, 21, 8, 24, 0), Date.UTC(2026, 8, 23, 0, 5, 0),
@@ -37,99 +29,35 @@
             Date.UTC(2030, 11, 21, 20, 9, 0)
         ];
 
-        window.initQBlocks = function() {
-            if (!window.TROPICAL_YEAR_MS) return;
-
-            window.Q_BLOCK_DEFS = [];
-            let rawDurs = [];
-            let totalRaw = 0;
-            
-            for(let d=0; d<360; d++) {
-                let v = 1 + 0.0167 * Math.cos((d - 14) * Math.PI / 180); 
-                let dur = 1 / v;
-                rawDurs.push(dur);
-                totalRaw += dur;
-            }
-            
-            let scale = window.TROPICAL_YEAR_MS / totalRaw;
-            
-            for(let d=0; d<360; d++) {
-                let q = Math.floor(d / 90) + 1;
-                let s = Math.floor((d % 90) / 30) + 1;
-                let degInSect = (d % 30) + 1; 
-                
-                let isAnchor = (d === 0 || d === 90 || d === 180 || d === 270);
-                let aName = "";
-                if(d===0) aName = "SOUTHERN SOLSTICE";
-                if(d===90) aName = "1ST EQUINOX";
-                if(d===180) aName = "NORTHERN SOLSTICE";
-                if(d===270) aName = "2ND EQUINOX";
-                
-                window.Q_BLOCK_DEFS.push({
-                    type: 'DEGREE', quad: q, sect: s, deg: degInSect, absDeg: d,
-                    dur: rawDurs[d] * scale, isAnchor: isAnchor, name: aName
-                });
-            }
-            
-            window.Q_BLOCKS = [];
-            let acc = 0;
-            window.Q_BLOCK_DEFS.forEach((b, i) => {
-                window.Q_BLOCKS.push({ ...b, relStart: acc, blockIndex: i });
-                acc += b.dur;
-            });
-
-            window.Q_YEAR_MS = acc;
-        };
-
         window.getQBlockByTime = function(ts) {
-            if(!window.ANCHOR_ALPHA_DYNAMIC || !window.Q_BLOCKS) return null;
-            let diff = (ts + 5) - window.ANCHOR_ALPHA_DYNAMIC;
-            let cycleIdx = Math.floor(diff / window.Q_YEAR_MS);
-            let rem = diff % window.Q_YEAR_MS;
-            if(rem < 0) { rem += window.Q_YEAR_MS; cycleIdx -= 1; }
+            if (!window.ANCHOR_ALPHA_DYNAMIC) return null;
+            let diff = ts - window.ANCHOR_ALPHA_DYNAMIC;
+            let cycle = Math.floor(diff / window.TROPICAL_YEAR_MS);
+            let daysElapsed = diff / window.MS_DAY;
+            let orb = window.getOrbitalData(daysElapsed);
+            let absDeg = Math.floor(orb.trueArc);
             
-            for(let i=0; i<window.Q_BLOCKS.length; i++) {
-                let b = window.Q_BLOCKS[i];
-                if(rem >= b.relStart && rem < b.relStart + b.dur) {
-                    return { ...b, cycle: cycleIdx, absoluteStart: window.ANCHOR_ALPHA_DYNAMIC + (cycleIdx * window.Q_YEAR_MS) + b.relStart };
-                }
+            let isAnchor = (absDeg === 0 || absDeg === 90 || absDeg === 180 || absDeg === 270);
+            let name = "";
+            if (isAnchor) {
+                const anchors = ["SOUTHERN SOLSTICE", "1ST EQUINOX", "NORTHERN SOLSTICE", "2ND EQUINOX"];
+                name = anchors[absDeg / 90];
             }
-            return null;
+            
+            return {
+                quad: orb.quad, sect: orb.sect, deg: orb.day, absDeg: absDeg,
+                cycle: cycle, isAnchor: isAnchor, name: name,
+                dur: window.TROPICAL_YEAR_MS / 360 
+            };
         };
 
-       window.stepQBlock = function(ts, n) {
-            let current = window.getQBlockByTime(ts);
-            if(!current) return ts;
-            let targetIdx = current.blockIndex + n;
-            let targetCycle = current.cycle;
-            
-            while(targetIdx >= window.Q_BLOCKS.length) { targetIdx -= window.Q_BLOCKS.length; targetCycle += 1; }
-            while(targetIdx < 0) { targetIdx += window.Q_BLOCKS.length; targetCycle -= 1; }
-            
-            let targetBlock = window.Q_BLOCKS[targetIdx];
-            return window.ANCHOR_ALPHA_DYNAMIC + (targetCycle * window.Q_YEAR_MS) + targetBlock.relStart + (targetBlock.dur / 2);
+        window.stepQBlock = function(ts, n) {
+            return ts + (n * (window.TROPICAL_YEAR_MS / 360));
         };
 
         window.stepQSector = function(ts, n) {
-            let current = window.getQBlockByTime(ts);
-            if(!current) return ts;
-            let cIdx = current.blockIndex;
-            let cCycle = current.cycle;
-            let steps = Math.abs(n);
-            let dir = n > 0 ? 1 : -1;
-            
-            for(let i=0; i<steps; i++) {
-                do {
-                    cIdx += dir;
-                    if(cIdx >= window.Q_BLOCKS.length) { cIdx -= window.Q_BLOCKS.length; cCycle++; }
-                    if(cIdx < 0) { cIdx += window.Q_BLOCKS.length; cCycle--; }
-                } while (window.Q_BLOCKS[cIdx].deg !== 1);
-            }
-            let targetBlock = window.Q_BLOCKS[cIdx];
-            return window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.Q_YEAR_MS) + targetBlock.relStart + (targetBlock.dur / 2);
+            return ts + (n * (window.TROPICAL_YEAR_MS / 12));
         };
-
-        window.initQBlocks();
 
         let lastPulse = 0;
         let scrubSpeed = 0;
