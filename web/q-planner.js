@@ -1473,10 +1473,26 @@ window.Q_OmniPlanner = {
                 let bioOffset = 50 - (declination * 0.4); // Photic alignment alters wake/sleep ratio
                 let bioAmp = 18 + (Math.abs(declination) * 0.15); // Systemic load scaling
                 
-                let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
+               let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
 
-                if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
-}
+                    if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
+
+                    for (let key in bioPaths) {
+                        if (key === state.name) {
+                            if (!bioPaths[key].active) {
+                                bioPaths[key].path += `M ${prevBioX} ${prevBioY} L ${x} ${bioY} `;
+                                bioPaths[key].active = true;
+                            } else {
+                                bioPaths[key].path += `L ${x} ${bioY} `;
+                            }
+                        } else {
+                            bioPaths[key].active = false;
+                        }
+                    }
+                    prevBioX = x;
+                    prevBioY = bioY;
+                }
+            }
 
         const addPath = (pathData, color, width, dash = "") => {
             if (!pathData) return; // Prevent render block if bio wave is totally clipped
