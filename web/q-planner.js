@@ -1111,7 +1111,7 @@ window.Q_OmniPlanner = {
     
     renderDay: function(container, title) {
         title.innerHTML = window.getDualTitle(this.selectedDate, this.isLegacy);
-       if (this.showBiometricBase) {
+        if (this.showBiometricBase) {
             const bioLegend = document.createElement('div');
             bioLegend.style.cssText = 'display:flex; gap:10px; margin: 10px; justify-content:center; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold;';
             bioLegend.innerHTML = `
@@ -1134,6 +1134,9 @@ window.Q_OmniPlanner = {
         if (this.isLegacy) {
             const list = document.createElement('div'); 
             list.style.overflowY = "auto"; list.style.flexGrow = "1";
+            const matrix = document.createElement('div'); // Matrix defined here
+            matrix.className = 'editor-matrix';
+            
             let dailyBlocksData = [];
             const selectedDateObj = new Date(this.selectedDate);
             
@@ -1151,7 +1154,7 @@ window.Q_OmniPlanner = {
             }
             
             const tensionData = this.calculateCivilTension(dailyBlocksData);
-           const dashboard = document.createElement('div');
+            const dashboard = document.createElement('div');
             dashboard.innerHTML = `
                 <div class="tension-dashboard">
                     <div style="display:flex; flex-direction:column;">
@@ -1163,23 +1166,31 @@ window.Q_OmniPlanner = {
             `;
             list.appendChild(dashboard);
 
-            const matrix = document.createElement('div');
-            matrix.className = 'editor-matrix';
-            matrix.style.paddingTop = '10px';
-
+            dailyBlocksData.forEach(b => {
+                let style = this.showBioWave ? window.getBlockStyleInfo(b.ms, b.ms + 3600000, anchorMins, wakingDurationMins, inertiaMins, dlmoMins, cycleDuration) : '';
+                const block = document.createElement('div');
+                block.className = 'slot-block time-block';
+                if (style) block.style.cssText += style;
+                
+                let timeStr = new Date(b.ms).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                block.innerHTML = `
+                    <div style="font-size:0.8rem; font-family:'Orbitron'; font-weight:bold; color:var(--omni-text);">${timeStr} LOCAL</div>
+                    <textarea style="width:100%; min-height:60px; background:transparent; color:var(--omni-text); border:none; border-bottom:1px solid var(--omni-bg); margin-top:8px; font-family:'JetBrains Mono'; outline:none;" oninput="window.qData['${b.key}'].text=this.value; window.savePlannerData();" placeholder="Intent...">${b.text}</textarea>
+                `;
+                matrix.appendChild(block);
+            });
          
             list.appendChild(matrix);
             container.appendChild(list);
         } else {
+            // ... (Orbital logic remains unchanged)
             let activeBlock = window.getQBlockByTime ? window.getQBlockByTime(this.selectedDate) : null;
             if (!activeBlock) return;
             let cCycle = activeBlock.cycle;
-            
-            // Continuous spatial base calculation
             let absDeg = activeBlock.absDeg;
             let relStart = absDeg * (window.TROPICAL_YEAR_MS / 360);
             let baseMs = window.ANCHOR_ALPHA_DYNAMIC + (cCycle * window.TROPICAL_YEAR_MS) + relStart;
-            let subDur = (window.TROPICAL_YEAR_MS / 360) / 20; // 0.05 degree increments
+            let subDur = (window.TROPICAL_YEAR_MS / 360) / 20;
             
             const matrix = document.createElement('div'); 
             matrix.className = 'editor-matrix';
@@ -1210,8 +1221,8 @@ window.Q_OmniPlanner = {
                 block.className = `slot-block time-block ${blockClass}`;
                 if (customStyle) block.style.cssText += customStyle;
                 
-               let currentFraction = (m * 0.05).toFixed(2).substring(1); 
-               let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">DEG ${absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
+                let currentFraction = (m * 0.05).toFixed(2).substring(1); 
+                let timeHeaderHtml = `<div style="display:flex; gap: 8px; align-items:baseline;"><span class="wave-label" style="font-size:0.9rem; font-family:'Orbitron'; font-weight:bold; transition: color 0.5s, text-shadow 0.5s; ${textStyle}">DEG ${absDeg}${currentFraction}</span><span style="font-size:0.55rem; color:rgba(229, 228, 226, 0.6); font-weight:bold;">(${(subDur/60000).toFixed(1)} MINS)</span></div>`;
 
                 let badgeHtml = '';
                 if (isCivilConstraint) badgeHtml += `<span style="background:var(--omni-warn); color:#000; padding:2px 6px; border-radius:2px; font-size:0.5rem; font-weight:bold; font-family:'Orbitron'; margin-left:5px;">FIXED CIVIL CONSTRAINT</span>`;
