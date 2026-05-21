@@ -1416,11 +1416,11 @@ window.Q_OmniPlanner = {
         let pathPhoto = "M 0 50 ";
         
         let bioPaths = {
-            "SLEEP / RECOVERY": { path: "", color: "var(--bio-purple, #b829ff)", active: false },
-            "SLEEP INERTIA": { path: "", color: "var(--chrono-amber, #B97A35)", active: false },
-            "DEEP FLOW": { path: "", color: "var(--env-green, #a7ff83)", active: false },
-            "VENT/RECOVERY": { path: "", color: "var(--sys-cyan, #00f0ff)", active: false },
-            "DLMO WIND-DOWN": { path: "", color: "var(--bio-cobalt, #0055ff)", active: false }
+            "SLEEP / RECOVERY": { path: "", tensionPath: "", color: "var(--bio-purple, #b829ff)", active: false },
+            "SLEEP INERTIA": { path: "", tensionPath: "", color: "var(--chrono-amber, #B97A35)", active: false },
+            "DEEP FLOW": { path: "", tensionPath: "", color: "var(--env-green, #a7ff83)", active: false },
+            "VENT/RECOVERY": { path: "", tensionPath: "", color: "var(--sys-cyan, #00f0ff)", active: false },
+            "DLMO WIND-DOWN": { path: "", tensionPath: "", color: "var(--bio-cobalt, #0055ff)", active: false }
         };
         let prevBioX = undefined; let prevBioY = undefined;
 
@@ -1486,47 +1486,40 @@ window.Q_OmniPlanner = {
                 let circadianLength = 1440 + (declination * 0.5); 
                 let phase = minsSinceWake / circadianLength;
 
-                let bioOffset = 50 - (declination * 0.4); // Photic alignment alters wake/sleep ratio
-                let bioAmp = 18 + (Math.abs(declination) * 0.15); // Systemic load scaling
+               let bioOffset = 50 - (declination * 0.4); 
+                let bioAmp = 18 + (Math.abs(declination) * 0.15); 
                 
-                // BEGIN TENSION MODIFIER
+                // Original Wave (Ghost - Unconstrained)
+                let originalBioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
+
+                // Tensioned Wave (Calculated if Friction is active)
+                let tensionedBioY = originalBioY;
                 if (this.isTensionMetricActive) {
                     let dObj = new Date(pointMs);
                     let key = window.getDataKey(dObj, dObj.getHours(), 0);
                     let cellData = window.qData[key];
-                    let localFriction = 0;
-                    
-                    if (cellData && cellData.text && (cellData.text.includes('[FIXED]') || cellData.text.includes('[CIVIL]'))) {
-                        const fric_coeff = { 'SLEEP / RECOVERY': 50, 'SLEEP INERTIA': 40, 'DLMO WIND-DOWN': 40, 'VENT/RECOVERY': 25, 'DEEP FLOW': 10 };
-                        localFriction = fric_coeff[state.name] || 10;
-                    }
+                    let localFriction = (cellData && cellData.text && (cellData.text.includes('[FIXED]') || cellData.text.includes('[CIVIL]'))) ? 25 : 0;
                     
                     let activeTension = Math.min(99, baseCompressionScore + localFriction);
                     let tensionDampener = 1.0 - (activeTension / 110); 
                     
-                    bioAmp *= tensionDampener; 
-                    bioOffset += (activeTension / 15); 
+                    tensionedBioY = (bioOffset + (activeTension / 15)) - (Math.cos(phase * Math.PI * 2) * (bioAmp * tensionDampener));
                 }
-                // END TENSION MODIFIER
-                
-                let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
 
-                if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
-
-                    for (let key in bioPaths) {
-                        if (key === state.name) {
-                            if (!bioPaths[key].active) {
-                                bioPaths[key].path += `M ${prevBioX} ${prevBioY} L ${x} ${bioY} `;
-                                bioPaths[key].active = true;
-                            } else {
-                                bioPaths[key].path += `L ${x} ${bioY} `;
-                            }
+                for (let key in bioPaths) {
+                    if (key === state.name) {
+                        if (!bioPaths[key].active) {
+                            bioPaths[key].path += `M ${x} ${originalBioY} `;
+                            bioPaths[key].tensionPath += `M ${x} ${tensionedBioY} `;
+                            bioPaths[key].active = true;
                         } else {
-                            bioPaths[key].active = false;
+                            bioPaths[key].path += `L ${x} ${originalBioY} `;
+                            bioPaths[key].tensionPath += `L ${x} ${tensionedBioY} `;
                         }
+                    } else {
+                        bioPaths[key].active = false;
                     }
-                    prevBioX = x;
-                    prevBioY = bioY;
+                }
                 }
             }
 
@@ -1545,7 +1538,16 @@ window.Q_OmniPlanner = {
 if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
         if (this.showBiometricBase) {
             for (let key in bioPaths) {
-                if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+                if (bioPaths[key].path) {
+                    if (this.isTensionMetricActive) {
+                        // Ghost Wave (Dashed/Faint)
+                        addPath(bioPaths[key].path, bioPaths[key].color, "1", "4 4");
+                        // Tensioned Wave (Solid/Contrast)
+                        addPath(bioPaths[key].tensionPath, "var(--omni-warn)", "1.5");
+                    } else {
+                        addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+                    }
+                }
             }
         }
         if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
