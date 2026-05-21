@@ -137,7 +137,7 @@ window.Q_OmniPlanner = {
     showOrbitalBase: false,
     showBiometricBase: false,
     isLegacy: true, 
-    civilDistortionActive: false,
+    isTensionMetricActive: false,
     
     init: function() {
         this.injectCSS(); 
@@ -241,9 +241,15 @@ window.Q_OmniPlanner = {
             }
         });
         
-        let advice = "SCHEDULE ALIGNED. True Ellipse resonance maintained.";
-        if (tensionScore >= 75) {
-            advice = "SEVERE JAGGEDNESS DETECTED. Fixed Civil Constraints forced into recovery windows. Burnout probability: CRITICAL.";
+        let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 360;
+            let sleepDur = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
+            let midSleep = (savedAnchor + 1440 - sleepDur/2) % 1440;
+            let compressionScore = Math.abs(midSleep - 720) / 10;
+            tensionScore += compressionScore;
+
+            let advice = "SCHEDULE ALIGNED. True Ellipse resonance maintained.";
+            if (tensionScore >= 75) {
+                advice = "SEVERE JAGGEDNESS DETECTED. Fixed Civil Constraints and Circadian Compression are overriding biological sovereignty. Burnout probability: CRITICAL.";
         } else if (tensionScore > 30) {
             advice = "MODERATE FRICTION. Civil logic overriding biological flow. Shift legacy meetings to Deep Flow sectors.";
         }
@@ -637,12 +643,12 @@ window.Q_OmniPlanner = {
             if (this.showBiometricBase) {
                 const distBtn = document.createElement('button');
                 distBtn.className = 'back-btn';
-                distBtn.style.color = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
-                distBtn.style.borderColor = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.color = this.isTensionMetricActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.borderColor = this.isTensionMetricActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
                 distBtn.style.marginLeft = '10px';
-                distBtn.innerText = this.civilDistortionActive ? '[ DISTORTION: ON ]' : '[ DISTORTION: OFF ]';
+                distBtn.innerText = this.isTensionMetricActive ? '[ TENSION: ON ]' : '[ TENSION: OFF ]';
                 distBtn.onclick = () => {
-                    this.civilDistortionActive = !this.civilDistortionActive;
+                    this.isTensionMetricActive = !this.isTensionMetricActive;
                     this.refreshView();
                 };
                 actionContainer.appendChild(distBtn);
