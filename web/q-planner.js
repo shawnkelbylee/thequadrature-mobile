@@ -1539,7 +1539,8 @@ if (this.isTensionMetricActive) {
             <span style="color:var(--env-green, #a7ff83); cursor:help;" title="BIOLOGICAL: User-calibrated circadian cycle via 5 biometric phases.">~ BIOLOGICAL</span>
             <span style="color:var(--gold, #F4D068); cursor:help;" title="FLUID DEGREE: Time to cross 1 degree of orbital path. Intersects at 1 spatial degree intervals.">~ FLUID DEGREE</span>
         `;
-        wrapper.appendChild(waveKey);
+ 
+       wrapper.appendChild(waveKey);
         wrapper.appendChild(svg);
         container.appendChild(wrapper);
     }
@@ -1550,4 +1551,3 @@ window.addEventListener('DOMContentLoaded', () => {
     if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.init === 'function') {
         window.Q_OmniPlanner.init();
     }
-});
