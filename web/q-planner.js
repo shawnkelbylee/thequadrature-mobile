@@ -1427,6 +1427,14 @@ window.Q_OmniPlanner = {
 
         // 3. Biological Event Horizon
         let userInitMs = parseInt(localStorage.getItem('q_init_ms')) || alphaAnchor;
+
+        // PRE-CALCULATE BASE COMPRESSION
+        let baseCompressionScore = 0;
+        if (this.isTensionActive) {
+            let midSleep = (savedAnchor + 1440 - sleepDuration/2) % 1440;
+            baseCompressionScore = Math.abs(midSleep - 720) / 10;
+        }
+
         for(let i=0; i<=resolution; i++) {
             let pct = i / resolution;
             let pointMs = startMs + (pct * msRange);
