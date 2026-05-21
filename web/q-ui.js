@@ -437,7 +437,7 @@ window.injectUniversalUI = function() {
         <div class="q-nav-bar">
             <div style="display:flex; width: 100%; justify-content: center; align-items: center;">
                 <div class="q-nav-menu" id="q-nav-menu">
-                    <button id="q-global-sim-badge" class="q-nav-btn sim-badge" style="display: inline-block; border-color:${authBorder} !important; color:${authColor} !important; background:${authBg} !important;" onclick="window.triggerDomainShift(event)">${authText}</button>
+                   
                     <a href="index.html" class="q-nav-btn face-btn vector-link ${faceActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">THE APERTURE</a>
                     <a href="PHYSIOLOGICAL.html" class="q-nav-btn bio-btn vector-link ${bActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">PHYSIOLOGICAL</a>
                     <a href="METAPHYSICAL.html" class="q-nav-btn com-btn vector-link ${cActive ? 'active' : ''}" onclick="window.location.href=this.href; return false;">METAPHYSICAL</a>
@@ -980,18 +980,6 @@ window.addEventListener('click', (e) => {
     }
 }, true);
 
-window.triggerDomainShift = function(e) {
-    if(e && typeof e.preventDefault === 'function') e.preventDefault();
-    let authState = localStorage.getItem('Q_PRO_AUTH') === 'true' ? 'ACTIVE' : 'STANDBY';
-    
-    if(authState !== 'ACTIVE') {
-        if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth();
-        else alert("OAuth Service Unavailable. Boot from System Home Gateway.");
-        return;
-    }
-    
-    if(window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') window.Q_Auth.triggerOAuth(); 
-};
 
 window.toggleTimeFmt = function(btnId) {
     let fmt = localStorage.getItem('Q_TIME_FMT') || 'UTC_24';
