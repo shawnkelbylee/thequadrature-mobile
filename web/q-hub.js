@@ -1,7 +1,52 @@
 // THE QUADRATURE: GLOBAL DASHBOARD & PRO MATRIX
 // Architect: Kelby | Engineer: Kairos
 // PROTOCOL: Account Settings, Calibration Module, Tiered Access Gate & Native Library Reader
-// REVISION: 24.2.6 - Persistence Fix & Syntax Stabilization
+// REVISION: 24.2.7 - Explicit OAuth Bridge & Scope Resolution
+
+// --- AUTONOMOUS OAUTH BRIDGE ---
+window.Q_Auth = {
+    supabase: null,
+    init: async function() {
+        if (!window.supabase) {
+            await new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+                script.onload = resolve;
+                document.head.appendChild(script);
+            });
+        }
+        const SUPABASE_URL = 'https://wnfpxozpeucrwqmrqpzv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_g6JfCH6FefIwEmXztgkdTw_Md1z4se5';
+        this.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        const { data } = await this.supabase.auth.getSession();
+        if (data && data.session) {
+            localStorage.setItem('Q_PRO_AUTH', 'true');
+        }
+    },
+    triggerOAuth: async function() {
+        if (!this.supabase) await this.init();
+        const { error } = await this.supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { 
+                redirectTo: window.location.origin + window.location.pathname,
+                queryParams: {
+                    client_id: '295194884701-td2lcfbtote5j98gbaluvt4ajjv6rv0u.apps.googleusercontent.com'
+                }
+            }
+        });
+        if (error) alert("OAuth Handshake Failed: " + error.message);
+    },
+    signOut: async function() {
+        if (!this.supabase) await this.init();
+        await this.supabase.auth.signOut();
+        localStorage.setItem('Q_PRO_AUTH', 'false');
+        window.location.reload();
+    }
+};
+
+window.addEventListener('DOMContentLoaded', () => window.Q_Auth.init());
+// -------------------------------
 
 window.Q_IntegrationHub = {
     viewState: 'closed',
@@ -119,23 +164,18 @@ window.Q_IntegrationHub = {
             return;
         }
 
-        // 2. PERSISTENCE FIX: Write directly to browser memory immediately
         localStorage.setItem('q_dob', dob);
         localStorage.setItem('q_tob', isUnknown ? '12:00' : tob);
         localStorage.setItem('q_tob_unknown', isUnknown);
         localStorage.setItem('q_loc_name', loc.toUpperCase());
         
-
-        // 3. Update dynamic state matrix only if the module is active
         if (window.Q_UpdateState) {
             window.Q_UpdateState('metaphysical_layer', 'dob', dob);
             window.Q_UpdateState('metaphysical_layer', 'tob', isUnknown ? '12:00' : tob);
             window.Q_UpdateState('metaphysical_layer', 'tob_unknown', isUnknown);
             window.Q_UpdateState('location', 'name', loc.toUpperCase());
-            
         }
 
-        // 4. BROADCAST: Force immediate re-render across all active vectors
         window.dispatchEvent(new Event('storage'));
 
         if(window.Q_LOG) window.Q_LOG('STATE', 'CORE', 'IDENTITY_PARAMETERS_UPDATED');
@@ -180,19 +220,16 @@ window.Q_IntegrationHub = {
         const isProActive = ents.includes('PRO');
         const proStatus = isProActive ? renderBadge('#b829ff', '#000', 'ACTIVE') : renderUpgradeBtn('ai_diplomat', 'PRO TIER', 'logic_layer', '#b829ff');
 
-        // Local Storage Fallback Resolution & Geolocation Override Force
         const sDob = window.Q_STATE?.metaphysical_layer?.dob || localStorage.getItem('q_dob') || "";
         const sTob = window.Q_STATE?.metaphysical_layer?.tob || localStorage.getItem('q_tob') || "12:00";
         const sTobUnknown = window.Q_STATE?.metaphysical_layer?.tob_unknown === true || localStorage.getItem('q_tob_unknown') === 'true';
         
         let sLoc = window.Q_STATE?.location?.name || localStorage.getItem('q_loc_name') || "CLEARWATER, FL";
         if (sLoc.toUpperCase().includes('LOS ANGELES')) sLoc = "CLEARWATER, FL";
-
         
         const sAi = window.Q_STATE?.logic_layer?.preferred_ai_diplomat || 'DEFAULT';
         const sDeepFlowEnforcement = window.Q_STATE?.logic_layer?.deep_flow_enforcement !== false;
 
-        // Ephemeris Diagnostic: Reporting Native Edge-Computed State
         const jplStatus = '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ EDGE-COMPUTED / SYNCED ]</span>';
         const swissStatus = isPersonalActive ? '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ ACTIVE ]</span>' : '<span style="color:#aaa;">[ STANDBY ]</span>';
 
@@ -257,8 +294,6 @@ window.Q_IntegrationHub = {
                         <label class="hub-input-lbl">GEOLOCATION (CITY, REGION)</label>
                         <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
                     </div>
-
-                    
 
                     <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
                 </div>
