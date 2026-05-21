@@ -137,7 +137,7 @@ window.Q_OmniPlanner = {
     showOrbitalBase: false,
     showBiometricBase: false,
     isLegacy: true, 
-    civilDistortionActive: false,
+    civilTensionActive: false,
     
     init: function() {
         this.injectCSS(); 
@@ -637,12 +637,12 @@ window.Q_OmniPlanner = {
             if (this.showBiometricBase) {
                 const distBtn = document.createElement('button');
                 distBtn.className = 'back-btn';
-                distBtn.style.color = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
-                distBtn.style.borderColor = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.color = this.civilTensionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.borderColor = this.civilTensionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
                 distBtn.style.marginLeft = '10px';
-                distBtn.innerText = this.civilDistortionActive ? '[ DISTORTION: ON ]' : '[ DISTORTION: OFF ]';
+                distBtn.innerText = this.civilTensionActive ? ' TENSION: ON ' : ' TENSION: OFF ';
                 distBtn.onclick = () => {
-                    this.civilDistortionActive = !this.civilDistortionActive;
+                    this.civilTensionActive = !this.civilTensionActive;
                     this.refreshView();
                 };
                 actionContainer.appendChild(distBtn);
