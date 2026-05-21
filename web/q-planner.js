@@ -1422,7 +1422,7 @@ window.Q_OmniPlanner = {
             "VENT/RECOVERY": { path: "", tensionPath: "", color: "var(--sys-cyan, #00f0ff)", active: false },
             "DLMO WIND-DOWN": { path: "", tensionPath: "", color: "var(--bio-cobalt, #0055ff)", active: false }
         };
-        let prevBioX = undefined; let prevBioY = undefined;
+        let prevBioX = undefined; let prevBioY = undefined; let prevTensionY = undefined;
 
         let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 420;
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
@@ -1535,23 +1535,22 @@ window.Q_OmniPlanner = {
             svg.appendChild(p);
         };
 
-if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
-        if (this.showBiometricBase) {
-            for (let key in bioPaths) {
-                if (bioPaths[key].path) {
-                    if (this.isTensionMetricActive) {
-                        // Ghost Wave (Dashed/Faint)
-                        addPath(bioPaths[key].path, bioPaths[key].color, "1", "4 4");
-                        // Tensioned Wave (Solid/Contrast)
-                        addPath(bioPaths[key].tensionPath, "var(--omni-warn)", "1.5");
-                    } else {
-                        addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
-                    }
+if (this.isTensionMetricActive) {
+            if (this.showBiometricBase) {
+                for (let key in bioPaths) {
+                    if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+                    if (bioPaths[key].tensionPath) addPath(bioPaths[key].tensionPath, "var(--omni-warn)", "1.5");
                 }
             }
-        }
-        if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
-        const waveKey = document.createElement('div');
+        } else {
+            if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
+            if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
+            if (this.showBiometricBase) {
+                for (let key in bioPaths) {
+                    if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+                }
+            }
+        }        const waveKey = document.createElement('div');
         waveKey.style.cssText = 'position:absolute; bottom:15px; left:15px; display:flex; gap:12px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold; z-index:100;';
         waveKey.innerHTML = `
             <span style="color:rgba(229, 228, 226, 0.6); cursor:help;" title="CIVIL GRID: The continuous uninterrupted count of 365 static 24-hour days.">— CIVIL GRID</span>
