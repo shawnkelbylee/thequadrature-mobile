@@ -1410,13 +1410,13 @@ window.Q_OmniPlanner = {
         let pathPhoto = "M 0 50 ";
         
         let bioPaths = {
-            "SLEEP / RECOVERY": { path: "", color: "var(--bio-purple, #b829ff)", active: false },
-            "SLEEP INERTIA": { path: "", color: "var(--chrono-amber, #B97A35)", active: false },
-            "DEEP FLOW": { path: "", color: "var(--env-green, #a7ff83)", active: false },
-            "VENT/RECOVERY": { path: "", color: "var(--sys-cyan, #00f0ff)", active: false },
-            "DLMO WIND-DOWN": { path: "", color: "var(--bio-cobalt, #0055ff)", active: false }
+            "SLEEP / RECOVERY": { path: "", tensionPath: "", color: "var(--bio-purple, #b829ff)", active: false },
+            "SLEEP INERTIA": { path: "", tensionPath: "", color: "var(--chrono-amber, #B97A35)", active: false },
+            "DEEP FLOW": { path: "", tensionPath: "", color: "var(--env-green, #a7ff83)", active: false },
+            "VENT/RECOVERY": { path: "", tensionPath: "", color: "var(--sys-cyan, #00f0ff)", active: false },
+            "DLMO WIND-DOWN": { path: "", tensionPath: "", color: "var(--bio-cobalt, #0055ff)", active: false }
         };
-        let prevBioX = undefined; let prevBioY = undefined;
+        let prevBioX = undefined; let prevBioY = undefined; let prevTensionY = undefined;
 
         let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 420;
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
@@ -1473,24 +1473,30 @@ window.Q_OmniPlanner = {
                 let bioOffset = 50 - (declination * 0.4); // Photic alignment alters wake/sleep ratio
                 let bioAmp = 18 + (Math.abs(declination) * 0.15); // Systemic load scaling
                 
-               let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
+               let baseBioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
+               
+               let tensionFactor = Math.min(baseCompressionScore / 100, 0.85);
+               let tensionBioY = 50 + ((baseBioY - 50) * (1 - tensionFactor));
 
-                    if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
+                    if (prevBioX === undefined) { prevBioX = x; prevBioY = baseBioY; prevTensionY = tensionBioY; }
 
                     for (let key in bioPaths) {
                         if (key === state.name) {
                             if (!bioPaths[key].active) {
-                                bioPaths[key].path += `M ${prevBioX} ${prevBioY} L ${x} ${bioY} `;
+                                bioPaths[key].path += `M ${prevBioX} ${prevBioY} L ${x} ${baseBioY} `;
+                                bioPaths[key].tensionPath += `M ${prevBioX} ${prevTensionY} L ${x} ${tensionBioY} `;
                                 bioPaths[key].active = true;
                             } else {
-                                bioPaths[key].path += `L ${x} ${bioY} `;
+                                bioPaths[key].path += `L ${x} ${baseBioY} `;
+                                bioPaths[key].tensionPath += `L ${x} ${tensionBioY} `;
                             }
                         } else {
                             bioPaths[key].active = false;
                         }
                     }
                     prevBioX = x;
-                    prevBioY = bioY;
+                    prevBioY = baseBioY;
+                    prevTensionY = tensionBioY;
                 }
             }
 
@@ -1506,14 +1512,22 @@ window.Q_OmniPlanner = {
             svg.appendChild(p);
         };
 
-if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
-        if (this.showBiometricBase) {
-            for (let key in bioPaths) {
-                if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+if (this.isTensionActive) {
+            if (this.showBiometricBase) {
+                for (let key in bioPaths) {
+                    if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+                    if (bioPaths[key].tensionPath) addPath(bioPaths[key].tensionPath, "var(--omni-warn)", "1.5", "5,5");
+                }
             }
-        }
-        if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
-        const waveKey = document.createElement('div');
+        } else {
+            if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
+            if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
+            if (this.showBiometricBase) {
+                for (let key in bioPaths) {
+                    if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
+                }
+            }
+        }        const waveKey = document.createElement('div');
         waveKey.style.cssText = 'position:absolute; bottom:15px; left:15px; display:flex; gap:12px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold; z-index:100;';
         waveKey.innerHTML = `
             <span style="color:rgba(229, 228, 226, 0.6); cursor:help;" title="CIVIL GRID: The continuous uninterrupted count of 365 static 24-hour days.">— CIVIL GRID</span>
