@@ -137,7 +137,7 @@ window.Q_OmniPlanner = {
     showOrbitalBase: false,
     showBiometricBase: false,
     isLegacy: true, 
-    isTensionMetricActive: false,
+    civilDistortionActive: false,
     
     init: function() {
         this.injectCSS(); 
@@ -241,15 +241,9 @@ window.Q_OmniPlanner = {
             }
         });
         
-        let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 360;
-            let sleepDur = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
-            let midSleep = (savedAnchor + 1440 - sleepDur/2) % 1440;
-            let compressionScore = Math.abs(midSleep - 720) / 10;
-            tensionScore += compressionScore;
-
-            let advice = "SCHEDULE ALIGNED. True Ellipse resonance maintained.";
-            if (tensionScore >= 75) {
-                advice = "SEVERE JAGGEDNESS DETECTED. Fixed Civil Constraints and Circadian Compression are overriding biological sovereignty. Burnout probability: CRITICAL.";
+        let advice = "SCHEDULE ALIGNED. True Ellipse resonance maintained.";
+        if (tensionScore >= 75) {
+            advice = "SEVERE JAGGEDNESS DETECTED. Fixed Civil Constraints forced into recovery windows. Burnout probability: CRITICAL.";
         } else if (tensionScore > 30) {
             advice = "MODERATE FRICTION. Civil logic overriding biological flow. Shift legacy meetings to Deep Flow sectors.";
         }
@@ -643,12 +637,12 @@ window.Q_OmniPlanner = {
             if (this.showBiometricBase) {
                 const distBtn = document.createElement('button');
                 distBtn.className = 'back-btn';
-                distBtn.style.color = this.isTensionMetricActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
-                distBtn.style.borderColor = this.isTensionMetricActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.color = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
+                distBtn.style.borderColor = this.civilDistortionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
                 distBtn.style.marginLeft = '10px';
-                distBtn.innerText = this.isTensionMetricActive ? '[ TENSION: ON ]' : '[ TENSION: OFF ]';
+                distBtn.innerText = this.civilDistortionActive ? '[ DISTORTION: ON ]' : '[ DISTORTION: OFF ]';
                 distBtn.onclick = () => {
-                    this.isTensionMetricActive = !this.isTensionMetricActive;
+                    this.civilDistortionActive = !this.civilDistortionActive;
                     this.refreshView();
                 };
                 actionContainer.appendChild(distBtn);
@@ -1416,33 +1410,23 @@ window.Q_OmniPlanner = {
         let pathPhoto = "M 0 50 ";
         
         let bioPaths = {
-            "SLEEP / RECOVERY": { path: "", tensionPath: "", color: "var(--bio-purple, #b829ff)", active: false },
-            "SLEEP INERTIA": { path: "", tensionPath: "", color: "var(--chrono-amber, #B97A35)", active: false },
-            "DEEP FLOW": { path: "", tensionPath: "", color: "var(--env-green, #a7ff83)", active: false },
-            "VENT/RECOVERY": { path: "", tensionPath: "", color: "var(--sys-cyan, #00f0ff)", active: false },
-            "DLMO WIND-DOWN": { path: "", tensionPath: "", color: "var(--bio-cobalt, #0055ff)", active: false }
+            "SLEEP / RECOVERY": { path: "", color: "var(--bio-purple, #b829ff)", active: false },
+            "SLEEP INERTIA": { path: "", color: "var(--chrono-amber, #B97A35)", active: false },
+            "DEEP FLOW": { path: "", color: "var(--env-green, #a7ff83)", active: false },
+            "VENT/RECOVERY": { path: "", color: "var(--sys-cyan, #00f0ff)", active: false },
+            "DLMO WIND-DOWN": { path: "", color: "var(--bio-cobalt, #0055ff)", active: false }
         };
-        let prevBioX = undefined; let prevBioY = undefined; let prevTensionY = undefined;
+        let prevBioX = undefined; let prevBioY = undefined;
 
         let savedAnchor = parseInt(localStorage.getItem('q_bio_anchor')) || 420;
         let sleepDuration = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
         let wakeDuration = 1440 - sleepDuration;
         let inertiaMins = 45;
         let dlmoMins = 90;
-       let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90;
+        let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90;
 
         // 3. Biological Event Horizon
         let userInitMs = parseInt(localStorage.getItem('q_init_ms')) || alphaAnchor;
-
-        // PRE-CALCULATE BASE COMPRESSION
-        let baseCompressionScore = 0;
-        if (this.isTensionMetricActive) {
-            let savedAnchorVal = parseInt(localStorage.getItem('q_bio_anchor')) || 360;
-            let sleepDurVal = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
-            let midSleep = (savedAnchorVal + 1440 - sleepDurVal/2) % 1440;
-            baseCompressionScore = Math.abs(midSleep - 720) / 10;
-        }
-
         for(let i=0; i<=resolution; i++) {
             let pct = i / resolution;
             let pointMs = startMs + (pct * msRange);
@@ -1481,26 +1465,32 @@ window.Q_OmniPlanner = {
             if (pointMs >= userInitMs) {
                 let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
                 let state = window.getBioPhase(minsSinceWake, wakeDuration, inertiaMins, dlmoMins, cycleDuration);
-                let circadianLength = 1440 + (declination * 0.5);
+                
+                // Variable Frequency (Circadian Drift) & Variable Offset (Photic Alignment)
+                let circadianLength = 1440 + (declination * 0.5); 
                 let phase = minsSinceWake / circadianLength;
-                let bioOffset = 50 - (declination * 0.4);
-                let bioAmp = 18 + (Math.abs(declination) * 0.15);
-                let originalBioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
+                
+                let bioOffset = 50 - (declination * 0.4); // Photic alignment alters wake/sleep ratio
+                let bioAmp = 18 + (Math.abs(declination) * 0.15); // Systemic load scaling
+                
+               let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
 
-                for (let key in bioPaths) {
-                    if (key === state.name) {
-                        if (!bioPaths[key].active) {
-                            bioPaths[key].path += `M ${x} ${originalBioY} `;
-                            bioPaths[key].active = true;
+                    if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
+
+                    for (let key in bioPaths) {
+                        if (key === state.name) {
+                            if (!bioPaths[key].active) {
+                                bioPaths[key].path += `M ${prevBioX} ${prevBioY} L ${x} ${bioY} `;
+                                bioPaths[key].active = true;
+                            } else {
+                                bioPaths[key].path += `L ${x} ${bioY} `;
+                            }
                         } else {
-                            bioPaths[key].path += `L ${x} ${originalBioY} `;
-                        }
-                    } else {
-                        if (bioPaths[key].active) {
-                            bioPaths[key].path += `L ${x} ${originalBioY} `;
                             bioPaths[key].active = false;
                         }
                     }
+                    prevBioX = x;
+                    prevBioY = bioY;
                 }
             }
 
@@ -1516,22 +1506,14 @@ window.Q_OmniPlanner = {
             svg.appendChild(p);
         };
 
-if (this.isTensionMetricActive) {
-            if (this.showBiometricBase) {
-                for (let key in bioPaths) {
-                    if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
-                    if (bioPaths[key].tensionPath) addPath(bioPaths[key].tensionPath, "var(--omni-warn)", "1.5");
-                }
+if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
+        if (this.showBiometricBase) {
+            for (let key in bioPaths) {
+                if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
             }
-        } else {
-            if (this.showOrbitalBase) addPath(pathOrbital, "var(--gold, #F4D068)", "0.8");
-            if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
-            if (this.showBiometricBase) {
-                for (let key in bioPaths) {
-                    if (bioPaths[key].path) addPath(bioPaths[key].path, bioPaths[key].color, "1.5");
-                }
-            }
-        }        const waveKey = document.createElement('div');
+        }
+        if (this.showLegacyBase) addPath(pathPhoto, "var(--sys-cyan, #00f0ff)", "1");
+        const waveKey = document.createElement('div');
         waveKey.style.cssText = 'position:absolute; bottom:15px; left:15px; display:flex; gap:12px; align-items:center; font-family:"Orbitron"; font-size:0.55rem; font-weight:bold; z-index:100;';
         waveKey.innerHTML = `
             <span style="color:rgba(229, 228, 226, 0.6); cursor:help;" title="CIVIL GRID: The continuous uninterrupted count of 365 static 24-hour days.">— CIVIL GRID</span>
@@ -1539,16 +1521,15 @@ if (this.isTensionMetricActive) {
             <span style="color:var(--env-green, #a7ff83); cursor:help;" title="BIOLOGICAL: User-calibrated circadian cycle via 5 biometric phases.">~ BIOLOGICAL</span>
             <span style="color:var(--gold, #F4D068); cursor:help;" title="FLUID DEGREE: Time to cross 1 degree of orbital path. Intersects at 1 spatial degree intervals.">~ FLUID DEGREE</span>
         `;
- 
-       wrapper.appendChild(waveKey);
+        wrapper.appendChild(waveKey);
         wrapper.appendChild(svg);
         container.appendChild(wrapper);
-}
-}
+    }
+};
 
 // --- SYSTEM MOUNT ---
 window.addEventListener('DOMContentLoaded', () => {
     if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.init === 'function') {
         window.Q_OmniPlanner.init();
- }
+    }
 });
