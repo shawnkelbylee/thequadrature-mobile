@@ -32,7 +32,7 @@ window.Q_Auth = {
                 redirectTo: window.location.origin + window.location.pathname,
                 queryParams: {
                     client_id: '295194884701-td2lcfbtote5j98gbaluvt4ajjv6rv0u.apps.googleusercontent.com'
-prompt: 'select_account'
+                     prompt: 'select_account'
                 }
             }
         });
