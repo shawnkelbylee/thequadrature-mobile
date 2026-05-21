@@ -137,7 +137,7 @@ window.Q_OmniPlanner = {
     showOrbitalBase: false,
     showBiometricBase: false,
     isLegacy: true, 
-    civilTensionActive: false,
+    isTensionActive: false,
     
     init: function() {
         this.injectCSS(); 
@@ -640,9 +640,9 @@ window.Q_OmniPlanner = {
                 distBtn.style.color = this.civilTensionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
                 distBtn.style.borderColor = this.civilTensionActive ? 'var(--omni-warn)' : 'rgba(229, 228, 226, 0.6)';
                 distBtn.style.marginLeft = '10px';
-                distBtn.innerText = this.civilTensionActive ? ' TENSION: ON ' : ' TENSION: OFF ';
+               distBtn.innerText = this.isTensionActive ? ' TENSION: ON ' : ' TENSION: OFF ';
                 distBtn.onclick = () => {
-                    this.civilTensionActive = !this.civilTensionActive;
+                    this.isTensionActive = !this.isTensionActive;
                     this.refreshView();
                 };
                 actionContainer.appendChild(distBtn);
