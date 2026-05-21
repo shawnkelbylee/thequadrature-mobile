@@ -1544,7 +1544,7 @@ if (this.isTensionMetricActive) {
         wrapper.appendChild(svg);
         container.appendChild(wrapper);
 }
-};
+}
 
 // --- SYSTEM MOUNT ---
 window.addEventListener('DOMContentLoaded', () => {
