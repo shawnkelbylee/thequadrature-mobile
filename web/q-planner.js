@@ -1543,8 +1543,8 @@ if (this.isTensionMetricActive) {
        wrapper.appendChild(waveKey);
         wrapper.appendChild(svg);
         container.appendChild(wrapper);
-    }
 }
+};
 
 // --- SYSTEM MOUNT ---
 window.addEventListener('DOMContentLoaded', () => {
