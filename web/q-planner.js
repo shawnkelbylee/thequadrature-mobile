@@ -1510,11 +1510,9 @@ window.Q_OmniPlanner = {
                     if (key === state.name) {
                         if (!bioPaths[key].active) {
                             bioPaths[key].path += `M ${x} ${originalBioY} `;
-                            bioPaths[key].tensionPath += `M ${x} ${tensionedBioY} `;
                             bioPaths[key].active = true;
                         } else {
                             bioPaths[key].path += `L ${x} ${originalBioY} `;
-                            bioPaths[key].tensionPath += `L ${x} ${tensionedBioY} `;
                         }
                     } else {
                         bioPaths[key].active = false;
