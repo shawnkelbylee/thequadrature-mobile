@@ -1481,30 +1481,11 @@ window.Q_OmniPlanner = {
             if (pointMs >= userInitMs) {
                 let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
                 let state = window.getBioPhase(minsSinceWake, wakeDuration, inertiaMins, dlmoMins, cycleDuration);
-                
-            // Variable Frequency (Circadian Drift) & Variable Offset (Photic Alignment)
-                let circadianLength = 1440 + (declination * 0.5); 
+                let circadianLength = 1440 + (declination * 0.5);
                 let phase = minsSinceWake / circadianLength;
-
-               let bioOffset = 50 - (declination * 0.4); 
-                let bioAmp = 18 + (Math.abs(declination) * 0.15); 
-                
-                // Original Wave (Ghost - Unconstrained)
+                let bioOffset = 50 - (declination * 0.4);
+                let bioAmp = 18 + (Math.abs(declination) * 0.15);
                 let originalBioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
-
-                // Tensioned Wave (Calculated if Friction is active)
-                let tensionedBioY = originalBioY;
-                if (this.isTensionMetricActive) {
-                    let dObj = new Date(pointMs);
-                    let key = window.getDataKey(dObj, dObj.getHours(), 0);
-                    let cellData = window.qData[key];
-                    let localFriction = (cellData && cellData.text && (cellData.text.includes('[FIXED]') || cellData.text.includes('[CIVIL]'))) ? 25 : 0;
-                    
-                    let activeTension = Math.min(99, baseCompressionScore + localFriction);
-                    let tensionDampener = 1.0 - (activeTension / 110); 
-                    
-                    tensionedBioY = (bioOffset + (activeTension / 15)) - (Math.cos(phase * Math.PI * 2) * (bioAmp * tensionDampener));
-                }
 
                 for (let key in bioPaths) {
                     if (key === state.name) {
@@ -1515,9 +1496,11 @@ window.Q_OmniPlanner = {
                             bioPaths[key].path += `L ${x} ${originalBioY} `;
                         }
                     } else {
-                        bioPaths[key].active = false;
+                        if (bioPaths[key].active) {
+                            bioPaths[key].path += `L ${x} ${originalBioY} `;
+                            bioPaths[key].active = false;
+                        }
                     }
-                }
                 }
             }
 
