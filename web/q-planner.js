@@ -1550,4 +1550,5 @@ if (this.isTensionMetricActive) {
 window.addEventListener('DOMContentLoaded', () => {
     if (window.Q_OmniPlanner && typeof window.Q_OmniPlanner.init === 'function') {
         window.Q_OmniPlanner.init();
-    }
+ }
+});
