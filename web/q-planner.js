@@ -1429,10 +1429,20 @@ window.Q_OmniPlanner = {
         let wakeDuration = 1440 - sleepDuration;
         let inertiaMins = 45;
         let dlmoMins = 90;
-        let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90;
+       let cycleDuration = parseInt(localStorage.getItem('q_bio_duration')) || 90;
 
         // 3. Biological Event Horizon
         let userInitMs = parseInt(localStorage.getItem('q_init_ms')) || alphaAnchor;
+
+        // PRE-CALCULATE BASE COMPRESSION
+        let baseCompressionScore = 0;
+        if (this.isTensionMetricActive) {
+            let savedAnchorVal = parseInt(localStorage.getItem('q_bio_anchor')) || 360;
+            let sleepDurVal = parseInt(localStorage.getItem('q_sleep_cycle_duration')) || 450;
+            let midSleep = (savedAnchorVal + 1440 - sleepDurVal/2) % 1440;
+            baseCompressionScore = Math.abs(midSleep - 720) / 10;
+        }
+
         for(let i=0; i<=resolution; i++) {
             let pct = i / resolution;
             let pointMs = startMs + (pct * msRange);
@@ -1472,16 +1482,36 @@ window.Q_OmniPlanner = {
                 let minsSinceWake = window.getMinsSinceWake(pointMs, savedAnchor);
                 let state = window.getBioPhase(minsSinceWake, wakeDuration, inertiaMins, dlmoMins, cycleDuration);
                 
-                // Variable Frequency (Circadian Drift) & Variable Offset (Photic Alignment)
+            // Variable Frequency (Circadian Drift) & Variable Offset (Photic Alignment)
                 let circadianLength = 1440 + (declination * 0.5); 
                 let phase = minsSinceWake / circadianLength;
-                
+
                 let bioOffset = 50 - (declination * 0.4); // Photic alignment alters wake/sleep ratio
                 let bioAmp = 18 + (Math.abs(declination) * 0.15); // Systemic load scaling
                 
-               let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
+                // BEGIN TENSION MODIFIER
+                if (this.isTensionMetricActive) {
+                    let dObj = new Date(pointMs);
+                    let key = window.getDataKey(dObj, dObj.getHours(), 0);
+                    let cellData = window.qData[key];
+                    let localFriction = 0;
+                    
+                    if (cellData && cellData.text && (cellData.text.includes('[FIXED]') || cellData.text.includes('[CIVIL]'))) {
+                        const fric_coeff = { 'SLEEP / RECOVERY': 50, 'SLEEP INERTIA': 40, 'DLMO WIND-DOWN': 40, 'VENT/RECOVERY': 25, 'DEEP FLOW': 10 };
+                        localFriction = fric_coeff[state.name] || 10;
+                    }
+                    
+                    let activeTension = Math.min(99, baseCompressionScore + localFriction);
+                    let tensionDampener = 1.0 - (activeTension / 110); 
+                    
+                    bioAmp *= tensionDampener; 
+                    bioOffset += (activeTension / 15); 
+                }
+                // END TENSION MODIFIER
+                
+                let bioY = bioOffset - (Math.cos(phase * Math.PI * 2) * bioAmp);
 
-                    if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
+                if (prevBioX === undefined) { prevBioX = x; prevBioY = bioY; }
 
                     for (let key in bioPaths) {
                         if (key === state.name) {
