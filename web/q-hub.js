@@ -2,6 +2,32 @@
 // Architect: Kelby | Engineer: Kairos
 // PROTOCOL: Account Settings, Calibration Module, Tiered Access Gate & Native Library Reader
 // REVISION: 24.2.6 - Persistence Fix & Syntax Stabilization
+// THE QUADRATURE: AUTHENTICATION MODULE (RESTORED)
+window.Q_Auth = {
+    triggerOAuth: async function(options) {
+        if (!window.supabaseClient) {
+            console.error('Supabase Client not initialized.');
+            return;
+        }
+        const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                scopes: 'email profile https://www.googleapis.com/auth/calendar.readonly',
+                queryParams: { access_type: 'offline', prompt: 'consent' }
+            }
+        });
+        if (error) console.error('OAuth Error:', error);
+    },
+    signOut: async function() {
+        if (window.supabaseClient) await window.supabaseClient.auth.signOut();
+        localStorage.setItem('Q_PRO_AUTH', 'false');
+        window.location.reload();
+    },
+    triggerGoogleCalendarSync: function() {
+        // Wrapper for legacy compatibility
+        this.triggerOAuth({ options: { scopes: 'email profile https://www.googleapis.com/auth/calendar.readonly' }});
+    }
+};
 window.Q_EphemerisBridge = {
     worker: null,
     init: function() {
