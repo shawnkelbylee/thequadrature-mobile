@@ -246,7 +246,28 @@ window.Q_IntegrationHub = {
                     </div>
                 </div>
 <div class="hub-tab-content ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-content-settings">
-                    
+                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">[ SYSTEM ENTITLEMENTS ]</div>
+                    <div class="hub-tier-row" style="border-color: rgba(255,255,255,0.3); margin-bottom:8px;">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">STANDARD TIER (FREE)</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Omni-Planner & Standard Civil Calendar Sync.</div>
+                        </div>
+                        ${renderBadge('#fff', '#000', 'ACTIVE')}
+                    </div>
+                    <div class="hub-tier-row" style="margin-bottom:8px;">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#00f0ff; font-weight: bold;">PERSONAL TIER ($14.99/mo)</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Biometric Bridge, HRV/Sleep tracking, Environmental Vector.</div>
+                        </div>
+                        ${personalStatus}
+                    </div>
+                    <div class="hub-tier-row" style="margin-bottom:15px;">
+                        <div>
+                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#b829ff; font-weight: bold;">PRO TIER ($19.00 - $29.99/mo)</div>
+                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">AI Temporal Firewall, The Quadrature Synchronization, Deep Flow Enforcement.</div>
+                        </div>
+                        ${proStatus}
+                    </div>
                     <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">[ CALIBRATION ]</div>
                     <div style="display:flex; gap:10px;">
                         <div class="hub-input-group" style="flex:2;">
