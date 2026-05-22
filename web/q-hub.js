@@ -90,6 +90,7 @@ window.Q_IntegrationHub = {
             .hub-accordion summary::after { content: ' +'; float: right; color: var(--theme-main); }
             .hub-accordion[open] summary::after { content: ' -'; }
             .hub-accordion-content { padding: 10px; font-size: 0.65rem; color: #aaa; line-height: 1.4; border-top: 1px solid rgba(255,255,255,0.1); }
+            .hub-accordion-content strong { color: #ffffff; }
         `;
         document.head.appendChild(style);
     },
