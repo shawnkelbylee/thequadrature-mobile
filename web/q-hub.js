@@ -247,29 +247,80 @@ window.Q_IntegrationHub = {
 
                 <div class="hub-tabs">
                     <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
-                   <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
-                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">MISSION STATEMENT</div>
-                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; text-align: center;">
-                        We are living biological lives on a mechanical grid. Our mission is to dismantle the mechanical cage and restore physiologic sovereignty by replacing the industrial clock with the continuous living rhythm of natural world resonance.
+                  <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
+                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">PERMANENT MISSION STATEMENT</div>
+                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; text-align: left;">
+                        We are living biological lives on a mechanical grid. For generations, humanity has forced its fluid rhythms into the rigid constraints of an industrial clock designed to synchronize machines, creating a global epidemic of chronic fatigue and burnout.<br><br>
+                        The Quad exists to dismantle this mechanical cage. Our mission is to restore physiologic sovereignty by replacing the artificial stress of the 24-hour integer with the continuous living rhythm of the natural world.<br><br>
+                        By mapping human activity to the Earth's physical momentum, we empower individuals to bypass systemic exhaustion and synchronize their focus, rest, and intent with their own internal biological resonance.
                     </div>
 
                     <details class="hub-accordion">
-                        <summary>THE 4 VECTORS</summary>
+                        <summary>THE APERTURE (HOME)</summary>
                         <div class="hub-accordion-content">
-                            <div style="margin-bottom:8px;"><strong>PHYSIOLOGICAL:</strong> Biometric resonance & state monitoring.</div>
-                            <div style="margin-bottom:8px;"><strong>METEOROLOGICAL:</strong> Atmospheric & environmental tracking.</div>
-                            <div style="margin-bottom:8px;"><strong>METAPHYSICAL:</strong> Cultural, religious, and zodiacal transit tracking.</div>
-                            <div><strong>ASTROPHYSICAL:</strong> Raw kinematic physics & orbital telemetry.</div>
+                            <div style="margin-bottom:8px;"><strong>The Center Dial (The Iris):</strong> A kinetic geometric interface that anchors your entry into the system. It acts as a visual status aperture for the OS.</div>
+                            <div style="margin-bottom:8px;"><strong>The Four Corner Panels:</strong> These navigation portals launch the corresponding Vector Engines:</div>
+                            <div style="margin-bottom:4px; padding-left:10px;"><strong style="color:#b829ff;">PHYSIOLOGICAL:</strong> Biometric resonance & state monitoring.</div>
+                            <div style="margin-bottom:4px; padding-left:10px;"><strong style="color:#a7ff83;">METEOROLOGICAL:</strong> Atmospheric & environmental tracking.</div>
+                            <div style="margin-bottom:4px; padding-left:10px;"><strong style="color:#F4D068;">METAPHYSICAL:</strong> Cultural, religious, and zodiacal transit tracking.</div>
+                            <div style="padding-left:10px;"><strong style="color:#00f0ff;">ASTROPHYSICAL:</strong> Raw kinematic physics & orbital telemetry.</div>
                         </div>
                     </details>
 
                     <details class="hub-accordion">
-                        <summary>MASTERING THE OMNI-PLANNER</summary>
+                        <summary>THE VECTOR ENGINES</summary>
+                        <div class="hub-accordion-content" style="padding: 5px;">
+                            <div style="font-size: 0.55rem; color: #888; text-align: center; margin-bottom: 8px;">(Click a vector below to expand detailed panel references)</div>
+                            
+                            <details class="hub-accordion" style="margin-bottom: 5px; border-color: rgba(184, 41, 255, 0.3);">
+                                <summary style="color:#b829ff;">>> PHYSIOLOGICAL</summary>
+                                <div class="hub-accordion-content">
+                                    <div style="margin-bottom:8px;"><strong>Top-Left (Iris Panel):</strong> Tracks "Tau Offset" (Temporal drift) in your Circadian Rhythm using your Wake Anchor and your current sensor connectivity status.</div>
+                                    <div style="margin-bottom:8px;"><strong>Top-Right (Pupil Panel):</strong> Displays your current biological state (e.g., Deep Flow/Recovery) and the "Cycle Horizon” time remaining in your current energy phase.</div>
+                                    <div style="margin-bottom:8px;"><strong>Bottom-Left (Eyelid Panel):</strong> Displays your calculated "Optimal Bedtime" (DLMO wind-down) and overall biological recovery status.</div>
+                                    <div><strong>Bottom-Right (Sclera Panel):</strong> Displays "Calendar Friction" (a score reflecting civil scheduling interference) and your current Alignment Status.</div>
+                                </div>
+                            </details>
+
+                            <details class="hub-accordion" style="margin-bottom: 5px; border-color: rgba(167, 255, 131, 0.3);">
+                                <summary style="color:#a7ff83;">>> METEOROLOGICAL</summary>
+                                <div class="hub-accordion-content">
+                                    <div style="margin-bottom:8px;"><strong>Top-Left (Insolation):</strong> Displays solar cycle data (Dawn/Dusk/Noon) or UV/Intensity, depending on your calibrated mode.</div>
+                                    <div style="margin-bottom:8px;"><strong>Top-Right (Hydrosphere):</strong> Displays planetary oceanic phases (e.g., La Niña), surface temperature variance, and current velocity.</div>
+                                    <div style="margin-bottom:8px;"><strong>Bottom-Left (Troposphere):</strong> Displays local air pressure, ambient temperature, and humidity levels.</div>
+                                    <div><strong>Bottom-Right (Stratosphere):</strong> Displays upper-atmospheric data, including Jet Stream speed and storm ceiling altitude.</div>
+                                </div>
+                            </details>
+
+                            <details class="hub-accordion" style="margin-bottom: 5px; border-color: rgba(244, 208, 104, 0.3);">
+                                <summary style="color:#F4D068;">>> METAPHYSICAL</summary>
+                                <div class="hub-accordion-content">
+                                    <div style="margin-bottom:8px;"><strong>Top-Left (Religious Overlay):</strong> Displays the active Faith Subset and the countdown to the next major cultural observance.</div>
+                                    <div style="margin-bottom:8px;"><strong>Top-Right (Zodiacal Transit):</strong> Displays your assigned Zodiac House and your current Transit Phase/Aspect.</div>
+                                    <div style="margin-bottom:8px;"><strong>Bottom-Left (Civil Anchor):</strong> Displays your system locale (e.g., US/Global) and the next upcoming civil holiday.</div>
+                                    <div><strong>Bottom-Right (Introspection):</strong> Displays the current Solar Term (Jiéqì) and your progress percentage through that seasonal growth arc.</div>
+                                </div>
+                            </details>
+
+                            <details class="hub-accordion" style="margin-bottom: 0; border-color: rgba(0, 240, 255, 0.3);">
+                                <summary style="color:#00f0ff;">>> ASTROPHYSICAL</summary>
+                                <div class="hub-accordion-content">
+                                    <div style="margin-bottom:8px;"><strong>Top-Left (Lunar):</strong> Displays Lunar Phase/Illumination or Apsidal proximity and gravitational load.</div>
+                                    <div style="margin-bottom:8px;"><strong>Top-Right (Barycentric):</strong> Displays planetary influence (Solar Wobble) or relative Angular Momentum.</div>
+                                    <div style="margin-bottom:8px;"><strong>Bottom-Left (Velocity):</strong> Displays planetary speed multipliers or systemic friction deltas.</div>
+                                    <div><strong>Bottom-Right (Equation of Time):</strong> Displays the raw Q-Delta (True vs. Mean Anomaly) or Chronological Distortion data.</div>
+                                </div>
+                            </details>
+                        </div>
+                    </details>
+
+                    <details class="hub-accordion">
+                        <summary>THE OMNI-PLANNER</summary>
                         <div class="hub-accordion-content">
-                            <div style="margin-bottom:8px;"><strong>Primary Postulate:</strong> Here and Now are Infinitely One!</div>
-                            <div style="margin-bottom:8px;"><strong>Visual Routing:</strong> Projects your biological wave over external legacy schedules.</div>
-                            <div style="margin-bottom:8px;"><strong>Friction Mapping:</strong> System calculates "Civil Tension" by flagging constraints that force labor during biological troughs.</div>
-                            <div><strong>Color Key:</strong> Green (Deep Flow), Blue (Wind-Down), Violet (Recovery), Amber (Sleep Inertia).</div>
+                            <div style="margin-bottom:8px;"><strong>The Function:</strong> The primary interface for mapping intent.</div>
+                            <div style="margin-bottom:8px;"><strong>Visual Mapping:</strong> Projects your biological wave over your external schedule (Google/Outlook events).</div>
+                            <div style="margin-bottom:8px;"><strong>Unified Matrix:</strong> Allows the user to visualize their organic biometric phase state wave mapped alongside the continuous waves of photoperiod (day/night) and orbital fluid degrees over the static and rigid legacy timeline.</div>
+                            <div><strong>Tension Scoring:</strong> The system calculates "Civil Tension" by flagging constraints that force labor during biological troughs and factoring in the destructive interference of forcibly truncating you natural circadian rhythm to fit inside a 24 box.</div>
                         </div>
                     </details>
                 </div>
