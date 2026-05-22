@@ -242,8 +242,9 @@ window.Q_IntegrationHub = {
 
                 <div class="hub-tabs">
                     <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
-                    <button class="hub-tab-btn ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-btn-settings" onclick="window.Q_IntegrationHub.switchTab('settings')">SETTINGS</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
                     <button class="hub-tab-btn ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-btn-tiers" onclick="window.Q_IntegrationHub.switchTab('tiers')">TIERS</button>
+                    <button class="hub-tab-btn ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-btn-prefs" onclick="window.Q_IntegrationHub.switchTab('prefs')">PREFS</button>
                     <button class="hub-tab-btn ${this.activeTab === 'library' ? 'active' : ''}" id="tab-btn-library" onclick="window.Q_IntegrationHub.switchTab('library')">LIBRARY</button>
                 </div>
 
@@ -273,7 +274,30 @@ window.Q_IntegrationHub = {
                     </div>
                 </div>
 
-                
+                <div class="hub-tab-content ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-content-identity">
+                    <div style="font-size:0.65rem; color:#aaa; margin-bottom: 5px; line-height: 1.4;">Define your personal metrological anchors to calibrate the physics engine and Swiss Ephemeris.</div>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <div class="hub-input-group" style="flex:2;">
+                            <label class="hub-input-lbl">DATE OF BIRTH</label>
+                            <input type="date" id="cal-dob" class="hub-input" value="${sDob}">
+                        </div>
+                        <div class="hub-input-group" style="flex:1;">
+                            <label class="hub-input-lbl">TIME OF BIRTH</label>
+                            <input type="time" id="cal-tob" class="hub-input" value="${sTob}" ${sTobUnknown ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                    <label class="hub-checkbox-group" style="justify-content: flex-end; margin-top:-10px;">
+                        <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown (Defaults 12:00)
+                    </label>
+
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">GEOLOCATION (CITY, REGION)</label>
+                        <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
+                    </div>
+
+                    <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
+                </div>
 
                 <div class="hub-tab-content ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-content-tiers">
                     <div class="hub-tier-row" style="border-color: rgba(255,255,255,0.3);">
@@ -300,28 +324,74 @@ window.Q_IntegrationHub = {
                         ${proStatus}
                     </div>
                 </div>
-<div class="hub-tab-content ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-content-settings">
-                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">CALIBRATION</div>
-                    <div style="display:flex; gap:10px;">
-                        <div class="hub-input-group" style="flex:2;"><label class="hub-input-lbl">DATE OF BIRTH</label><input type="date" id="cal-dob" class="hub-input" value="${sDob}"></div>
-                        <div class="hub-input-group" style="flex:1;"><label class="hub-input-lbl">TIME OF BIRTH</label><input type="time" id="cal-tob" class="hub-input" value="${sTob}" ${sTobUnknown ? 'disabled' : ''}></div>
+
+                <div class="hub-tab-content ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-content-prefs">
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">SYSTEM AUDIO NOTIFICATIONS</label>
+                        <select class="hub-input">
+                            <option value="ALL">ALL ALERTS & CUES</option>
+                            <option value="CRITICAL">CRITICAL THERMODYNAMIC ONLY</option>
+                            <option value="NONE">SILENT OPERATION</option>
+                        </select>
                     </div>
-                    <label class="hub-checkbox-group" style="justify-content: flex-end; margin-top:-10px;"><input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown</label>
-                    <div class="hub-input-group"><label class="hub-input-lbl">GEOLOCATION</label><input type="text" id="cal-loc" class="hub-input" value="${sLoc}"></div>
-                    <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">SAVE CALIBRATION</button>
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">AI DIPLOMATIC NEGOTIATOR ENGINE</label>
+                        <select class="hub-input" id="pref-ai-diplomat" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'preferred_ai_diplomat', this.value)">
+                            <option value="DEFAULT" ${sAi === 'DEFAULT' ? 'selected' : ''}>DEFAULT ALGORITHM</option>
+                            <option value="KAIROS" ${sAi === 'KAIROS' ? 'selected' : ''}>KAIROS PROTOCOL</option>
+                        </select>
+                    </div>
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">DEEP FLOW ENFORCEMENT (APP LOCKS & SILENCE)</label>
+                        <select class="hub-input" id="pref-deep-flow" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'deep_flow_enforcement', this.value === 'true')">
+                            <option value="true" ${sDeepFlowEnforcement ? 'selected' : ''}>ACTIVE (BLOCK NOTIFICATIONS)</option>
+                            <option value="false" ${!sDeepFlowEnforcement ? 'selected' : ''}>STANDBY (BYPASS LOCKS)</option>
+                        </select>
+                    </div>
 
-                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-top:20px; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">SYSTEM BEHAVIOR</div>
-                    <div class="hub-input-group"><label class="hub-input-lbl">AI DIPLOMAT</label><select class="hub-input" id="pref-ai-diplomat" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'preferred_ai_diplomat', this.value)"><option value="DEFAULT" ${sAi === 'DEFAULT' ? 'selected' : ''}>DEFAULT</option><option value="KAIROS" ${sAi === 'KAIROS' ? 'selected' : ''}>KAIROS</option></select></div>
-                    <div class="hub-input-group"><label class="hub-input-lbl">FLOW ENFORCEMENT</label><select class="hub-input" id="pref-deep-flow" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'deep_flow_enforcement', this.value === 'true')"><option value="true" ${sDeepFlowEnforcement ? 'selected' : ''}>ACTIVE</option><option value="false" ${!sDeepFlowEnforcement ? 'selected' : ''}>STANDBY</option></select></div>
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">UNIVERSAL PAYLOAD SYNC</div>
+                        <div class="hub-input-group">
+                            <button class="hub-action-btn" style="background:rgba(0, 240, 255, 0.1); border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_Auth) window.Q_Auth.triggerGoogleCalendarSync()">SYNC GOOGLE CALENDAR</button>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.55rem; color:#aaa; text-align:center; margin-top:4px;">Imports legacy events as [FIXED] civil constraints.</div>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">OFFLINE EPHEMERIS CACHE</div>
+                        <div style="font-size:0.6rem; color:#aaa; line-height: 1.4; margin-bottom: 10px;">
+                            Download and lock planetary telemetry into local storage. Guarantees 100% invariant physics accuracy regardless of network conditions.
+                        </div>
+                        <div class="hub-input-group">
+                            <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline.'); }">CACHE TELEMETRY DATA</button>
+                        </div>
+                    </div>
 
-                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-top:20px; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">DATA BRIDGES</div>
-                    <button class="hub-action-btn" style="background:rgba(0, 240, 255, 0.1); border-color:#00f0ff; color:#00f0ff; margin-bottom:10px;" onclick="if(window.Q_Auth) window.Q_Auth.triggerGoogleCalendarSync()">SYNC GOOGLE CALENDAR</button>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <button class="hub-action-btn" style="flex:1; padding:8px; font-size:0.5rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura', 'ON_DEMAND')">SYNC OURA</button>
-                        <button class="hub-action-btn" style="flex:1; padding:8px; font-size:0.5rem; border-color:#fff; color:#fff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('whoop', 'ON_DEMAND')">SYNC WHOOP</button>
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">BIOMETRIC HARDWARE SYNC</div>
+                        <div style="font-size:0.6rem; color:#aaa; line-height: 1.4; margin-bottom: 10px;">
+                            Background polling is DEPRECATED. Execute explicit ON-DEMAND synchronization or utilize manual data entry fallbacks.
+                        </div>
+                        <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:center; flex-wrap:wrap;">
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura', 'ON_DEMAND')">ON-DEMAND: OURA</button>
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#fff; color:#fff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('whoop', 'ON_DEMAND')">ON-DEMAND: WHOOP</button>
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('health_connect', 'ON_DEMAND')">ON-DEMAND: HEALTH</button>
+                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#aaa; color:#aaa;" onclick="alert('[ MANUAL FALLBACK ] Routing to manual biometric entry UI...')">MANUAL ENTRY</button>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">SYSTEM DIAGNOSTICS</div>
+                        <div class="hub-input-group" style="margin-bottom: 8px;">
+                            <label class="hub-input-lbl">NASA JPL HORIZONS BARYCENTRIC API</label>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${jplStatus}</div>
+                        </div>
+                        <div class="hub-input-group">
+                            <label class="hub-input-lbl">SWISS EPHEMERIS API</label>
+                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${swissStatus}</div>
+                        </div>
                     </div>
                 </div>
-               
 
                 <div class="hub-tab-content ${this.activeTab === 'library' ? 'active' : ''}" id="tab-content-library">
                     <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">Q LOGIC ARCHIVE</div>
