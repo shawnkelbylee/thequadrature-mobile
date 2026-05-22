@@ -344,7 +344,7 @@ window.Q_IntegrationHub = {
                     </div>
                     
                     <div class="hub-input-group" style="margin-bottom:10px;">
-                        <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline. Ensure q-ephemeris-worker.js is active.'); }">CACHE TELEMETRY DATA</button>
+                       <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); } else { alert('Ephemeris Bridge Offline.'); }">CACHE TELEMETRY DATA</button>
                     </div>
 
                     <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
