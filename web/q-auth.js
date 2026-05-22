@@ -1,11 +1,11 @@
 // THE QUADRATURE: AUTHENTICATION BRIDGE
-const supabase = supabase.createClient('https://wnfpxozpeucrwqmrqpzv.supabase.co', 'sb_publishable_g6JfCH6FefIwEmXztgkdTw_Md1z4se5');
+const sbClient = window.supabase.createClient('https://wnfpxozpeucrwqmrqpzv.supabase.co', 'sb_publishable_g6JfCH6FefIwEmXztgkdTw_Md1z4se5');
 
-window.supabaseClient = supabase;
+window.supabaseClient = sbClient;
 
 window.Q_Auth = {
     triggerOAuth: async function(options) {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+        const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 scopes: options.options.scopes,
@@ -15,8 +15,11 @@ window.Q_Auth = {
         if (error) console.error('OAuth Error:', error);
     },
     signOut: async function() {
-        await supabase.auth.signOut();
+        await window.supabaseClient.auth.signOut();
         localStorage.setItem('Q_PRO_AUTH', 'false');
         window.location.reload();
+    },
+    triggerGoogleCalendarSync: function() {
+        this.triggerOAuth({ options: { scopes: 'email profile https://www.googleapis.com/auth/calendar.readonly' }});
     }
 };
