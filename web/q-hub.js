@@ -110,6 +110,12 @@ window.Q_IntegrationHub = {
             .support-links { border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; font-size: 0.6rem; font-family: 'Orbitron'; font-weight: 700; }
             .support-links a { color: rgba(255,255,255,0.6); text-decoration: none; transition: 0.3s; letter-spacing: 1px; }
             .support-links a:hover { color: var(--theme-main, #00f0ff); text-shadow: 0 0 8px rgba(0,240,255,0.5); }
+.hub-accordion { background: rgba(255,255,255,0.03); margin-bottom: 10px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+            .hub-accordion summary { padding: 10px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; color: #fff; font-weight: bold; outline: none; list-style: none; }
+            .hub-accordion summary::-webkit-details-marker { display: none; }
+            .hub-accordion summary::after { content: ' +'; float: right; color: var(--theme-main); }
+            .hub-accordion[open] summary::after { content: ' -'; }
+            .hub-accordion-content { padding: 10px; font-size: 0.65rem; color: #aaa; line-height: 1.4; border-top: 1px solid rgba(255,255,255,0.1); }
         `;
         document.head.appendChild(style);
     },
@@ -267,35 +273,37 @@ window.Q_IntegrationHub = {
 
                 <div class="hub-tabs">
                     <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
-                   <button class="hub-tab-btn ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-btn-settings" onclick="window.Q_IntegrationHub.switchTab('settings')">SETTINGS</button>
+                   <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
+                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">MISSION STATEMENT</div>
+                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; text-align: center;">
+                        We are living biological lives on a mechanical grid. Our mission is to dismantle the mechanical cage and restore physiologic sovereignty by replacing the industrial clock with the continuous living rhythm of natural world resonance.
+                    </div>
+
+                    <details class="hub-accordion">
+                        <summary>THE 4 VECTORS</summary>
+                        <div class="hub-accordion-content">
+                            <div style="margin-bottom:8px;"><strong>PHYSIOLOGICAL:</strong> Biometric resonance & state monitoring.</div>
+                            <div style="margin-bottom:8px;"><strong>METEOROLOGICAL:</strong> Atmospheric & environmental tracking.</div>
+                            <div style="margin-bottom:8px;"><strong>METAPHYSICAL:</strong> Cultural, religious, and zodiacal transit tracking.</div>
+                            <div><strong>ASTROPHYSICAL:</strong> Raw kinematic physics & orbital telemetry.</div>
+                        </div>
+                    </details>
+
+                    <details class="hub-accordion">
+                        <summary>MASTERING THE OMNI-PLANNER</summary>
+                        <div class="hub-accordion-content">
+                            <div style="margin-bottom:8px;"><strong>Primary Postulate:</strong> Here and Now are Infinitely One!</div>
+                            <div style="margin-bottom:8px;"><strong>Visual Routing:</strong> Projects your biological wave over external legacy schedules.</div>
+                            <div style="margin-bottom:8px;"><strong>Friction Mapping:</strong> System calculates "Civil Tension" by flagging constraints that force labor during biological troughs.</div>
+                            <div><strong>Color Key:</strong> Green (Deep Flow), Blue (Wind-Down), Violet (Recovery), Amber (Sleep Inertia).</div>
+                        </div>
+                    </details>
+                </div>
+<button class="hub-tab-btn ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-btn-settings" onclick="window.Q_IntegrationHub.switchTab('settings')">SETTINGS</button>
                     <button class="hub-tab-btn ${this.activeTab === 'library' ? 'active' : ''}" id="tab-btn-library" onclick="window.Q_IntegrationHub.switchTab('library')">LIBRARY</button>
                 </div>
 
-                <div class="hub-tab-content ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-content-guide">
-                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">WELCOME TO THE QUAD</div>
-                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px;">
-                        We are living biological lives on a mechanical grid. By continually forcing our bodies and minds to conform to an unnatural, static timeline, we have created a global epidemic of chronic fatigue. The Quad exists to dismantle the mechanical cage, allowing you to synchronize your workflow directly to the scientifically verified momentum of your own biology.
-                    </div>
-
-                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">THE 4 VECTORS</div>
-                    <div style="font-size:0.6rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; display:flex; flex-direction:column; gap:8px;">
-                        <div><span style="color:#b829ff; font-weight:bold; font-family:'Orbitron';">PHYSIOLOGICAL:</span> The Biological Resonance bridge. Synchronizes the human organism against the true kinematic wave.</div>
-                        <div><span style="color:#a7ff83; font-weight:bold; font-family:'Orbitron';">METEOROLOGICAL:</span> Environmental Almanac. Tracks atmospheric delta and thermodynamic tension.</div>
-                        <div><span style="color:#F4D068; font-weight:bold; font-family:'Orbitron';">METAPHYSICAL:</span> Communal Metadata. Neutralizes cultural drift into objective coordinates via the ICRF.</div>
-                        <div><span style="color:#00f0ff; font-weight:bold; font-family:'Orbitron';">ASTROPHYSICAL:</span> The Mechanical Root. Quantifies the Q-Delta and manages the Continuous Respiration algorithm.</div>
-                    </div>
-
-                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:8px; border-bottom:1px dashed rgba(255,255,255,0.2); padding-bottom:4px;">MASTERING THE OMNI-PLANNER</div>
-                    <div style="font-size:0.6rem; color:#aaa; line-height: 1.5; margin-bottom: 15px;">
-                        <span style="color:#fff; font-weight:bold;">Primary Postulate:</span> Here and Now are Infinitely One!<br><br>
-                        <span style="color:#fff; font-weight:bold;">Visual Routing:</span> The Omni-Planner acts as a transparent overlay, mapping your 90-to-120 minute ultradian rhythms over legacy 24-hour integers.<br><br>
-                        <span style="color:#fff; font-weight:bold;">Friction Mapping:</span><br>
-                        <span style="color:#a7ff83;">&#x25A0; Green (Deep Flow):</span> Prime window for high-stakes, focused intent.<br>
-                        <span style="color:#00f0ff;">&#x25A0; Blue (DLMO Wind-Down):</span> Mandatory window to step back, rest, and discharge tension.<br>
-                        <span style="color:#b829ff;">&#x25A0; Violet (Sleep Recovery):</span> Core biological restoration phase.<br>
-                        <span style="color:#B97A35;">&#x25A0; Amber (Sleep Inertia):</span> Wake transition and cortisol stabilization.
-                    </div>
-                </div>
+               
 <div class="hub-tab-content ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-content-settings">
                     <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">[ SYSTEM ENTITLEMENTS ]</div>
                     <div class="hub-tier-row" style="border-color: rgba(255,255,255,0.3); margin-bottom:8px;">
