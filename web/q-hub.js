@@ -173,7 +173,19 @@ window.Q_IntegrationHub = {
             const entitlementsRaw = localStorage.getItem('Q_ENTITLEMENTS');
             try { ents = entitlementsRaw ? JSON.parse(entitlementsRaw) : []; } catch(e) {}
         }
-
+// ARCHITECT OVERRIDE: Iterative check handles dynamic Supabase project ID keys
+        let isArchitect = false;
+        for (let i = 0; i < localStorage.length; i++) {
+            const val = localStorage.getItem(localStorage.key(i));
+            if (val && val.includes('shawnkelbylee@gmail.com')) {
+                isArchitect = true;
+                break;
+            }
+        }
+        if (isArchitect) {
+            ents = ['STANDARD', 'PERSONAL', 'PRO', 'TEAM'];
+            localStorage.setItem('Q_ENTITLEMENTS', JSON.stringify(ents));
+        }
         const isPersonalActive = ents.includes('PERSONAL') || ents.includes('PRO') || ents.includes('TEAM');
         const personalStatus = isPersonalActive ? renderBadge('#00f0ff', '#000', 'ACTIVE') : renderUpgradeBtn('biometric_api', 'PERSONAL TIER', 'hardware_hooks', '#00f0ff');
 
@@ -204,9 +216,7 @@ window.Q_IntegrationHub = {
 
                 <div class="hub-tabs">
                     <button class="hub-tab-btn ${this.activeTab === 'guide' ? 'active' : ''}" id="tab-btn-guide" onclick="window.Q_IntegrationHub.switchTab('guide')">GUIDE</button>
-                    <button class="hub-tab-btn ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-btn-identity" onclick="window.Q_IntegrationHub.switchTab('identity')">IDENTITY</button>
-                    <button class="hub-tab-btn ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-btn-tiers" onclick="window.Q_IntegrationHub.switchTab('tiers')">TIERS</button>
-                    <button class="hub-tab-btn ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-btn-prefs" onclick="window.Q_IntegrationHub.switchTab('prefs')">PREFS</button>
+                   <button class="hub-tab-btn ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-btn-settings" onclick="window.Q_IntegrationHub.switchTab('settings')">SETTINGS</button>
                     <button class="hub-tab-btn ${this.activeTab === 'library' ? 'active' : ''}" id="tab-btn-library" onclick="window.Q_IntegrationHub.switchTab('library')">LIBRARY</button>
                 </div>
 
@@ -235,10 +245,9 @@ window.Q_IntegrationHub = {
                         <span style="color:#B97A35;">&#x25A0; Amber (Sleep Inertia):</span> Wake transition and cortisol stabilization.
                     </div>
                 </div>
-
-                <div class="hub-tab-content ${this.activeTab === 'identity' ? 'active' : ''}" id="tab-content-identity">
-                    <div style="font-size:0.65rem; color:#aaa; margin-bottom: 5px; line-height: 1.4;">Define your personal metrological anchors to calibrate the physics engine and Swiss Ephemeris.</div>
+<div class="hub-tab-content ${this.activeTab === 'settings' ? 'active' : ''}" id="tab-content-settings">
                     
+                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">[ CALIBRATION ]</div>
                     <div style="display:flex; gap:10px;">
                         <div class="hub-input-group" style="flex:2;">
                             <label class="hub-input-lbl">DATE OF BIRTH</label>
@@ -250,46 +259,15 @@ window.Q_IntegrationHub = {
                         </div>
                     </div>
                     <label class="hub-checkbox-group" style="justify-content: flex-end; margin-top:-10px;">
-                        <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown (Defaults 12:00)
+                        <input type="checkbox" id="cal-tob-unknown" onchange="window.Q_IntegrationHub.toggleTOB()" ${sTobUnknown ? 'checked' : ''}> Exact Time Unknown
                     </label>
-
                     <div class="hub-input-group">
                         <label class="hub-input-lbl">GEOLOCATION (CITY, REGION)</label>
                         <input type="text" id="cal-loc" class="hub-input" value="${sLoc}" placeholder="e.g. CLEARWATER, FL">
                     </div>
+                    <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:5px; margin-bottom:15px;">COMMIT TO STATE</button>
 
-                    
-
-                    <button class="hub-action-btn" id="btn-save-identity" onclick="window.Q_IntegrationHub.saveIdentityParameters()" style="margin-top:10px;">COMMIT TO STATE</button>
-                </div>
-
-                <div class="hub-tab-content ${this.activeTab === 'tiers' ? 'active' : ''}" id="tab-content-tiers">
-                    <div class="hub-tier-row" style="border-color: rgba(255,255,255,0.3);">
-                        <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">STANDARD TIER (FREE)</div>
-                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Omni-Planner & Standard Civil Calendar Sync.</div>
-                        </div>
-                        ${renderBadge('#fff', '#000', 'ACTIVE')}
-                    </div>
-
-                    <div class="hub-tier-row">
-                        <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#00f0ff; font-weight: bold;">PERSONAL TIER ($14.99/mo)</div>
-                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">Biometric Bridge, HRV/Sleep tracking, Environmental Vector.</div>
-                        </div>
-                        ${personalStatus}
-                    </div>
-                    
-                    <div class="hub-tier-row">
-                        <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#b829ff; font-weight: bold;">PRO TIER ($19.00 - $29.99/mo)</div>
-                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">AI Temporal Firewall, Q Logic Synchronization, Deep Flow Enforcement.</div>
-                        </div>
-                        ${proStatus}
-                    </div>
-                </div>
-
-                <div class="hub-tab-content ${this.activeTab === 'prefs' ? 'active' : ''}" id="tab-content-prefs">
+                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; text-shadow:0 0 8px rgba(255,255,255,0.3);">[ SYSTEM BEHAVIOR ]</div>
                     <div class="hub-input-group">
                         <label class="hub-input-lbl">SYSTEM AUDIO NOTIFICATIONS</label>
                         <select class="hub-input">
@@ -305,57 +283,31 @@ window.Q_IntegrationHub = {
                             <option value="KAIROS" ${sAi === 'KAIROS' ? 'selected' : ''}>KAIROS PROTOCOL</option>
                         </select>
                     </div>
-                    <div class="hub-input-group">
-                        <label class="hub-input-lbl">DEEP FLOW ENFORCEMENT (APP LOCKS & SILENCE)</label>
+                    <div class="hub-input-group" style="margin-bottom:15px;">
+                        <label class="hub-input-lbl">DEEP FLOW ENFORCEMENT</label>
                         <select class="hub-input" id="pref-deep-flow" onchange="if(window.Q_UpdateState) window.Q_UpdateState('logic_layer', 'deep_flow_enforcement', this.value === 'true')">
                             <option value="true" ${sDeepFlowEnforcement ? 'selected' : ''}>ACTIVE (BLOCK NOTIFICATIONS)</option>
                             <option value="false" ${!sDeepFlowEnforcement ? 'selected' : ''}>STANDBY (BYPASS LOCKS)</option>
                         </select>
                     </div>
 
-                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
-                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">UNIVERSAL PAYLOAD SYNC</div>
-                        <div class="hub-input-group">
-                            <button class="hub-action-btn" style="background:rgba(0, 240, 255, 0.1); border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_Auth) window.Q_Auth.triggerGoogleCalendarSync()">SYNC GOOGLE CALENDAR</button>
-                            <div style="font-family:'JetBrains Mono'; font-size:0.55rem; color:#aaa; text-align:center; margin-top:4px;">Imports legacy events as [FIXED] civil constraints.</div>
-                        </div>
+                    <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; text-shadow:0 0 8px rgba(255,255,255,0.3);">[ DATA BRIDGES ]</div>
+                    
+                    <div class="hub-input-group" style="margin-bottom:10px;">
+                        <button class="hub-action-btn" style="background:rgba(0, 240, 255, 0.1); border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_Auth) window.Q_Auth.triggerGoogleCalendarSync()">SYNC GOOGLE CALENDAR</button>
                     </div>
                     
-                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
-                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">OFFLINE EPHEMERIS CACHE</div>
-                        <div style="font-size:0.6rem; color:#aaa; line-height: 1.4; margin-bottom: 10px;">
-                            Download and lock planetary telemetry into local storage. Guarantees 100% invariant physics accuracy regardless of network conditions.
-                        </div>
-                        <div class="hub-input-group">
-                            <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline.'); }">CACHE TELEMETRY DATA</button>
-                        </div>
+                    <div class="hub-input-group" style="margin-bottom:10px;">
+                        <button class="hub-action-btn" style="background:rgba(244, 208, 104, 0.1); border-color:#F4D068; color:#F4D068;" onclick="if(window.Q_EphemerisBridge) { window.Q_EphemerisBridge.toggleOfflineMode(true); alert('[ CACHE ENGAGED ]\\nOffline planetary telemetry secured.'); } else { alert('Ephemeris Bridge Offline. Ensure q-ephemeris-worker.js is active.'); }">CACHE TELEMETRY DATA</button>
                     </div>
 
-                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
-                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">BIOMETRIC HARDWARE SYNC</div>
-                        <div style="font-size:0.6rem; color:#aaa; line-height: 1.4; margin-bottom: 10px;">
-                            Background polling is DEPRECATED. Execute explicit ON-DEMAND synchronization or utilize manual data entry fallbacks.
-                        </div>
-                        <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:center; flex-wrap:wrap;">
-                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura', 'ON_DEMAND')">ON-DEMAND: OURA</button>
-                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#fff; color:#fff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('whoop', 'ON_DEMAND')">ON-DEMAND: WHOOP</button>
-                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#00f0ff; color:#00f0ff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('health_connect', 'ON_DEMAND')">ON-DEMAND: HEALTH</button>
-                            <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#aaa; color:#aaa;" onclick="alert('[ MANUAL FALLBACK ] Routing to manual biometric entry UI...')">MANUAL ENTRY</button>
-                        </div>
+                    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura', 'ON_DEMAND')">ON-DEMAND: OURA</button>
+                        <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#fff; color:#fff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('whoop', 'ON_DEMAND')">ON-DEMAND: WHOOP</button>
                     </div>
-                    
-                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top: 5px;">
-                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; text-shadow:0 0 8px rgba(255,255,255,0.3);">SYSTEM DIAGNOSTICS</div>
-                        <div class="hub-input-group" style="margin-bottom: 8px;">
-                            <label class="hub-input-lbl">NASA JPL HORIZONS BARYCENTRIC API</label>
-                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${jplStatus}</div>
-                        </div>
-                        <div class="hub-input-group">
-                            <label class="hub-input-lbl">SWISS EPHEMERIS API</label>
-                            <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${swissStatus}</div>
-                        </div>
-                    </div>
+
                 </div>
+             
 
                 <div class="hub-tab-content ${this.activeTab === 'library' ? 'active' : ''}" id="tab-content-library">
                     <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">Q LOGIC ARCHIVE</div>
