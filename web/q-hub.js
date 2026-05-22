@@ -2,7 +2,32 @@
 // Architect: Kelby | Engineer: Kairos
 // PROTOCOL: Account Settings, Calibration Module, Tiered Access Gate & Native Library Reader
 // REVISION: 24.2.6 - Persistence Fix & Syntax Stabilization
+window.Q_EphemerisBridge = {
+    worker: null,
+    init: function() {
+        if (window.Worker) {
+            this.worker = new Worker('q-ephemeris-worker.js');
+            this.worker.onmessage = (e) => {
+                if (e.data.type === 'TELEMETRY_SUCCESS') {
+                    if(window.Q_LOG) window.Q_LOG('STATE', 'EPHEMERIS', 'CACHE_SECURED', { source: e.data.source });
+                    alert(`[ CACHE CONFIRMED ]\nTelemetry secured from ${e.data.source}.\nWindow: ${e.data.window}`);
+                } else if (e.data.type === 'TELEMETRY_FAILED') {
+                    alert(`[ CACHE FAILED ]\nError: ${e.data.error}`);
+                }
+            };
+        } else {
+            console.error('[Q-OS] CRITICAL: Web Workers not supported in this environment.');
+        }
+    },
+    toggleOfflineMode: function(forceCache) {
+        if (!this.worker) this.init();
+        if (this.worker && forceCache) {
+            this.worker.postMessage({ action: 'SYNC_TELEMETRY', payload: { timestamp: Date.now() } });
+        }
+    }
+};
 
+window.addEventListener('DOMContentLoaded', () => window.Q_EphemerisBridge.init());
 window.Q_IntegrationHub = {
     viewState: 'closed',
     activeTab: 'guide',
@@ -326,7 +351,15 @@ window.Q_IntegrationHub = {
                         <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#39ff14; color:#39ff14;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('oura', 'ON_DEMAND')">ON-DEMAND: OURA</button>
                         <button class="hub-action-btn" style="flex:1; min-width:40%; padding:8px; font-size:0.6rem; border-color:#fff; color:#fff;" onclick="if(window.Q_UniversalSync) window.Q_UniversalSync.routeBiometricAuth('whoop', 'ON_DEMAND')">ON-DEMAND: WHOOP</button>
                     </div>
-
+                      <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight:bold; margin-bottom:10px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px; margin-top:15px; text-shadow:0 0 8px rgba(255,255,255,0.3);">[ SYSTEM DIAGNOSTICS ]</div>
+                    <div class="hub-input-group" style="margin-bottom: 8px;">
+                        <label class="hub-input-lbl">NASA JPL HORIZONS BARYCENTRIC API</label>
+                        <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${jplStatus}</div>
+                    </div>
+                    <div class="hub-input-group">
+                        <label class="hub-input-lbl">SWISS EPHEMERIS API</label>
+                        <div style="font-family:'JetBrains Mono'; font-size:0.65rem; background:rgba(0,0,0,0.4); padding:6px 10px; border-radius:4px; border:1px solid rgba(255,255,255,0.1);">${swissStatus}</div>
+                    </div>
                 </div>
              
 
