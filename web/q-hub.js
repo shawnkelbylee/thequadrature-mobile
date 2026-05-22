@@ -406,7 +406,12 @@ window.Q_IntegrationHub = {
                 } else {
                     try {
                         if (window.Q_Auth && typeof window.Q_Auth.triggerOAuth === 'function') {
-                            window.Q_Auth.triggerOAuth();
+                            window.Q_Auth.triggerOAuth({
+                                provider: 'google',
+                                options: {
+                                    scopes: 'email profile https://www.googleapis.com/auth/calendar.readonly'
+                                }
+                            });
                         } else {
                             console.error('CRITICAL: window.Q_Auth module not detected.');
                             alert('[ AUTH ERROR ] Authentication provider not found. Check bridge configuration.');
