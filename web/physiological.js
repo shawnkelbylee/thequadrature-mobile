@@ -305,7 +305,7 @@ window.addEventListener('q-tick', (e) => {
     const elBrac = document.getElementById('brac-state');
     const elHorizon = document.getElementById('phase-horizon');
     const bioBarEl = document.getElementById('bio-bar');
-    if (elBrac) elBrac.innerText = isDeepFlow ? "PEAK FOCUS" : "REST REQUIRED";
+    if (elBrac) elBrac.innerText = currentBioState;
     if (elHorizon) elHorizon.innerText = `${Math.floor(remainingMins)} MIN`;
     if (bioBarEl) bioBarEl.style.width = (cyclePosFloat * 100) + "%";
 
