@@ -419,20 +419,12 @@ function renderDynamicRing() {
         nodeLayer.appendChild(oNode);
     }
 
-    let outerDb = [];
-    activeFaiths.forEach(f => { 
-        if (f === 'isl') outerDb = outerDb.concat(ISL_DB);
-        else if(window.Q_REGISTRY.REL_DB[f]) outerDb = outerDb.concat(window.Q_REGISTRY.REL_DB[f]); 
-    });
+    let dynamicYear = currentRenderedYear > 0 ? currentRenderedYear : new Date().getFullYear();
+    let outerDb = window.getActiveMetaphysicalNodes ? window.getActiveMetaphysicalNodes(dynamicYear) : [];
     
-    if (activeCivil && window.Q_REGISTRY.REL_DB['civ']) {
-        outerDb = outerDb.concat(window.Q_REGISTRY.REL_DB['civ']);
-    }
-    if (activeHolidays && window.Q_REGISTRY.REL_DB['hol']) {
-        outerDb = outerDb.concat(window.Q_REGISTRY.REL_DB['hol']);
-    }
-    if (activeSys) outerDb = outerDb.concat(SYS_DB);
-    
+    // Strip anchors from the outer ring (they render separately on the inner 22.5 radius track)
+    outerDb = outerDb.filter(n => n.type !== 'node-anc');
+
     if (outerDb.length > 0) {
         let fannedOuter = applyFanning(outerDb);
         renderNodes(fannedOuter, nodeLayer, 42.5);
@@ -715,18 +707,17 @@ window.addEventListener('q-tick', (e) => {
 
     const activeTimeMs = isLive ? Date.now() : activeDateObj.getTime();
 
-    let combinedRel = []; 
-    activeFaiths.forEach(f => { 
-        if(f === 'isl') combinedRel = combinedRel.concat(ISL_DB);
-        else if(window.Q_REGISTRY.REL_DB[f]) combinedRel = combinedRel.concat(window.Q_REGISTRY.REL_DB[f]); 
-    }); 
-    combinedRel.sort((a,b)=>a.coord-b.coord);
+   // Fetch unified perpetual nodes for the active rendered year
+    const allDynamicNodes = window.getActiveMetaphysicalNodes ? window.getActiveMetaphysicalNodes(currentRenderedYear) : [];
+    
+    let combinedRel = allDynamicNodes.filter(n => ['node-jud', 'node-isl', 'node-chr', 'node-hin', 'node-bud', 'node-tao'].includes(n.type));
+    combinedRel.sort((a,b) => a.coord - b.coord);
     
     let nextRel = getNextEvent(trueArc, combinedRel);
     const relNextEl = document.getElementById('rel-next');
     if (relNextEl) {
         if(nextRel) {
-            let dStr = getLegacyDateString(nextRel.coord, trueArc, activeTimeMs);
+            let dStr = getLegacyDateString(nextRel, trueArc, activeTimeMs);
             relNextEl.innerText = `${nextRel.name.substring(0,8).toUpperCase()}.. (${dStr})`;
         } else {
             relNextEl.innerText = "--";
@@ -759,16 +750,14 @@ window.addEventListener('q-tick', (e) => {
         if (zodPhaseEl) zodPhaseEl.innerText = "PENDING CALIBRATION";
     }
 
-    let globalCiv = [];
-    if (window.Q_REGISTRY.REL_DB['civ']) {
-        globalCiv = globalCiv.concat(window.Q_REGISTRY.REL_DB['civ']);
-    }
+    let combinedCiv = allDynamicNodes.filter(n => ['node-civ', 'node-hol', 'node-sys'].includes(n.type));
+    combinedCiv.sort((a,b) => a.coord - b.coord);
 
-    let nextCiv = getNextEvent(trueArc, globalCiv.concat(SYS_DB));
+    let nextCiv = getNextEvent(trueArc, combinedCiv);
     const civNextEl = document.getElementById('civ-next');
     if (civNextEl) {
         if(nextCiv) {
-            let dStr = getLegacyDateString(nextCiv.coord, trueArc, activeTimeMs);
+            let dStr = getLegacyDateString(nextCiv, trueArc, activeTimeMs);
             civNextEl.innerText = `${nextCiv.name.substring(0,10).toUpperCase()}.. (${dStr})`;
         } else {
             civNextEl.innerText = "--";
