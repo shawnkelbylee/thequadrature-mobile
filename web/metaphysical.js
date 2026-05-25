@@ -489,14 +489,29 @@ window.hideNeedleHUD = function() {
 
 function getNextEvent(currentArc, dbArray, currentTimeMs) {
         let startOfTodayMs = new Date(currentTimeMs).setHours(0,0,0,0);
-        let next = dbArray.find(e => {
-            if (e.time) return e.time >= startOfTodayMs; // Locks event until midnight passes
+        
+        // 1. Isolate only upcoming events
+        let upcoming = dbArray.filter(e => {
+            if (e.time) return e.time >= startOfTodayMs; 
             let degAhead = e.coord - currentArc;
             if (degAhead < 0) degAhead += 360;
-            return degAhead >= 0 && degAhead < 180; // Forward lookup for pure orbital anchors
+            return degAhead >= 0 && degAhead < 180; 
         });
-        if(!next && dbArray.length > 0) next = dbArray[0]; 
-        return next;
+
+        // 2. Fallback if at the end of the year array
+        if (upcoming.length === 0 && dbArray.length > 0) upcoming = dbArray.slice();
+        if (upcoming.length === 0) return null;
+
+        // 3. Force strict chronological sorting, overriding the spatial degree order
+        upcoming.sort((a, b) => {
+            if (a.time && b.time) return a.time - b.time; // Sort exact timestamps
+            
+            let aDeg = a.coord - currentArc; if (aDeg < 0) aDeg += 360;
+            let bDeg = b.coord - currentArc; if (bDeg < 0) bDeg += 360;
+            return aDeg - bDeg;
+        });
+
+        return upcoming[0];
     }
 
     function getLegacyDateString(eventObj, currentArc, currentTimeMs) {
