@@ -696,7 +696,7 @@ window.Q_OmniPlanner = {
     },
 
     injectHolidays: function(element, date) {
-        if (!window.ANCHOR_ALPHA_DYNAMIC || !window.getGlobalHolidays) return;
+        if (!window.ANCHOR_ALPHA_DYNAMIC || !window.getActiveMetaphysicalNodes) return;
         
         const year = date.getFullYear();
         const month = date.getMonth();
@@ -707,7 +707,7 @@ window.Q_OmniPlanner = {
         const o = window.getOrbitalData ? window.getOrbitalData(daysElapsed) : { meanArc: 0 };
         const dayArc = o.meanArc;
         
-        const allEvents = window.getGlobalHolidays(year);
+        const allEvents = window.getActiveMetaphysicalNodes();
         const degreesPerDay = 360 / 365.24219;
         
         const matches = allEvents.filter(e => {
@@ -722,12 +722,12 @@ window.Q_OmniPlanner = {
         matches.forEach(match => {
             const tag = document.createElement('div');
             tag.className = 's-tag';
-            tag.style.cssText = 'font-size:0.55rem; color:#F4D068; margin-top:6px; font-family:"JetBrains Mono"; font-weight:bold; text-shadow:0 0 5px rgba(0,0,0,0.8);';
+            let tagColor = match.type === 'node-sys' ? '#00f0ff' : '#F4D068';
+            tag.style.cssText = `font-size:0.55rem; color:${tagColor}; margin-top:6px; font-family:"JetBrains Mono"; font-weight:bold; text-shadow:0 0 5px rgba(0,0,0,0.8);`;
             tag.innerText = `${match.glyph || ''} ${match.name.toUpperCase()}`;
             element.appendChild(tag);
         });
     },
-
     renderSector: function(container, title) {
         const matrix = document.createElement('div'); 
         matrix.className = 'planner-matrix';

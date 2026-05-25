@@ -788,3 +788,16 @@ window.addEventListener('q-tick', (e) => {
         }
     }
 });
+// GLOBAL METAPHYSICAL ACCESSOR
+window.getActiveMetaphysicalNodes = function() {
+    let combinedDb = [];
+    activeFaiths.forEach(f => {
+        if (f === 'isl') combinedDb = combinedDb.concat(ISL_DB);
+        else if (window.Q_REGISTRY.REL_DB[f]) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB[f]);
+    });
+    if (activeCivil && window.Q_REGISTRY.REL_DB['civ']) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB['civ']);
+    if (activeHolidays && window.Q_REGISTRY.REL_DB['hol']) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB['hol']);
+    if (activeSys) combinedDb = combinedDb.concat(SYS_DB);
+    if (activeAnchors && window.Q_REGISTRY.ANCHORS) combinedDb = combinedDb.concat(window.Q_REGISTRY.ANCHORS.filter(p => p.renderUI !== false));
+    return combinedDb;
+};
