@@ -696,27 +696,29 @@ window.Q_OmniPlanner = {
     },
 
     injectHolidays: function(element, date) {
-        if (!window.ANCHOR_ALPHA_DYNAMIC || !window.getActiveMetaphysicalNodes) return;
+        if (!window.getActiveMetaphysicalNodes) return;
         
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDate();
-        const utcNoonMs = Date.UTC(year, month, day, 12, 0, 0);
-        
-        const daysElapsed = (utcNoonMs - window.ANCHOR_ALPHA_DYNAMIC) / window.MS_DAY;
-        const o = window.getOrbitalData ? window.getOrbitalData(daysElapsed) : { meanArc: 0 };
-        const dayArc = o.meanArc;
-        
-        const allEvents = window.getActiveMetaphysicalNodes();
-        const degreesPerDay = 360 / 365.24219;
+        const targetYear = date.getFullYear();
+        const allEvents = window.getActiveMetaphysicalNodes(targetYear);
         
         const matches = allEvents.filter(e => {
-            let diff = dayArc - e.coord; 
-            if (diff < -180) diff += 360;
-            if (diff > 180) diff -= 360;
-            
-            let durationDeg = (e.durationDays || 1) * degreesPerDay;
-            return (diff >= 0 && diff < durationDeg); 
+            if (e.time) {
+                // Strict Legacy Timestamp Match
+                let eD = new Date(e.time);
+                return (eD.getUTCFullYear() === date.getFullYear() && 
+                        eD.getUTCMonth() === date.getMonth() && 
+                        eD.getUTCDate() === date.getDate());
+            } else {
+                // Fallback for Purely Orbital Anchors (Solstices/Equinoxes)
+                if (!window.ANCHOR_ALPHA_DYNAMIC) return false;
+                const utcNoonMs = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+                const daysElapsed = (utcNoonMs - window.ANCHOR_ALPHA_DYNAMIC) / 86400000;
+                const o = window.getOrbitalData ? window.getOrbitalData(daysElapsed) : { meanArc: 0 };
+                let diff = o.meanArc - e.coord;
+                if (diff < -180) diff += 360;
+                if (diff > 180) diff -= 360;
+                return (diff >= 0 && diff < (360 / 365.24219));
+            }
         });
 
         matches.forEach(match => {

@@ -788,16 +788,93 @@ window.addEventListener('q-tick', (e) => {
         }
     }
 });
-// GLOBAL METAPHYSICAL ACCESSOR
-window.getActiveMetaphysicalNodes = function() {
+// GLOBAL METAPHYSICAL ACCESSOR & PERPETUAL GENERATOR
+window.getActiveMetaphysicalNodes = function(targetYear) {
+    if (!targetYear) targetYear = new Date().getFullYear();
     let combinedDb = [];
-    activeFaiths.forEach(f => {
-        if (f === 'isl') combinedDb = combinedDb.concat(ISL_DB);
-        else if (window.Q_REGISTRY.REL_DB[f]) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB[f]);
-    });
-    if (activeCivil && window.Q_REGISTRY.REL_DB['civ']) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB['civ']);
-    if (activeHolidays && window.Q_REGISTRY.REL_DB['hol']) combinedDb = combinedDb.concat(window.Q_REGISTRY.REL_DB['hol']);
+
+    // Dynamic Civil Date Calculators
+    const getNthDay = (y, m, dow, n) => {
+        let d = new Date(Date.UTC(y, m, 1, 12, 0, 0));
+        let offset = (dow - d.getUTCDay() + 7) % 7;
+        d.setUTCDate(1 + offset + (n - 1) * 7);
+        return d.getTime();
+    };
+    const getLastDay = (y, m, dow) => {
+        let d = new Date(Date.UTC(y, m + 1, 0, 12, 0, 0));
+        let offset = (d.getUTCDay() - dow + 7) % 7;
+        d.setUTCDate(d.getUTCDate() - offset);
+        return d.getTime();
+    };
+    const getEaster = (y) => {
+        let f=Math.floor, G=y%19, C=f(y/100), H=(C-f(C/4)-f((8*C+13)/25)+19*G+15)%30, I=H-f(H/28)*(1-f(29/(H+1))*f((21-G)/11)), J=(y+f(y/4)+I+2-C+f(C/4))%7, L=I-J, m=3+f((L+40)/44), d=L+28-31*f(m/4);
+        return Date.UTC(y, m-1, d, 12, 0, 0);
+    };
+
+    // 1. Civil (US/Static Perpetual)
+    if (activeCivil) {
+        combinedDb = combinedDb.concat([
+            { name: "New Year's Day", time: Date.UTC(targetYear, 0, 1, 12, 0), type: 'node-civ', glyph: '★' },
+            { name: "MLK Jr. Day", time: getNthDay(targetYear, 0, 1, 3), type: 'node-civ', glyph: '★' },
+            { name: "Presidents' Day", time: getNthDay(targetYear, 1, 1, 3), type: 'node-civ', glyph: '★' },
+            { name: "Memorial Day", time: getLastDay(targetYear, 4, 1), type: 'node-civ', glyph: '★' },
+            { name: "Juneteenth", time: Date.UTC(targetYear, 5, 19, 12, 0), type: 'node-civ', glyph: '★' },
+            { name: "Independence Day", time: Date.UTC(targetYear, 6, 4, 12, 0), type: 'node-civ', glyph: '★' },
+            { name: "Labor Day", time: getNthDay(targetYear, 8, 1, 1), type: 'node-civ', glyph: '★' },
+            { name: "Indigenous Peoples' Day", time: getNthDay(targetYear, 9, 1, 2), type: 'node-civ', glyph: '★' },
+            { name: "Veterans Day", time: Date.UTC(targetYear, 10, 11, 12, 0), type: 'node-civ', glyph: '★' },
+            { name: "Thanksgiving", time: getNthDay(targetYear, 10, 4, 4), type: 'node-civ', glyph: '★' },
+            { name: "Christmas", time: Date.UTC(targetYear, 11, 25, 12, 0), type: 'node-civ', glyph: '★' }
+        ]);
+    }
+
+    // 2. Societal Holidays (Perpetual)
+    if (activeHolidays) {
+        combinedDb = combinedDb.concat([
+            { name: "New Year's Eve", time: Date.UTC(targetYear, 11, 31, 12, 0), type: 'node-hol', glyph: '🎈' },
+            { name: "Valentine's Day", time: Date.UTC(targetYear, 1, 14, 12, 0), type: 'node-hol', glyph: '🎈' },
+            { name: "St. Patrick's Day", time: Date.UTC(targetYear, 2, 17, 12, 0), type: 'node-hol', glyph: '🎈' },
+            { name: "Earth Day", time: Date.UTC(targetYear, 3, 22, 12, 0), type: 'node-hol', glyph: '🎈' },
+            { name: "Cinco de Mayo", time: Date.UTC(targetYear, 4, 5, 12, 0), type: 'node-hol', glyph: '🎈' },
+            { name: "Mother's Day", time: getNthDay(targetYear, 4, 0, 2), type: 'node-hol', glyph: '🎈' },
+            { name: "Father's Day", time: getNthDay(targetYear, 5, 0, 3), type: 'node-hol', glyph: '🎈' },
+            { name: "Halloween", time: Date.UTC(targetYear, 9, 31, 12, 0), type: 'node-hol', glyph: '🎈' }
+        ]);
+    }
+
+    // 3. Christian (Computus Algorithm)
+    if (activeFaiths.includes('chr')) {
+        let easterMs = getEaster(targetYear);
+        combinedDb = combinedDb.concat([
+            { name: "Ash Wednesday", time: easterMs - (46 * 86400000), type: 'node-chr', glyph: '✝' },
+            { name: "Palm Sunday", time: easterMs - (7 * 86400000), type: 'node-chr', glyph: '✝' },
+            { name: "Good Friday", time: easterMs - (2 * 86400000), type: 'node-chr', glyph: '✝' },
+            { name: "Easter", time: easterMs, type: 'node-chr', glyph: '✝' },
+            { name: "Pentecost", time: easterMs + (49 * 86400000), type: 'node-chr', glyph: '✝' }
+        ]);
+    }
+
+    // 4. Islamic (Hijri Drift - 10.87 days/year regression from 2026 baseline)
+    if (activeFaiths.includes('isl')) {
+        let shiftMs = (targetYear - 2026) * -10.87 * 86400000;
+        combinedDb = combinedDb.concat([
+            { name: "Ramadan Begins", time: Date.UTC(2026, 1, 18, 12, 0) + shiftMs, type: 'node-isl', glyph: '☪' },
+            { name: "Eid al-Fitr", time: Date.UTC(2026, 2, 20, 12, 0) + shiftMs, type: 'node-isl', glyph: '☪' },
+            { name: "Eid al-Adha", time: Date.UTC(2026, 4, 27, 12, 0) + shiftMs, type: 'node-isl', glyph: '☪' }
+        ]);
+    }
+
+    // 5. System Nodes & Pure Orbital Anchors
     if (activeSys) combinedDb = combinedDb.concat(SYS_DB);
     if (activeAnchors && window.Q_REGISTRY.ANCHORS) combinedDb = combinedDb.concat(window.Q_REGISTRY.ANCHORS.filter(p => p.renderUI !== false));
+
+    // Assign Dynamic Q-Coordinates based on generated Timestamps
+    combinedDb.forEach(ev => {
+        if (ev.time && window.getOrbitalData && window.ANCHOR_ALPHA_DYNAMIC) {
+            let diff = ev.time - window.ANCHOR_ALPHA_DYNAMIC;
+            ev.coord = window.getOrbitalData(diff / window.MS_DAY).meanArc;
+        }
+    });
+
     return combinedDb;
 };
