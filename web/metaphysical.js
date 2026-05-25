@@ -487,24 +487,29 @@ window.hideNeedleHUD = function() {
     if (hud) hud.style.opacity = '0'; 
 };
 
-function getNextEvent(currentArc, dbArray) {
-    let next = dbArray.find(e => e.coord > currentArc);
-    if(!next && dbArray.length > 0) next = dbArray[0]; 
-    return next;
-}
-
-function getLegacyDateString(targetCoord, currentArc, currentTimeMs) {
-    if (!window.MS_DAY) window.MS_DAY = 86400000;
-    let degAhead = targetCoord - currentArc;
-    if (degAhead < 0) degAhead += 360;
-    let targetMs = currentTimeMs + (degAhead * (365.24219 / 360) * window.MS_DAY);
-    if (window.formatLegacyDate) {
-        return window.formatLegacyDate(targetMs).dateStr.substring(0,6);
+function getNextEvent(currentArc, dbArray, currentTimeMs) {
+        let startOfTodayMs = new Date(currentTimeMs).setHours(0,0,0,0);
+        let next = dbArray.find(e => {
+            if (e.time) return e.time >= startOfTodayMs; // Locks event until midnight passes
+            let degAhead = e.coord - currentArc;
+            if (degAhead < 0) degAhead += 360;
+            return degAhead >= 0 && degAhead < 180; // Forward lookup for pure orbital anchors
+        });
+        if(!next && dbArray.length > 0) next = dbArray[0]; 
+        return next;
     }
-    const d = new Date(targetMs);
-    const mos = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-    return `${mos[d.getUTCMonth()]} ${d.getUTCDate().toString().padStart(2,'0')}`;
-}
+
+    function getLegacyDateString(eventObj, currentArc, currentTimeMs) {
+        let targetMs = eventObj.time;
+        if (!targetMs) {
+            let degAhead = eventObj.coord - currentArc;
+            if (degAhead < 0) degAhead += 360;
+            targetMs = currentTimeMs + (degAhead * (365.24219 / 360) * 86400000);
+        }
+        const d = new Date(targetMs);
+        const mos = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+        return `${mos[d.getUTCMonth()]} ${d.getUTCDate().toString().padStart(2,'0')}`;
+    }
 
 window.openOptions = function(e, target) {
     if(e) e.stopPropagation(); currentOptTarget = target;
@@ -582,7 +587,21 @@ window.openOptions = function(e, target) {
         window.Q_ModalEngine.render(title, html, 'SAVE & CLOSE', saveOptions);
     }
 };
-
+window.syncToPlanner = function(timeMs, tag, text) {
+    if (!window.qData || !window.getDataKey) return;
+    let d = new Date(timeMs);
+    let key = window.getDataKey(d, 12, 0); // Inject at Local Noon
+    if (!window.qData[key]) window.qData[key] = { text: "" };
+    
+    let newText = text.trim();
+    if (tag && newText !== "" && !newText.includes(`[${tag}]`)) {
+        newText = `[${tag}] \n${newText}`;
+    }
+    
+    window.qData[key].text = newText;
+    if (window.savePlannerData) window.savePlannerData();
+    window.dispatchEvent(new Event('storage')); // Force Omni-Planner to refresh
+};
 function saveOptions() {
     if(currentOptTarget === 'rel') {
         activeFaiths = [];
@@ -713,7 +732,7 @@ window.addEventListener('q-tick', (e) => {
     let combinedRel = allDynamicNodes.filter(n => ['node-jud', 'node-isl', 'node-chr', 'node-hin', 'node-bud', 'node-tao'].includes(n.type));
     combinedRel.sort((a,b) => a.coord - b.coord);
     
-    let nextRel = getNextEvent(trueArc, combinedRel);
+    let nextRel = getNextEvent(trueArc, combinedRel, activeTimeMs);
     const relNextEl = document.getElementById('rel-next');
     if (relNextEl) {
         if(nextRel) {
@@ -753,7 +772,7 @@ window.addEventListener('q-tick', (e) => {
     let combinedCiv = allDynamicNodes.filter(n => ['node-civ', 'node-hol', 'node-sys'].includes(n.type));
     combinedCiv.sort((a,b) => a.coord - b.coord);
 
-    let nextCiv = getNextEvent(trueArc, combinedCiv);
+    let nextCiv = getNextEvent(trueArc, combinedCiv, activeTimeMs);
     const civNextEl = document.getElementById('civ-next');
     if (civNextEl) {
         if(nextCiv) {
