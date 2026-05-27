@@ -239,7 +239,20 @@ window.Q_IntegrationHub = {
         // Ephemeris Diagnostic: Reporting Native Edge-Computed State
         const jplStatus = '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ EDGE-COMPUTED / SYNCED ]</span>';
         const swissStatus = isPersonalActive ? '<span style="color:#00f0ff; text-shadow:0 0 5px rgba(0,240,255,0.5);">[ ACTIVE ]</span>' : '<span style="color:#aaa;">[ STANDBY ]</span>';
-
+// ARCHITECT EDIT: Dynamic Library Grid Generation
+        let libraryGridHTML = '<div style="text-align:center; color:#ff4444; font-size:0.65rem; font-family:\'Orbitron\'; padding: 10px;">[ ERROR: DATA MATRIX UNREACHABLE ]</div>';
+        if (window.Q_MANUSCRIPTS && window.Q_MANUSCRIPTS.length > 0) {
+            libraryGridHTML = window.Q_MANUSCRIPTS.map(doc => `
+                <div class="hub-tier-row" style="flex-direction:column; align-items:flex-start; gap:8px; margin-bottom:10px; cursor:default;">
+                    <div style="width:100%; display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                        <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold; text-transform:uppercase; line-height:1.2;">${doc.title}</div>
+                        <div style="font-size:0.5rem; color:#b829ff; font-weight:bold; letter-spacing:1px; white-space:nowrap;">[ ${doc.type} ]</div>
+                    </div>
+                    <div style="font-size:0.55rem; color:#aaa; line-height:1.4;">${doc.desc}</div>
+                    <button class="hub-action-btn" onclick="window.open('${doc.url}', '_blank')" style="padding:6px 12px; font-size:0.55rem; color:var(--theme-main, #00f0ff); border-color:var(--theme-main, #00f0ff); margin-top:5px;">INITIALIZE READER</button>
+                </div>
+            `).join('');
+        }
         dom.innerHTML = `
             <div class="q-hub-box" onclick="event.stopPropagation()">
                 <div class="hub-header">PRO MATRIX // ACCOUNT</div>
@@ -424,17 +437,10 @@ window.Q_IntegrationHub = {
              
 
                 <div class="hub-tab-content ${this.activeTab === 'library' ? 'active' : ''}" id="tab-content-library">
-                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:5px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">Q LOGIC ARCHIVE</div>
-                    <div style="font-size:0.65rem; color:#aaa; line-height: 1.5; margin-bottom: 15px; text-align:center;">
-                        Library data migrated. Execute external bridge to access The Quadrature manuscripts and initialize Quadification.
-                    </div>
-
-                    <div class="hub-tier-row">
-                        <div>
-                            <div style="font-family:'Orbitron'; font-size:0.75rem; color:#fff; font-weight: bold;">Q LOGIC LIBRARY</div>
-                            <div style="font-size:0.55rem; color:#888; margin-top: 4px;">External Manuscript Payload</div>
-                        </div>
-                        <button class="hub-action-btn" onclick="if(typeof window.executeHomeSequence === 'function') window.executeHomeSequence('q-library-data.html'); else window.location.href='q-library-data.html';" style="width:auto; padding:6px 12px; font-size:0.55rem; color:var(--theme-main, #00f0ff); border-color:var(--theme-main, #00f0ff);">ACCESS ARCHIVE</button>
+                    <div style="font-family:'Orbitron'; font-size:0.85rem; color:var(--theme-main, #00f0ff); font-weight:bold; letter-spacing:1px; margin-bottom:15px; text-shadow:0 0 8px rgba(0,240,255,0.3); text-align:center;">Q LOGIC ARCHIVE</div>
+                    
+                    <div id="archive-grid" style="display:flex; flex-direction:column; gap:5px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
+                        ${libraryGridHTML}
                     </div>
                 </div>
 
