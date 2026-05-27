@@ -1,31 +1,28 @@
-// THE QUADRATURE: LIBRARY DATA MATRIX
+// THE QUADRATURE: MANUSCRIPT DATA MATRIX
+// Architect: Kelby | Engineer: Kairos
+// PROTOCOL: Native Manuscript Reader Index
+// REVISION: 24.2.7 - Integration of Thesis, Architecture, and Validation Protocol
+
 window.Q_MANUSCRIPTS = [
     {
-        title: "THE QUADRATURE HANDBOOK",
-        type: "SYSTEM MANIFESTO",
-        desc: "A User's Guide to Living in True Time. Details the 4-Vector Unification and Omni-Planner protocols.",
+        title: "THE ARCHITECTURE OF THE ETERNAL NOW",
+        type: "PHILOSOPHICAL DOCTRINE",
+        desc: "The comprehensive framework defining the Free Sensorium, the Primary Postulate, and the Sovereign Transit.",
         access: "PUBLIC",
-        url: "assets/HANDBOOK.html"
+        url: "assets/Architecture_of_the_Eternal_Now.pdf"
     },
     {
-        title: "FOUNDATIONAL ESSAYS: ENGINEERING & PHYSICS",
-        type: "TECHNICAL DOCTRINE",
-        desc: "The mathematical and thermodynamic proofs of the system, detailing the invariant physics engine.",
+        title: "THE QUADRATURE: A THESIS",
+        type: "EMPIRICAL FRAMEWORK",
+        desc: "The institutional validation logic detailing the Truncation Gap, the Seasonal Shift Tax, and Metrological Debt.",
         access: "PUBLIC",
-        url: "assets/ESSAYS-ENG.html"
+        url: "assets/Quadrature_Thesis.pdf"
     },
     {
-        title: "FOUNDATIONAL ESSAYS: PHILOSOPHY & METAPHYSICS",
-        type: "COGNITIVE DOCTRINE",
-        desc: "Translates orbital mechanics into actionable visual anchors, addressing behavioral exhaustion.",
+        title: "HARDWARE VALIDATION PROTOCOL",
+        type: "21-DAY CALIBRATION TRANSIT",
+        desc: "A telemetry protocol utilizing continuous hardware data to isolate the native biological wave from the accumulated damage of the entrained state.",
         access: "PUBLIC",
-        url: "assets/ESSAYS-PHIL.html"
-    },
-    {
-        title: "THE ETERNAL NOW",
-        type: "EXPANDED MANUSCRIPT",
-        desc: "The comprehensive, unabridged philosophical and structural thesis of The Quadrature.",
-        access: "LOCKED",
-        url: null
+        url: "assets/Action_Plan.pdf"
     }
 ];
